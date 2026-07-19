@@ -7,8 +7,10 @@ extends RefCounted
 ## starting orbit is the horizontal xz-plane. Ship forward is local -Z.
 
 enum FlightState { COASTING, BURNING }
+enum SasMode { OFF, PROGRADE, RETROGRADE, NORMAL, ANTI_NORMAL, RADIAL_OUT, RADIAL_IN }
 
 const BURN_SUBSTEP := 0.05
+const SAS_NAMES := ["OFF", "PROGRADE", "RETROGRADE", "NORMAL", "ANTI-NORM", "RADIAL+", "RADIAL-"]
 
 var body: BodyDef
 var elements: OrbitElements
@@ -25,6 +27,7 @@ var last_time := 0.0
 var initial_mass := 0.0
 var accel_along_track := 0.0  # smoothed d|v|/dt in sim time, m/s^2
 var revision := 0  # bumps whenever elements are refit (event caches key on it)
+var sas_mode := SasMode.OFF
 
 var _level: LevelDef
 
@@ -137,6 +140,25 @@ func dv_remaining() -> float:
 
 func dv_used() -> float:
 	return Integrator.delta_v(initial_mass, mass(), isp)
+
+
+## Direction the active SAS mode wants the nose pointing (unit vector in
+## the parent frame). Roll is left free — holds align forward only.
+func sas_target_dir() -> DVec3:
+	match sas_mode:
+		SasMode.PROGRADE:
+			return v.normalized()
+		SasMode.RETROGRADE:
+			return v.normalized().neg()
+		SasMode.NORMAL:
+			return r.cross(v).normalized()
+		SasMode.ANTI_NORMAL:
+			return r.cross(v).normalized().neg()
+		SasMode.RADIAL_OUT:
+			return r.normalized()
+		SasMode.RADIAL_IN:
+			return r.normalized().neg()
+	return forward_dir()
 
 
 ## Angle between the nose and prograde, for the HUD.

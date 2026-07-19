@@ -113,10 +113,25 @@ func _unhandled_input(event: InputEvent) -> void:
 			ship.throttle = 0.0
 		KEY_R:
 			get_tree().reload_current_scene()
+		KEY_T:
+			if phase == Phase.FLYING:
+				ship.sas_mode = ShipSim.SasMode.OFF
+		KEY_G:
+			_toggle_sas(ShipSim.SasMode.PROGRADE)
+		KEY_H:
+			_toggle_sas(ShipSim.SasMode.RETROGRADE)
 		KEY_N:
-			if phase == Phase.WON and level_index < _levels.size() - 1:
+			if phase == Phase.FLYING:
+				_toggle_sas(ShipSim.SasMode.NORMAL)
+			elif phase == Phase.WON and level_index < _levels.size() - 1:
 				level_index += 1
 				get_tree().reload_current_scene()
+		KEY_B:
+			_toggle_sas(ShipSim.SasMode.ANTI_NORMAL)
+		KEY_U:
+			_toggle_sas(ShipSim.SasMode.RADIAL_OUT)
+		KEY_I:
+			_toggle_sas(ShipSim.SasMode.RADIAL_IN)
 		KEY_L:
 			# temp mission-select until the M6 campaign shell exists
 			var titles: Array = []
@@ -137,6 +152,9 @@ func _apply_flight_input(delta: float) -> void:
 		_axis(KEY_E, KEY_Q))
 	if rot != Vector3.ZERO:
 		ship.rotate_local(rot * ROT_RATE * delta)
+		ship.sas_mode = ShipSim.SasMode.OFF  # manual stick overrides the hold
+	elif ship.sas_mode != ShipSim.SasMode.OFF:
+		_run_sas(delta)
 
 	var throttle_input := _axis(KEY_CTRL, KEY_SHIFT)
 	if throttle_input != 0.0:
@@ -196,6 +214,29 @@ func _scan_span(el: OrbitElements) -> float:
 		return el.period()
 	var exit_t := OrbitEvents.radius_crossing_time(el, level.draw_limit, sim_time, true)
 	return (exit_t - sim_time) if not is_nan(exit_t) else 2.0e4
+
+
+func _toggle_sas(mode: ShipSim.SasMode) -> void:
+	if phase != Phase.FLYING:
+		return
+	if not level.sas_enabled:
+		hud.flash("SAS NOT INSTALLED")
+		return
+	ship.sas_mode = ShipSim.SasMode.OFF if ship.sas_mode == mode else mode
+
+
+## Turn the nose toward the SAS target at the manual turn rate.
+func _run_sas(delta: float) -> void:
+	var target := ship.sas_target_dir().to_vector3()
+	var forward := ship.attitude * Vector3(0, 0, -1)
+	var angle := acos(clampf(forward.dot(target), -1.0, 1.0))
+	if angle < 0.0005:
+		return
+	var axis := forward.cross(target)
+	if axis.length_squared() < 1e-12:  # anti-parallel: any perpendicular works
+		axis = ship.attitude.x
+	var step := minf(angle, ROT_RATE.x * delta)
+	ship.attitude = (Basis(axis.normalized(), step) * ship.attitude).orthonormalized()
 
 
 func _axis(neg: Key, pos: Key) -> float:

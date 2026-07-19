@@ -17,6 +17,11 @@ var map_extent := 360.0  # minimap ortho height, km units
 var draw_limit := 4.0e5  # trajectory clip radius around the root body, m
 var fail_radius := 0.0  # mission envelope around the root body; 0 = none
 
+# Capability flags ("the flight computer"): granted per level as in-fiction
+# avionics upgrades at act boundaries (DESIGN.md section 6).
+var sas_enabled := false
+var nodes_enabled := false
+
 
 func medal(dv_used: float) -> String:
 	if dv_used <= dv_par:

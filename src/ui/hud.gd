@@ -32,11 +32,14 @@ func build(level: LevelDef) -> void:
 	engine_label = _label(Control.PRESET_BOTTOM_LEFT, GREEN)
 	help_label = _label(Control.PRESET_BOTTOM_RIGHT, DIM_GREEN)
 	help_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	help_label.text = "\n".join([
+	var help_lines := [
 		"W/S PITCH  A/D YAW  Q/E ROLL",
 		"SHIFT/CTRL THROTTLE  Z MAX  X CUT",
 		",/. TIME WARP  R RESTART  L MISSIONS",
-		"TAB ORBIT VIEW  DRAG ROTATE  WHEEL ZOOM"])
+		"TAB ORBIT VIEW  DRAG ROTATE  WHEEL ZOOM"]
+	if level.sas_enabled:
+		help_lines.append("SAS: G PRO  H RETRO  N NORM  B ANTI  U/I RADIAL  T OFF")
+	help_label.text = "\n".join(help_lines)
 	center_label = _label(Control.PRESET_CENTER, GREEN, 34)
 	center_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	center_label.visible = false
@@ -64,7 +67,9 @@ func refresh(ship: ShipSim, level: LevelDef, sim_time: float, warp: int) -> void
 		"SOI %s   ALT %8.2f km   VEL %7.1f m/s" % [
 			ship.body.name, ship.altitude() / 1000.0, ship.speed()],
 		"R-AP %s km   R-PE %8.2f km" % [ap_text, el.radius_periapsis() / 1000.0],
-		"%s   OFF-PROGRADE %3.0f°" % [state_text, rad_to_deg(ship.off_prograde_angle())]])
+		"%s   OFF-PROGRADE %3.0f°   SAS %s" % [
+			state_text, rad_to_deg(ship.off_prograde_angle()),
+			ShipSim.SAS_NAMES[ship.sas_mode]]])
 
 	var lines: Array = ["OBJECTIVE", level.objective.describe()]
 	lines.append_array(level.objective.status_lines(ship))
