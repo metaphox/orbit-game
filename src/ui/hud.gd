@@ -12,6 +12,7 @@ var objective_label: Label
 var engine_label: Label
 var help_label: Label
 var center_label: Label
+var minimap_root: Control
 var _font: SystemFont
 
 
@@ -22,20 +23,25 @@ func build(level: LevelDef) -> void:
 	status_label = _label(Control.PRESET_TOP_LEFT, GREEN)
 	objective_label = _label(Control.PRESET_TOP_RIGHT, GREEN)
 	objective_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	# leave the top-right corner itself to the minimap
+	objective_label.offset_top += 280
+	objective_label.offset_bottom += 280
 	engine_label = _label(Control.PRESET_BOTTOM_LEFT, GREEN)
 	help_label = _label(Control.PRESET_BOTTOM_RIGHT, DIM_GREEN)
 	help_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	help_label.text = "\n".join([
 		"W/S PITCH  A/D YAW  Q/E ROLL",
 		"SHIFT/CTRL THROTTLE  Z MAX  X CUT",
-		",/. TIME WARP  M MAP  R RESTART"])
-	center_label = _label(Control.PRESET_CENTER, GREEN, 26)
+		",/. TIME WARP  TAB MAP  R RESTART"])
+	center_label = _label(Control.PRESET_CENTER, GREEN, 34)
 	center_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	center_label.visible = false
 
 	var title := _label(Control.PRESET_CENTER_TOP, DIM_GREEN)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.text = level.title
+
+	_build_minimap()
 
 
 func refresh(ship: ShipSim, level: LevelDef, sim_time: float, warp: int) -> void:
@@ -81,7 +87,50 @@ func show_fail(reason: String) -> void:
 	center_label.visible = true
 
 
-func _label(preset: int, color: Color, size := 15) -> Label:
+## Picture-in-picture orbit map: a SubViewport sharing the main world with
+## its own camera on the map layer, so it always mirrors the live map.
+func _build_minimap() -> void:
+	minimap_root = Control.new()
+	minimap_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(minimap_root)
+	minimap_root.custom_minimum_size = Vector2(280, 260)
+	minimap_root.set_anchors_and_offsets_preset(
+		Control.PRESET_TOP_RIGHT, Control.PRESET_MODE_MINSIZE, 12)
+
+	var back := ColorRect.new()
+	back.color = Color(0.0, 0.06, 0.02, 0.45)
+	back.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	minimap_root.add_child(back)
+	back.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+
+	var container := SubViewportContainer.new()
+	container.stretch = true
+	container.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	minimap_root.add_child(container)
+	container.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+
+	var viewport := SubViewport.new()
+	viewport.transparent_bg = true
+	viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	container.add_child(viewport)
+
+	var cam := Camera3D.new()
+	cam.projection = Camera3D.PROJECTION_ORTHOGONAL
+	cam.size = 360.0
+	cam.near = 1.0
+	cam.far = 2000.0
+	cam.cull_mask = MapView.MAP_LAYER
+	viewport.add_child(cam)
+	cam.position = Vector3(0, 320, 150)
+	cam.look_at(Vector3.ZERO, Vector3.UP)
+	cam.make_current()
+
+
+func set_minimap_visible(shown: bool) -> void:
+	minimap_root.visible = shown
+
+
+func _label(preset: int, color: Color, size := 19) -> Label:
 	var label := Label.new()
 	label.add_theme_font_override("font", _font)
 	label.add_theme_font_size_override("font_size", size)

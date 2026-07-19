@@ -61,8 +61,9 @@ func _unhandled_input(event: InputEvent) -> void:
 	if key == null or not key.pressed or key.echo:
 		return
 	match key.physical_keycode:
-		KEY_M:
+		KEY_TAB:
 			map_active = not map_active
+			hud.set_minimap_visible(not map_active)
 			if map_active:
 				map_view.camera.make_current()
 			else:

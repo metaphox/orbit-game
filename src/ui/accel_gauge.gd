@@ -44,16 +44,16 @@ func _draw() -> void:
 
 	# --- propellant: outer ring, clockwise from 12 o'clock
 	var prop_color := GREEN if prop_frac > 0.25 else AMBER
-	draw_arc(center, radius + 10.0, 0.0, TAU, 72, Color(prop_color, 0.25), 1.5, true)
+	draw_arc(center, radius + 11.0, 0.0, TAU, 72, Color(prop_color, 0.25), 3.0, true)
 	if prop_frac > 0.001:
-		draw_arc(center, radius + 10.0, -PI / 2, -PI / 2 + TAU * clampf(prop_frac, 0.0, 1.0),
-			72, prop_color, 3.0, true)
+		draw_arc(center, radius + 11.0, -PI / 2, -PI / 2 + TAU * clampf(prop_frac, 0.0, 1.0),
+			72, prop_color, 6.0, true)
 
 	# --- acceleration dial
-	draw_arc(center, radius, 0.0, TAU, 72, DIM_GREEN, 1.5, true)
+	draw_arc(center, radius, 0.0, TAU, 72, DIM_GREEN, 2.5, true)
 	for i in 12:
 		var dir := Vector2.from_angle(TAU * i / 12.0)
-		draw_line(center + dir * (radius - 4.0), center + dir * radius, DIM_GREEN, 1.5)
+		draw_line(center + dir * (radius - 5.0), center + dir * radius, DIM_GREEN, 2.5)
 
 	var frac := clampf(absf(accel) / accel_max, 0.0, 1.0)
 	var active := absf(accel) > DEADBAND
@@ -62,9 +62,9 @@ func _draw() -> void:
 		# sweep clockwise from 12 o'clock while gaining, counter-clockwise
 		# while losing
 		if accel >= 0.0:
-			draw_arc(center, radius - 8.0, -PI / 2, -PI / 2 + TAU * frac, 72, color, 4.0, true)
+			draw_arc(center, radius - 9.0, -PI / 2, -PI / 2 + TAU * frac, 72, color, 7.0, true)
 		else:
-			draw_arc(center, radius - 8.0, -PI / 2 - TAU * frac, -PI / 2, 72, color, 4.0, true)
+			draw_arc(center, radius - 9.0, -PI / 2 - TAU * frac, -PI / 2, 72, color, 7.0, true)
 		for k in 3:
 			var p := fposmod(_phase + k / 3.0, 1.0)
 			var ring_r: float
@@ -73,7 +73,7 @@ func _draw() -> void:
 			else:
 				ring_r = lerpf(radius * 0.92, radius * 0.25, p)
 			var fade := (1.0 - absf(p * 2.0 - 1.0)) * 0.55
-			draw_arc(center, ring_r, 0.0, TAU, 48, Color(color, fade), 1.5, true)
+			draw_arc(center, ring_r, 0.0, TAU, 48, Color(color, fade), 2.5, true)
 
 	var trend := "▲" if accel > DEADBAND else ("▼" if accel < -DEADBAND else "—")
 	_text(center + Vector2(0, radius + 30.0), "ACC %+5.2f m/s² %s" % [accel, trend],

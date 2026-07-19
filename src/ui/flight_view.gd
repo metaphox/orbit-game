@@ -138,7 +138,7 @@ func _build_ship_mesh() -> void:
 ## billboarded toward the camera — a virtual instrument, not a physical one.
 func _build_status_hologram(level: LevelDef) -> void:
 	var viewport := SubViewport.new()
-	viewport.size = Vector2i(256, 300)
+	viewport.size = Vector2i(512, 600)
 	viewport.transparent_bg = true
 	viewport.disable_3d = true
 	viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
@@ -147,16 +147,17 @@ func _build_status_hologram(level: LevelDef) -> void:
 	gauge = AccelGauge.new()
 	gauge.accel_max = level.thrust / level.dry_mass * 1.1
 	viewport.add_child(gauge)
-	gauge.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	gauge.size = Vector2(256, 300)
+	gauge.scale = Vector2(2.0, 2.0)  # crisp 2x render into the 512-wide target
 
 	var sprite := Sprite3D.new()
 	sprite.texture = viewport.get_texture()
 	sprite.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	sprite.pixel_size = 0.013
+	sprite.pixel_size = 0.012  # 512 px -> ~6 m panel
 	sprite.modulate = Color(1.0, 1.0, 1.0, 0.92)
 	sprite.no_depth_test = true  # hologram never hides behind the hull
 	sprite.render_priority = 10
-	sprite.position = Vector3(3.6, 0.9, 0.0)
+	sprite.position = Vector3(5.2, 1.2, 0.0)
 	ship_root.add_child(sprite)
 
 
