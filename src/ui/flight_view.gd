@@ -1,18 +1,17 @@
 class_name FlightView
 extends Node3D
 ## The 3D world view. Floating origin: the ship renders at (0,0,0) and the
-## world shifts around it, so float32 GPU precision never sees large
-## coordinates. 1 render unit = 1 m. Placeholder art until M7.
+## world (all bodies) shifts around it, so float32 GPU precision never sees
+## large coordinates. 1 render unit = 1 m. Placeholder art until M7.
 ##
 ## Two cameras share this world: the mouse-orbitable chase camera, and the
-## "orbit view" side camera centered on the planet (TAB) — zoom and rotate
-## freely without touching the ship. The current trajectory glows in-world
-## (color = how close to the target orbit); the target orbit is a dashed
-## ring.
+## "orbit view" side camera centered on the ship's current parent body
+## (TAB) — zoom and rotate freely without touching the ship. The current
+## trajectory glows in-world, colored by the objective's 0..1 closeness;
+## the target (orbit or SOI) is a dashed ring.
 
 const TRAJ_SAMPLES := 256
 const TRAJ_REFRESH := 0.25
-const TRAJ_DRAW_LIMIT := 4.0e5
 # Adaptive orbit-line sampling: the camera rides ON the line, so chords
 # near the ship are seen edge-on and must be near-tangent-continuous.
 # Steps in true anomaly start fine at the ship and grow geometrically.
@@ -25,7 +24,6 @@ const SIDE_MARKER_LAYER := 8  # ship dot only the side camera can see
 
 var camera: Camera3D
 var side_camera: Camera3D
-var planet: MeshInstance3D
 var ship_root: Node3D
 var prograde_marker: Node3D
 var retrograde_marker: Node3D
@@ -33,14 +31,17 @@ var star_dust: StarDust
 var flame: MeshInstance3D
 var gauge: AccelGauge
 
+var _bodies: Array[BodyDef] = []
+var _body_meshes: Array[MeshInstance3D] = []
 var _prop_full := 1.0
-var _target_radius := 0.0
-var _tolerance := 0.0
+var _objective: Objective
+var _draw_limit := 4.0e5
 
 var _traj_mesh: ImmediateMesh
 var _traj_instance: MeshInstance3D
 var _traj_material: StandardMaterial3D
 var _target_instance: MeshInstance3D
+var _ring_body: BodyDef
 var _traj_timer := 0.0
 
 var _cam_yaw := 0.0
@@ -48,6 +49,7 @@ var _cam_pitch := 0.0
 var _side_azimuth := 0.6
 var _side_elevation := 0.5
 var _side_distance := 3.0e5
+var _side_zoom_max := 1.6e6
 var _side_marker: MeshInstance3D
 
 
@@ -69,18 +71,23 @@ func build(level: LevelDef) -> void:
 	sun.light_energy = 1.3
 	add_child(sun)
 
-	planet = MeshInstance3D.new()
-	var sphere := SphereMesh.new()
-	sphere.radius = level.body.radius
-	sphere.height = level.body.radius * 2.0
-	sphere.radial_segments = 96
-	sphere.rings = 48
-	var planet_mat := StandardMaterial3D.new()
-	planet_mat.albedo_color = Color(0.16, 0.3, 0.48)
-	planet_mat.roughness = 0.9
-	sphere.material = planet_mat
-	planet.mesh = sphere
-	add_child(planet)
+	_bodies = [level.body]
+	for moon in level.moons:
+		_bodies.append(moon)
+	for body in _bodies:
+		var mesh_instance := MeshInstance3D.new()
+		var sphere := SphereMesh.new()
+		sphere.radius = body.radius
+		sphere.height = body.radius * 2.0
+		sphere.radial_segments = 96
+		sphere.rings = 48
+		var mat := StandardMaterial3D.new()
+		mat.albedo_color = body.color
+		mat.roughness = 0.9
+		sphere.material = mat
+		mesh_instance.mesh = sphere
+		add_child(mesh_instance)
+		_body_meshes.append(mesh_instance)
 
 	ship_root = Node3D.new()
 	add_child(ship_root)
@@ -93,10 +100,10 @@ func build(level: LevelDef) -> void:
 	_prop_full = level.prop_mass
 	_build_status_hologram(level)
 
-	var objective: OrbitMatchObjective = level.objective
-	_target_radius = objective.target_radius
-	_tolerance = objective.tolerance
-	_build_trajectory_lines()
+	_objective = level.objective
+	_draw_limit = level.draw_limit
+	_side_zoom_max = maxf(1.6e6, level.draw_limit * 1.4)
+	_build_trajectory_lines(level)
 
 	prograde_marker = _make_marker(Color(0.3, 1.0, 0.4))
 	retrograde_marker = _make_marker(Color(1.0, 0.35, 0.25))
@@ -110,15 +117,17 @@ func build(level: LevelDef) -> void:
 
 	side_camera = Camera3D.new()
 	side_camera.near = 50.0
-	side_camera.far = 4.0e6
+	side_camera.far = 3.0e7
 	side_camera.cull_mask = 1 | SIDE_MARKER_LAYER
 	add_child(side_camera)
 
 
 func sync(ship: ShipSim, delta: float) -> void:
+	var t := ship.last_time
+	var ship_abs := ship.absolute_position(t)
 	ship_root.basis = ship.attitude
-	var planet_pos := ship.r.neg().to_vector3()
-	planet.position = planet_pos
+	for i in _bodies.size():
+		_body_meshes[i].position = _bodies[i].position_at(t).sub(ship_abs).to_vector3()
 
 	var v_dir := ship.v.normalized().to_vector3()
 	_place_marker(prograde_marker, v_dir)
@@ -135,14 +144,13 @@ func sync(ship: ShipSim, delta: float) -> void:
 	gauge.prop_frac = ship.prop_mass / _prop_full
 	gauge.dv_left = ship.dv_remaining()
 
-	# trajectory + target ring ride the floating origin via node offset
-	_traj_instance.position = planet_pos
-	_target_instance.position = planet_pos
+	# trajectory + target ring ride the floating origin via node offsets
+	_traj_instance.position = ship.r.neg().to_vector3()  # current parent
+	_target_instance.position = _ring_body.position_at(t).sub(ship_abs).to_vector3()
 	_traj_timer -= delta
 	if _traj_timer <= 0.0:
 		_traj_timer = TRAJ_REFRESH
-		var el := ship.current_elements()
-		_rebuild_trajectory(el, el.true_anomaly_at_time(ship.last_time))
+		_rebuild_trajectory(ship)
 
 	# chase camera: ship-relative orbit, offset by mouse drag
 	var chase_basis := ship.attitude \
@@ -150,12 +158,13 @@ func sync(ship: ShipSim, delta: float) -> void:
 	camera.position = chase_basis * Vector3(0, 3.5, 11.0)
 	camera.look_at(Vector3.ZERO, chase_basis.y)
 
-	# side camera: orbits the planet center, ship-independent
+	# side camera: orbits the current parent body, ship-independent
+	var parent_pos := ship.r.neg().to_vector3()
 	var side_basis := Basis(Vector3(0, 1, 0), _side_azimuth) \
 		* Basis(Vector3(1, 0, 0), -_side_elevation)
-	side_camera.position = planet_pos + side_basis * Vector3(0, 0, _side_distance)
+	side_camera.position = parent_pos + side_basis * Vector3(0, 0, _side_distance)
 	side_camera.near = maxf(50.0, _side_distance * 0.002)
-	side_camera.look_at(planet_pos, side_basis.y)
+	side_camera.look_at(parent_pos, side_basis.y)
 	_side_marker.scale = Vector3.ONE * maxf(_side_distance * 0.006, 1.0)
 
 
@@ -177,10 +186,10 @@ func side_drag(relative: Vector2) -> void:
 
 
 func side_zoom(factor: float) -> void:
-	_side_distance = clampf(_side_distance * factor, 9.0e4, 1.6e6)
+	_side_distance = clampf(_side_distance * factor, 9.0e4, _side_zoom_max)
 
 
-func _build_trajectory_lines() -> void:
+func _build_trajectory_lines(level: LevelDef) -> void:
 	_traj_mesh = ImmediateMesh.new()
 	_traj_material = StandardMaterial3D.new()
 	_traj_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
@@ -191,7 +200,18 @@ func _build_trajectory_lines() -> void:
 	_traj_instance.material_override = _traj_material
 	add_child(_traj_instance)
 
-	# target orbit: dashed ring in the starting orbital plane (y = 0)
+	# target ring: the goal orbit (OrbitMatch, around the root) or the
+	# target body's SOI (TransferCapture, rides the moon)
+	var ring_radius: float
+	if _objective is TransferCaptureObjective:
+		var capture := _objective as TransferCaptureObjective
+		_ring_body = capture.target
+		ring_radius = capture.target.soi_radius
+	else:
+		var match_obj := _objective as OrbitMatchObjective
+		_ring_body = level.body
+		ring_radius = match_obj.target_radius
+
 	var dash_mesh := ImmediateMesh.new()
 	dash_mesh.surface_begin(Mesh.PRIMITIVE_LINES)
 	var dashes := 96
@@ -201,7 +221,7 @@ func _build_trajectory_lines() -> void:
 		for k in 2:
 			var ang := TAU * (i + k * 0.85) / dashes
 			dash_mesh.surface_add_vertex(Vector3(
-				cos(ang) * _target_radius, 0.0, sin(ang) * _target_radius))
+				cos(ang) * ring_radius, 0.0, sin(ang) * ring_radius))
 	dash_mesh.surface_end()
 	var dash_mat := StandardMaterial3D.new()
 	dash_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
@@ -228,23 +248,19 @@ func _build_trajectory_lines() -> void:
 	add_child(_side_marker)  # stays at origin = ship render position
 
 
-func _rebuild_trajectory(el: OrbitElements, nu_ship: float) -> void:
-	var err := 1.0e9
-	if el.is_elliptic():
-		err = maxf(
-			absf(el.radius_apoapsis() - _target_radius),
-			absf(el.radius_periapsis() - _target_radius))
-	var t := clampf((err - _tolerance) / 20000.0, 0.0, 1.0)
-	var color := MATCH_COLOR.lerp(FAR_COLOR, t)
+func _rebuild_trajectory(ship: ShipSim) -> void:
+	var el := ship.current_elements()
+	var color := FAR_COLOR.lerp(MATCH_COLOR, _objective.trajectory_closeness(ship))
 	_traj_material.albedo_color = color
 	_traj_material.emission = color
 
-	var closed := el.is_elliptic() and el.radius_apoapsis() <= TRAJ_DRAW_LIMIT
+	var r_max := minf(_draw_limit, ship.body.soi_radius * 1.15)
+	var closed := el.is_elliptic() and el.radius_apoapsis() <= r_max
 	var pts: Array
 	if closed:
-		pts = _adaptive_loop_points(el, nu_ship)
+		pts = _adaptive_loop_points(el, el.true_anomaly_at_time(ship.last_time))
 	else:
-		pts = el.sample_positions(TRAJ_SAMPLES, TRAJ_DRAW_LIMIT)
+		pts = el.sample_positions(TRAJ_SAMPLES, r_max)
 	_traj_mesh.clear_surfaces()
 	_traj_mesh.surface_begin(Mesh.PRIMITIVE_LINE_STRIP)
 	for p: DVec3 in pts:

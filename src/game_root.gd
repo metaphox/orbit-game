@@ -1,13 +1,15 @@
 extends Node3D
-## Level orchestrator: sim clock, warp, input, win/fail state, view toggle.
-## Keys are polled directly for M2; migrating to InputMap (rebindable) is
-## part of the M6 settings work.
+## Level orchestrator: sim clock, event-aware warp, input, win/fail state,
+## view toggle, level switching. Keys are polled directly for M2/M3;
+## migrating to InputMap (rebindable) is part of the M6 settings work.
 
 enum Phase { FLYING, WON, FAILED }
 
-const WARP_STEPS: Array[int] = [1, 5, 25, 100]
+const WARP_STEPS: Array[int] = [1, 5, 25, 100, 500, 2500]
 const ROT_RATE := Vector3(0.6, 0.6, 1.1)  # pitch/yaw/roll, rad/s
 const THROTTLE_RATE := 1.4  # full throttle sweep per second
+
+static var level_index := 0
 
 var level: LevelDef
 var ship: ShipSim
@@ -20,9 +22,15 @@ var flight_view: FlightView
 var map_view: MapView
 var hud: Hud
 
+var _levels := [Level01, Level02]
+var _event_revision := -1
+var _event_horizon := -1.0
+var _next_event := INF
+
 
 func _ready() -> void:
-	level = Level01.make()
+	level_index = clampi(level_index, 0, _levels.size() - 1)
+	level = _levels[level_index].make()
 	ship = ShipSim.new()
 	ship.setup(level)
 
@@ -45,14 +53,26 @@ func _physics_process(delta: float) -> void:
 	if phase != Phase.FLYING:
 		return
 	_apply_flight_input(delta)
-	sim_time += delta * WARP_STEPS[warp_index]
+	var t_target := sim_time + delta * WARP_STEPS[warp_index]
+	# Rails warp must not step across an SOI boundary or impact: clamp the
+	# jump to the precomputed next event and drop out of warp there.
+	if ship.flight_state == ShipSim.FlightState.COASTING and ship.throttle == 0.0:
+		var event_t := _next_event_time()
+		if event_t < t_target:
+			t_target = event_t + 0.001  # land just past the boundary
+			warp_index = 0
+	sim_time = t_target
 	ship.advance_to(sim_time)
+	var notice := ship.apply_soi_transitions(sim_time)
+	if notice != "":
+		warp_index = 0
+		hud.flash(notice)
 	_check_end_conditions()
 
 
 func _process(delta: float) -> void:
 	flight_view.sync(ship, delta)
-	map_view.sync(ship, delta)
+	map_view.sync(ship, sim_time, delta)
 	hud.refresh(ship, level, sim_time, WARP_STEPS[warp_index])
 
 
@@ -93,6 +113,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			ship.throttle = 0.0
 		KEY_R:
 			get_tree().reload_current_scene()
+		KEY_N:
+			if phase == Phase.WON and level_index < _levels.size() - 1:
+				level_index += 1
+				get_tree().reload_current_scene()
 
 
 func _apply_flight_input(delta: float) -> void:
@@ -112,12 +136,55 @@ func _apply_flight_input(delta: float) -> void:
 
 
 func _check_end_conditions() -> void:
-	if ship.r.length() <= level.body.radius:
+	if ship.r.length() <= ship.body.radius:
 		phase = Phase.FAILED
-		hud.show_fail("SURFACE IMPACT")
+		hud.show_fail("%s SURFACE IMPACT" % ship.body.name)
+	elif (level.fail_radius > 0.0 and ship.body.parent == null
+			and ship.r.length() > level.fail_radius):
+		phase = Phase.FAILED
+		hud.show_fail("MISSION ENVELOPE EXCEEDED")
 	elif level.objective.is_met(ship):
 		phase = Phase.WON
-		hud.show_win(level, ship.dv_used())
+		hud.show_win(level, ship.dv_used(), level_index < _levels.size() - 1)
+
+
+## Next impact/SOI event on the current coasting orbit, cached per elements
+## revision. Analytic where possible; child-SOI entries use a scan whose
+## coarse step cannot skip an encounter window.
+func _next_event_time() -> float:
+	if ship.revision != _event_revision or sim_time > _event_horizon:
+		_recompute_events()
+	return _next_event
+
+
+func _recompute_events() -> void:
+	_event_revision = ship.revision
+	var el := ship.elements
+	var events: Array[float] = []
+	var impact := OrbitEvents.impact_time(el, ship.body.radius, sim_time)
+	if not is_nan(impact):
+		events.append(impact)
+	var horizon := sim_time + _scan_span(el)
+	if ship.body.parent != null:
+		var exit_t := OrbitEvents.soi_exit_time(el, ship.body.soi_radius, sim_time)
+		if not is_nan(exit_t):
+			events.append(exit_t)
+	else:
+		for moon in level.moons:
+			var entry := OrbitEvents.child_soi_entry_time(
+				el, moon.orbit, moon.soi_radius, sim_time, horizon,
+				maxf((horizon - sim_time) / 400.0, 1.0))
+			if not is_nan(entry):
+				events.append(entry)
+	_event_horizon = horizon
+	_next_event = events.min() if not events.is_empty() else INF
+
+
+func _scan_span(el: OrbitElements) -> float:
+	if el.is_elliptic():
+		return el.period()
+	var exit_t := OrbitEvents.radius_crossing_time(el, level.draw_limit, sim_time, true)
+	return (exit_t - sim_time) if not is_nan(exit_t) else 2.0e4
 
 
 func _axis(neg: Key, pos: Key) -> float:

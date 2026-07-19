@@ -4,14 +4,18 @@ extends RefCounted
 ## resources in M6.
 
 var title := ""
-var body: BodyDef
+var body: BodyDef  # root body; the ship starts in its SOI
+var moons: Array[BodyDef] = []
 var start_radius := 0.0
 var dry_mass := 0.0
 var prop_mass := 0.0
 var thrust := 0.0
 var isp := 0.0
-var objective: OrbitMatchObjective
+var objective: Objective
 var dv_par := 0.0
+var map_extent := 360.0  # minimap ortho height, km units
+var draw_limit := 4.0e5  # trajectory clip radius around the root body, m
+var fail_radius := 0.0  # mission envelope around the root body; 0 = none
 
 
 func medal(dv_used: float) -> String:

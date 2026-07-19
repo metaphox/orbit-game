@@ -24,9 +24,13 @@ var flight_state := FlightState.COASTING
 var last_time := 0.0
 var initial_mass := 0.0
 var accel_along_track := 0.0  # smoothed d|v|/dt in sim time, m/s^2
+var revision := 0  # bumps whenever elements are refit (event caches key on it)
+
+var _level: LevelDef
 
 
 func setup(level: LevelDef) -> void:
+	_level = level
 	body = level.body
 	dry_mass = level.dry_mass
 	prop_mass = level.prop_mass
@@ -61,6 +65,38 @@ func advance_to(t: float) -> void:
 	accel_along_track = lerpf(
 		accel_along_track, (v.length() - speed_before) / (t - last_time), 0.25)
 	last_time = t
+
+
+## Cross SOI boundaries: hand the state to the new parent frame and refit.
+## Called after each advance; rails warp is clamped to precomputed event
+## times upstream, so polling here only ever sees small overshoots.
+## Returns a short notice for the HUD, or "" when nothing happened.
+func apply_soi_transitions(t: float) -> String:
+	if body.parent != null:
+		if r.length() >= body.soi_radius:
+			var st := Frames.to_parent_frame(StateRV.new(r, v), body.orbit, t)
+			var old := body.name
+			body = body.parent
+			r = st.r
+			v = st.v
+			_refit_elements(t)
+			return "LEAVING %s SOI" % old
+		return ""
+	for moon in _level.moons:
+		var moon_state := moon.orbit.state_at_time(t)
+		if r.distance_to(moon_state.r) <= moon.soi_radius:
+			var st := Frames.to_child_frame(StateRV.new(r, v), moon.orbit, t)
+			body = moon
+			r = st.r
+			v = st.v
+			_refit_elements(t)
+			return "ENTERING %s SOI" % moon.name
+	return ""
+
+
+## Position in root-body coordinates (parents recurse to the origin).
+func absolute_position(t: float) -> DVec3:
+	return body.position_at(t).add(r)
 
 
 func rotate_local(angles: Vector3) -> void:
@@ -126,6 +162,7 @@ func _integrate_burn(duration: float, thrust: float, flow: float) -> void:
 func _refit_elements(at_time: float) -> void:
 	elements = OrbitElements.from_state(r, v, body.mu, at_time)
 	flight_state = FlightState.COASTING
+	revision += 1
 
 
 func _coast_to(t: float) -> void:

@@ -14,6 +14,8 @@ var help_label: Label
 var center_label: Label
 var minimap_root: Control
 var _font: SystemFont
+var _flash_label: Label
+var _flash_left := 0.0
 
 
 func build(level: LevelDef) -> void:
@@ -42,7 +44,13 @@ func build(level: LevelDef) -> void:
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.text = level.title
 
-	_build_minimap()
+	_flash_label = _label(Control.PRESET_CENTER_TOP, GREEN, 24)
+	_flash_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_flash_label.offset_top += 44
+	_flash_label.offset_bottom += 44
+	_flash_label.visible = false
+
+	_build_minimap(level)
 
 
 func refresh(ship: ShipSim, level: LevelDef, sim_time: float, warp: int) -> void:
@@ -52,17 +60,15 @@ func refresh(ship: ShipSim, level: LevelDef, sim_time: float, warp: int) -> void
 	var ap_text := "  ESCAPE" if not el.is_elliptic() else "%8.2f" % (ap / 1000.0)
 	status_label.text = "\n".join([
 		"T+ %s   WARP %dx" % [_clock(sim_time), warp],
-		"ALT  %8.2f km   VEL %7.1f m/s" % [ship.altitude() / 1000.0, ship.speed()],
+		"SOI %s   ALT %8.2f km   VEL %7.1f m/s" % [
+			ship.body.name, ship.altitude() / 1000.0, ship.speed()],
 		"R-AP %s km   R-PE %8.2f km" % [ap_text, el.radius_periapsis() / 1000.0],
 		"%s   OFF-PROGRADE %3.0f°" % [state_text, rad_to_deg(ship.off_prograde_angle())]])
 
-	var objective: OrbitMatchObjective = level.objective
-	var band := "AP Δ%+8.2f   PE Δ%+8.2f" % [
-		(ap - objective.target_radius) / 1000.0 if el.is_elliptic() else INF,
-		(el.radius_periapsis() - objective.target_radius) / 1000.0]
-	objective_label.text = "\n".join([
-		"OBJECTIVE", objective.describe(), band,
-		"PAR %.0f m/s" % level.dv_par])
+	var lines: Array = ["OBJECTIVE", level.objective.describe()]
+	lines.append_array(level.objective.status_lines(ship))
+	lines.append("PAR %.0f m/s" % level.dv_par)
+	objective_label.text = "\n".join(lines)
 
 	engine_label.text = "\n".join([
 		"THR  %s %3.0f%%" % [_bar(ship.throttle), ship.throttle * 100.0],
@@ -72,14 +78,30 @@ func refresh(ship: ShipSim, level: LevelDef, sim_time: float, warp: int) -> void
 			ship.dv_remaining(), ship.dv_used()]])
 
 
-func show_win(level: LevelDef, dv_used: float) -> void:
+func show_win(level: LevelDef, dv_used: float, has_next: bool) -> void:
 	center_label.add_theme_color_override("font_color", GREEN)
-	center_label.text = "\n".join([
-		"■ ORBIT ACHIEVED ■", "",
+	var lines := [
+		"■ OBJECTIVE COMPLETE ■", "",
 		"ΔV USED %.1f m/s — PAR %.0f" % [dv_used, level.dv_par],
 		"MEDAL: %s" % level.medal(dv_used), "",
-		"[R] FLY AGAIN"])
+		"[R] FLY AGAIN"]
+	if has_next:
+		lines.append("[N] NEXT MISSION")
+	center_label.text = "\n".join(lines)
 	center_label.visible = true
+
+
+func flash(text: String) -> void:
+	_flash_label.text = "■ %s ■" % text
+	_flash_label.visible = true
+	_flash_left = 2.5
+
+
+func _process(delta: float) -> void:
+	if _flash_left > 0.0:
+		_flash_left -= delta
+		if _flash_left <= 0.0:
+			_flash_label.visible = false
 
 
 func show_fail(reason: String) -> void:
@@ -90,7 +112,7 @@ func show_fail(reason: String) -> void:
 
 ## Picture-in-picture orbit map: a SubViewport sharing the main world with
 ## its own camera on the map layer, so it always mirrors the live map.
-func _build_minimap() -> void:
+func _build_minimap(level: LevelDef) -> void:
 	minimap_root = Control.new()
 	minimap_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(minimap_root)
@@ -125,12 +147,12 @@ func _build_minimap() -> void:
 
 	var cam := Camera3D.new()
 	cam.projection = Camera3D.PROJECTION_ORTHOGONAL
-	cam.size = 360.0
+	cam.size = level.map_extent
 	cam.near = 1.0
-	cam.far = 2000.0
+	cam.far = level.map_extent * 6.0
 	cam.cull_mask = MapView.MAP_LAYER
 	viewport.add_child(cam)
-	cam.position = Vector3(0, 320, 150)
+	cam.position = Vector3(0, level.map_extent * 0.9, level.map_extent * 0.42)
 	cam.look_at(Vector3.ZERO, Vector3.UP)
 	cam.make_current()
 
