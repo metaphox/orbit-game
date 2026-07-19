@@ -10,9 +10,15 @@ extends Node3D
 ## (color = how close to the target orbit); the target orbit is a dashed
 ## ring.
 
-const TRAJ_SAMPLES := 200
+const TRAJ_SAMPLES := 256
 const TRAJ_REFRESH := 0.25
 const TRAJ_DRAW_LIMIT := 4.0e5
+# Adaptive orbit-line sampling: the camera rides ON the line, so chords
+# near the ship are seen edge-on and must be near-tangent-continuous.
+# Steps in true anomaly start fine at the ship and grow geometrically.
+const TRAJ_FINE_STEP := 0.002
+const TRAJ_COARSE_STEP := 0.06
+const TRAJ_STEP_GROWTH := 1.18
 const MATCH_COLOR := Color(0.35, 1.0, 0.45)
 const FAR_COLOR := Color(1.0, 0.55, 0.12)
 const SIDE_MARKER_LAYER := 8  # ship dot only the side camera can see
@@ -135,7 +141,8 @@ func sync(ship: ShipSim, delta: float) -> void:
 	_traj_timer -= delta
 	if _traj_timer <= 0.0:
 		_traj_timer = TRAJ_REFRESH
-		_rebuild_trajectory(ship.current_elements())
+		var el := ship.current_elements()
+		_rebuild_trajectory(el, el.true_anomaly_at_time(ship.last_time))
 
 	# chase camera: ship-relative orbit, offset by mouse drag
 	var chase_basis := ship.attitude \
@@ -221,7 +228,7 @@ func _build_trajectory_lines() -> void:
 	add_child(_side_marker)  # stays at origin = ship render position
 
 
-func _rebuild_trajectory(el: OrbitElements) -> void:
+func _rebuild_trajectory(el: OrbitElements, nu_ship: float) -> void:
 	var err := 1.0e9
 	if el.is_elliptic():
 		err = maxf(
@@ -232,15 +239,39 @@ func _rebuild_trajectory(el: OrbitElements) -> void:
 	_traj_material.albedo_color = color
 	_traj_material.emission = color
 
-	var pts: Array = el.sample_positions(TRAJ_SAMPLES, TRAJ_DRAW_LIMIT)
+	var closed := el.is_elliptic() and el.radius_apoapsis() <= TRAJ_DRAW_LIMIT
+	var pts: Array
+	if closed:
+		pts = _adaptive_loop_points(el, nu_ship)
+	else:
+		pts = el.sample_positions(TRAJ_SAMPLES, TRAJ_DRAW_LIMIT)
 	_traj_mesh.clear_surfaces()
 	_traj_mesh.surface_begin(Mesh.PRIMITIVE_LINE_STRIP)
 	for p: DVec3 in pts:
 		_traj_mesh.surface_add_vertex(p.to_vector3())
-	if el.is_elliptic() and el.radius_apoapsis() <= TRAJ_DRAW_LIMIT:
+	if closed:
 		var first: DVec3 = pts[0]
 		_traj_mesh.surface_add_vertex(first.to_vector3())
 	_traj_mesh.surface_end()
+
+
+## Full loop with vertex density concentrated at the ship: the first point
+## sits exactly on the ship, neighbors ~0.1 degrees apart (invisible bends
+## at grazing view), widening to coarse steps on the far side.
+func _adaptive_loop_points(el: OrbitElements, nu_ship: float) -> Array:
+	var offsets: Array[float] = []
+	var step := TRAJ_FINE_STEP
+	var off := 0.0
+	while off < PI:
+		offsets.append(off)
+		off += step
+		step = minf(step * TRAJ_STEP_GROWTH, TRAJ_COARSE_STEP)
+	var pts := []
+	for i in range(offsets.size() - 1, 0, -1):
+		pts.append(el.state_at_true_anomaly(nu_ship - offsets[i]).r)
+	for i in offsets.size():
+		pts.append(el.state_at_true_anomaly(nu_ship + offsets[i]).r)
+	return pts
 
 
 func _build_ship_mesh() -> void:
