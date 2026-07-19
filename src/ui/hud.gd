@@ -24,8 +24,8 @@ func build(level: LevelDef) -> void:
 	objective_label = _label(Control.PRESET_TOP_RIGHT, GREEN)
 	objective_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	# leave the top-right corner itself to the minimap
-	objective_label.offset_top += 280
-	objective_label.offset_bottom += 280
+	objective_label.offset_top += 545
+	objective_label.offset_bottom += 545
 	engine_label = _label(Control.PRESET_BOTTOM_LEFT, GREEN)
 	help_label = _label(Control.PRESET_BOTTOM_RIGHT, DIM_GREEN)
 	help_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
@@ -93,15 +93,15 @@ func _build_minimap() -> void:
 	minimap_root = Control.new()
 	minimap_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(minimap_root)
-	# pin to the top-right corner explicitly: 280x260, 12 px margin
+	# pin to the top-right corner explicitly: 560x520, 12 px margin
 	minimap_root.anchor_left = 1.0
 	minimap_root.anchor_right = 1.0
 	minimap_root.anchor_top = 0.0
 	minimap_root.anchor_bottom = 0.0
-	minimap_root.offset_left = -292.0
+	minimap_root.offset_left = -572.0
 	minimap_root.offset_right = -12.0
 	minimap_root.offset_top = 12.0
-	minimap_root.offset_bottom = 272.0
+	minimap_root.offset_bottom = 532.0
 	minimap_root.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	minimap_root.grow_vertical = Control.GROW_DIRECTION_END
 
