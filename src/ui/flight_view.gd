@@ -11,6 +11,8 @@ var prograde_marker: Node3D
 var retrograde_marker: Node3D
 var star_dust: StarDust
 var flame: MeshInstance3D
+var gauge: AccelGauge
+var _prop_full := 1.0
 
 
 func build(level: LevelDef) -> void:
@@ -50,6 +52,9 @@ func build(level: LevelDef) -> void:
 	add_child(star_dust)
 	star_dust.build()
 
+	_prop_full = level.prop_mass
+	_build_status_hologram(level)
+
 	prograde_marker = _make_marker(Color(0.3, 1.0, 0.4))
 	retrograde_marker = _make_marker(Color(1.0, 0.35, 0.25))
 
@@ -74,6 +79,11 @@ func sync(ship: ShipSim) -> void:
 	flame.visible = thrusting
 	if thrusting:
 		flame.scale = Vector3(1.0, 1.0, ship.throttle * randf_range(0.85, 1.15))
+
+	gauge.speed = ship.speed()
+	gauge.accel = ship.accel_along_track
+	gauge.prop_frac = ship.prop_mass / _prop_full
+	gauge.dv_left = ship.dv_remaining()
 
 	camera.position = ship.attitude * Vector3(0, 3.5, 11.0)
 	camera.look_at(Vector3.ZERO, ship.attitude.y)
@@ -121,6 +131,33 @@ func _build_ship_mesh() -> void:
 	flame.position = Vector3(0, 0, 3.1)
 	flame.visible = false
 	ship_root.add_child(flame)
+
+
+## The status dial lives on a SubViewport texture floated beside the hull:
+## positioned in ship-local space (it travels and turns with the ship) but
+## billboarded toward the camera — a virtual instrument, not a physical one.
+func _build_status_hologram(level: LevelDef) -> void:
+	var viewport := SubViewport.new()
+	viewport.size = Vector2i(256, 300)
+	viewport.transparent_bg = true
+	viewport.disable_3d = true
+	viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	add_child(viewport)
+
+	gauge = AccelGauge.new()
+	gauge.accel_max = level.thrust / level.dry_mass * 1.1
+	viewport.add_child(gauge)
+	gauge.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+
+	var sprite := Sprite3D.new()
+	sprite.texture = viewport.get_texture()
+	sprite.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	sprite.pixel_size = 0.013
+	sprite.modulate = Color(1.0, 1.0, 1.0, 0.92)
+	sprite.no_depth_test = true  # hologram never hides behind the hull
+	sprite.render_priority = 10
+	sprite.position = Vector3(3.6, 0.9, 0.0)
+	ship_root.add_child(sprite)
 
 
 func _make_marker(color: Color) -> Node3D:

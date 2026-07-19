@@ -23,6 +23,7 @@ var isp := 0.0
 var flight_state := FlightState.COASTING
 var last_time := 0.0
 var initial_mass := 0.0
+var accel_along_track := 0.0  # smoothed d|v|/dt in sim time, m/s^2
 
 
 func setup(level: LevelDef) -> void:
@@ -43,6 +44,7 @@ func setup(level: LevelDef) -> void:
 func advance_to(t: float) -> void:
 	if t <= last_time:
 		return
+	var speed_before := v.length()
 	if throttle > 0.0 and prop_mass > 0.0:
 		var thrust := thrust_max * throttle
 		var flow := Integrator.mass_flow(thrust, isp)
@@ -56,6 +58,8 @@ func advance_to(t: float) -> void:
 		_coast_to(t)
 	else:
 		_coast_to(t)
+	accel_along_track = lerpf(
+		accel_along_track, (v.length() - speed_before) / (t - last_time), 0.25)
 	last_time = t
 
 
