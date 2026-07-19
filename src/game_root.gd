@@ -117,6 +117,17 @@ func _unhandled_input(event: InputEvent) -> void:
 			if phase == Phase.WON and level_index < _levels.size() - 1:
 				level_index += 1
 				get_tree().reload_current_scene()
+		KEY_L:
+			# temp mission-select until the M6 campaign shell exists
+			var titles: Array = []
+			for level_class in _levels:
+				titles.append(level_class.make().title)
+			hud.toggle_level_menu(titles)
+		KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9:
+			var target := key.physical_keycode - KEY_1
+			if target < _levels.size() and target != level_index:
+				level_index = target
+				get_tree().reload_current_scene()
 
 
 func _apply_flight_input(delta: float) -> void:

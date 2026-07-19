@@ -16,6 +16,7 @@ var minimap_root: Control
 var _font: SystemFont
 var _flash_label: Label
 var _flash_left := 0.0
+var _menu_label: Label
 
 
 func build(level: LevelDef) -> void:
@@ -34,7 +35,7 @@ func build(level: LevelDef) -> void:
 	help_label.text = "\n".join([
 		"W/S PITCH  A/D YAW  Q/E ROLL",
 		"SHIFT/CTRL THROTTLE  Z MAX  X CUT",
-		",/. TIME WARP  R RESTART",
+		",/. TIME WARP  R RESTART  L MISSIONS",
 		"TAB ORBIT VIEW  DRAG ROTATE  WHEEL ZOOM"])
 	center_label = _label(Control.PRESET_CENTER, GREEN, 34)
 	center_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -89,6 +90,23 @@ func show_win(level: LevelDef, dv_used: float, has_next: bool) -> void:
 		lines.append("[N] NEXT MISSION")
 	center_label.text = "\n".join(lines)
 	center_label.visible = true
+
+
+## Temp mission-select overlay (replaced by the M6 campaign shell).
+func toggle_level_menu(titles: Array) -> void:
+	if _menu_label == null:
+		_menu_label = _label(Control.PRESET_CENTER, GREEN, 24)
+		_menu_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	if _menu_label.visible:
+		_menu_label.visible = false
+		return
+	var lines := ["■ SELECT MISSION ■", ""]
+	for i in titles.size():
+		lines.append("[%d] %s" % [i + 1, titles[i]])
+	lines.append("")
+	lines.append("[L] CLOSE")
+	_menu_label.text = "\n".join(lines)
+	_menu_label.visible = true
 
 
 func flash(text: String) -> void:
