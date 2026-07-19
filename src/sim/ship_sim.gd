@@ -7,10 +7,11 @@ extends RefCounted
 ## starting orbit is the horizontal xz-plane. Ship forward is local -Z.
 
 enum FlightState { COASTING, BURNING }
-enum SasMode { OFF, PROGRADE, RETROGRADE, NORMAL, ANTI_NORMAL, RADIAL_OUT, RADIAL_IN }
+enum SasMode { OFF, PROGRADE, RETROGRADE, NORMAL, ANTI_NORMAL, RADIAL_OUT, RADIAL_IN, NODE }
 
 const BURN_SUBSTEP := 0.05
-const SAS_NAMES := ["OFF", "PROGRADE", "RETROGRADE", "NORMAL", "ANTI-NORM", "RADIAL+", "RADIAL-"]
+const SAS_NAMES := ["OFF", "PROGRADE", "RETROGRADE", "NORMAL", "ANTI-NORM", "RADIAL+", "RADIAL-", "NODE"]
+const NODE_COMPLETE_DV := 0.5  # m/s left at which a node counts as burned
 
 var body: BodyDef
 var elements: OrbitElements
@@ -28,6 +29,8 @@ var initial_mass := 0.0
 var accel_along_track := 0.0  # smoothed d|v|/dt in sim time, m/s^2
 var revision := 0  # bumps whenever elements are refit (event caches key on it)
 var sas_mode := SasMode.OFF
+var node: ManeuverNode
+var node_completed := false  # one-shot flag for the UI to poll and clear
 
 var _level: LevelDef
 
@@ -142,9 +145,35 @@ func dv_used() -> float:
 	return Integrator.delta_v(initial_mass, mass(), isp)
 
 
+func create_node(at_time: float) -> void:
+	node = ManeuverNode.new()
+	node.t_node = at_time
+	refresh_node_plan()
+
+
+## Recompute the node's world-frame dv after any edit (also resets the
+## remaining-burn vector to the full plan).
+func refresh_node_plan() -> void:
+	if node != null:
+		node.remaining = node.planned_world_dv(current_elements())
+
+
+func predicted_elements() -> OrbitElements:
+	if node == null:
+		return null
+	var el := current_elements()
+	var state := el.state_at_time(node.t_node)
+	return OrbitElements.from_state(
+		state.r, state.v.add(node.planned_world_dv(el)), body.mu, node.t_node)
+
+
 ## Direction the active SAS mode wants the nose pointing (unit vector in
 ## the parent frame). Roll is left free — holds align forward only.
 func sas_target_dir() -> DVec3:
+	if sas_mode == SasMode.NODE:
+		if node != null and node.remaining.length() > 0.05:
+			return node.remaining.normalized()
+		return forward_dir()
 	match sas_mode:
 		SasMode.PROGRADE:
 			return v.normalized()
@@ -169,7 +198,8 @@ func off_prograde_angle() -> float:
 
 func _integrate_burn(duration: float, thrust: float, flow: float) -> void:
 	flight_state = FlightState.BURNING
-	var s := Integrator.BurnState.new(r, v, mass())
+	var mass_before := mass()
+	var s := Integrator.BurnState.new(r, v, mass_before)
 	var dir := forward_dir()
 	var t_done := 0.0
 	while t_done < duration - 1e-9:
@@ -179,6 +209,14 @@ func _integrate_burn(duration: float, thrust: float, flow: float) -> void:
 	r = s.r
 	v = s.v
 	prop_mass = maxf(s.mass - dry_mass, 0.0)
+	if node != null:
+		var dv_step := Integrator.delta_v(mass_before, mass(), isp)
+		node.remaining = node.remaining.sub(dir.scaled(dv_step))
+		if node.remaining.length() < NODE_COMPLETE_DV:
+			node = null
+			node_completed = true
+			if sas_mode == SasMode.NODE:
+				sas_mode = SasMode.OFF
 
 
 func _refit_elements(at_time: float) -> void:

@@ -48,4 +48,5 @@ static func make() -> LevelDef:
 	level.draw_limit = 6.0e6
 	level.fail_radius = 8.0e6
 	level.sas_enabled = true
+	level.nodes_enabled = true
 	return level

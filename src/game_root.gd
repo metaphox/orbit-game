@@ -67,6 +67,10 @@ func _physics_process(delta: float) -> void:
 	if notice != "":
 		warp_index = 0
 		hud.flash(notice)
+	if ship.node_completed:
+		ship.node_completed = false
+		hud.flash("NODE COMPLETE")
+		flight_view.mark_traj_dirty()
 	_check_end_conditions()
 
 
@@ -132,6 +136,35 @@ func _unhandled_input(event: InputEvent) -> void:
 			_toggle_sas(ShipSim.SasMode.RADIAL_OUT)
 		KEY_I:
 			_toggle_sas(ShipSim.SasMode.RADIAL_IN)
+		KEY_ENTER:
+			_node_create()
+		KEY_BACKSPACE:
+			if ship.node != null:
+				ship.node = null
+				if ship.sas_mode == ShipSim.SasMode.NODE:
+					ship.sas_mode = ShipSim.SasMode.OFF
+				flight_view.mark_traj_dirty()
+		KEY_BRACKETLEFT:
+			_node_adjust("t_node", -60.0 if key.shift_pressed else -5.0)
+		KEY_BRACKETRIGHT:
+			_node_adjust("t_node", 60.0 if key.shift_pressed else 5.0)
+		KEY_UP:
+			_node_adjust("prograde", 10.0 if key.shift_pressed else 1.0)
+		KEY_DOWN:
+			_node_adjust("prograde", -10.0 if key.shift_pressed else -1.0)
+		KEY_RIGHT:
+			_node_adjust("normal", 10.0 if key.shift_pressed else 1.0)
+		KEY_LEFT:
+			_node_adjust("normal", -10.0 if key.shift_pressed else -1.0)
+		KEY_O:
+			_node_adjust("radial", 10.0 if key.shift_pressed else 1.0)
+		KEY_P:
+			_node_adjust("radial", -10.0 if key.shift_pressed else -1.0)
+		KEY_V:
+			if phase == Phase.FLYING and level.nodes_enabled and ship.node != null:
+				ship.sas_mode = (ShipSim.SasMode.OFF
+					if ship.sas_mode == ShipSim.SasMode.NODE
+					else ShipSim.SasMode.NODE)
 		KEY_L:
 			# temp mission-select until the M6 campaign shell exists
 			var titles: Array = []
@@ -214,6 +247,33 @@ func _scan_span(el: OrbitElements) -> float:
 		return el.period()
 	var exit_t := OrbitEvents.radius_crossing_time(el, level.draw_limit, sim_time, true)
 	return (exit_t - sim_time) if not is_nan(exit_t) else 2.0e4
+
+
+func _node_create() -> void:
+	if phase != Phase.FLYING:
+		return
+	if not level.nodes_enabled:
+		hud.flash("FLIGHT COMPUTER NOT INSTALLED")
+		return
+	if ship.node == null:
+		ship.create_node(sim_time + 120.0)
+		flight_view.mark_traj_dirty()
+
+
+func _node_adjust(field: String, amount: float) -> void:
+	if phase != Phase.FLYING or ship.node == null:
+		return
+	match field:
+		"t_node":
+			ship.node.t_node = maxf(ship.node.t_node + amount, sim_time + 1.0)
+		"prograde":
+			ship.node.prograde += amount
+		"normal":
+			ship.node.normal += amount
+		"radial":
+			ship.node.radial += amount
+	ship.refresh_node_plan()
+	flight_view.mark_traj_dirty()
 
 
 func _toggle_sas(mode: ShipSim.SasMode) -> void:

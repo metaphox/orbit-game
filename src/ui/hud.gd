@@ -39,6 +39,9 @@ func build(level: LevelDef) -> void:
 		"TAB ORBIT VIEW  DRAG ROTATE  WHEEL ZOOM"]
 	if level.sas_enabled:
 		help_lines.append("SAS: G PRO  H RETRO  N NORM  B ANTI  U/I RADIAL  T OFF")
+	if level.nodes_enabled:
+		help_lines.append("NODE: ENTER ADD  BKSP DEL  [/] TIME  ↑↓ PRO  ←→ NORM  O/P RAD")
+		help_lines.append("      SHIFT = COARSE   V HOLD NODE")
 	help_label.text = "\n".join(help_lines)
 	center_label = _label(Control.PRESET_CENTER, GREEN, 34)
 	center_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -76,12 +79,22 @@ func refresh(ship: ShipSim, level: LevelDef, sim_time: float, warp: int) -> void
 	lines.append("PAR %.0f m/s" % level.dv_par)
 	objective_label.text = "\n".join(lines)
 
-	engine_label.text = "\n".join([
+	var engine_lines := [
 		"THR  %s %3.0f%%" % [_bar(ship.throttle), ship.throttle * 100.0],
 		"PROP %s %3.0f%%   Δv %5.1f   USED %5.1f" % [
 			_bar(ship.prop_mass / level.prop_mass),
 			100.0 * ship.prop_mass / level.prop_mass,
-			ship.dv_remaining(), ship.dv_used()]])
+			ship.dv_remaining(), ship.dv_used()]]
+	if ship.node != null:
+		var dv := ship.node.total_dv()
+		var exhaust_v := ship.isp * Integrator.G0
+		var burn_time := ship.mass() * (1.0 - exp(-dv / exhaust_v)) \
+			/ (ship.thrust_max / exhaust_v)
+		engine_lines.append(
+			"NODE Δv %5.1f   T%+7.0fs   BURN %3.0fs   REM %5.1f" % [
+				dv, sim_time - ship.node.t_node, burn_time,
+				ship.node.remaining.length()])
+	engine_label.text = "\n".join(engine_lines)
 
 
 func show_win(level: LevelDef, dv_used: float, has_next: bool) -> void:

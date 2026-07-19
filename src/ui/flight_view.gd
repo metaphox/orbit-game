@@ -44,6 +44,15 @@ var _target_instance: MeshInstance3D
 var _ring_body: BodyDef
 var _traj_timer := 0.0
 
+var _node_mesh: ImmediateMesh
+var _node_instance: MeshInstance3D
+var _preview_mesh: ImmediateMesh
+var _preview_instance: MeshInstance3D
+var _preview_anchor: DVec3  # parent-frame moon position at predicted entry
+var _preview_active := false
+var _node_marker: MeshInstance3D
+var _level: LevelDef
+
 var _cam_yaw := 0.0
 var _cam_pitch := 0.0
 var _side_azimuth := 0.6
@@ -103,7 +112,9 @@ func build(level: LevelDef) -> void:
 	_objective = level.objective
 	_draw_limit = level.draw_limit
 	_side_zoom_max = maxf(1.6e6, level.draw_limit * 1.4)
+	_level = level
 	_build_trajectory_lines(level)
+	_build_node_visuals()
 
 	prograde_marker = _make_marker(Color(0.3, 1.0, 0.4))
 	retrograde_marker = _make_marker(Color(1.0, 0.35, 0.25))
@@ -145,8 +156,18 @@ func sync(ship: ShipSim, delta: float) -> void:
 	gauge.dv_left = ship.dv_remaining()
 
 	# trajectory + target ring ride the floating origin via node offsets
-	_traj_instance.position = ship.r.neg().to_vector3()  # current parent
+	var parent_offset := ship.r.neg().to_vector3()
+	_traj_instance.position = parent_offset  # current parent
 	_target_instance.position = _ring_body.position_at(t).sub(ship_abs).to_vector3()
+	_node_instance.position = parent_offset
+	if _preview_active:
+		_preview_instance.position = _preview_anchor.sub(ship.r).to_vector3()
+	var has_node := ship.node != null
+	_node_marker.visible = has_node
+	if has_node:
+		_node_marker.position = ship.current_elements() \
+			.state_at_time(ship.node.t_node).r.sub(ship.r).to_vector3()
+		_node_marker.scale = Vector3.ONE * maxf(_side_distance * 0.004, 4.0)
 	_traj_timer -= delta
 	if _traj_timer <= 0.0:
 		_traj_timer = TRAJ_REFRESH
@@ -166,6 +187,10 @@ func sync(ship: ShipSim, delta: float) -> void:
 	side_camera.near = maxf(50.0, _side_distance * 0.002)
 	side_camera.look_at(parent_pos, side_basis.y)
 	_side_marker.scale = Vector3.ONE * maxf(_side_distance * 0.006, 1.0)
+
+
+func mark_traj_dirty() -> void:
+	_traj_timer = 0.0
 
 
 func set_side_active(active: bool) -> void:
@@ -248,6 +273,82 @@ func _build_trajectory_lines(level: LevelDef) -> void:
 	add_child(_side_marker)  # stays at origin = ship render position
 
 
+func _build_node_visuals() -> void:
+	var ghost_mat := StandardMaterial3D.new()
+	ghost_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	ghost_mat.albedo_color = Color(0.45, 0.85, 1.0)
+	ghost_mat.emission_enabled = true
+	ghost_mat.emission = Color(0.45, 0.85, 1.0)
+	ghost_mat.emission_energy_multiplier = 1.8
+
+	_node_mesh = ImmediateMesh.new()
+	_node_instance = MeshInstance3D.new()
+	_node_instance.mesh = _node_mesh
+	_node_instance.material_override = ghost_mat
+	add_child(_node_instance)
+
+	_preview_mesh = ImmediateMesh.new()
+	_preview_instance = MeshInstance3D.new()
+	_preview_instance.mesh = _preview_mesh
+	_preview_instance.material_override = ghost_mat
+	add_child(_preview_instance)
+
+	_node_marker = MeshInstance3D.new()
+	var dot := SphereMesh.new()
+	dot.radius = 1.0
+	dot.height = 2.0
+	var marker_mat := StandardMaterial3D.new()
+	marker_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	marker_mat.albedo_color = Color(0.45, 0.85, 1.0)
+	dot.material = marker_mat
+	_node_marker.mesh = dot
+	_node_marker.layers = 1 | SIDE_MARKER_LAYER
+	_node_marker.visible = false
+	add_child(_node_marker)
+
+
+## Predicted post-burn conic (cyan), plus a moon-centric arc when the
+## prediction enters a moon's SOI — anchored at the moon's position at the
+## predicted entry time, KSP-style.
+func _rebuild_node_ghost(ship: ShipSim) -> void:
+	_node_mesh.clear_surfaces()
+	_preview_mesh.clear_surfaces()
+	_preview_active = false
+	if ship.node == null:
+		return
+	var pred := ship.predicted_elements()
+	var r_max := minf(_draw_limit, ship.body.soi_radius * 1.15)
+	var pts: Array = pred.sample_positions(TRAJ_SAMPLES, r_max)
+	var closed := pred.is_elliptic() and pred.radius_apoapsis() <= r_max
+	_node_mesh.surface_begin(Mesh.PRIMITIVE_LINE_STRIP)
+	for p: DVec3 in pts:
+		_node_mesh.surface_add_vertex(p.to_vector3())
+	if closed:
+		var first: DVec3 = pts[0]
+		_node_mesh.surface_add_vertex(first.to_vector3())
+	_node_mesh.surface_end()
+
+	if ship.body.parent != null:
+		return
+	for moon in _level.moons:
+		var span := pred.period() if pred.is_elliptic() else 6.0e4
+		var entry := OrbitEvents.child_soi_entry_time(
+			pred, moon.orbit, moon.soi_radius, ship.node.t_node,
+			ship.node.t_node + span, maxf(span / 400.0, 1.0))
+		if is_nan(entry):
+			continue
+		var rel := Frames.to_child_frame(pred.state_at_time(entry), moon.orbit, entry)
+		var arc := OrbitElements.from_state(rel.r, rel.v, moon.mu, entry)
+		var arc_pts: Array = arc.sample_positions(96, moon.soi_radius)
+		_preview_mesh.surface_begin(Mesh.PRIMITIVE_LINE_STRIP)
+		for p: DVec3 in arc_pts:
+			_preview_mesh.surface_add_vertex(p.to_vector3())
+		_preview_mesh.surface_end()
+		_preview_anchor = moon.position_at(entry)
+		_preview_active = true
+		break
+
+
 func _rebuild_trajectory(ship: ShipSim) -> void:
 	var el := ship.current_elements()
 	var color := FAR_COLOR.lerp(MATCH_COLOR, _objective.trajectory_closeness(ship))
@@ -269,6 +370,7 @@ func _rebuild_trajectory(ship: ShipSim) -> void:
 		var first: DVec3 = pts[0]
 		_traj_mesh.surface_add_vertex(first.to_vector3())
 	_traj_mesh.surface_end()
+	_rebuild_node_ghost(ship)
 
 
 ## Full loop with vertex density concentrated at the ship: the first point
