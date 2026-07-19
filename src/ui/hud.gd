@@ -93,9 +93,17 @@ func _build_minimap() -> void:
 	minimap_root = Control.new()
 	minimap_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(minimap_root)
-	minimap_root.custom_minimum_size = Vector2(280, 260)
-	minimap_root.set_anchors_and_offsets_preset(
-		Control.PRESET_TOP_RIGHT, Control.PRESET_MODE_MINSIZE, 12)
+	# pin to the top-right corner explicitly: 280x260, 12 px margin
+	minimap_root.anchor_left = 1.0
+	minimap_root.anchor_right = 1.0
+	minimap_root.anchor_top = 0.0
+	minimap_root.anchor_bottom = 0.0
+	minimap_root.offset_left = -292.0
+	minimap_root.offset_right = -12.0
+	minimap_root.offset_top = 12.0
+	minimap_root.offset_bottom = 272.0
+	minimap_root.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	minimap_root.grow_vertical = Control.GROW_DIRECTION_END
 
 	var back := ColorRect.new()
 	back.color = Color(0.0, 0.06, 0.02, 0.45)
