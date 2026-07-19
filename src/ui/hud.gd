@@ -1,0 +1,105 @@
+class_name Hud
+extends CanvasLayer
+## Text HUD, green monospace on black — placeholder that already leans
+## toward the CRT look. Shaders and real styling arrive in M7.
+
+const GREEN := Color(0.45, 1.0, 0.55)
+const DIM_GREEN := Color(0.3, 0.65, 0.38)
+const RED := Color(1.0, 0.4, 0.3)
+
+var status_label: Label
+var objective_label: Label
+var engine_label: Label
+var help_label: Label
+var center_label: Label
+var _font: SystemFont
+
+
+func build(level: LevelDef) -> void:
+	_font = SystemFont.new()
+	_font.font_names = PackedStringArray(["Menlo", "Monaco", "Consolas", "monospace"])
+
+	status_label = _label(Control.PRESET_TOP_LEFT, GREEN)
+	objective_label = _label(Control.PRESET_TOP_RIGHT, GREEN)
+	objective_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	engine_label = _label(Control.PRESET_BOTTOM_LEFT, GREEN)
+	help_label = _label(Control.PRESET_BOTTOM_RIGHT, DIM_GREEN)
+	help_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	help_label.text = "\n".join([
+		"W/S PITCH  A/D YAW  Q/E ROLL",
+		"SHIFT/CTRL THROTTLE  Z MAX  X CUT",
+		",/. TIME WARP  M MAP  R RESTART"])
+	center_label = _label(Control.PRESET_CENTER, GREEN, 26)
+	center_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	center_label.visible = false
+
+	var title := _label(Control.PRESET_CENTER_TOP, DIM_GREEN)
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.text = level.title
+
+
+func refresh(ship: ShipSim, level: LevelDef, sim_time: float, warp: int) -> void:
+	var el := ship.current_elements()
+	var state_text := "BURNING" if ship.flight_state == ShipSim.FlightState.BURNING else "COASTING"
+	var ap := el.radius_apoapsis()
+	var ap_text := "  ESCAPE" if not el.is_elliptic() else "%8.2f" % (ap / 1000.0)
+	status_label.text = "\n".join([
+		"T+ %s   WARP %dx" % [_clock(sim_time), warp],
+		"ALT  %8.2f km   VEL %7.1f m/s" % [ship.altitude() / 1000.0, ship.speed()],
+		"R-AP %s km   R-PE %8.2f km" % [ap_text, el.radius_periapsis() / 1000.0],
+		"%s   OFF-PROGRADE %3.0f°" % [state_text, rad_to_deg(ship.off_prograde_angle())]])
+
+	var objective: OrbitMatchObjective = level.objective
+	var band := "AP Δ%+8.2f   PE Δ%+8.2f" % [
+		(ap - objective.target_radius) / 1000.0 if el.is_elliptic() else INF,
+		(el.radius_periapsis() - objective.target_radius) / 1000.0]
+	objective_label.text = "\n".join([
+		"OBJECTIVE", objective.describe(), band,
+		"PAR %.0f m/s" % level.dv_par])
+
+	engine_label.text = "\n".join([
+		"THR  %s %3.0f%%" % [_bar(ship.throttle), ship.throttle * 100.0],
+		"PROP %s %3.0f%%   Δv %5.1f   USED %5.1f" % [
+			_bar(ship.prop_mass / level.prop_mass),
+			100.0 * ship.prop_mass / level.prop_mass,
+			ship.dv_remaining(), ship.dv_used()]])
+
+
+func show_win(level: LevelDef, dv_used: float) -> void:
+	center_label.add_theme_color_override("font_color", GREEN)
+	center_label.text = "\n".join([
+		"■ ORBIT ACHIEVED ■", "",
+		"ΔV USED %.1f m/s — PAR %.0f" % [dv_used, level.dv_par],
+		"MEDAL: %s" % level.medal(dv_used), "",
+		"[R] FLY AGAIN"])
+	center_label.visible = true
+
+
+func show_fail(reason: String) -> void:
+	center_label.add_theme_color_override("font_color", RED)
+	center_label.text = "\n".join(["■ %s ■" % reason, "", "[R] RESTART"])
+	center_label.visible = true
+
+
+func _label(preset: int, color: Color, size := 15) -> Label:
+	var label := Label.new()
+	label.add_theme_font_override("font", _font)
+	label.add_theme_font_size_override("font_size", size)
+	label.add_theme_color_override("font_color", color)
+	label.add_theme_constant_override("line_spacing", 4)
+	add_child(label)
+	label.set_anchors_and_offsets_preset(preset, Control.PRESET_MODE_MINSIZE, 14)
+	label.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	label.grow_vertical = Control.GROW_DIRECTION_BOTH
+	return label
+
+
+func _bar(frac: float) -> String:
+	var filled := int(round(clampf(frac, 0.0, 1.0) * 10.0))
+	return "[%s%s]" % ["█".repeat(filled), "░".repeat(10 - filled)]
+
+
+func _clock(t: float) -> String:
+	var total := int(t)
+	@warning_ignore("integer_division")
+	return "%02d:%02d:%02d" % [total / 3600, (total / 60) % 60, total % 60]
