@@ -51,6 +51,7 @@ var _preview_instance: MeshInstance3D
 var _preview_anchor: DVec3  # parent-frame moon position at predicted entry
 var _preview_active := false
 var _node_marker: MeshInstance3D
+var _station_marker: MeshInstance3D
 var _level: LevelDef
 
 var _cam_yaw := 0.0
@@ -162,6 +163,11 @@ func sync(ship: ShipSim, delta: float) -> void:
 	_node_instance.position = parent_offset
 	if _preview_active:
 		_preview_instance.position = _preview_anchor.sub(ship.r).to_vector3()
+	if _station_marker != null:
+		var st := (_objective as RendezvousObjective).station_orbit.state_at_time(t)
+		_station_marker.position = st.r.sub(ship_abs).to_vector3()
+		_station_marker.scale = Vector3.ONE * maxf(_side_distance * 0.002, 1.0)
+
 	var has_node := ship.node != null
 	_node_marker.visible = has_node
 	if has_node:
@@ -225,13 +231,24 @@ func _build_trajectory_lines(level: LevelDef) -> void:
 	_traj_instance.material_override = _traj_material
 	add_child(_traj_instance)
 
-	# target ring: the goal orbit (OrbitMatch, around the root) or the
-	# target body's SOI (TransferCapture, rides the moon)
+	# target ring: whatever circle best marks the goal for this objective
 	var ring_radius: float
 	if _objective is TransferCaptureObjective:
 		var capture := _objective as TransferCaptureObjective
 		_ring_body = capture.target
 		ring_radius = capture.target.soi_radius
+	elif _objective is RendezvousObjective:
+		var rdv := _objective as RendezvousObjective
+		_ring_body = level.body
+		ring_radius = rdv.station_orbit.a
+	elif _objective is AirlessLandingObjective:
+		var landing := _objective as AirlessLandingObjective
+		_ring_body = landing.target
+		ring_radius = landing.target.radius * 1.03
+	elif _objective is EntryCorridorObjective:
+		var corridor := _objective as EntryCorridorObjective
+		_ring_body = level.body
+		ring_radius = corridor.target_periapsis
 	else:
 		var match_obj := _objective as OrbitMatchObjective
 		_ring_body = level.body
@@ -305,6 +322,20 @@ func _build_node_visuals() -> void:
 	_node_marker.layers = 1 | SIDE_MARKER_LAYER
 	_node_marker.visible = false
 	add_child(_node_marker)
+
+	if _objective is RendezvousObjective:
+		_station_marker = MeshInstance3D.new()
+		var box := BoxMesh.new()
+		box.size = Vector3(3, 3, 3)
+		var station_mat := StandardMaterial3D.new()
+		station_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		station_mat.albedo_color = Color(1.0, 0.7, 0.2)
+		station_mat.emission_enabled = true
+		station_mat.emission = Color(1.0, 0.7, 0.2)
+		box.material = station_mat
+		_station_marker.mesh = box
+		_station_marker.layers = 1 | SIDE_MARKER_LAYER
+		add_child(_station_marker)
 
 
 ## Predicted post-burn conic (cyan), plus a moon-centric arc when the

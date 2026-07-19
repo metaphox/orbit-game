@@ -4,8 +4,9 @@ extends RefCounted
 ## resources in M6.
 
 var title := ""
-var body: BodyDef  # root body; the ship starts in its SOI
+var body: BodyDef  # root body of the system
 var moons: Array[BodyDef] = []
+var start_body: BodyDef  # where the ship starts; null = the root body
 var start_radius := 0.0
 var dry_mass := 0.0
 var prop_mass := 0.0

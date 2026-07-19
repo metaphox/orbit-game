@@ -37,7 +37,7 @@ var _level: LevelDef
 
 func setup(level: LevelDef) -> void:
 	_level = level
-	body = level.body
+	body = level.start_body if level.start_body != null else level.body
 	dry_mass = level.dry_mass
 	prop_mass = level.prop_mass
 	thrust_max = level.thrust

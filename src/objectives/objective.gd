@@ -5,8 +5,17 @@ extends RefCounted
 ## "closeness" that colors the in-world trajectory (1 = on target).
 
 
+enum ContactResult { NONE, WIN, CRASH }
+
+
 func is_met(_ship: ShipSim) -> bool:
 	return false
+
+
+## Called when the ship touches a surface. NONE means contact is always a
+## failure (the default); landing objectives override.
+func contact_result(_ship: ShipSim) -> ContactResult:
+	return ContactResult.NONE
 
 
 func describe() -> String:

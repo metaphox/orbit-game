@@ -66,6 +66,33 @@ static func child_soi_entry_time(
 	return NAN
 
 
+## Time and distance of closest approach between two conics in [t0, t1].
+## Coarse scan for the minimum, then ternary refinement around it.
+static func closest_approach(
+		el_a: OrbitElements, el_b: OrbitElements, t0: float, t1: float,
+		coarse_dt: float) -> Dictionary:
+	var best_t := t0
+	var best_d := _distance(el_a, el_b, t0)
+	var t := t0 + coarse_dt
+	while t <= t1:
+		var d := _distance(el_a, el_b, t)
+		if d < best_d:
+			best_d = d
+			best_t = t
+		t += coarse_dt
+	var lo := maxf(best_t - coarse_dt, t0)
+	var hi := minf(best_t + coarse_dt, t1)
+	for _i in 60:
+		var m1 := lo + (hi - lo) / 3.0
+		var m2 := hi - (hi - lo) / 3.0
+		if _distance(el_a, el_b, m1) < _distance(el_a, el_b, m2):
+			hi = m2
+		else:
+			lo = m1
+	best_t = 0.5 * (lo + hi)
+	return {"time": best_t, "distance": _distance(el_a, el_b, best_t)}
+
+
 static func _bisect_entry(
 		ship_el: OrbitElements, child_el: OrbitElements, soi_radius: float,
 		t_out: float, t_in: float) -> float:

@@ -17,6 +17,7 @@ var ship_marker: MeshInstance3D
 var _level: LevelDef
 var _moon_markers: Array[MeshInstance3D] = []
 var _soi_rings: Array[MeshInstance3D] = []
+var _station_marker: MeshInstance3D
 var _refresh_left := 0.0
 
 
@@ -35,8 +36,25 @@ func build(level: LevelDef) -> void:
 
 	if level.objective is OrbitMatchObjective:
 		var target := level.objective as OrbitMatchObjective
-		var ring := _circle_points(target.target_radius * MAP_SCALE)
-		add_child(_line_instance(ring, Color(0.2, 0.55, 0.28)))
+		add_child(_line_instance(
+			_circle_points(target.target_radius * MAP_SCALE), Color(0.2, 0.55, 0.28)))
+	elif level.objective is RendezvousObjective:
+		var rdv := level.objective as RendezvousObjective
+		add_child(_line_instance(
+			_circle_points(rdv.station_orbit.a * MAP_SCALE), Color(0.2, 0.55, 0.28)))
+		_station_marker = MeshInstance3D.new()
+		var st_dot := SphereMesh.new()
+		var st_radius := level.map_extent / 200.0
+		st_dot.radius = st_radius
+		st_dot.height = st_radius * 2.0
+		st_dot.material = _line_material(Color(1.0, 0.7, 0.2))
+		_station_marker.mesh = st_dot
+		_station_marker.layers = MAP_LAYER
+		add_child(_station_marker)
+	elif level.objective is EntryCorridorObjective:
+		var corridor := level.objective as EntryCorridorObjective
+		add_child(_line_instance(
+			_circle_points(corridor.target_periapsis * MAP_SCALE), Color(0.2, 0.55, 0.28)))
 
 	for moon in level.moons:
 		# the moon's orbit track around the root
@@ -82,6 +100,9 @@ func sync(ship: ShipSim, t: float, delta: float) -> void:
 		var moon_pos := _level.moons[i].position_at(t).scaled(MAP_SCALE).to_vector3()
 		_moon_markers[i].position = moon_pos
 		_soi_rings[i].position = moon_pos
+	if _station_marker != null:
+		_station_marker.position = (_level.objective as RendezvousObjective) \
+			.station_orbit.state_at_time(t).r.scaled(MAP_SCALE).to_vector3()
 	# orbit conic is parent-centered; offset the node by the parent's spot
 	orbit_instance.position = ship.body.position_at(t).scaled(MAP_SCALE).to_vector3()
 	_refresh_left -= delta

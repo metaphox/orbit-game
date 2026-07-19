@@ -22,7 +22,7 @@ var flight_view: FlightView
 var map_view: MapView
 var hud: Hud
 
-var _levels := [Level01, Level02]
+var _levels := [Level01, Level02, Level03, Level04, Level05]
 var _event_revision := -1
 var _event_horizon := -1.0
 var _next_event := INF
@@ -199,8 +199,16 @@ func _apply_flight_input(delta: float) -> void:
 
 func _check_end_conditions() -> void:
 	if ship.r.length() <= ship.body.radius:
-		phase = Phase.FAILED
-		hud.show_fail("%s SURFACE IMPACT" % ship.body.name)
+		match level.objective.contact_result(ship):
+			Objective.ContactResult.WIN:
+				phase = Phase.WON
+				hud.show_win(level, ship.dv_used(), level_index < _levels.size() - 1)
+			Objective.ContactResult.CRASH:
+				phase = Phase.FAILED
+				hud.show_fail("TOUCHDOWN TOO HARD")
+			_:
+				phase = Phase.FAILED
+				hud.show_fail("%s SURFACE IMPACT" % ship.body.name)
 	elif (level.fail_radius > 0.0 and ship.body.parent == null
 			and ship.r.length() > level.fail_radius):
 		phase = Phase.FAILED
