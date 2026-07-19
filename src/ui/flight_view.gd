@@ -9,6 +9,8 @@ var planet: MeshInstance3D
 var ship_root: Node3D
 var prograde_marker: Node3D
 var retrograde_marker: Node3D
+var star_dust: StarDust
+var flame: MeshInstance3D
 
 
 func build(level: LevelDef) -> void:
@@ -44,6 +46,10 @@ func build(level: LevelDef) -> void:
 	add_child(ship_root)
 	_build_ship_mesh()
 
+	star_dust = StarDust.new()
+	add_child(star_dust)
+	star_dust.build()
+
 	prograde_marker = _make_marker(Color(0.3, 1.0, 0.4))
 	retrograde_marker = _make_marker(Color(1.0, 0.35, 0.25))
 
@@ -62,6 +68,12 @@ func sync(ship: ShipSim) -> void:
 	var v_dir := ship.v.normalized().to_vector3()
 	_place_marker(prograde_marker, v_dir)
 	_place_marker(retrograde_marker, -v_dir)
+	star_dust.update_motion(v_dir, ship.speed())
+
+	var thrusting := ship.throttle > 0.0 and ship.prop_mass > 0.0
+	flame.visible = thrusting
+	if thrusting:
+		flame.scale = Vector3(1.0, 1.0, ship.throttle * randf_range(0.85, 1.15))
 
 	camera.position = ship.attitude * Vector3(0, 3.5, 11.0)
 	camera.look_at(Vector3.ZERO, ship.attitude.y)
@@ -92,6 +104,23 @@ func _build_ship_mesh() -> void:
 	nose.rotation.x = -PI / 2
 	nose.position = Vector3(0, 0, -2.3)
 	ship_root.add_child(nose)
+
+	flame = MeshInstance3D.new()
+	var plume := CylinderMesh.new()
+	plume.top_radius = 0.06  # narrow tail (far end after rotation)
+	plume.bottom_radius = 0.5
+	plume.height = 2.4
+	var flame_mat := StandardMaterial3D.new()
+	flame_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	flame_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	flame_mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	flame_mat.albedo_color = Color(1.0, 0.55, 0.15, 0.85)
+	plume.material = flame_mat
+	flame.mesh = plume
+	flame.rotation.x = PI / 2  # plume axis (+Y) -> backward (+Z)
+	flame.position = Vector3(0, 0, 3.1)
+	flame.visible = false
+	ship_root.add_child(flame)
 
 
 func _make_marker(color: Color) -> Node3D:

@@ -12,7 +12,12 @@ var objective_label: Label
 var engine_label: Label
 var help_label: Label
 var center_label: Label
+var accel_gauge: AccelGauge
 var _font: SystemFont
+
+var _prev_speed := 0.0
+var _prev_time := -1.0
+var _accel_smooth := 0.0
 
 
 func build(level: LevelDef) -> void:
@@ -37,6 +42,15 @@ func build(level: LevelDef) -> void:
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.text = level.title
 
+	accel_gauge = AccelGauge.new()
+	accel_gauge.font = _font
+	accel_gauge.accel_max = level.thrust / level.dry_mass * 1.1
+	add_child(accel_gauge)
+	accel_gauge.set_anchors_and_offsets_preset(
+		Control.PRESET_CENTER_BOTTOM, Control.PRESET_MODE_MINSIZE, 8)
+	accel_gauge.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	accel_gauge.grow_vertical = Control.GROW_DIRECTION_BEGIN
+
 
 func refresh(ship: ShipSim, level: LevelDef, sim_time: float, warp: int) -> void:
 	var el := ship.current_elements()
@@ -56,6 +70,15 @@ func refresh(ship: ShipSim, level: LevelDef, sim_time: float, warp: int) -> void
 	objective_label.text = "\n".join([
 		"OBJECTIVE", objective.describe(), band,
 		"PAR %.0f m/s" % level.dv_par])
+
+	# measured along-track acceleration in sim time (warp-independent)
+	if _prev_time >= 0.0 and sim_time > _prev_time:
+		var raw := (ship.speed() - _prev_speed) / (sim_time - _prev_time)
+		_accel_smooth = lerpf(_accel_smooth, raw, 0.2)
+	_prev_speed = ship.speed()
+	_prev_time = sim_time
+	accel_gauge.speed = ship.speed()
+	accel_gauge.accel = _accel_smooth
 
 	engine_label.text = "\n".join([
 		"THR  %s %3.0f%%" % [_bar(ship.throttle), ship.throttle * 100.0],
