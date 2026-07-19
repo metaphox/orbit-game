@@ -32,7 +32,8 @@ func build(level: LevelDef) -> void:
 	help_label.text = "\n".join([
 		"W/S PITCH  A/D YAW  Q/E ROLL",
 		"SHIFT/CTRL THROTTLE  Z MAX  X CUT",
-		",/. TIME WARP  TAB MAP  R RESTART"])
+		",/. TIME WARP  R RESTART",
+		"TAB ORBIT VIEW  DRAG ROTATE  WHEEL ZOOM"])
 	center_label = _label(Control.PRESET_CENTER, GREEN, 34)
 	center_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	center_label.visible = false

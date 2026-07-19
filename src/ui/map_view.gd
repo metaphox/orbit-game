@@ -1,8 +1,9 @@
 class_name MapView
 extends Node3D
-## The mission-computer map: planet, current orbit conic, ghost target
-## orbit, ship marker. 1 render unit = 1 km, everything on visual layer 2
-## so only the map camera sees it. Vector-CRT styling arrives in M7.
+## The schematic mission-computer map feeding the HUD minimap: planet,
+## current orbit conic, ghost target orbit, ship marker. 1 render unit =
+## 1 km, everything on visual layer 2 so only the minimap camera sees it.
+## Vector-CRT styling arrives in M7.
 
 const MAP_SCALE := 0.001
 const MAP_LAYER := 2
@@ -10,7 +11,6 @@ const ORBIT_SAMPLES := 160
 const REFRESH_INTERVAL := 0.2
 const DRAW_LIMIT_RADIUS := 4.0e5  # clip unbound trajectories at 400 km
 
-var camera: Camera3D
 var orbit_mesh: ImmediateMesh
 var ship_marker: MeshInstance3D
 var _refresh_left := 0.0
@@ -47,16 +47,6 @@ func build(level: LevelDef) -> void:
 	ship_marker.mesh = dot
 	ship_marker.layers = MAP_LAYER
 	add_child(ship_marker)
-
-	camera = Camera3D.new()
-	camera.projection = Camera3D.PROJECTION_ORTHOGONAL
-	camera.size = 320.0
-	camera.near = 1.0
-	camera.far = 2000.0
-	camera.cull_mask = MAP_LAYER
-	add_child(camera)
-	camera.position = Vector3(0, 320, 150)
-	camera.look_at(Vector3.ZERO, Vector3.UP)
 
 
 func sync(ship: ShipSim, delta: float) -> void:

@@ -14,7 +14,7 @@ var ship: ShipSim
 var sim_time := 0.0
 var warp_index := 0
 var phase := Phase.FLYING
-var map_active := false
+var side_active := false
 
 var flight_view: FlightView
 var map_view: MapView
@@ -51,23 +51,35 @@ func _physics_process(delta: float) -> void:
 
 
 func _process(delta: float) -> void:
-	flight_view.sync(ship)
+	flight_view.sync(ship, delta)
 	map_view.sync(ship, delta)
 	hud.refresh(ship, level, sim_time, WARP_STEPS[warp_index])
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	var motion := event as InputEventMouseMotion
+	if motion != null:
+		if motion.button_mask & MOUSE_BUTTON_MASK_LEFT:
+			if side_active:
+				flight_view.side_drag(motion.relative)
+			else:
+				flight_view.chase_drag(motion.relative)
+		return
+	var wheel := event as InputEventMouseButton
+	if wheel != null:
+		if side_active and wheel.pressed:
+			if wheel.button_index == MOUSE_BUTTON_WHEEL_UP:
+				flight_view.side_zoom(0.88)
+			elif wheel.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+				flight_view.side_zoom(1.14)
+		return
 	var key := event as InputEventKey
 	if key == null or not key.pressed or key.echo:
 		return
 	match key.physical_keycode:
 		KEY_TAB:
-			map_active = not map_active
-			hud.set_minimap_visible(not map_active)
-			if map_active:
-				map_view.camera.make_current()
-			else:
-				flight_view.camera.make_current()
+			side_active = not side_active
+			flight_view.set_side_active(side_active)
 		KEY_PERIOD:
 			if phase == Phase.FLYING and ship.throttle == 0.0:
 				warp_index = mini(warp_index + 1, WARP_STEPS.size() - 1)
