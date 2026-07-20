@@ -22,6 +22,17 @@ const MATCH_COLOR := Color(0.35, 1.0, 0.45)
 const FAR_COLOR := Color(1.0, 0.55, 0.12)
 const SIDE_MARKER_LAYER := 8  # ship dot only the side camera can see
 
+# Orbit marks: apoapsis/periapsis/nodes/etc, orbit-view only (see
+# _build_orbit_marks) - meaningless at chase-cam range where the whole
+# orbit shape isn't visible anyway.
+const AP_COLOR := Color(0.4, 0.75, 1.0)
+const PE_COLOR := Color(1.0, 0.85, 0.3)
+const AN_COLOR := Color(0.85, 0.4, 1.0)
+const DN_COLOR := Color(0.55, 0.3, 0.75)
+const IMPACT_COLOR := Color(1.0, 0.2, 0.15)
+const ENCOUNTER_COLOR := Color(1.0, 1.0, 1.0)
+const CLOSEST_APPROACH_COLOR := Color(1.0, 0.3, 0.6)
+
 var camera: Camera3D
 var side_camera: Camera3D
 var ship_root: Node3D
@@ -53,6 +64,14 @@ var _preview_active := false
 var _node_marker: MeshInstance3D
 var _station_marker: MeshInstance3D
 var _level: LevelDef
+
+var _ap_marker: MeshInstance3D
+var _pe_marker: MeshInstance3D
+var _an_marker: MeshInstance3D
+var _dn_marker: MeshInstance3D
+var _impact_marker: MeshInstance3D
+var _encounter_marker: MeshInstance3D
+var _closest_approach_marker: MeshInstance3D
 
 const DEFAULT_CAM_YAW := 0.0
 const DEFAULT_CAM_PITCH := 0.0
@@ -132,6 +151,7 @@ func build(level: LevelDef) -> void:
 	_level = level
 	_build_trajectory_lines(level)
 	_build_node_visuals()
+	_build_orbit_marks()
 
 	prograde_marker = _make_marker(Color(0.3, 1.0, 0.4))
 	retrograde_marker = _make_marker(Color(1.0, 0.35, 0.25))
@@ -360,6 +380,97 @@ func _build_node_visuals() -> void:
 		add_child(_station_marker)
 
 
+## Apoapsis/periapsis/nodes/impact/encounter/closest-approach: small
+## colored dots, orbit-view only, positioned each trajectory refresh in
+## _update_orbit_marks. Built once here and toggled visible/hidden rather
+## than recreated, since most of them don't apply to every level.
+func _build_orbit_marks() -> void:
+	_ap_marker = _make_orbit_mark(AP_COLOR)
+	_pe_marker = _make_orbit_mark(PE_COLOR)
+	_an_marker = _make_orbit_mark(AN_COLOR)
+	_dn_marker = _make_orbit_mark(DN_COLOR)
+	_impact_marker = _make_orbit_mark(IMPACT_COLOR)
+	_encounter_marker = _make_orbit_mark(ENCOUNTER_COLOR)
+	_closest_approach_marker = _make_orbit_mark(CLOSEST_APPROACH_COLOR)
+
+
+func _make_orbit_mark(color: Color) -> MeshInstance3D:
+	var mark := MeshInstance3D.new()
+	var dot := SphereMesh.new()
+	dot.radius = 1.0
+	dot.height = 2.0
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.albedo_color = color
+	mat.emission_enabled = true
+	mat.emission = color
+	mat.emission_energy_multiplier = 1.5
+	dot.material = mat
+	mark.mesh = dot
+	mark.layers = SIDE_MARKER_LAYER
+	mark.visible = false
+	add_child(mark)
+	return mark
+
+
+## Whether a true anomaly is physically reachable on this trajectory - for
+## a hyperbolic arc only |nu| < acos(-1/e) is ever actually visited.
+func _nu_reachable(el: OrbitElements, nu: float) -> bool:
+	if el.is_elliptic():
+		return true
+	return absf(wrapf(nu, -PI, PI)) < acos(-1.0 / el.e)
+
+
+func _update_orbit_marks(ship: ShipSim, el: OrbitElements) -> void:
+	var mark_scale := Vector3.ONE * maxf(_side_distance * 0.006, 1.0)
+
+	_pe_marker.visible = true
+	_pe_marker.position = el.state_at_true_anomaly(0.0).r.sub(ship.r).to_vector3()
+	_pe_marker.scale = mark_scale
+
+	_ap_marker.visible = el.is_elliptic()
+	if _ap_marker.visible:
+		_ap_marker.position = el.state_at_true_anomaly(PI).r.sub(ship.r).to_vector3()
+		_ap_marker.scale = mark_scale
+
+	var crossings: Array = el.xz_plane_crossings()
+	var nodes_valid := (crossings.size() == 2
+		and _nu_reachable(el, crossings[0]) and _nu_reachable(el, crossings[1]))
+	_an_marker.visible = nodes_valid
+	_dn_marker.visible = nodes_valid
+	if nodes_valid:
+		_an_marker.position = el.state_at_true_anomaly(crossings[0]).r.sub(ship.r).to_vector3()
+		_dn_marker.position = el.state_at_true_anomaly(crossings[1]).r.sub(ship.r).to_vector3()
+		_an_marker.scale = mark_scale
+		_dn_marker.scale = mark_scale
+
+	var t := ship.last_time
+	var impact_t := OrbitEvents.impact_time(el, ship.body.radius, t)
+	_impact_marker.visible = not is_nan(impact_t)
+	if _impact_marker.visible:
+		_impact_marker.position = el.state_at_time(impact_t).r.sub(ship.r).to_vector3()
+		_impact_marker.scale = mark_scale
+
+	_encounter_marker.visible = false
+	if ship.body.parent == null:
+		var span := el.period() if el.is_elliptic() else 6.0e4
+		for moon in _level.moons:
+			var entry := OrbitEvents.child_soi_entry_time(
+				el, moon.orbit, moon.soi_radius, t, t + span, maxf(span / 400.0, 1.0))
+			if not is_nan(entry):
+				_encounter_marker.visible = true
+				_encounter_marker.position = el.state_at_time(entry).r.sub(ship.r).to_vector3()
+				_encounter_marker.scale = mark_scale
+				break
+
+	_closest_approach_marker.visible = false
+	if _objective is RendezvousObjective and ship.body.parent == null:
+		var ca := (_objective as RendezvousObjective).closest_approach(ship)
+		_closest_approach_marker.visible = true
+		_closest_approach_marker.position = el.state_at_time(ca.time).r.sub(ship.r).to_vector3()
+		_closest_approach_marker.scale = mark_scale
+
+
 ## Predicted post-burn conic (cyan), plus a moon-centric arc when the
 ## prediction enters a moon's SOI — anchored at the moon's position at the
 ## predicted entry time, KSP-style.
@@ -424,6 +535,7 @@ func _rebuild_trajectory(ship: ShipSim) -> void:
 		_traj_mesh.surface_add_vertex(first.to_vector3())
 	_traj_mesh.surface_end()
 	_rebuild_node_ghost(ship)
+	_update_orbit_marks(ship, el)
 
 
 ## Full loop with vertex density concentrated at the ship: the first point

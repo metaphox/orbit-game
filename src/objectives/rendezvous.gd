@@ -27,7 +27,7 @@ func status_lines(ship: ShipSim) -> Array:
 	var st := station_orbit.state_at_time(ship.last_time)
 	var lines: Array = ["DIST %8.2f km   REL-V %6.1f m/s" % [
 		ship.r.distance_to(st.r) / 1000.0, ship.v.sub(st.v).length()]]
-	var ca := _closest_approach(ship)
+	var ca := closest_approach(ship)
 	lines.append("CLOSEST %8.2f km  T+%4.0f s" % [
 		ca.distance / 1000.0, ca.time - ship.last_time])
 	return lines
@@ -36,11 +36,11 @@ func status_lines(ship: ShipSim) -> Array:
 func trajectory_closeness(ship: ShipSim) -> float:
 	if is_met(ship):
 		return 1.0
-	var ca := _closest_approach(ship)
+	var ca := closest_approach(ship)
 	return clampf(1.0 - ca.distance / closeness_falloff, 0.0, 1.0) * 0.9
 
 
-func _closest_approach(ship: ShipSim) -> Dictionary:
+func closest_approach(ship: ShipSim) -> Dictionary:
 	var el := ship.current_elements()
 	var span := el.period() if el.is_elliptic() else 2.0e4
 	return OrbitEvents.closest_approach(

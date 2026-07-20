@@ -132,6 +132,27 @@ func true_anomaly_at_radius(r_len: float) -> float:
 	return acos(c)
 
 
+## True anomalies [ascending, descending] where the orbit crosses the
+## world XZ-plane (Y=0) — i.e. the ascending/descending nodes against this
+## game's reference plane, not against plane_normal itself (which just
+## records this orbit's own tilt). Empty if the orbit doesn't leave the
+## plane at all (equatorial: plane_normal.y ~ ±1). Reachability on a
+## hyperbolic arc isn't checked here — callers should confirm via
+## radius_at_true_anomaly / the true-anomaly bound before using a result.
+func xz_plane_crossings() -> Array:
+	if absf(plane_normal.y) > 1.0 - INC_EQUATORIAL:
+		return []
+	var basis := _perifocal_basis()
+	var p_hat: DVec3 = basis[0]
+	var q_hat: DVec3 = basis[1]
+	var nu1 := atan2(-p_hat.y, q_hat.y)
+	var nu2 := wrapf(nu1 + PI, -PI, PI)
+	var dy_dnu_at_nu1 := -p_hat.y * sin(nu1) + q_hat.y * cos(nu1)
+	if dy_dnu_at_nu1 > 0.0:
+		return [nu1, nu2]
+	return [nu2, nu1]
+
+
 func is_elliptic() -> bool:
 	return e < 1.0
 

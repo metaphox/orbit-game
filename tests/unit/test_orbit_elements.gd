@@ -133,3 +133,55 @@ func test_hyperbolic_samples_clip_at_r_max() -> void:
 		assert_lt(pt.length(), soi * 1.000001, "sample inside r_max")
 	assert_close(pts[0].length(), soi, 1e-6, "arc starts at r_max")
 	assert_close(pts[32].length(), soi, 1e-6, "arc ends at r_max")
+
+
+func test_xz_plane_crossings_empty_for_equatorial_orbit() -> void:
+	# starting orbit convention: r=(R,0,0), v=(0,0,-v) -> h=(0,+,0), lies
+	# entirely in the xz-plane already, no distinct crossing points
+	var v_circ := circular_speed(MU_EARTH, R_LEO)
+	var el := OrbitElements.from_state(
+		DVec3.new(R_LEO, 0.0, 0.0), DVec3.new(0.0, 0.0, -v_circ), MU_EARTH, 0.0)
+	assert_eq(el.xz_plane_crossings(), [], "equatorial orbit has no plane crossings")
+
+
+func test_xz_plane_crossings_are_on_the_plane_and_correctly_labeled() -> void:
+	var v_circ := circular_speed(MU_EARTH, R_LEO)
+	for tilt in [0.3, 1.1, 2.4, -0.8]:
+		var v := DVec3.new(0.0, v_circ * sin(tilt), -v_circ * cos(tilt))
+		var el := OrbitElements.from_state(DVec3.new(R_LEO, 0.0, 0.0), v, MU_EARTH, 0.0)
+		var crossings: Array = el.xz_plane_crossings()
+		assert_eq(crossings.size(), 2, "tilt=%s: two crossings" % tilt)
+		var ascending_nu: float = crossings[0]
+		var descending_nu: float = crossings[1]
+
+		var r_asc := el.state_at_true_anomaly(ascending_nu).r
+		var r_desc := el.state_at_true_anomaly(descending_nu).r
+		assert_close(r_asc.y, 0.0, 1e-6, "tilt=%s: ascending point on the plane" % tilt)
+		assert_close(r_desc.y, 0.0, 1e-6, "tilt=%s: descending point on the plane" % tilt)
+
+		# confirm labeling by sampling just before/after each crossing
+		var h := 0.01
+		var y_before_asc := el.state_at_true_anomaly(ascending_nu - h).r.y
+		var y_after_asc := el.state_at_true_anomaly(ascending_nu + h).r.y
+		assert_lt(y_before_asc, 0.0, "tilt=%s: below the plane before ascending" % tilt)
+		assert_gt(y_after_asc, 0.0, "tilt=%s: above the plane after ascending" % tilt)
+
+		var y_before_desc := el.state_at_true_anomaly(descending_nu - h).r.y
+		var y_after_desc := el.state_at_true_anomaly(descending_nu + h).r.y
+		assert_gt(y_before_desc, 0.0, "tilt=%s: above the plane before descending" % tilt)
+		assert_lt(y_after_desc, 0.0, "tilt=%s: below the plane after descending" % tilt)
+
+
+func test_xz_plane_crossings_match_brute_force_scan() -> void:
+	var v_circ := circular_speed(MU_EARTH, R_LEO)
+	var el := OrbitElements.from_state(
+		DVec3.new(R_LEO, 1.0e6, -3.0e5),
+		DVec3.new(-400.0, v_circ * 0.35, v_circ * 0.9), MU_EARTH, 0.0)
+	var crossings: Array = el.xz_plane_crossings()
+	assert_eq(crossings.size(), 2)
+	for nu: float in crossings:
+		# scan a small bracket around the analytic answer for a sign change,
+		# confirming it's a genuine zero-crossing and not off by a stray pi
+		var y_minus := el.state_at_true_anomaly(nu - 0.02).r.y
+		var y_plus := el.state_at_true_anomaly(nu + 0.02).r.y
+		assert_true(sign(y_minus) != sign(y_plus), "nu=%s brackets a real sign change" % nu)
