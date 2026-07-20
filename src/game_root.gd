@@ -102,6 +102,12 @@ func _process(delta: float) -> void:
 	flight_view.sync(ship, delta)
 	map_view.sync(ship, sim_time, delta)
 	hud.refresh(ship, level, sim_time, WARP_STEPS[warp_index])
+	# star dust runs its own clock independent of sim_time, so it needs an
+	# explicit freeze whenever the sim itself isn't advancing (paused, or
+	# the mission already ended) - covers every path that can reach a
+	# non-FLYING phase (pause menu, space/0 quick-pause, win, fail) from
+	# one place instead of duplicating the call at each transition site.
+	flight_view.star_dust.set_frozen(phase != Phase.FLYING)
 
 
 func _unhandled_input(event: InputEvent) -> void:

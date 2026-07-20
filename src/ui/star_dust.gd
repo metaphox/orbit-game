@@ -43,3 +43,14 @@ func update_motion(v_dir: Vector3, speed: float) -> void:
 	var dust_speed := speed * SPEED_FACTOR
 	_mat.initial_velocity_min = maxf(dust_speed * 0.97, 1.0)
 	_mat.initial_velocity_max = maxf(dust_speed * 1.03, 1.0)
+
+
+## GPUParticles3D runs its own internal clock independent of the game sim,
+## so pausing/ending the mission alone doesn't stop it - existing particles
+## keep drifting and new ones keep spawning even though the fed-in
+## direction/speed have stopped changing. speed_scale=0 freezes the whole
+## particle simulation in place (not emitting=false, which would still let
+## already-spawned particles keep drifting); resuming picks up exactly
+## where it left off, no jump.
+func set_frozen(frozen: bool) -> void:
+	speed_scale = 0.0 if frozen else 1.0

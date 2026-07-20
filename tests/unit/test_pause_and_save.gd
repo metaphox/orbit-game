@@ -211,3 +211,29 @@ func test_ship_state_without_node_round_trips_null() -> void:
 	restored.node = ManeuverNode.new()  # should be cleared by apply_serialized
 	restored.apply_serialized(data, 10.0)
 	assert_null(restored.node)
+
+
+func test_star_dust_freezes_while_paused_and_resumes_cleanly() -> void:
+	var game := _boot()
+	var dust: StarDust = game.flight_view.star_dust
+	assert_eq(dust.speed_scale, 1.0, "running while flying")
+
+	game._unhandled_input(_key(KEY_SPACE))
+	simulate(game, 2, 1.0 / 60.0)
+	assert_eq(dust.speed_scale, 0.0, "frozen while paused")
+
+	game._unhandled_input(_key(KEY_SPACE))
+	simulate(game, 2, 1.0 / 60.0)
+	assert_eq(dust.speed_scale, 1.0, "resumes cleanly, no jump")
+
+
+func test_star_dust_freezes_on_win() -> void:
+	var game := _boot()
+	var target: float = game.level.objective.target_radius
+	game.ship.elements = OrbitElements.from_state(
+		DVec3.new(target, 0.0, 0.0),
+		DVec3.new(0.0, 0.0, -sqrt(game.level.body.mu / target)),
+		game.level.body.mu, game.sim_time)
+	simulate(game, 5, 1.0 / 60.0)
+	assert_eq(game.phase, game.Phase.WON)
+	assert_eq(game.flight_view.star_dust.speed_scale, 0.0, "frozen once the mission ends")
