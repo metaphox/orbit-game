@@ -37,6 +37,12 @@ var map_view: MapView
 var hud: Hud
 
 var _pause_menu: PauseMenu = null
+# Physical Shift/Ctrl throttle is read by polling Input.is_physical_key_
+# pressed(), a mechanism a synthetic _unhandled_input call never touches -
+# these track the toolbar SHIFT/CTRL buttons' hold state separately so
+# _apply_flight_input can merge both sources.
+var _toolbar_shift_held := false
+var _toolbar_ctrl_held := false
 var _event_revision := -1
 var _event_horizon := -1.0
 var _next_event := INF
@@ -59,8 +65,24 @@ func _ready() -> void:
 	hud = Hud.new()
 	add_child(hud)
 	hud.build(level)
+	hud.toolbar_key.connect(_on_toolbar_key)
 
 	flight_view.camera.make_current()
+
+
+## Toolbar buttons don't duplicate any input logic - they just construct
+## the same InputEventKey a real keypress would and call _unhandled_input
+## directly, the exact call every test in this project already makes.
+## SHIFT/CTRL are the one exception (see _toolbar_shift_held's doc).
+func _on_toolbar_key(keycode: int, pressed: bool) -> void:
+	if keycode == KEY_SHIFT:
+		_toolbar_shift_held = pressed
+	elif keycode == KEY_CTRL:
+		_toolbar_ctrl_held = pressed
+	var event := InputEventKey.new()
+	event.physical_keycode = keycode
+	event.pressed = pressed
+	_unhandled_input(event)
 
 
 ## Overrides the just-built fresh ship with a saved mid-mission state.
@@ -285,7 +307,10 @@ func _apply_flight_input(delta: float) -> void:
 	elif ship.sas_mode != ShipSim.SasMode.OFF:
 		_run_sas(delta)
 
-	var throttle_input := _axis(KEY_CTRL, KEY_SHIFT)
+	var throttle_input := clampf(
+		_axis(KEY_CTRL, KEY_SHIFT) + (1.0 if _toolbar_shift_held else 0.0)
+			- (1.0 if _toolbar_ctrl_held else 0.0),
+		-1.0, 1.0)
 	if throttle_input != 0.0:
 		ship.throttle = clampf(
 			ship.throttle + throttle_input * THROTTLE_RATE * delta, 0.0, 1.0)

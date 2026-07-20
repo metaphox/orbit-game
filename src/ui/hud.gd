@@ -3,9 +3,31 @@ extends CanvasLayer
 ## Text HUD, green monospace on black — placeholder that already leans
 ## toward the CRT look. Shaders and real styling arrive in M7.
 
+## Emitted by toolbar buttons; game_root routes this straight into its own
+## _unhandled_input as a synthetic InputEventKey, so a click does exactly
+## what the real key does with zero duplicated logic - same code path
+## real key-presses and headless tests already use.
+signal toolbar_key(keycode: int, pressed: bool)
+
 const GREEN := Color(0.45, 1.0, 0.55)
 const DIM_GREEN := Color(0.3, 0.65, 0.38)
 const RED := Color(1.0, 0.4, 0.3)
+
+# [label, physical keycode, holdable]. Holdable buttons (throttle) fire on
+# button_down/button_up like a held key; everything else taps press+release
+# on a single click.
+const TOOLBAR_ROW_1 := [
+	["TAB", KEY_TAB, false], ["SHIFT", KEY_SHIFT, true], ["CTRL", KEY_CTRL, true],
+	["F", KEY_F, false], ["B", KEY_B, false], ["N", KEY_N, false], ["G", KEY_G, false],
+	["U", KEY_U, false], ["I", KEY_I, false], ["T", KEY_T, false],
+	["+", KEY_EQUAL, false], ["-", KEY_MINUS, false], ["Z", KEY_Z, false], ["X", KEY_X, false],
+]
+const TOOLBAR_ROW_2 := [
+	["ENTER", KEY_ENTER, false], ["BKSP", KEY_BACKSPACE, false],
+	["[", KEY_BRACKETLEFT, false], ["]", KEY_BRACKETRIGHT, false],
+	["↑", KEY_UP, false], ["↓", KEY_DOWN, false], ["←", KEY_LEFT, false], ["→", KEY_RIGHT, false],
+	["O", KEY_O, false], ["P", KEY_P, false], ["V", KEY_V, false],
+]
 
 var status_label: Label
 var objective_label: Label
@@ -18,7 +40,6 @@ var _font: SystemFont
 var _flash_label: Label
 var _flash_left := 0.0
 var _paused_label: Label
-var _toolbar_label: Label
 
 
 func build(level: LevelDef) -> void:
@@ -219,16 +240,72 @@ func _build_warp_indicator(_level: LevelDef) -> void:
 ## overlay isn't tied to either Camera3D, so this shows in the chase view
 ## and the orbit view (TAB) alike with no extra wiring. Letters only for
 ## now; state highlighting (e.g. which SAS mode is active) can follow.
+## Real clickable buttons (not a text label) for every non-warp keybind:
+## the mode/hold cluster plus the maneuver-node editing cluster. Clicking
+## one taps (or holds, for SHIFT/CTRL throttle) the matching physical key
+## via toolbar_key - see the signal doc for why that's the whole
+## integration surface.
 func _build_toolbar() -> void:
-	_toolbar_label = Label.new()
-	_toolbar_label.add_theme_font_override("font", _font)
-	_toolbar_label.add_theme_font_size_override("font_size", 17)
-	_toolbar_label.add_theme_color_override("font_color", DIM_GREEN)
-	_toolbar_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_toolbar_label.text = "[TAB|SHIFT|CTRL|F|B|N|G|U|I|T|+|-]"
-	add_child(_toolbar_label)
-	_toolbar_label.set_anchors_and_offsets_preset(
+	var toolbar := VBoxContainer.new()
+	toolbar.add_theme_constant_override("separation", 4)
+	toolbar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(toolbar)
+	toolbar.set_anchors_and_offsets_preset(
 		Control.PRESET_CENTER_BOTTOM, Control.PRESET_MODE_MINSIZE, 16)
+	_build_toolbar_row(toolbar, TOOLBAR_ROW_1)
+	_build_toolbar_row(toolbar, TOOLBAR_ROW_2)
+
+
+func _build_toolbar_row(parent: Control, entries: Array) -> void:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 3)
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	parent.add_child(row)
+	for entry in entries:
+		row.add_child(_make_toolbar_button(entry[0], entry[1], entry[2]))
+
+
+func _make_toolbar_button(label: String, keycode: int, holdable: bool) -> Button:
+	var button := Button.new()
+	button.text = label
+	button.custom_minimum_size = Vector2(0, 26)
+	button.add_theme_font_override("font", _font)
+	button.add_theme_font_size_override("font_size", 13)
+	button.focus_mode = Control.FOCUS_NONE  # never steals keyboard focus from flying
+	_style_toolbar_button(button)
+	if holdable:
+		button.button_down.connect(func(): toolbar_key.emit(keycode, true))
+		button.button_up.connect(func(): toolbar_key.emit(keycode, false))
+	else:
+		button.pressed.connect(func():
+			toolbar_key.emit(keycode, true)
+			toolbar_key.emit(keycode, false))
+	return button
+
+
+func _style_toolbar_button(button: Button) -> void:
+	var normal := StyleBoxFlat.new()
+	normal.bg_color = Color(0.0, 0.1, 0.04, 0.75)
+	normal.set_border_width_all(1)
+	normal.border_color = DIM_GREEN
+	normal.set_content_margin_all(3)
+	normal.content_margin_left = 6
+	normal.content_margin_right = 6
+	var hover := normal.duplicate()
+	hover.bg_color = Color(0.05, 0.25, 0.1, 0.85)
+	hover.border_color = GREEN
+	var pressed_style := normal.duplicate()
+	pressed_style.bg_color = Color(0.1, 0.45, 0.2, 0.9)
+	pressed_style.border_color = GREEN
+
+	button.add_theme_stylebox_override("normal", normal)
+	button.add_theme_stylebox_override("hover", hover)
+	button.add_theme_stylebox_override("pressed", pressed_style)
+	button.add_theme_stylebox_override("focus", normal)
+	button.add_theme_color_override("font_color", DIM_GREEN)
+	button.add_theme_color_override("font_hover_color", GREEN)
+	button.add_theme_color_override("font_pressed_color", GREEN)
 
 
 func set_paused_indicator(shown: bool) -> void:
