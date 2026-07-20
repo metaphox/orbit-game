@@ -54,11 +54,17 @@ var _node_marker: MeshInstance3D
 var _station_marker: MeshInstance3D
 var _level: LevelDef
 
-var _cam_yaw := 0.0
-var _cam_pitch := 0.0
-var _side_azimuth := 0.6
-var _side_elevation := 0.5
-var _side_distance := 3.0e5
+const DEFAULT_CAM_YAW := 0.0
+const DEFAULT_CAM_PITCH := 0.0
+const DEFAULT_SIDE_AZIMUTH := 0.6
+const DEFAULT_SIDE_ELEVATION := 0.5
+const DEFAULT_SIDE_DISTANCE := 3.0e5
+
+var _cam_yaw := DEFAULT_CAM_YAW
+var _cam_pitch := DEFAULT_CAM_PITCH
+var _side_azimuth := DEFAULT_SIDE_AZIMUTH
+var _side_elevation := DEFAULT_SIDE_ELEVATION
+var _side_distance := DEFAULT_SIDE_DISTANCE
 var _side_zoom_max := 1.6e6
 var _side_marker: MeshInstance3D
 
@@ -207,6 +213,16 @@ func sync(ship: ShipSim, delta: float) -> void:
 
 func mark_traj_dirty() -> void:
 	_traj_timer = 0.0
+
+
+## Resets both cameras (chase-cam mouse-drag offset and the orbit-view
+## rotation/zoom) back to their starting state.
+func reset_view() -> void:
+	_cam_yaw = DEFAULT_CAM_YAW
+	_cam_pitch = DEFAULT_CAM_PITCH
+	_side_azimuth = DEFAULT_SIDE_AZIMUTH
+	_side_elevation = DEFAULT_SIDE_ELEVATION
+	_side_distance = DEFAULT_SIDE_DISTANCE
 
 
 func set_side_active(active: bool) -> void:

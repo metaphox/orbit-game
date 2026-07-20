@@ -54,7 +54,7 @@ func build() -> void:
 	help.add_theme_font_override("font", font)
 	help.add_theme_font_size_override("font_size", 13)
 	help.add_theme_color_override("font_color", Color(DIM_GREEN))
-	help.text = "↑↓ SELECT   ENTER CONFIRM   OR PRESS NUMBER   [ESC]/[SPACE] RESUME"
+	help.text = "↑↓ SELECT   ENTER CONFIRM   OR PRESS NUMBER   [ESC]/[SPACE]/[0] RESUME"
 	help.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	add_child(help)
 	help.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM, Control.PRESET_MODE_MINSIZE, 70)

@@ -36,8 +36,8 @@ func build(level: LevelDef) -> void:
 	var help_lines := [
 		"W/S PITCH  A/D YAW  Q/E ROLL",
 		"SHIFT/CTRL THROTTLE  Z MAX  X CUT",
-		"1-4 WARP 1/2/4/8x  ,/. WARP STEP",
-		"SPACE PAUSE  ESC PAUSE MENU  R RESTART",
+		"1-9 WARP LEVEL  -/= WARP STEP",
+		"SPACE/0 PAUSE  ESC PAUSE MENU  R RESET VIEW",
 		"TAB ORBIT VIEW  DRAG ROTATE  WHEEL/TRACKPAD ZOOM"]
 	if level.sas_enabled:
 		help_lines.append("SAS: G PRO  H RETRO  N NORM  B ANTI  U/I RADIAL  T OFF")
@@ -61,7 +61,7 @@ func build(level: LevelDef) -> void:
 
 	_paused_label = _label(Control.PRESET_CENTER, GREEN, 22)
 	_paused_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_paused_label.text = "‖ PAUSED — SPACE OR ESC TO RESUME"
+	_paused_label.text = "‖ PAUSED — SPACE, 0, OR ESC TO RESUME"
 	_paused_label.visible = false
 
 	_build_minimap(level)

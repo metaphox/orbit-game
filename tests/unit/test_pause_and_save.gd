@@ -98,21 +98,71 @@ func test_pause_menu_buttons_emit_expected_signals() -> void:
 
 func test_warp_number_keys_set_exact_multipliers() -> void:
 	var game := _boot()
-	game._unhandled_input(_key(KEY_1))
-	assert_eq(game.WARP_STEPS[game.warp_index], 1)
-	game._unhandled_input(_key(KEY_2))
-	assert_eq(game.WARP_STEPS[game.warp_index], 2)
-	game._unhandled_input(_key(KEY_3))
-	assert_eq(game.WARP_STEPS[game.warp_index], 4)
-	game._unhandled_input(_key(KEY_4))
-	assert_eq(game.WARP_STEPS[game.warp_index], 8)
+	var expected := [1, 5, 10, 25, 50, 100, 200, 500, 1000]
+	var keys := [KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9]
+	for i in keys.size():
+		game._unhandled_input(_key(keys[i]))
+		assert_eq(game.WARP_STEPS[game.warp_index], expected[i], "key %d -> %dx" % [i + 1, expected[i]])
 
 
 func test_warp_keys_ignored_while_thrusting() -> void:
 	var game := _boot()
 	game.ship.throttle = 1.0
-	game._unhandled_input(_key(KEY_4))
+	game._unhandled_input(_key(KEY_9))
 	assert_eq(game.warp_index, 0, "can't warp while actively burning")
+
+
+func test_minus_equal_step_warp_one_level_at_a_time() -> void:
+	var game := _boot()
+	game._unhandled_input(_key(KEY_EQUAL))
+	assert_eq(game.warp_index, 1, "= steps up one level")
+	game._unhandled_input(_key(KEY_EQUAL))
+	assert_eq(game.warp_index, 2)
+	game._unhandled_input(_key(KEY_MINUS))
+	assert_eq(game.warp_index, 1, "- steps down one level")
+
+	game.warp_index = 0
+	game._unhandled_input(_key(KEY_MINUS))
+	assert_eq(game.warp_index, 0, "- floors at index 0, does not wrap")
+
+	game.warp_index = game.WARP_STEPS.size() - 1
+	game._unhandled_input(_key(KEY_EQUAL))
+	assert_eq(game.warp_index, game.WARP_STEPS.size() - 1, "= caps at the last step")
+
+
+func test_zero_key_is_a_pause_alias_for_space() -> void:
+	var game := _boot()
+	game._unhandled_input(_key(KEY_0))
+	assert_eq(game.phase, game.Phase.PAUSED, "0 pauses like space does")
+	assert_null(game._pause_menu, "quick pause, no menu")
+	game._unhandled_input(_key(KEY_0))
+	assert_eq(game.phase, game.Phase.FLYING, "0 again resumes")
+
+
+func test_r_resets_the_view_during_flight() -> void:
+	var game := _boot()
+	game.flight_view._cam_yaw = 1.2
+	game.flight_view._cam_pitch = -0.4
+	game.flight_view._side_azimuth = 2.0
+	game.flight_view._side_elevation = -1.0
+	game.flight_view._side_distance = 8.0e5
+
+	game._unhandled_input(_key(KEY_R))
+	assert_eq(game.flight_view._cam_yaw, game.flight_view.DEFAULT_CAM_YAW)
+	assert_eq(game.flight_view._cam_pitch, game.flight_view.DEFAULT_CAM_PITCH)
+	assert_eq(game.flight_view._side_azimuth, game.flight_view.DEFAULT_SIDE_AZIMUTH)
+	assert_eq(game.flight_view._side_elevation, game.flight_view.DEFAULT_SIDE_ELEVATION)
+	assert_eq(game.flight_view._side_distance, game.flight_view.DEFAULT_SIDE_DISTANCE)
+	assert_eq(game.phase, game.Phase.FLYING, "R does not restart the mission while flying")
+
+
+func test_r_restarts_on_win_or_fail_instead_of_resetting_view() -> void:
+	var game := _boot()
+	game.phase = game.Phase.WON
+	var restarted := [false]
+	game.restart_requested.connect(func(): restarted[0] = true)
+	game._unhandled_input(_key(KEY_R))
+	assert_true(restarted[0], "R matches the on-screen [R] RESTART prompt once the mission ends")
 
 
 func test_ship_state_round_trips_through_serialize() -> void:

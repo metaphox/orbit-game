@@ -14,10 +14,8 @@ signal save_requested(payload: Dictionary)
 
 enum Phase { FLYING, WON, FAILED, PAUSED }
 
-## Keys 1-4 jump straight to the first four steps (1/2/4/8x); ,/. step
-## through the whole ladder including the higher warps those keys don't
-## reach.
-const WARP_STEPS: Array[int] = [1, 2, 4, 8, 25, 100, 500, 2500]
+## Keys 1-9 jump straight to the matching step; -/= walk one step at a time.
+const WARP_STEPS: Array[int] = [1, 5, 10, 25, 50, 100, 200, 500, 1000]
 const ROT_RATE := Vector3(0.6, 0.6, 1.1)  # pitch/yaw/roll, rad/s
 const THROTTLE_RATE := 1.4  # full throttle sweep per second
 const ZOOM_PAN_SIGN := -1.0  # flip if trackpad scroll-up zooms out instead of in
@@ -147,12 +145,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		KEY_TAB:
 			side_active = not side_active
 			flight_view.set_side_active(side_active)
-		KEY_PERIOD:
+		KEY_EQUAL:
 			if phase == Phase.FLYING and ship.throttle == 0.0:
 				warp_index = mini(warp_index + 1, WARP_STEPS.size() - 1)
-		KEY_COMMA:
+		KEY_MINUS:
 			warp_index = maxi(warp_index - 1, 0)
-		KEY_1, KEY_2, KEY_3, KEY_4:
+		KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9:
 			if phase == Phase.FLYING and ship.throttle == 0.0:
 				warp_index = key.physical_keycode - KEY_1
 		KEY_Z:
@@ -162,7 +160,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		KEY_X:
 			ship.throttle = 0.0
 		KEY_R:
-			restart_requested.emit()
+			if phase == Phase.FLYING or phase == Phase.PAUSED:
+				flight_view.reset_view()
+			else:  # WON or FAILED: matches the on-screen "[R] RESTART" prompt
+				restart_requested.emit()
 		KEY_ESCAPE:
 			if phase == Phase.FLYING or phase == Phase.PAUSED:
 				if _pause_menu != null:
@@ -171,15 +172,8 @@ func _unhandled_input(event: InputEvent) -> void:
 					_open_pause_menu()
 			else:  # WON or FAILED: no pause concept once the mission has ended
 				exit_requested.emit()
-		KEY_SPACE:
-			if _pause_menu != null:
-				_close_pause_menu()
-			elif phase == Phase.FLYING:
-				phase = Phase.PAUSED
-				hud.set_paused_indicator(true)
-			elif phase == Phase.PAUSED:
-				phase = Phase.FLYING
-				hud.set_paused_indicator(false)
+		KEY_SPACE, KEY_0:
+			_toggle_quick_pause()
 		KEY_T:
 			if phase == Phase.FLYING:
 				ship.sas_mode = ShipSim.SasMode.OFF
@@ -259,6 +253,19 @@ func _save_progress() -> void:
 	save_requested.emit(payload)
 	if _pause_menu != null:
 		_pause_menu.show_saved_confirmation()
+
+
+## SPACE and 0 are aliases for the same quick pause/unpause toggle; also
+## dismisses the full pause menu if one is open.
+func _toggle_quick_pause() -> void:
+	if _pause_menu != null:
+		_close_pause_menu()
+	elif phase == Phase.FLYING:
+		phase = Phase.PAUSED
+		hud.set_paused_indicator(true)
+	elif phase == Phase.PAUSED:
+		phase = Phase.FLYING
+		hud.set_paused_indicator(false)
 
 
 func _apply_flight_input(delta: float) -> void:
