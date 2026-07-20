@@ -183,16 +183,16 @@ func _unhandled_input(event: InputEvent) -> void:
 		KEY_T:
 			if phase == Phase.FLYING:
 				ship.sas_mode = ShipSim.SasMode.OFF
-		KEY_G:
+		KEY_F:
 			_toggle_sas(ShipSim.SasMode.PROGRADE)
-		KEY_H:
+		KEY_B:
 			_toggle_sas(ShipSim.SasMode.RETROGRADE)
 		KEY_N:
 			if phase == Phase.FLYING:
 				_toggle_sas(ShipSim.SasMode.NORMAL)
 			elif phase == Phase.WON:
 				next_requested.emit(level_index)
-		KEY_B:
+		KEY_G:
 			_toggle_sas(ShipSim.SasMode.ANTI_NORMAL)
 		KEY_U:
 			_toggle_sas(ShipSim.SasMode.RADIAL_OUT)

@@ -53,3 +53,34 @@ func test_sas_converges_on_retrograde_hold() -> void:
 	# toggling the same mode disengages
 	game._toggle_sas(ShipSim.SasMode.RETROGRADE)
 	assert_eq(ship.sas_mode, ShipSim.SasMode.OFF, "toggle off")
+
+
+func _key(keycode: Key) -> InputEventKey:
+	var event := InputEventKey.new()
+	event.physical_keycode = keycode
+	event.pressed = true
+	return event
+
+
+func test_f_and_b_lock_prograde_and_retrograde_with_toggle_release() -> void:
+	GameRootScript.level_index = 1  # level 2 has the avionics
+	var game := _boot()
+	var ship: ShipSim = game.ship
+
+	game._unhandled_input(_key(KEY_F))
+	assert_eq(ship.sas_mode, ShipSim.SasMode.PROGRADE, "F locks prograde")
+	game._unhandled_input(_key(KEY_F))
+	assert_eq(ship.sas_mode, ShipSim.SasMode.OFF, "F again releases it")
+
+	game._unhandled_input(_key(KEY_B))
+	assert_eq(ship.sas_mode, ShipSim.SasMode.RETROGRADE, "B locks retrograde")
+	game._unhandled_input(_key(KEY_B))
+	assert_eq(ship.sas_mode, ShipSim.SasMode.OFF, "B again releases it")
+
+
+func test_g_still_reaches_anti_normal_after_the_remap() -> void:
+	GameRootScript.level_index = 1
+	var game := _boot()
+	var ship: ShipSim = game.ship
+	game._unhandled_input(_key(KEY_G))
+	assert_eq(ship.sas_mode, ShipSim.SasMode.ANTI_NORMAL, "G moved here, freed by B->retrograde")

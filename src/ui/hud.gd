@@ -40,7 +40,7 @@ func build(level: LevelDef) -> void:
 		"SPACE/0 PAUSE  ESC PAUSE MENU  R RESET VIEW",
 		"TAB ORBIT VIEW  DRAG ROTATE  WHEEL/TRACKPAD ZOOM"]
 	if level.sas_enabled:
-		help_lines.append("SAS: G PRO  H RETRO  N NORM  B ANTI  U/I RADIAL  T OFF")
+		help_lines.append("SAS: F PRO  B RETRO  N NORM  G ANTI  U/I RADIAL  T OFF")
 	if level.nodes_enabled:
 		help_lines.append("NODE: ENTER ADD  BKSP DEL  [/] TIME  ↑↓ PRO  ←→ NORM  O/P RAD")
 		help_lines.append("      SHIFT = COARSE   V HOLD NODE")
