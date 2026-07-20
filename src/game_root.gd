@@ -1,7 +1,15 @@
 extends Node3D
-## Level orchestrator: sim clock, event-aware warp, input, win/fail state,
-## view toggle, level switching. Keys are polled directly for M2/M3;
-## migrating to InputMap (rebindable) is part of the M6 settings work.
+## A single flyable mission: sim clock, event-aware warp, input, win/fail
+## state, view toggle. Self-contained and directly loadable (every headless
+## test does this); src/campaign_root.gd is the menu shell that wraps it
+## for normal play and reacts to the signals below. Keys are polled
+## directly for M2-M5; migrating to InputMap (rebindable) is part of the
+## M6 settings work.
+
+signal mission_won(index: int, dv_used: float, medal: String)
+signal restart_requested
+signal exit_requested
+signal next_requested(index: int)
 
 enum Phase { FLYING, WON, FAILED }
 
@@ -9,6 +17,8 @@ const WARP_STEPS: Array[int] = [1, 5, 25, 100, 500, 2500]
 const ROT_RATE := Vector3(0.6, 0.6, 1.1)  # pitch/yaw/roll, rad/s
 const THROTTLE_RATE := 1.4  # full throttle sweep per second
 
+## Which mission to build: set by campaign_root before instantiating this
+## scene, or directly by tests/the temp jump before loading it.
 static var level_index := 0
 
 var level: LevelDef
@@ -22,15 +32,14 @@ var flight_view: FlightView
 var map_view: MapView
 var hud: Hud
 
-var _levels := [Level01, Level02, Level03, Level04, Level05]
 var _event_revision := -1
 var _event_horizon := -1.0
 var _next_event := INF
 
 
 func _ready() -> void:
-	level_index = clampi(level_index, 0, _levels.size() - 1)
-	level = _levels[level_index].make()
+	level_index = clampi(level_index, 0, Campaign.level_count() - 1)
+	level = Campaign.level_at(level_index).make()
 	ship = ShipSim.new()
 	ship.setup(level)
 
@@ -116,7 +125,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		KEY_X:
 			ship.throttle = 0.0
 		KEY_R:
-			get_tree().reload_current_scene()
+			restart_requested.emit()
+		KEY_ESCAPE:
+			exit_requested.emit()
 		KEY_T:
 			if phase == Phase.FLYING:
 				ship.sas_mode = ShipSim.SasMode.OFF
@@ -127,9 +138,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		KEY_N:
 			if phase == Phase.FLYING:
 				_toggle_sas(ShipSim.SasMode.NORMAL)
-			elif phase == Phase.WON and level_index < _levels.size() - 1:
-				level_index += 1
-				get_tree().reload_current_scene()
+			elif phase == Phase.WON:
+				next_requested.emit(level_index)
 		KEY_B:
 			_toggle_sas(ShipSim.SasMode.ANTI_NORMAL)
 		KEY_U:
@@ -165,17 +175,6 @@ func _unhandled_input(event: InputEvent) -> void:
 				ship.sas_mode = (ShipSim.SasMode.OFF
 					if ship.sas_mode == ShipSim.SasMode.NODE
 					else ShipSim.SasMode.NODE)
-		KEY_L:
-			# temp mission-select until the M6 campaign shell exists
-			var titles: Array = []
-			for level_class in _levels:
-				titles.append(level_class.make().title)
-			hud.toggle_level_menu(titles)
-		KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9:
-			var target := key.physical_keycode - KEY_1
-			if target < _levels.size() and target != level_index:
-				level_index = target
-				get_tree().reload_current_scene()
 
 
 func _apply_flight_input(delta: float) -> void:
@@ -201,8 +200,7 @@ func _check_end_conditions() -> void:
 	if ship.r.length() <= ship.body.radius:
 		match level.objective.contact_result(ship):
 			Objective.ContactResult.WIN:
-				phase = Phase.WON
-				hud.show_win(level, ship.dv_used(), level_index < _levels.size() - 1)
+				_win()
 			Objective.ContactResult.CRASH:
 				phase = Phase.FAILED
 				hud.show_fail("TOUCHDOWN TOO HARD")
@@ -214,8 +212,15 @@ func _check_end_conditions() -> void:
 		phase = Phase.FAILED
 		hud.show_fail("MISSION ENVELOPE EXCEEDED")
 	elif level.objective.is_met(ship):
-		phase = Phase.WON
-		hud.show_win(level, ship.dv_used(), level_index < _levels.size() - 1)
+		_win()
+
+
+func _win() -> void:
+	phase = Phase.WON
+	var dv_used := ship.dv_used()
+	var medal := level.medal(dv_used)
+	hud.show_win(level, dv_used, Campaign.next_after(level_index) != -1)
+	mission_won.emit(level_index, dv_used, medal)
 
 
 ## Next impact/SOI event on the current coasting orbit, cached per elements
