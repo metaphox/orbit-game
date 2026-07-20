@@ -18,6 +18,7 @@ var _font: SystemFont
 var _flash_label: Label
 var _flash_left := 0.0
 var _paused_label: Label
+var _toolbar_label: Label
 
 
 func build(level: LevelDef) -> void:
@@ -66,6 +67,7 @@ func build(level: LevelDef) -> void:
 
 	_build_minimap(level)
 	_build_warp_indicator(level)
+	_build_toolbar()
 	if Settings.effects_enabled:
 		add_child(ScreenGrade.new())  # drawn last: whole-screen film grade on top
 
@@ -210,6 +212,23 @@ func _build_warp_indicator(_level: LevelDef) -> void:
 	warp_label.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	warp_label.grow_vertical = Control.GROW_DIRECTION_END
 	warp_label.text = "TIME WARP: 1x"
+
+
+## Static reference strip of the non-warp keybinds (1-9 warp levels are
+## covered by the warp indicator, not repeated here). A plain CanvasLayer
+## overlay isn't tied to either Camera3D, so this shows in the chase view
+## and the orbit view (TAB) alike with no extra wiring. Letters only for
+## now; state highlighting (e.g. which SAS mode is active) can follow.
+func _build_toolbar() -> void:
+	_toolbar_label = Label.new()
+	_toolbar_label.add_theme_font_override("font", _font)
+	_toolbar_label.add_theme_font_size_override("font_size", 17)
+	_toolbar_label.add_theme_color_override("font_color", DIM_GREEN)
+	_toolbar_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_toolbar_label.text = "[TAB|SHIFT|CTRL|F|B|N|G|U|I|T|+|-]"
+	add_child(_toolbar_label)
+	_toolbar_label.set_anchors_and_offsets_preset(
+		Control.PRESET_CENTER_BOTTOM, Control.PRESET_MODE_MINSIZE, 16)
 
 
 func set_paused_indicator(shown: bool) -> void:
