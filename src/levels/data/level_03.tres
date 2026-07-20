@@ -1,0 +1,31 @@
+[gd_resource type="Resource" script_class="LevelDef" format=3]
+
+[ext_resource type="Script" path="res://src/sim/body_def.gd" id="1_pjyq6"]
+[ext_resource type="Script" path="res://src/objectives/rendezvous.gd" id="2_q2ajs"]
+[ext_resource type="Script" path="res://src/levels/level_def.gd" id="3_n0yhj"]
+
+[sub_resource type="Resource" id="Resource_pbgc6"]
+script = ExtResource("1_pjyq6")
+name = "EARTH"
+mu = 76760000000.0
+radius = 63710.0
+color = Color(0.16, 0.3, 0.48, 1)
+
+[sub_resource type="Resource" id="Resource_5ny8l"]
+script = ExtResource("2_q2ajs")
+station_orbit_radius = 90000.0
+station_orbit_phase_deg = 40.10704565915762
+station_mu = 76760000000.0
+
+[resource]
+script = ExtResource("3_n0yhj")
+title = "ORBIT SCHOOL 2: RENDEZVOUS"
+body = SubResource("Resource_pbgc6")
+start_radius = 70000.0
+dry_mass = 1000.0
+prop_mass = 250.0
+thrust = 6000.0
+isp = 82.0
+objective = SubResource("Resource_5ny8l")
+dv_par = 90.0
+sas_enabled = true

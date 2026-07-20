@@ -3,8 +3,8 @@ extends Objective
 ## Win when the ship holds a bound orbit around the target body: inside its
 ## SOI, elliptic, apoapsis under the SOI edge, periapsis above the surface.
 
-var target: BodyDef
-var approach_falloff := 6.0e5  # m of apoapsis error at which the line is fully amber
+@export var target: BodyDef
+@export var approach_falloff := 6.0e5  # m of apoapsis error at which the line is fully amber
 
 
 func is_met(ship: ShipSim) -> bool:

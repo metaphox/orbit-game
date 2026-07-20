@@ -1,0 +1,57 @@
+[gd_resource type="Resource" script_class="LevelDef" format=3]
+
+[ext_resource type="Script" path="res://src/sim/body_def.gd" id="1_71mek"]
+[ext_resource type="Script" path="res://src/objectives/transfer_capture.gd" id="2_uibme"]
+[ext_resource type="Script" path="res://src/levels/level_def.gd" id="3_trg5t"]
+
+[sub_resource type="Resource" id="Resource_ynib7"]
+script = ExtResource("1_71mek")
+name = "SOL"
+mu = 54800000000000.0
+radius = 400000.0
+color = Color(0.95, 0.75, 0.3, 1)
+
+[sub_resource type="Resource" id="Resource_5evap"]
+script = ExtResource("1_71mek")
+name = "EARTH"
+mu = 76760000000.0
+radius = 63710.0
+soi_radius = 9240000.0
+parent = SubResource("Resource_ynib7")
+color = Color(0.16, 0.3, 0.48, 1)
+orbit_radius = 40000000.0
+
+[sub_resource type="Resource" id="Resource_sft2l"]
+script = ExtResource("1_71mek")
+name = "MARS"
+mu = 8210000000.0
+radius = 33900.0
+soi_radius = 3000000.0
+parent = SubResource("Resource_ynib7")
+color = Color(0.72, 0.36, 0.22, 1)
+orbit_radius = 60000000.0
+orbit_phase_deg = 60.0
+
+[sub_resource type="Resource" id="Resource_fhmye"]
+script = ExtResource("2_uibme")
+target = SubResource("Resource_sft2l")
+approach_falloff = 3000000.0
+
+[resource]
+script = ExtResource("3_trg5t")
+title = "INTERPLANETARY 1: EARTH TO MARS"
+body = SubResource("Resource_ynib7")
+moons = Array[ExtResource("1_71mek")]([SubResource("Resource_5evap"), SubResource("Resource_sft2l")])
+start_body = SubResource("Resource_5evap")
+start_radius = 70000.0
+dry_mass = 1200.0
+prop_mass = 2300.0
+thrust = 15000.0
+isp = 90.0
+objective = SubResource("Resource_fhmye")
+dv_par = 700.0
+map_extent = 145000.0
+draw_limit = 90000000.0
+fail_radius = 130000000.0
+sas_enabled = true
+nodes_enabled = true

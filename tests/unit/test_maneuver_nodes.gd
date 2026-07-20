@@ -10,7 +10,7 @@ func after_each() -> void:
 
 func _lunar_ship() -> ShipSim:
 	var ship := ShipSim.new()
-	ship.setup(Level02.make())
+	ship.setup(Campaign.level_at(1))
 	return ship
 
 

@@ -1,0 +1,46 @@
+[gd_resource type="Resource" script_class="LevelDef" format=3]
+
+[ext_resource type="Script" path="res://src/sim/body_def.gd" id="1_tukx0"]
+[ext_resource type="Script" path="res://src/objectives/airless_landing.gd" id="2_20mo1"]
+[ext_resource type="Script" path="res://src/levels/level_def.gd" id="3_tgk2x"]
+
+[sub_resource type="Resource" id="Resource_4htxi"]
+script = ExtResource("1_tukx0")
+name = "EARTH"
+mu = 76760000000.0
+radius = 63710.0
+color = Color(0.16, 0.3, 0.48, 1)
+
+[sub_resource type="Resource" id="Resource_j5uuj"]
+script = ExtResource("1_tukx0")
+name = "MOON"
+mu = 944000000.0
+radius = 17374.0
+soi_radius = 660000.0
+parent = SubResource("Resource_4htxi")
+color = Color(0.62, 0.6, 0.58, 1)
+orbit_radius = 3844000.0
+orbit_phase_deg = 114.59155902616465
+
+[sub_resource type="Resource" id="Resource_b4vup"]
+script = ExtResource("2_20mo1")
+target = SubResource("Resource_j5uuj")
+
+[resource]
+script = ExtResource("3_tgk2x")
+title = "LUNAR PROGRAM 2: MARE SERENITATIS"
+body = SubResource("Resource_4htxi")
+moons = Array[ExtResource("1_tukx0")]([SubResource("Resource_j5uuj")])
+start_body = SubResource("Resource_j5uuj")
+start_radius = 25000.0
+dry_mass = 1000.0
+prop_mass = 650.0
+thrust = 12000.0
+isp = 82.0
+objective = SubResource("Resource_b4vup")
+dv_par = 280.0
+map_extent = 9200.0
+draw_limit = 6000000.0
+fail_radius = 8000000.0
+sas_enabled = true
+nodes_enabled = true

@@ -4,9 +4,9 @@ extends Objective
 ## the entry corridor. No atmosphere is simulated — the capsule takes it
 ## from there (DESIGN.md section 5).
 
-var target_periapsis := 0.0
-var tolerance := 0.0
-var closeness_falloff := 5.0e5
+@export var target_periapsis := 0.0
+@export var tolerance := 0.0
+@export var closeness_falloff := 5.0e5
 
 
 func is_met(ship: ShipSim) -> bool:

@@ -30,7 +30,7 @@ func _phased_transfer(level: LevelDef, t0: float) -> OrbitElements:
 
 
 func test_soi_entry_handoff_in_ship_sim() -> void:
-	var level := Level02.make()
+	var level := Campaign.level_at(1)
 	var ship := ShipSim.new()
 	ship.setup(level)
 	var moon: BodyDef = level.moons[0]
@@ -55,7 +55,7 @@ func test_soi_entry_handoff_in_ship_sim() -> void:
 
 
 func test_soi_exit_handoff_back_to_earth() -> void:
-	var level := Level02.make()
+	var level := Campaign.level_at(1)
 	var ship := ShipSim.new()
 	ship.setup(level)
 	var moon: BodyDef = level.moons[0]
@@ -80,7 +80,7 @@ func test_soi_exit_handoff_back_to_earth() -> void:
 
 
 func test_transfer_capture_objective() -> void:
-	var level := Level02.make()
+	var level := Campaign.level_at(1)
 	var objective: TransferCaptureObjective = level.objective
 	var ship := ShipSim.new()
 	ship.setup(level)

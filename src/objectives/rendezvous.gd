@@ -3,11 +3,26 @@ extends Objective
 ## Win when coasting within max_distance of the station with relative
 ## speed under max_rel_speed. No docking minigame — proximity ends it.
 
-var station_orbit: OrbitElements
-var station_name := "STATION"
-var max_distance := 2000.0
-var max_rel_speed := 25.0
-var closeness_falloff := 1.0e5
+## Circular orbit around the level's root body, in the XZ plane - literal
+## @export fields rather than a stored OrbitElements so a level .tres stays
+## plain Inspector-editable data; the OrbitElements is derived and cached
+## lazily via the `station_orbit` property below.
+@export var station_orbit_radius := 0.0
+@export var station_orbit_phase_deg := 0.0
+@export var station_mu := 0.0
+@export var station_orbit_epoch := 0.0
+@export var station_name := "STATION"
+@export var max_distance := 2000.0
+@export var max_rel_speed := 25.0
+@export var closeness_falloff := 1.0e5
+
+## OrbitElements for the station, rebuilt on every access - see BodyDef.orbit
+## for why this isn't cached. Read-only: nothing should assign to this
+## directly.
+var station_orbit: OrbitElements:
+	get:
+		return OrbitElements.circular(
+			station_mu, station_orbit_radius, station_orbit_phase_deg, station_orbit_epoch)
 
 
 func is_met(ship: ShipSim) -> bool:

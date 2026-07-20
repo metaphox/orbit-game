@@ -167,7 +167,7 @@ func test_r_restarts_on_win_or_fail_instead_of_resetting_view() -> void:
 
 func test_ship_state_round_trips_through_serialize() -> void:
 	var ship := ShipSim.new()
-	ship.setup(Level02.make())
+	ship.setup(Campaign.level_at(1))
 	ship.create_node(300.0)
 	ship.node.prograde = 42.0
 	ship.refresh_node_plan()
@@ -180,7 +180,7 @@ func test_ship_state_round_trips_through_serialize() -> void:
 	var data := ship.serialize()
 
 	var restored := ShipSim.new()
-	restored.setup(Level02.make())
+	restored.setup(Campaign.level_at(1))
 	restored.apply_serialized(data, 500.0)
 
 	assert_eq(restored.body.name, ship.body.name)
@@ -202,12 +202,12 @@ func test_ship_state_round_trips_through_serialize() -> void:
 
 func test_ship_state_without_node_round_trips_null() -> void:
 	var ship := ShipSim.new()
-	ship.setup(Level01.make())
+	ship.setup(Campaign.level_at(0))
 	var data := ship.serialize()
 	assert_null(data["node"])
 
 	var restored := ShipSim.new()
-	restored.setup(Level01.make())
+	restored.setup(Campaign.level_at(0))
 	restored.node = ManeuverNode.new()  # should be cleared by apply_serialized
 	restored.apply_serialized(data, 10.0)
 	assert_null(restored.node)

@@ -3,9 +3,9 @@ extends Objective
 ## Powered descent onto an airless body: surface contact wins if vertical
 ## and horizontal speeds are under the limits, otherwise it's a crash.
 
-var target: BodyDef
-var max_vertical := 8.0
-var max_horizontal := 5.0
+@export var target: BodyDef
+@export var max_vertical := 8.0
+@export var max_horizontal := 5.0
 
 
 func contact_result(ship: ShipSim) -> ContactResult:

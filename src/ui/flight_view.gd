@@ -134,9 +134,10 @@ func build(level: LevelDef) -> void:
 		add_child(mesh_instance)
 		_body_meshes.append(mesh_instance)
 
-	ship_root = Node3D.new()
-	add_child(ship_root)
-	_build_ship_mesh()
+	var rig := preload("res://src/ui/ship_camera_rig.tscn").instantiate()
+	add_child(rig)
+	ship_root = rig.get_node("Ship")
+	flame = rig.get_node("Ship/Flame")
 
 	star_dust = StarDust.new()
 	add_child(star_dust)
@@ -156,18 +157,8 @@ func build(level: LevelDef) -> void:
 	prograde_marker = _make_marker(Color(0.3, 1.0, 0.4))
 	retrograde_marker = _make_marker(Color(1.0, 0.35, 0.25))
 
-	camera = Camera3D.new()
-	camera.near = 0.5
-	camera.far = 500000.0
-	camera.cull_mask = 1
-	add_child(camera)
-	camera.position = Vector3(0, 3.5, 11.0)
-
-	side_camera = Camera3D.new()
-	side_camera.near = 50.0
-	side_camera.far = 3.0e7
-	side_camera.cull_mask = 1 | SIDE_MARKER_LAYER
-	add_child(side_camera)
+	camera = rig.get_node("ChaseCamera")
+	side_camera = rig.get_node("SideCamera")
 
 
 func sync(ship: ShipSim, delta: float) -> void:
@@ -555,54 +546,6 @@ func _adaptive_loop_points(el: OrbitElements, nu_ship: float) -> Array:
 	for i in offsets.size():
 		pts.append(el.state_at_true_anomaly(nu_ship + offsets[i]).r)
 	return pts
-
-
-func _build_ship_mesh() -> void:
-	var hull := MeshInstance3D.new()
-	var capsule := CapsuleMesh.new()
-	capsule.radius = 0.8
-	capsule.height = 3.4
-	var hull_mat := StandardMaterial3D.new()
-	hull_mat.albedo_color = Color(0.92, 0.9, 0.86)
-	hull_mat.roughness = 0.55
-	hull_mat.metallic = 0.15
-	hull_mat.rim_enabled = true
-	hull_mat.rim = 0.35
-	hull_mat.rim_tint = 0.7
-	capsule.material = hull_mat
-	hull.mesh = capsule
-	hull.rotation.x = -PI / 2  # capsule axis (+Y) -> forward (-Z)
-	ship_root.add_child(hull)
-
-	var nose := MeshInstance3D.new()
-	var cone := CylinderMesh.new()
-	cone.top_radius = 0.02
-	cone.bottom_radius = 0.75
-	cone.height = 1.3
-	var nose_mat := StandardMaterial3D.new()
-	nose_mat.albedo_color = Color(0.95, 0.45, 0.1)
-	cone.material = nose_mat
-	nose.mesh = cone
-	nose.rotation.x = -PI / 2
-	nose.position = Vector3(0, 0, -2.3)
-	ship_root.add_child(nose)
-
-	flame = MeshInstance3D.new()
-	var plume := CylinderMesh.new()
-	plume.top_radius = 0.06  # narrow tail (far end after rotation)
-	plume.bottom_radius = 0.5
-	plume.height = 2.4
-	var flame_mat := StandardMaterial3D.new()
-	flame_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	flame_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	flame_mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
-	flame_mat.albedo_color = Color(1.0, 0.55, 0.15, 0.85)
-	plume.material = flame_mat
-	flame.mesh = plume
-	flame.rotation.x = PI / 2  # plume axis (+Y) -> backward (+Z)
-	flame.position = Vector3(0, 0, 3.1)
-	flame.visible = false
-	ship_root.add_child(flame)
 
 
 ## The status dial lives on a SubViewport texture floated beside the hull:

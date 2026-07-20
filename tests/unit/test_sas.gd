@@ -16,7 +16,7 @@ func _boot() -> Node:
 
 
 func test_sas_target_directions() -> void:
-	var level := Level02.make()
+	var level := Campaign.level_at(1)
 	var ship := ShipSim.new()
 	ship.setup(level)
 	# start state: r = +X, v = -Z, h = +Y

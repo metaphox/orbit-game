@@ -1,0 +1,47 @@
+[gd_resource type="Resource" script_class="LevelDef" format=3]
+
+[ext_resource type="Script" path="res://src/sim/body_def.gd" id="1_defok"]
+[ext_resource type="Script" path="res://src/objectives/entry_corridor.gd" id="2_oihp3"]
+[ext_resource type="Script" path="res://src/levels/level_def.gd" id="3_qiben"]
+
+[sub_resource type="Resource" id="Resource_moxm6"]
+script = ExtResource("1_defok")
+name = "EARTH"
+mu = 76760000000.0
+radius = 63710.0
+color = Color(0.16, 0.3, 0.48, 1)
+
+[sub_resource type="Resource" id="Resource_ik631"]
+script = ExtResource("1_defok")
+name = "MOON"
+mu = 944000000.0
+radius = 17374.0
+soi_radius = 660000.0
+parent = SubResource("Resource_moxm6")
+color = Color(0.62, 0.6, 0.58, 1)
+orbit_radius = 3844000.0
+orbit_phase_deg = 114.59155902616465
+
+[sub_resource type="Resource" id="Resource_4dan1"]
+script = ExtResource("2_oihp3")
+target_periapsis = 66000.0
+tolerance = 800.0
+
+[resource]
+script = ExtResource("3_qiben")
+title = "LUNAR PROGRAM 3: COME HOME"
+body = SubResource("Resource_moxm6")
+moons = Array[ExtResource("1_defok")]([SubResource("Resource_ik631")])
+start_body = SubResource("Resource_ik631")
+start_radius = 25000.0
+dry_mass = 1000.0
+prop_mass = 450.0
+thrust = 12000.0
+isp = 82.0
+objective = SubResource("Resource_4dan1")
+dv_par = 130.0
+map_extent = 9200.0
+draw_limit = 6000000.0
+fail_radius = 8000000.0
+sas_enabled = true
+nodes_enabled = true

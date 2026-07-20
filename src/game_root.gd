@@ -50,7 +50,7 @@ var _next_event := INF
 
 func _ready() -> void:
 	level_index = clampi(level_index, 0, Campaign.level_count() - 1)
-	level = Campaign.level_at(level_index).make()
+	level = Campaign.level_at(level_index)
 	ship = ShipSim.new()
 	ship.setup(level)
 

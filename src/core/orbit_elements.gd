@@ -33,6 +33,17 @@ var epoch := 0.0
 var plane_normal := DVec3.new()
 
 
+## A circular orbit at the given radius, starting phase_deg around from +X
+## (in the XZ plane, matching the level-data convention used throughout
+## src/levels and src/objectives) at the given epoch.
+static func circular(mu_p: float, radius: float, phase_deg: float, t: float) -> OrbitElements:
+	var v := sqrt(mu_p / radius)
+	var theta := deg_to_rad(phase_deg)
+	return from_state(
+		DVec3.new(radius * cos(theta), 0.0, -radius * sin(theta)),
+		DVec3.new(-v * sin(theta), 0.0, -v * cos(theta)), mu_p, t)
+
+
 static func from_state(r: DVec3, v: DVec3, mu_p: float, t: float) -> OrbitElements:
 	var el := OrbitElements.new()
 	el.mu = mu_p

@@ -9,7 +9,7 @@ func after_each() -> void:
 
 
 func test_orbit_match_inclination_gate() -> void:
-	var level := Level06.make()
+	var level := Campaign.level_at(5)
 	var objective: OrbitMatchObjective = level.objective
 	var earth := level.body
 	var v_circ := circular_speed(earth.mu, 70000.0)
@@ -18,7 +18,7 @@ func test_orbit_match_inclination_gate() -> void:
 	var equatorial := OrbitElements.from_state(
 		DVec3.new(70000.0, 0.0, 0.0), DVec3.new(0.0, 0.0, -v_circ), earth.mu, 0.0)
 	var ship := ShipSim.new()
-	ship.setup(Level01.make())
+	ship.setup(Campaign.level_at(0))
 	ship.elements = equatorial
 	assert_false(objective.is_met(ship), "equatorial orbit misses the inclination target")
 
@@ -50,7 +50,7 @@ func test_mars_level_boots_inside_earth_soi() -> void:
 
 
 func test_mars_departure_guidance_uses_absolute_position() -> void:
-	var level := Level07.make()
+	var level := Campaign.level_at(6)
 	var objective: TransferCaptureObjective = level.objective
 	var ship := ShipSim.new()
 	ship.setup(level)
@@ -70,7 +70,7 @@ func test_mars_departure_guidance_uses_absolute_position() -> void:
 ## ship's start, capture - works, using the same mu_sun/r_earth/r_mars the
 ## level ships with.
 func test_mars_hohmann_transfer_reaches_and_captures() -> void:
-	var level := Level07.make()
+	var level := Campaign.level_at(6)
 	var sun_mu: float = level.body.mu
 	var earth: BodyDef = level.moons[0]
 	var mars: BodyDef = level.moons[1]
@@ -89,10 +89,7 @@ func test_mars_hohmann_transfer_reaches_and_captures() -> void:
 	# test_tli_scenario.gd uses for the Moon)
 	var n_mars := mars.orbit.mean_motion()
 	var theta0 := PI - n_mars * t_apo + 0.04
-	var v_mars := sqrt(sun_mu / r_mars)
-	mars.orbit = OrbitElements.from_state(
-		DVec3.new(r_mars * cos(theta0), 0.0, -r_mars * sin(theta0)),
-		DVec3.new(-v_mars * sin(theta0), 0.0, -v_mars * cos(theta0)), sun_mu, 0.0)
+	mars.orbit_phase_deg = rad_to_deg(theta0)
 
 	var t_encounter := OrbitEvents.child_soi_entry_time(
 		transfer, mars.orbit, mars.soi_radius, 0.0, t_apo + 5.0e4, 1000.0)

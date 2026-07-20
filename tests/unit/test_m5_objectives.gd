@@ -9,7 +9,7 @@ func after_each() -> void:
 
 
 func test_closest_approach_matches_brute_force() -> void:
-	var level := Level03.make()
+	var level := Campaign.level_at(2)
 	var ship := ShipSim.new()
 	ship.setup(level)
 	var objective: RendezvousObjective = level.objective
@@ -28,7 +28,7 @@ func test_closest_approach_matches_brute_force() -> void:
 
 
 func test_rendezvous_met_only_in_proximity() -> void:
-	var level := Level03.make()
+	var level := Campaign.level_at(2)
 	var objective: RendezvousObjective = level.objective
 	var ship := ShipSim.new()
 	ship.setup(level)
@@ -43,7 +43,7 @@ func test_rendezvous_met_only_in_proximity() -> void:
 
 
 func test_landing_contact_win_and_crash() -> void:
-	var level := Level04.make()
+	var level := Campaign.level_at(3)
 	var objective: AirlessLandingObjective = level.objective
 	var ship := ShipSim.new()
 	ship.setup(level)
@@ -62,11 +62,11 @@ func test_landing_contact_win_and_crash() -> void:
 
 
 func test_entry_corridor_met_on_dipping_orbit() -> void:
-	var level := Level05.make()
+	var level := Campaign.level_at(4)
 	var objective: EntryCorridorObjective = level.objective
 	var earth := level.body
 	var ship := ShipSim.new()
-	ship.setup(Level01.make())  # earth-centered ship shell
+	ship.setup(Campaign.level_at(0))  # earth-centered ship shell
 	# ellipse from 300 km apoapsis down to the corridor periapsis
 	var ra := 3.0e5
 	var rp := objective.target_periapsis

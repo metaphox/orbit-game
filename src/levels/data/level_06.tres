@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="LevelDef" format=3]
+
+[ext_resource type="Script" path="res://src/sim/body_def.gd" id="1_0vwku"]
+[ext_resource type="Script" path="res://src/objectives/orbit_match.gd" id="2_egjkq"]
+[ext_resource type="Script" path="res://src/levels/level_def.gd" id="3_n0cwn"]
+
+[sub_resource type="Resource" id="Resource_6xvq6"]
+script = ExtResource("1_0vwku")
+name = "EARTH"
+mu = 76760000000.0
+radius = 63710.0
+color = Color(0.16, 0.3, 0.48, 1)
+
+[sub_resource type="Resource" id="Resource_1ajdf"]
+script = ExtResource("2_egjkq")
+target_radius = 70000.0
+tolerance = 1500.0
+target_inclination = 0.2617993877991494
+inclination_tolerance = 0.017453292519943295
+
+[resource]
+script = ExtResource("3_n0cwn")
+title = "ORBIT SCHOOL 3: PLANE CHANGE"
+body = SubResource("Resource_6xvq6")
+start_radius = 70000.0
+dry_mass = 1000.0
+prop_mass = 750.0
+thrust = 6000.0
+isp = 82.0
+objective = SubResource("Resource_1ajdf")
+dv_par = 300.0
+sas_enabled = true

@@ -6,8 +6,16 @@ extends RefCounted
 ## progression without renumbering anything.
 
 ## Not `const`: GDScript's const requires a compile-time constant
-## expression, and references to other class_name scripts don't qualify.
-static var LEVELS := [Level01, Level02, Level03, Level04, Level05, Level06, Level07]
+## expression, and preload() calls don't qualify.
+static var LEVELS: Array[LevelDef] = [
+	preload("res://src/levels/data/level_01.tres"),
+	preload("res://src/levels/data/level_02.tres"),
+	preload("res://src/levels/data/level_03.tres"),
+	preload("res://src/levels/data/level_04.tres"),
+	preload("res://src/levels/data/level_05.tres"),
+	preload("res://src/levels/data/level_06.tres"),
+	preload("res://src/levels/data/level_07.tres"),
+]
 
 const ACTS := [
 	{"name": "ACT 1 — EARTH ORBIT SCHOOL", "indices": [0, 2, 5]},
@@ -24,8 +32,12 @@ static func level_count() -> int:
 	return LEVELS.size()
 
 
-static func level_at(index: int) -> GDScript:
-	return LEVELS[index]
+## A fresh, independent LevelDef every call - preload() caches a single
+## shared Resource instance process-wide, but callers (a mission attempt,
+## an in-progress save) expect their own copy to mutate freely without
+## leaking into other attempts or profiles.
+static func level_at(index: int) -> LevelDef:
+	return LEVELS[index].duplicate(true)
 
 
 static func acts() -> Array:
@@ -50,4 +62,4 @@ static func next_after(index: int) -> int:
 
 
 static func title(index: int) -> String:
-	return LEVELS[index].make().title
+	return LEVELS[index].title

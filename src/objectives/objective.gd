@@ -1,5 +1,5 @@
 class_name Objective
-extends RefCounted
+extends Resource
 ## Base for level win conditions. Subclasses are pure predicates plus the
 ## bits the UI needs: a description, live status lines, and a 0..1
 ## "closeness" that colors the in-world trajectory (1 = on target).

@@ -3,15 +3,15 @@ extends Objective
 ## Win when the coasting orbit's apoapsis and periapsis radii are both
 ## inside the tolerance band around target_radius.
 
-var target_radius := 0.0
-var tolerance := 0.0
-var closeness_falloff := 20000.0  # m of Ap/Pe error at which the line is fully amber
+@export var target_radius := 0.0
+@export var tolerance := 0.0
+@export var closeness_falloff := 20000.0  # m of Ap/Pe error at which the line is fully amber
 
 ## Optional: require a specific orbital plane too (radians). Disabled by
 ## default (tolerance = PI, i.e. any inclination passes) so existing pure
 ## altitude levels are unaffected.
-var target_inclination := 0.0
-var inclination_tolerance := PI
+@export var target_inclination := 0.0
+@export var inclination_tolerance := PI
 
 
 func is_met(ship: ShipSim) -> bool:
