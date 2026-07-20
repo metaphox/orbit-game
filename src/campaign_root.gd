@@ -16,6 +16,12 @@ var game: Node
 
 
 func _ready() -> void:
+	# Belt-and-suspenders alongside project.godot's display/window/size/
+	# min_* settings: guarantees the floor even if that project setting
+	# doesn't apply on a given platform. Skipped headless (tests) since
+	# there's no real window to constrain.
+	if DisplayServer.get_name() != "headless":
+		DisplayServer.window_set_min_size(Vector2i(1024, 768))
 	# Only initialize if a test (or future caller) hasn't already injected
 	# one - previously this unconditionally clobbered a pre-set store,
 	# silently redirecting to the default save path.

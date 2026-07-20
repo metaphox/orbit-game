@@ -2,7 +2,7 @@ class_name TitleScreen
 extends CanvasLayer
 ## The splash screen: game title plus the main menu. CONTINUE is disabled
 ## when no profile has ever been active; NEW is disabled once all profile
-## slots are full.
+## slots are full. Navigable by number key or by Up/Down + Enter.
 
 signal continue_pressed
 signal new_pressed
@@ -14,15 +14,23 @@ signal quit_pressed
 const GREEN := "#73ff8c"
 const DIM_GREEN := "#4da362"
 const DISABLED := "#4a4a4a"
+const HIGHLIGHT := "#fff59d"
 
 var _text: RichTextLabel
-var _can_continue := false
-var _can_new := false
+var _items: Array = []  # [label: String, enabled: bool]
+var _cursor := 0
 
 
 func build(store: ProfileStore) -> void:
-	_can_continue = store.last_active_profile() != null
-	_can_new = store.can_create_profile()
+	_items = [
+		["CONTINUE", store.last_active_profile() != null],
+		["NEW PROFILE", store.can_create_profile()],
+		["LOAD PROFILE", true],
+		["SETTINGS", true],
+		["CREDITS", true],
+		["QUIT", true],
+	]
+	_cursor = _first_enabled()
 
 	var bg := ColorRect.new()
 	bg.color = Color(0.008, 0.008, 0.016)
@@ -54,7 +62,7 @@ func build(store: ProfileStore) -> void:
 	_text.bbcode_enabled = true
 	_text.fit_content = true
 	_text.scroll_active = false
-	_text.custom_minimum_size = Vector2(360, 10)
+	_text.custom_minimum_size = Vector2(380, 10)
 	_text.add_theme_font_override("normal_font", font)
 	_text.add_theme_font_size_override("normal_font_size", 20)
 	add_child(_text)
@@ -66,7 +74,8 @@ func build(store: ProfileStore) -> void:
 	slots.add_theme_font_override("font", font)
 	slots.add_theme_font_size_override("font_size", 13)
 	slots.add_theme_color_override("font_color", Color(DIM_GREEN))
-	slots.text = "%d / %d PROFILE SLOTS USED" % [store.profiles.size(), ProfileStore.MAX_PROFILES]
+	slots.text = "%d / %d PROFILE SLOTS USED   ↑↓ SELECT   ENTER CONFIRM" % [
+		store.profiles.size(), ProfileStore.MAX_PROFILES]
 	slots.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	add_child(slots)
 	slots.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM, Control.PRESET_MODE_MINSIZE, 60)
@@ -76,22 +85,59 @@ func build(store: ProfileStore) -> void:
 		add_child(ScreenGrade.new())
 
 
+func _first_enabled() -> int:
+	for i in _items.size():
+		if _items[i][1]:
+			return i
+	return 0
+
+
 func _refresh() -> void:
-	var items := [
-		["CONTINUE", _can_continue],
-		["NEW PROFILE", _can_new],
-		["LOAD PROFILE", true],
-		["SETTINGS", true],
-		["CREDITS", true],
-		["QUIT", true],
-	]
 	var lines: Array = []
-	for i in items.size():
-		var label: String = items[i][0]
-		var enabled: bool = items[i][1]
-		var color := GREEN if enabled else DISABLED
-		lines.append("[color=%s][%d] %s[/color]" % [color, i + 1, label])
+	for i in _items.size():
+		var label: String = _items[i][0]
+		var enabled: bool = _items[i][1]
+		var selected := i == _cursor
+		var color: String
+		if selected and enabled:
+			color = HIGHLIGHT
+		elif enabled:
+			color = GREEN
+		else:
+			color = DISABLED
+		var marker := "▶ " if selected else "  "
+		lines.append("[color=%s]%s[%d] %s[/color]" % [color, marker, i + 1, label])
 	_text.text = "\n".join(lines)
+
+
+func _move_cursor(delta: int) -> void:
+	var n := _items.size()
+	var i := _cursor
+	for _step in n:
+		i = wrapi(i + delta, 0, n)
+		if _items[i][1]:
+			_cursor = i
+			_refresh()
+			return
+
+
+func _select_and_activate(i: int) -> void:
+	if i < 0 or i >= _items.size() or not _items[i][1]:
+		return
+	_cursor = i
+	match i:
+		0:
+			continue_pressed.emit()
+		1:
+			new_pressed.emit()
+		2:
+			load_pressed.emit()
+		3:
+			settings_pressed.emit()
+		4:
+			credits_pressed.emit()
+		5:
+			quit_pressed.emit()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -99,17 +145,11 @@ func _unhandled_input(event: InputEvent) -> void:
 	if key == null or not key.pressed or key.echo:
 		return
 	match key.physical_keycode:
-		KEY_1:
-			if _can_continue:
-				continue_pressed.emit()
-		KEY_2:
-			if _can_new:
-				new_pressed.emit()
-		KEY_3:
-			load_pressed.emit()
-		KEY_4:
-			settings_pressed.emit()
-		KEY_5:
-			credits_pressed.emit()
-		KEY_6:
-			quit_pressed.emit()
+		KEY_UP:
+			_move_cursor(-1)
+		KEY_DOWN:
+			_move_cursor(1)
+		KEY_ENTER, KEY_KP_ENTER:
+			_select_and_activate(_cursor)
+		KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6:
+			_select_and_activate(key.physical_keycode - KEY_1)

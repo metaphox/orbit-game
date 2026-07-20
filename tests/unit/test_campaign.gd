@@ -167,3 +167,74 @@ func test_load_profile_switches_active_profile() -> void:
 	simulate(root, 2, 1.0 / 60.0)
 	assert_eq(root.active_profile.profile_name, "Ada", "explicitly switched profile")
 	assert_eq(root.store.last_active_name, "Ada", "switch persists as the new default")
+
+
+func test_title_screen_arrow_navigation_skips_disabled_items() -> void:
+	var store := ProfileStore.load_or_new(SAVE_TEST_PATH)  # no profiles -> CONTINUE disabled
+	var screen := TitleScreen.new()
+	add_child_autofree(screen)
+	screen.build(store)
+	assert_eq(screen._cursor, 1, "starts on the first enabled item (NEW PROFILE, not CONTINUE)")
+
+	screen._move_cursor(-1)
+	assert_eq(screen._cursor, 5, "moving up from the top wraps to the last item (QUIT)")
+
+	screen._move_cursor(1)
+	assert_eq(screen._cursor, 1, "moving down from QUIT wraps back around, skipping CONTINUE")
+
+	# GDScript lambdas capture locals by value, so use a 1-element array as
+	# a mutable box the closure can actually write through.
+	var quit_signaled := [false]
+	screen.quit_pressed.connect(func(): quit_signaled[0] = true)
+	screen._move_cursor(-1)
+	screen._select_and_activate(screen._cursor)
+	assert_true(quit_signaled[0], "Enter on the highlighted item activates it")
+
+
+func test_title_screen_number_key_still_works_and_moves_cursor() -> void:
+	var store := ProfileStore.load_or_new(SAVE_TEST_PATH)
+	store.create_profile("Ada")  # now CONTINUE is enabled
+	var screen := TitleScreen.new()
+	add_child_autofree(screen)
+	screen.build(store)
+
+	var settings_signaled := [false]
+	screen.settings_pressed.connect(func(): settings_signaled[0] = true)
+	screen._select_and_activate(3)  # [4] SETTINGS
+	assert_true(settings_signaled[0], "direct activation still works")
+	assert_eq(screen._cursor, 3, "activating an item also moves the cursor there")
+
+
+func test_level_select_arrow_navigation_skips_locked_missions() -> void:
+	var profile := Profile.new()  # only level 0 unlocked
+	var screen := LevelSelect.new()
+	add_child_autofree(screen)
+	screen.build(profile)
+	assert_eq(screen._cursor, 0, "starts on the only unlocked mission")
+
+	screen._move_cursor(1)
+	assert_eq(screen._cursor, 0, "no other mission is unlocked, so cursor can't move")
+
+	profile.record_win(0, "GOLD ★★★", 60.0)  # unlocks Campaign.order()[1] (level 2)
+	screen._refresh()  # profile mutated in place; screen doesn't poll on its own
+	screen._move_cursor(1)
+	assert_eq(screen._cursor, 1, "cursor now advances to the newly-unlocked mission")
+
+	var chosen := [-1]
+	screen.level_chosen.connect(func(index): chosen[0] = index)
+	screen._select_and_activate(screen._cursor)
+	assert_eq(chosen[0], Campaign.order()[1], "Enter launches the highlighted, unlocked mission")
+
+
+func test_level_select_escape_returns_to_title() -> void:
+	var profile := Profile.new()
+	var screen := LevelSelect.new()
+	add_child_autofree(screen)
+	screen.build(profile)
+	var back_signaled := [false]
+	screen.back_pressed.connect(func(): back_signaled[0] = true)
+	var esc := InputEventKey.new()
+	esc.physical_keycode = KEY_ESCAPE
+	esc.pressed = true
+	screen._unhandled_input(esc)
+	assert_true(back_signaled[0], "Escape returns to the title screen")
