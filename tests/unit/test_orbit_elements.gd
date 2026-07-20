@@ -172,6 +172,86 @@ func test_xz_plane_crossings_are_on_the_plane_and_correctly_labeled() -> void:
 		assert_lt(y_after_desc, 0.0, "tilt=%s: below the plane after descending" % tilt)
 
 
+## Confirms a degenerate/invalid OrbitElements never leaks NaN/Inf into any
+## field, or into a propagated state_at_time() call downstream.
+func _assert_finite(el: OrbitElements, msg: String) -> void:
+	for label in ["a", "e", "inc", "raan", "argp", "m0", "mu"]:
+		assert_true(is_finite(el.get(label)), "%s: %s finite" % [msg, label])
+	assert_true(
+		is_finite(el.plane_normal.x) and is_finite(el.plane_normal.y) and is_finite(el.plane_normal.z),
+		"%s: plane_normal finite" % msg)
+	var s := el.state_at_time(el.epoch + 100.0)
+	assert_true(is_finite(s.r.x) and is_finite(s.r.y) and is_finite(s.r.z), "%s: propagated r finite" % msg)
+	assert_true(is_finite(s.v.x) and is_finite(s.v.y) and is_finite(s.v.z), "%s: propagated v finite" % msg)
+
+
+func test_radial_trajectory_is_flagged_invalid_but_finite() -> void:
+	# r and v exactly parallel: zero angular momentum, no defined orbital plane
+	var el := OrbitElements.from_state(
+		DVec3.new(R_LEO, 0.0, 0.0), DVec3.new(500.0, 0.0, 0.0), MU_EARTH, 0.0)
+	assert_false(el.is_valid, "purely radial trajectory has zero angular momentum")
+	_assert_finite(el, "radial")
+
+
+func test_near_radial_flagged_by_ratio_not_absolute_h() -> void:
+	# interplanetary-scale r: the resulting h_len (~4.0) is numerically
+	# "large" - larger than a fixed absolute epsilon tuned for LEO would
+	# ever need to be - yet the ship is still headed almost straight in
+	# (tangential speed is 5e-11x the radial speed). Only a ratio-based
+	# guard (h_len / (r_len * v_len), independent of scale) catches this.
+	var r_interplanetary := 4.0e7
+	var el := OrbitElements.from_state(
+		DVec3.new(r_interplanetary, 0.0, 0.0), DVec3.new(5000.0, 0.0, 1.0e-7), MU_EARTH, 0.0)
+	assert_false(el.is_valid, "near-radial at interplanetary scale still flagged")
+	_assert_finite(el, "near-radial interplanetary")
+
+	# same near-radial ratio, but at LEO scale - proves it's the same guard,
+	# not two different scale-specific thresholds.
+	var el_leo := OrbitElements.from_state(
+		DVec3.new(R_LEO, 0.0, 0.0), DVec3.new(1000.0, 0.0, 1.0e-8), MU_EARTH, 0.0)
+	assert_false(el_leo.is_valid, "near-radial at LEO scale also flagged")
+	_assert_finite(el_leo, "near-radial LEO")
+
+
+func test_zero_radius_is_flagged_invalid_but_finite() -> void:
+	var el := OrbitElements.from_state(
+		DVec3.new(), DVec3.new(0.0, 7000.0, 0.0), MU_EARTH, 0.0)
+	assert_false(el.is_valid, "zero radius has no defined orbit")
+	_assert_finite(el, "zero radius")
+
+
+func test_zero_velocity_is_flagged_invalid_but_finite() -> void:
+	var el := OrbitElements.from_state(
+		DVec3.new(R_LEO, 0.0, 0.0), DVec3.new(), MU_EARTH, 0.0)
+	assert_false(el.is_valid, "zero velocity has no defined orbit")
+	_assert_finite(el, "zero velocity")
+
+
+func test_non_positive_mu_is_flagged_invalid_but_finite() -> void:
+	var r := DVec3.new(R_LEO, 0.0, 0.0)
+	var v := DVec3.new(0.0, 7000.0, 0.0)
+	var el_zero := OrbitElements.from_state(r, v, 0.0, 0.0)
+	assert_false(el_zero.is_valid, "zero mu is non-physical")
+	_assert_finite(el_zero, "zero mu")
+	var el_neg := OrbitElements.from_state(r, v, -1.0, 0.0)
+	assert_false(el_neg.is_valid, "negative mu is non-physical")
+	_assert_finite(el_neg, "negative mu")
+
+
+func test_near_parabolic_orbit_is_valid_and_finite() -> void:
+	# a legitimate (if numerically delicate) orbit, not degenerate input -
+	# regression coverage for the existing ECC_PARABOLIC_GUARD, which
+	# previously had none.
+	var v_esc := sqrt(2.0 * MU_EARTH / R_LEO)
+	var el := OrbitElements.from_state(
+		DVec3.new(R_LEO, 0.0, 0.0), DVec3.new(0.0, v_esc, 0.0), MU_EARTH, 0.0)
+	assert_true(el.is_valid, "near-parabolic is a legitimate orbit, not degenerate input")
+	_assert_finite(el, "near-parabolic")
+	assert_close(
+		absf(el.e - 1.0), OrbitElements.ECC_PARABOLIC_GUARD, 1e-6,
+		"eccentricity nudged just off exactly 1")
+
+
 func test_xz_plane_crossings_match_brute_force_scan() -> void:
 	var v_circ := circular_speed(MU_EARTH, R_LEO)
 	var el := OrbitElements.from_state(

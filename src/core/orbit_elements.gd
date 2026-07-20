@@ -16,6 +16,17 @@ const ECC_PARABOLIC_GUARD := 1e-9
 const ECC_CIRCULAR := 1e-10
 const INC_EQUATORIAL := 1e-10
 
+## Below these, from_state() treats the input as degenerate: r or v too
+## small to mean anything, a non-physical mu, or r nearly parallel to v
+## (near-zero angular momentum - a purely radial trajectory, reachable in
+## play by killing tangential velocity). MIN_H_RATIO is h_len / (r_len *
+## v_len), the sine of the angle between r and v, so it stays meaningful
+## at both LEO and interplanetary scale rather than needing a fixed
+## absolute h_len epsilon.
+const MIN_RADIUS := 1.0
+const MIN_SPEED := 1.0e-6
+const MIN_H_RATIO := 1.0e-9
+
 var mu := 0.0
 var a := 0.0
 var e := 0.0
@@ -24,6 +35,14 @@ var raan := 0.0
 var argp := 0.0
 var m0 := 0.0
 var epoch := 0.0
+
+## False when from_state() was given a degenerate input. Elements are still
+## finite and usable (nudged away from the singularity, the same technique
+## the eccentricity guard below already uses) rather than NaN, so
+## rendering/save code never sees NaN - but callers that can, like
+## ShipSim._refit_elements, should treat this as a mission-ending fault
+## rather than silently continuing on a physically-meaningless orbit.
+var is_valid := true
 
 ## Orbit normal (r x v, normalized) in world/render coordinates. `inc` is
 ## measured against the classical +Z pole for the internal element math
@@ -44,7 +63,35 @@ static func circular(mu_p: float, radius: float, phase_deg: float, t: float) -> 
 		DVec3.new(-v * sin(theta), 0.0, -v * cos(theta)), mu_p, t)
 
 
+## Degenerate input (non-physical mu, r/v too small to mean anything, or r
+## nearly parallel to v - near-zero angular momentum) does NOT get nudged
+## through the normal math with floored inputs: even a floored angular
+## momentum can combine with the input's actual energy to produce a
+## vanishingly small semi-major axis, which blows up mean_motion() and
+## overflows the Kepler solver several steps downstream - a floor prevents
+## the immediate division by zero but not that. Instead, degenerate input
+## is replaced outright with a synthesized, numerically tame circular
+## orbit (same technique as circular() above) at a safe radius, flagged
+## is_valid = false so callers know the shape is a placeholder, not a fit
+## to the actual input.
 static func from_state(r: DVec3, v: DVec3, mu_p: float, t: float) -> OrbitElements:
+	var r_len := r.length()
+	var v_len := v.length()
+	var h_len := r.cross(v).length()
+	var degenerate := (mu_p <= 0.0 or r_len < MIN_RADIUS or v_len < MIN_SPEED
+		or h_len < MIN_H_RATIO * r_len * v_len)
+	if not degenerate:
+		return _from_state_unchecked(r, v, mu_p, t)
+
+	var safe_mu := mu_p if mu_p > 0.0 else 1.0
+	var safe_r := maxf(r_len, MIN_RADIUS)
+	var el := _from_state_unchecked(
+		DVec3.new(safe_r, 0.0, 0.0), DVec3.new(0.0, sqrt(safe_mu / safe_r), 0.0), safe_mu, t)
+	el.is_valid = false
+	return el
+
+
+static func _from_state_unchecked(r: DVec3, v: DVec3, mu_p: float, t: float) -> OrbitElements:
 	var el := OrbitElements.new()
 	el.mu = mu_p
 	el.epoch = t

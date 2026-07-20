@@ -2,9 +2,12 @@ extends Node3D
 ## A single flyable mission: sim clock, event-aware warp, input, win/fail
 ## state, view toggle. Self-contained and directly loadable (every headless
 ## test does this); src/campaign_root.gd is the menu shell that wraps it
-## for normal play and reacts to the signals below. Keys are polled
-## directly for M2-M5; migrating to InputMap (rebindable) is part of the
-## M6 settings work.
+## for normal play and reacts to the signals below. Gameplay input goes
+## through InputMap actions (project.godot's [input] section) rather than
+## raw keycodes, so remapping/controller support just needs a settings UI
+## on top of this - not touched here. Menu-navigation screens are a
+## separate, lower-risk convention (arrow keys/Enter/number-select) and are
+## intentionally not part of this migration.
 
 signal mission_won(index: int, dv_used: float, medal: String)
 signal restart_requested
@@ -16,6 +19,10 @@ enum Phase { FLYING, WON, FAILED, PAUSED }
 
 ## Keys 1-9 jump straight to the matching step; -/= walk one step at a time.
 const WARP_STEPS: Array[int] = [1, 5, 10, 25, 50, 100, 200, 500, 1000]
+const WARP_STEP_ACTIONS := [
+	"warp_step_1", "warp_step_2", "warp_step_3", "warp_step_4", "warp_step_5",
+	"warp_step_6", "warp_step_7", "warp_step_8", "warp_step_9",
+]
 const ROT_RATE := Vector3(0.6, 0.6, 1.1)  # pitch/yaw/roll, rad/s
 const THROTTLE_RATE := 1.4  # full throttle sweep per second
 const ZOOM_PAN_SIGN := -1.0  # flip if trackpad scroll-up zooms out instead of in
@@ -37,12 +44,6 @@ var map_view: MapView
 var hud: Hud
 
 var _pause_menu: PauseMenu = null
-# Physical Shift/Ctrl throttle is read by polling Input.is_physical_key_
-# pressed(), a mechanism a synthetic _unhandled_input call never touches -
-# these track the toolbar SHIFT/CTRL buttons' hold state separately so
-# _apply_flight_input can merge both sources.
-var _toolbar_shift_held := false
-var _toolbar_ctrl_held := false
 var _event_revision := -1
 var _event_horizon := -1.0
 var _next_event := INF
@@ -73,12 +74,25 @@ func _ready() -> void:
 ## Toolbar buttons don't duplicate any input logic - they just construct
 ## the same InputEventKey a real keypress would and call _unhandled_input
 ## directly, the exact call every test in this project already makes.
-## SHIFT/CTRL are the one exception (see _toolbar_shift_held's doc).
+## SHIFT/CTRL are the one exception: _apply_flight_input reads the
+## throttle axis via Input.get_axis(), which - like is_physical_key_
+## pressed() before it - only reflects real OS-level key state, never a
+## synthetic event passed to _unhandled_input. Input.action_press()/
+## action_release() are Godot's actual mechanism for synthetic action
+## input, so the toolbar drives those directly instead.
 func _on_toolbar_key(keycode: int, pressed: bool) -> void:
 	if keycode == KEY_SHIFT:
-		_toolbar_shift_held = pressed
-	elif keycode == KEY_CTRL:
-		_toolbar_ctrl_held = pressed
+		if pressed:
+			Input.action_press("throttle_increase")
+		else:
+			Input.action_release("throttle_increase")
+		return
+	if keycode == KEY_CTRL:
+		if pressed:
+			Input.action_press("throttle_decrease")
+		else:
+			Input.action_release("throttle_decrease")
+		return
 	var event := InputEventKey.new()
 	event.physical_keycode = keycode
 	event.pressed = pressed
@@ -169,86 +183,93 @@ func _unhandled_input(event: InputEvent) -> void:
 	var key := event as InputEventKey
 	if key == null or not key.pressed or key.echo:
 		return
-	match key.physical_keycode:
-		KEY_TAB:
-			side_active = not side_active
-			flight_view.set_side_active(side_active)
-		KEY_EQUAL:
-			if phase == Phase.FLYING and ship.throttle == 0.0:
-				warp_index = mini(warp_index + 1, WARP_STEPS.size() - 1)
-		KEY_MINUS:
-			warp_index = maxi(warp_index - 1, 0)
-		KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9:
-			if phase == Phase.FLYING and ship.throttle == 0.0:
-				warp_index = key.physical_keycode - KEY_1
-		KEY_Z:
-			if phase == Phase.FLYING:
-				ship.throttle = 1.0
-				warp_index = 0
-		KEY_X:
-			ship.throttle = 0.0
-		KEY_R:
-			if phase == Phase.FLYING or phase == Phase.PAUSED:
-				flight_view.reset_view()
-			else:  # WON or FAILED: matches the on-screen "[R] RESTART" prompt
-				restart_requested.emit()
-		KEY_ESCAPE:
-			if phase == Phase.FLYING or phase == Phase.PAUSED:
-				if _pause_menu != null:
-					_close_pause_menu()
-				else:
-					_open_pause_menu()
-			else:  # WON or FAILED: no pause concept once the mission has ended
-				exit_requested.emit()
-		KEY_SPACE, KEY_0:
-			_toggle_quick_pause()
-		KEY_T:
-			if phase == Phase.FLYING:
+	if _dispatch_warp_step(key):
+		return
+	if key.is_action_pressed("toggle_side_camera"):
+		side_active = not side_active
+		flight_view.set_side_active(side_active)
+	elif key.is_action_pressed("warp_increase"):
+		if phase == Phase.FLYING and ship.throttle == 0.0:
+			warp_index = mini(warp_index + 1, WARP_STEPS.size() - 1)
+	elif key.is_action_pressed("warp_decrease"):
+		warp_index = maxi(warp_index - 1, 0)
+	elif key.is_action_pressed("throttle_full"):
+		if phase == Phase.FLYING:
+			ship.throttle = 1.0
+			warp_index = 0
+	elif key.is_action_pressed("throttle_cut"):
+		ship.throttle = 0.0
+	elif key.is_action_pressed("reset_or_restart"):
+		if phase == Phase.FLYING or phase == Phase.PAUSED:
+			flight_view.reset_view()
+		else:  # WON or FAILED: matches the on-screen "[R] RESTART" prompt
+			restart_requested.emit()
+	elif key.is_action_pressed("pause_menu"):
+		if phase == Phase.FLYING or phase == Phase.PAUSED:
+			if _pause_menu != null:
+				_close_pause_menu()
+			else:
+				_open_pause_menu()
+		else:  # WON or FAILED: no pause concept once the mission has ended
+			exit_requested.emit()
+	elif key.is_action_pressed("quick_pause"):
+		_toggle_quick_pause()
+	elif key.is_action_pressed("sas_off"):
+		if phase == Phase.FLYING:
+			ship.sas_mode = ShipSim.SasMode.OFF
+	elif key.is_action_pressed("sas_prograde"):
+		_toggle_sas(ShipSim.SasMode.PROGRADE)
+	elif key.is_action_pressed("sas_retrograde"):
+		_toggle_sas(ShipSim.SasMode.RETROGRADE)
+	elif key.is_action_pressed("sas_normal"):
+		if phase == Phase.FLYING:
+			_toggle_sas(ShipSim.SasMode.NORMAL)
+		elif phase == Phase.WON:
+			next_requested.emit(level_index)
+	elif key.is_action_pressed("sas_antinormal"):
+		_toggle_sas(ShipSim.SasMode.ANTI_NORMAL)
+	elif key.is_action_pressed("sas_radial_out"):
+		_toggle_sas(ShipSim.SasMode.RADIAL_OUT)
+	elif key.is_action_pressed("sas_radial_in"):
+		_toggle_sas(ShipSim.SasMode.RADIAL_IN)
+	elif key.is_action_pressed("node_create"):
+		_node_create()
+	elif key.is_action_pressed("node_delete"):
+		if ship.node != null:
+			ship.node = null
+			if ship.sas_mode == ShipSim.SasMode.NODE:
 				ship.sas_mode = ShipSim.SasMode.OFF
-		KEY_F:
-			_toggle_sas(ShipSim.SasMode.PROGRADE)
-		KEY_B:
-			_toggle_sas(ShipSim.SasMode.RETROGRADE)
-		KEY_N:
-			if phase == Phase.FLYING:
-				_toggle_sas(ShipSim.SasMode.NORMAL)
-			elif phase == Phase.WON:
-				next_requested.emit(level_index)
-		KEY_G:
-			_toggle_sas(ShipSim.SasMode.ANTI_NORMAL)
-		KEY_U:
-			_toggle_sas(ShipSim.SasMode.RADIAL_OUT)
-		KEY_I:
-			_toggle_sas(ShipSim.SasMode.RADIAL_IN)
-		KEY_ENTER:
-			_node_create()
-		KEY_BACKSPACE:
-			if ship.node != null:
-				ship.node = null
-				if ship.sas_mode == ShipSim.SasMode.NODE:
-					ship.sas_mode = ShipSim.SasMode.OFF
-				flight_view.mark_traj_dirty()
-		KEY_BRACKETLEFT:
-			_node_adjust("t_node", -60.0 if key.shift_pressed else -5.0)
-		KEY_BRACKETRIGHT:
-			_node_adjust("t_node", 60.0 if key.shift_pressed else 5.0)
-		KEY_UP:
-			_node_adjust("prograde", 10.0 if key.shift_pressed else 1.0)
-		KEY_DOWN:
-			_node_adjust("prograde", -10.0 if key.shift_pressed else -1.0)
-		KEY_RIGHT:
-			_node_adjust("normal", 10.0 if key.shift_pressed else 1.0)
-		KEY_LEFT:
-			_node_adjust("normal", -10.0 if key.shift_pressed else -1.0)
-		KEY_O:
-			_node_adjust("radial", 10.0 if key.shift_pressed else 1.0)
-		KEY_P:
-			_node_adjust("radial", -10.0 if key.shift_pressed else -1.0)
-		KEY_V:
-			if phase == Phase.FLYING and level.nodes_enabled and ship.node != null:
-				ship.sas_mode = (ShipSim.SasMode.OFF
-					if ship.sas_mode == ShipSim.SasMode.NODE
-					else ShipSim.SasMode.NODE)
+			flight_view.mark_traj_dirty()
+	elif key.is_action_pressed("node_time_earlier"):
+		_node_adjust("t_node", -60.0 if key.shift_pressed else -5.0)
+	elif key.is_action_pressed("node_time_later"):
+		_node_adjust("t_node", 60.0 if key.shift_pressed else 5.0)
+	elif key.is_action_pressed("node_prograde_increase"):
+		_node_adjust("prograde", 10.0 if key.shift_pressed else 1.0)
+	elif key.is_action_pressed("node_prograde_decrease"):
+		_node_adjust("prograde", -10.0 if key.shift_pressed else -1.0)
+	elif key.is_action_pressed("node_normal_increase"):
+		_node_adjust("normal", 10.0 if key.shift_pressed else 1.0)
+	elif key.is_action_pressed("node_normal_decrease"):
+		_node_adjust("normal", -10.0 if key.shift_pressed else -1.0)
+	elif key.is_action_pressed("node_radial_increase"):
+		_node_adjust("radial", 10.0 if key.shift_pressed else 1.0)
+	elif key.is_action_pressed("node_radial_decrease"):
+		_node_adjust("radial", -10.0 if key.shift_pressed else -1.0)
+	elif key.is_action_pressed("sas_node_hold"):
+		if phase == Phase.FLYING and level.nodes_enabled and ship.node != null:
+			ship.sas_mode = (ShipSim.SasMode.OFF
+				if ship.sas_mode == ShipSim.SasMode.NODE
+				else ShipSim.SasMode.NODE)
+
+
+func _dispatch_warp_step(key: InputEventKey) -> bool:
+	for i in WARP_STEP_ACTIONS.size():
+		if key.is_action_pressed(WARP_STEP_ACTIONS[i]):
+			if phase == Phase.FLYING and ship.throttle == 0.0:
+				warp_index = i
+			return true
+	return false
 
 
 func _open_pause_menu() -> void:
@@ -298,19 +319,16 @@ func _toggle_quick_pause() -> void:
 
 func _apply_flight_input(delta: float) -> void:
 	var rot := Vector3(
-		_axis(KEY_W, KEY_S),  # W noses down, S noses up (KSP convention)
-		_axis(KEY_D, KEY_A),
-		_axis(KEY_E, KEY_Q))
+		Input.get_axis("pitch_down", "pitch_up"),  # W noses down, S noses up (KSP convention)
+		Input.get_axis("yaw_right", "yaw_left"),
+		Input.get_axis("roll_right", "roll_left"))
 	if rot != Vector3.ZERO:
 		ship.rotate_local(rot * ROT_RATE * delta)
 		ship.sas_mode = ShipSim.SasMode.OFF  # manual stick overrides the hold
 	elif ship.sas_mode != ShipSim.SasMode.OFF:
 		_run_sas(delta)
 
-	var throttle_input := clampf(
-		_axis(KEY_CTRL, KEY_SHIFT) + (1.0 if _toolbar_shift_held else 0.0)
-			- (1.0 if _toolbar_ctrl_held else 0.0),
-		-1.0, 1.0)
+	var throttle_input := Input.get_axis("throttle_decrease", "throttle_increase")
 	if throttle_input != 0.0:
 		ship.throttle = clampf(
 			ship.throttle + throttle_input * THROTTLE_RATE * delta, 0.0, 1.0)
@@ -319,7 +337,10 @@ func _apply_flight_input(delta: float) -> void:
 
 
 func _check_end_conditions() -> void:
-	if ship.r.length() <= ship.body.radius:
+	if not ship.elements.is_valid:
+		phase = Phase.FAILED
+		hud.show_fail("ORBIT TRAJECTORY DEGENERATE")
+	elif ship.r.length() <= ship.body.radius:
 		match level.objective.contact_result(ship):
 			Objective.ContactResult.WIN:
 				_win()
@@ -437,12 +458,3 @@ func _run_sas(delta: float) -> void:
 		axis = ship.attitude.x
 	var step := minf(angle, ROT_RATE.x * delta)
 	ship.attitude = (Basis(axis.normalized(), step) * ship.attitude).orthonormalized()
-
-
-func _axis(neg: Key, pos: Key) -> float:
-	var value := 0.0
-	if Input.is_physical_key_pressed(pos):
-		value += 1.0
-	if Input.is_physical_key_pressed(neg):
-		value -= 1.0
-	return value

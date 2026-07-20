@@ -63,3 +63,20 @@ func test_fail_on_impact() -> void:
 		game.level.body.mu, game.sim_time)
 	simulate(game, 600, 1.0 / 60.0)
 	assert_eq(game.phase, game.Phase.FAILED, "impact triggers fail")
+
+
+func test_fail_on_degenerate_orbit() -> void:
+	var game := _boot()
+	var ship: ShipSim = game.ship
+	# purely radial trajectory: r parallel to v, zero angular momentum -
+	# unrecoverable, but must fail cleanly with a diagnostic rather than
+	# corrupting state with NaN.
+	ship.elements = OrbitElements.from_state(
+		DVec3.new(game.level.start_radius, 0.0, 0.0), DVec3.new(500.0, 0.0, 0.0),
+		game.level.body.mu, game.sim_time)
+	assert_false(ship.elements.is_valid, "sanity: this state is actually degenerate")
+	simulate(game, 5, 1.0 / 60.0)
+	assert_eq(game.phase, game.Phase.FAILED, "degenerate orbit triggers a diagnosed fail")
+	assert_true(
+		game.hud.center_label.text.contains("ORBIT TRAJECTORY DEGENERATE"),
+		"fail reason is shown, not a silent/frozen HUD")

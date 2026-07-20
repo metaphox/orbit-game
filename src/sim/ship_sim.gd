@@ -168,7 +168,12 @@ func predicted_elements() -> OrbitElements:
 
 
 ## Direction the active SAS mode wants the nose pointing (unit vector in
-## the parent frame). Roll is left free — holds align forward only.
+## the parent frame). Roll is left free — holds align forward only. Falls
+## back to holding the current attitude (a no-op) when the mode's source
+## vector is too close to zero to define a direction (e.g. PROGRADE/
+## RETROGRADE after a burn that's nearly killed velocity, or NORMAL/
+## ANTI_NORMAL on a near-radial trajectory) rather than snapping to
+## DVec3.normalized()'s zero-vector fallback.
 func sas_target_dir() -> DVec3:
 	if sas_mode == SasMode.NODE:
 		if node != null and node.remaining.length() > 0.05:
@@ -176,17 +181,19 @@ func sas_target_dir() -> DVec3:
 		return forward_dir()
 	match sas_mode:
 		SasMode.PROGRADE:
-			return v.normalized()
+			return v.normalized() if v.length() > 1e-6 else forward_dir()
 		SasMode.RETROGRADE:
-			return v.normalized().neg()
+			return v.normalized().neg() if v.length() > 1e-6 else forward_dir()
 		SasMode.NORMAL:
-			return r.cross(v).normalized()
+			var h := r.cross(v)
+			return h.normalized() if h.length() > 1e-6 else forward_dir()
 		SasMode.ANTI_NORMAL:
-			return r.cross(v).normalized().neg()
+			var h := r.cross(v)
+			return h.normalized().neg() if h.length() > 1e-6 else forward_dir()
 		SasMode.RADIAL_OUT:
-			return r.normalized()
+			return r.normalized() if r.length() > 1e-6 else forward_dir()
 		SasMode.RADIAL_IN:
-			return r.normalized().neg()
+			return r.normalized().neg() if r.length() > 1e-6 else forward_dir()
 	return forward_dir()
 
 

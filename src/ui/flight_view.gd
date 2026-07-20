@@ -21,6 +21,15 @@ const TRAJ_STEP_GROWTH := 1.18
 const MATCH_COLOR := Color(0.35, 1.0, 0.45)
 const FAR_COLOR := Color(1.0, 0.55, 0.12)
 const SIDE_MARKER_LAYER := 8  # ship dot only the side camera can see
+const BODY_SHADER := preload("res://src/shaders/celestial_body.gdshader")
+const ATMOSPHERE_SHADER := preload("res://src/shaders/atmosphere.gdshader")
+const EARTH_MAP := preload("res://assets/textures/earth_abstract.svg")
+
+const BODY_GENERIC := 0
+const BODY_EARTH := 1
+const BODY_MOON := 2
+const BODY_SUN := 3
+const BODY_MARS := 4
 
 # Orbit marks: apoapsis/periapsis/nodes/etc, orbit-view only (see
 # _build_orbit_marks) - meaningless at chase-cam range where the whole
@@ -44,6 +53,7 @@ var gauge: AccelGauge
 
 var _bodies: Array[BodyDef] = []
 var _body_meshes: Array[MeshInstance3D] = []
+var _body_rotation_rates: Array[float] = []
 var _prop_full := 1.0
 var _objective: Objective
 var _draw_limit := 4.0e5
@@ -115,24 +125,32 @@ func build(level: LevelDef) -> void:
 		_bodies.append(moon)
 	for body in _bodies:
 		var mesh_instance := MeshInstance3D.new()
-		var sphere := SphereMesh.new()
-		sphere.radius = body.radius
-		sphere.height = body.radius * 2.0
-		sphere.radial_segments = 96
-		sphere.rings = 48
-		var mat := StandardMaterial3D.new()
-		mat.albedo_color = body.color
-		mat.roughness = 0.9
-		mat.rim_enabled = true
-		mat.rim = 0.65
-		mat.rim_tint = 0.55
-		mat.emission_enabled = true
-		mat.emission = body.color.lightened(0.3)
-		mat.emission_energy_multiplier = 0.12  # faint grazing-angle atmosphere glow
-		sphere.material = mat
-		mesh_instance.mesh = sphere
+		var kind := _body_kind(body.name)
+		var segments := 42 if kind == BODY_EARTH else 30
+		var rings := 22 if kind == BODY_EARTH else 16
+		mesh_instance.mesh = _make_faceted_sphere(body.radius, segments, rings)
+		mesh_instance.material_override = _make_body_material(body, kind)
 		add_child(mesh_instance)
 		_body_meshes.append(mesh_instance)
+		_body_rotation_rates.append(_rotation_rate_for(kind))
+
+		if kind == BODY_EARTH:
+			# A separate translucent shell lets the edge glow remain crisp even
+			# while the low-poly surface beneath it catches hard facet lighting.
+			var atmosphere := MeshInstance3D.new()
+			var shell := SphereMesh.new()
+			shell.radius = body.radius * 1.028
+			shell.height = body.radius * 2.056
+			shell.radial_segments = 64
+			shell.rings = 32
+			var atmosphere_mat := ShaderMaterial.new()
+			atmosphere_mat.shader = ATMOSPHERE_SHADER
+			atmosphere_mat.set_shader_parameter("glow_color", Color(0.10, 0.66, 0.88))
+			atmosphere_mat.set_shader_parameter("glow_strength", 0.76)
+			shell.material = atmosphere_mat
+			atmosphere.mesh = shell
+			atmosphere.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			mesh_instance.add_child(atmosphere)
 
 	var rig := preload("res://src/ui/ship_camera_rig.tscn").instantiate()
 	add_child(rig)
@@ -159,6 +177,138 @@ func build(level: LevelDef) -> void:
 
 	camera = rig.get_node("ChaseCamera")
 	side_camera = rig.get_node("SideCamera")
+	# The world sun often sits behind a tail-following camera, which turned
+	# the small craft into a silhouette.  A short-range camera fill affects
+	# only nearby hardware (never the kilometer-scale bodies) and reads like
+	# the chase rig's own inspection lamp.
+	var chase_fill := OmniLight3D.new()
+	chase_fill.light_color = Color(0.78, 0.86, 0.92)
+	chase_fill.light_energy = 2.1
+	chase_fill.omni_range = 22.0
+	chase_fill.shadow_enabled = false
+	camera.add_child(chase_fill)
+
+
+func _body_kind(body_name: String) -> int:
+	match body_name.to_upper():
+		"EARTH":
+			return BODY_EARTH
+		"MOON":
+			return BODY_MOON
+		"SOL", "SUN":
+			return BODY_SUN
+		"MARS":
+			return BODY_MARS
+		_:
+			return BODY_GENERIC
+
+
+func _rotation_rate_for(kind: int) -> float:
+	match kind:
+		BODY_EARTH:
+			return TAU / 86164.0
+		BODY_MOON:
+			return TAU / (27.3 * 86400.0)
+		BODY_MARS:
+			return TAU / 88642.0
+		BODY_SUN:
+			return TAU / (25.0 * 86400.0)
+		_:
+			return 0.0
+
+
+func _make_body_material(body: BodyDef, kind: int) -> ShaderMaterial:
+	var material := ShaderMaterial.new()
+	material.shader = BODY_SHADER
+	material.set_shader_parameter("body_kind", kind)
+	material.set_shader_parameter("base_color", body.color)
+	material.set_shader_parameter("seed", float(absi(body.name.hash() % 2048)) / 173.0)
+	if kind == BODY_EARTH:
+		material.set_shader_parameter("earth_map", EARTH_MAP)
+	return material
+
+
+## A deliberately low-poly UV sphere with a distinct normal per triangle.
+## SurfaceTool duplicates the vertices for us here, so the directional light
+## reveals the polygon model while fixed equirectangular UVs anchor Earth art.
+func _make_faceted_sphere(radius: float, segments: int, rings: int) -> ArrayMesh:
+	var tool := SurfaceTool.new()
+	tool.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for ring in rings:
+		var lat_0 := -PI * 0.5 + PI * float(ring) / float(rings)
+		var lat_1 := -PI * 0.5 + PI * float(ring + 1) / float(rings)
+		var v_0 := float(ring) / float(rings)
+		var v_1 := float(ring + 1) / float(rings)
+		for segment in segments:
+			var lon_0 := TAU * float(segment) / float(segments)
+			var lon_1 := TAU * float(segment + 1) / float(segments)
+			var u_0 := float(segment) / float(segments)
+			var u_1 := float(segment + 1) / float(segments)
+			var p_00 := _sphere_point(radius, lat_0, lon_0)
+			var p_01 := _sphere_point(radius, lat_0, lon_1)
+			var p_10 := _sphere_point(radius, lat_1, lon_0)
+			var p_11 := _sphere_point(radius, lat_1, lon_1)
+			if ring == 0:
+				_add_faceted_triangle(tool,
+					p_00, Vector2(u_0, v_0),
+					p_11, Vector2(u_1, v_1),
+					p_10, Vector2(u_0, v_1))
+			elif ring == rings - 1:
+				_add_faceted_triangle(tool,
+					p_00, Vector2(u_0, v_0),
+					p_01, Vector2(u_1, v_0),
+					p_10, Vector2(u_0, v_1))
+			else:
+				_add_faceted_triangle(tool,
+					p_00, Vector2(u_0, v_0),
+					p_01, Vector2(u_1, v_0),
+					p_11, Vector2(u_1, v_1))
+				_add_faceted_triangle(tool,
+					p_00, Vector2(u_0, v_0),
+					p_11, Vector2(u_1, v_1),
+					p_10, Vector2(u_0, v_1))
+	return tool.commit()
+
+
+func _sphere_point(radius: float, latitude: float, longitude: float) -> Vector3:
+	var latitude_radius := cos(latitude)
+	return Vector3(
+		latitude_radius * cos(longitude),
+		sin(latitude),
+		latitude_radius * sin(longitude)) * radius
+
+
+func _add_faceted_triangle(
+		tool: SurfaceTool,
+		a: Vector3, uv_a: Vector2,
+		b: Vector3, uv_b: Vector2,
+		c: Vector3, uv_c: Vector2) -> void:
+	var normal := (b - a).cross(c - a)
+	if normal.length_squared() < 1.0e-10:
+		return
+	normal = normal.normalized()
+	# Godot treats clockwise triangles as front-facing. Keep the submitted
+	# winding's geometric normal inward (clockwise when viewed from outside),
+	# while the explicit lighting normal remains outward. The opposite winding
+	# renders the far hemisphere through the globe, like an inside-painted shell.
+	if normal.dot(a + b + c) > 0.0:
+		var swap := b
+		b = c
+		c = swap
+		var uv_swap := uv_b
+		uv_b = uv_c
+		uv_c = uv_swap
+	else:
+		normal = -normal
+	tool.set_normal(normal)
+	tool.set_uv(uv_a)
+	tool.add_vertex(a)
+	tool.set_normal(normal)
+	tool.set_uv(uv_b)
+	tool.add_vertex(b)
+	tool.set_normal(normal)
+	tool.set_uv(uv_c)
+	tool.add_vertex(c)
 
 
 func sync(ship: ShipSim, delta: float) -> void:
@@ -167,6 +317,7 @@ func sync(ship: ShipSim, delta: float) -> void:
 	ship_root.basis = ship.attitude
 	for i in _bodies.size():
 		_body_meshes[i].position = _bodies[i].position_at(t).sub(ship_abs).to_vector3()
+		_body_meshes[i].rotation.y = fposmod(t * _body_rotation_rates[i], TAU)
 
 	var v_dir := ship.v.normalized().to_vector3()
 	_place_marker(prograde_marker, v_dir)
@@ -209,7 +360,10 @@ func sync(ship: ShipSim, delta: float) -> void:
 	# chase camera: ship-relative orbit, offset by mouse drag
 	var chase_basis := ship.attitude \
 		* Basis(Vector3(0, 1, 0), _cam_yaw) * Basis(Vector3(1, 0, 0), _cam_pitch)
-	camera.position = chase_basis * Vector3(0, 3.5, 11.0)
+	# A slight shoulder angle keeps the radiator silhouette and antenna
+	# readable; a dead-center tail camera collapses the whole craft into the
+	# dark engine bell.
+	camera.position = chase_basis * Vector3(4.2, 3.5, 11.0)
 	camera.look_at(Vector3.ZERO, chase_basis.y)
 
 	# side camera: orbits and tracks the ship, which - thanks to the

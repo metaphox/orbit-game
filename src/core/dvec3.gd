@@ -53,8 +53,14 @@ func length() -> float:
 	return sqrt(length_squared())
 
 
+## Zero vector for a near-zero-length input rather than dividing through to
+## NaN/Inf - a player can drive a velocity or angular-momentum vector to
+## (near) zero in flight (e.g. a retrograde burn that kills velocity), and
+## callers should be able to treat "no direction" as a safe, finite value.
 func normalized() -> DVec3:
 	var l := length()
+	if l < 1e-9:
+		return DVec3.new()
 	return DVec3.new(x / l, y / l, z / l)
 
 

@@ -55,8 +55,25 @@ func trajectory_closeness(ship: ShipSim) -> float:
 	return clampf(1.0 - ca.distance / closeness_falloff, 0.0, 1.0) * 0.9
 
 
+const CLOSEST_APPROACH_CACHE_WINDOW := 2.0  # sim seconds
+
+var _ca_cache: Dictionary = {}
+var _ca_revision := -1
+var _ca_time := -INF
+
+
+## Shared by status_lines, trajectory_closeness, and FlightView's marker so
+## the ~360-Kepler-solve OrbitEvents.closest_approach() call underneath
+## this doesn't run 2-3x per frame. Cached until a burn/refit bumps
+## ship.revision or predicted sim time drifts past the cache window - the
+## prediction window is [ship.last_time, ship.last_time + span], which
+## genuinely shifts as the ship coasts, so revision alone isn't enough.
 func closest_approach(ship: ShipSim) -> Dictionary:
-	var el := ship.current_elements()
-	var span := el.period() if el.is_elliptic() else 2.0e4
-	return OrbitEvents.closest_approach(
-		el, station_orbit, ship.last_time, ship.last_time + span, span / 240.0)
+	if ship.revision != _ca_revision or absf(ship.last_time - _ca_time) >= CLOSEST_APPROACH_CACHE_WINDOW:
+		var el := ship.current_elements()
+		var span := el.period() if el.is_elliptic() else 2.0e4
+		_ca_cache = OrbitEvents.closest_approach(
+			el, station_orbit, ship.last_time, ship.last_time + span, span / 240.0)
+		_ca_revision = ship.revision
+		_ca_time = ship.last_time
+	return _ca_cache

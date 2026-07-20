@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="256" viewBox="0 0 512 256">
+  <!-- Fixed equirectangular mission-globe map. Broad angular polygons and a
+       tiny indexed palette keep it readable on the game's faceted sphere. -->
+  <rect width="512" height="256" fill="#061f31"/>
+  <path fill="#0b5361" d="M0 32h512v36H0zM0 184h512v30H0z" opacity=".34"/>
+
+  <!-- shallow coastal shelves -->
+  <g fill="#267275" opacity=".72">
+    <path d="M28 61l25-25 49-9 51 19 29 37-18 25-31 4-16 25-29-8-13-28-31-13z"/>
+    <path d="M132 117l33-9 28 18 15 43-13 50-22 27-18-34 4-30-18-21z"/>
+    <path d="M211 48l24-24 35 7 5 25-27 16-28-6z"/>
+    <path d="M226 69l34-25 43 2 22 18 63-25 76 18 24 34-28 28-66 3-23 23-38-14-23 16-9 58-29 21-27-39 4-39-26-21z"/>
+    <path d="M386 157l36-20 48 15 20 34-29 31-54-8-27-29z"/>
+  </g>
+
+  <!-- deliberately abstract continental plates -->
+  <g stroke="#263d2f" stroke-width="3" stroke-linejoin="round">
+    <path fill="#77845a" d="M39 64l21-20 42-8 42 17 26 31-14 16-29 1-15 24-20-7-11-27-28-9z"/>
+    <path fill="#a78a55" d="M142 123l22-7 20 16 13 37-10 42-13 22-12-27 5-29-18-21z"/>
+    <path fill="#d1c9a2" d="M220 49l19-17 26 5 2 15-22 11-22-4z"/>
+    <path fill="#9a9860" d="M235 75l28-21 35 1 21 18-17 20-27 1-17 25-27-10-15-19z"/>
+    <path fill="#a9814e" d="M257 111l43-14 25 16-11 28-8 48-24 24-22-34 5-37-20-18z"/>
+    <path fill="#74865b" d="M309 68l72-22 70 18 24 26-21 20-58 2-25 22-37-16-18-20z"/>
+    <path fill="#b18a51" d="M393 163l31-17 39 13 16 25-23 23-44-7-22-22z"/>
+  </g>
+
+  <!-- polar telemetry paint -->
+  <path fill="#d9ded0" d="M0 0h512v17l-47 8-54-6-64 8-58-7-53 8-65-10-61 8-50-6-60 8z" opacity=".88"/>
+  <path fill="#c8d3c8" d="M0 236l58-8 49 8 58-6 61 9 65-8 57 7 59-8 55 7 50-6v25H0z" opacity=".8"/>
+</svg>

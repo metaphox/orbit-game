@@ -17,8 +17,12 @@ func total_dv() -> float:
 
 
 ## The planned dv in parent-frame world coordinates, using the orbital
-## frame (prograde/normal/radial) at the node's position on `el`.
+## frame (prograde/normal/radial) at the node's position on `el`. No burn
+## is planned (zero dv) against a degenerate reference orbit - a garbage
+## direction would be worse than declining to plan at all.
 func planned_world_dv(el: OrbitElements) -> DVec3:
+	if not el.is_valid:
+		return DVec3.new()
 	var state := el.state_at_time(t_node)
 	var pro_dir := state.v.normalized()
 	var norm_dir := state.r.cross(state.v).normalized()

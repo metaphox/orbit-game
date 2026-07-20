@@ -11,22 +11,34 @@ signal toolbar_key(keycode: int, pressed: bool)
 
 const GREEN := Color(0.45, 1.0, 0.55)
 const DIM_GREEN := Color(0.3, 0.65, 0.38)
+const AMBER := Color(1.0, 0.67, 0.2)
+const BONE := Color(0.86, 0.84, 0.72)
+const CONSOLE_BLACK := Color(0.008, 0.025, 0.02, 0.94)
 const RED := Color(1.0, 0.4, 0.3)
 
 # [label, physical keycode, holdable]. Holdable buttons (throttle) fire on
 # button_down/button_up like a held key; everything else taps press+release
 # on a single click.
-const TOOLBAR_ROW_1 := [
-	["TAB", KEY_TAB, false], ["SHIFT", KEY_SHIFT, true], ["CTRL", KEY_CTRL, true],
-	["F", KEY_F, false], ["B", KEY_B, false], ["N", KEY_N, false], ["G", KEY_G, false],
-	["U", KEY_U, false], ["I", KEY_I, false], ["T", KEY_T, false],
-	["+", KEY_EQUAL, false], ["-", KEY_MINUS, false], ["Z", KEY_Z, false], ["X", KEY_X, false],
+const TOOLBAR_GROUPS_ROW_1 := [
+	["VIEW", [["TAB", KEY_TAB, false]]],
+	["THRUST", [
+		["SHIFT", KEY_SHIFT, true], ["CTRL", KEY_CTRL, true],
+		["Z", KEY_Z, false], ["X", KEY_X, false]]],
+	["SAS LOCK", [
+		["F", KEY_F, false], ["B", KEY_B, false], ["N", KEY_N, false],
+		["G", KEY_G, false], ["U", KEY_U, false], ["I", KEY_I, false],
+		["T", KEY_T, false]]],
+	["WARP", [["+", KEY_EQUAL, false], ["-", KEY_MINUS, false]]],
 ]
-const TOOLBAR_ROW_2 := [
-	["ENTER", KEY_ENTER, false], ["BKSP", KEY_BACKSPACE, false],
-	["[", KEY_BRACKETLEFT, false], ["]", KEY_BRACKETRIGHT, false],
-	["↑", KEY_UP, false], ["↓", KEY_DOWN, false], ["←", KEY_LEFT, false], ["→", KEY_RIGHT, false],
-	["O", KEY_O, false], ["P", KEY_P, false], ["V", KEY_V, false],
+const TOOLBAR_GROUPS_ROW_2 := [
+	["MANEUVER", [
+		["ENTER", KEY_ENTER, false], ["BKSP", KEY_BACKSPACE, false],
+		["[", KEY_BRACKETLEFT, false], ["]", KEY_BRACKETRIGHT, false]]],
+	["VECTOR", [
+		["↑", KEY_UP, false], ["↓", KEY_DOWN, false],
+		["←", KEY_LEFT, false], ["→", KEY_RIGHT, false],
+		["O", KEY_O, false], ["P", KEY_P, false]]],
+	["GUIDANCE", [["V", KEY_V, false]]],
 ]
 
 var status_label: Label
@@ -40,6 +52,7 @@ var _font: SystemFont
 var _flash_label: Label
 var _flash_left := 0.0
 var _paused_label: Label
+var _toolbar_buttons: Dictionary = {}
 
 
 func build(level: LevelDef) -> void:
@@ -130,6 +143,7 @@ func refresh(ship: ShipSim, level: LevelDef, sim_time: float, warp: int) -> void
 	engine_label.text = "\n".join(engine_lines)
 
 	warp_label.text = "TIME WARP: %dx" % warp
+	_sync_toolbar_state(ship)
 
 
 func show_win(level: LevelDef, dv_used: float, has_next: bool) -> void:
@@ -246,24 +260,74 @@ func _build_warp_indicator(_level: LevelDef) -> void:
 ## via toolbar_key - see the signal doc for why that's the whole
 ## integration surface.
 func _build_toolbar() -> void:
+	var console := PanelContainer.new()
+	console.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(console)
+	console.set_anchors_and_offsets_preset(
+		Control.PRESET_CENTER_BOTTOM, Control.PRESET_MODE_MINSIZE, 14)
+	console.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	console.grow_vertical = Control.GROW_DIRECTION_BEGIN
+
+	var console_style := StyleBoxFlat.new()
+	console_style.bg_color = CONSOLE_BLACK
+	console_style.set_border_width_all(1)
+	console_style.border_color = Color(DIM_GREEN, 0.72)
+	console_style.corner_radius_top_left = 5
+	console_style.corner_radius_top_right = 5
+	console_style.corner_radius_bottom_left = 2
+	console_style.corner_radius_bottom_right = 2
+	console_style.set_content_margin_all(6)
+	console.add_theme_stylebox_override("panel", console_style)
+
 	var toolbar := VBoxContainer.new()
 	toolbar.add_theme_constant_override("separation", 4)
 	toolbar.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(toolbar)
-	toolbar.set_anchors_and_offsets_preset(
-		Control.PRESET_CENTER_BOTTOM, Control.PRESET_MODE_MINSIZE, 16)
-	_build_toolbar_row(toolbar, TOOLBAR_ROW_1)
-	_build_toolbar_row(toolbar, TOOLBAR_ROW_2)
+	console.add_child(toolbar)
+	_build_toolbar_row(toolbar, TOOLBAR_GROUPS_ROW_1)
+	_build_toolbar_row(toolbar, TOOLBAR_GROUPS_ROW_2)
 
 
-func _build_toolbar_row(parent: Control, entries: Array) -> void:
+func _build_toolbar_row(parent: Control, groups: Array) -> void:
 	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 3)
+	row.add_theme_constant_override("separation", 5)
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	parent.add_child(row)
+	for group in groups:
+		row.add_child(_make_toolbar_group(group[0], group[1]))
+
+
+func _make_toolbar_group(title: String, entries: Array) -> Control:
+	var panel := PanelContainer.new()
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var panel_style := StyleBoxFlat.new()
+	panel_style.bg_color = Color(0.015, 0.065, 0.048, 0.82)
+	panel_style.set_border_width_all(1)
+	panel_style.border_color = Color(0.18, 0.38, 0.29, 0.9)
+	panel_style.corner_radius_top_left = 2
+	panel_style.corner_radius_top_right = 2
+	panel_style.set_content_margin_all(4)
+	panel.add_theme_stylebox_override("panel", panel_style)
+
+	var stack := VBoxContainer.new()
+	stack.add_theme_constant_override("separation", 2)
+	stack.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.add_child(stack)
+
+	var heading := Label.new()
+	heading.text = "▰  " + title
+	heading.add_theme_font_override("font", _font)
+	heading.add_theme_font_size_override("font_size", 9)
+	heading.add_theme_color_override("font_color", AMBER)
+	stack.add_child(heading)
+
+	var buttons := HBoxContainer.new()
+	buttons.add_theme_constant_override("separation", 2)
+	buttons.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	stack.add_child(buttons)
 	for entry in entries:
-		row.add_child(_make_toolbar_button(entry[0], entry[1], entry[2]))
+		buttons.add_child(_make_toolbar_button(entry[0], entry[1], entry[2]))
+	return panel
 
 
 func _make_toolbar_button(label: String, keycode: int, holdable: bool) -> Button:
@@ -273,7 +337,12 @@ func _make_toolbar_button(label: String, keycode: int, holdable: bool) -> Button
 	button.add_theme_font_override("font", _font)
 	button.add_theme_font_size_override("font_size", 13)
 	button.focus_mode = Control.FOCUS_NONE  # never steals keyboard focus from flying
+	if keycode in [KEY_F, KEY_B, KEY_N, KEY_G, KEY_U, KEY_I, KEY_T, KEY_V]:
+		button.toggle_mode = true
 	_style_toolbar_button(button)
+	if not _toolbar_buttons.has(keycode):
+		_toolbar_buttons[keycode] = []
+	(_toolbar_buttons[keycode] as Array).append(button)
 	if holdable:
 		button.button_down.connect(func(): toolbar_key.emit(keycode, true))
 		button.button_up.connect(func(): toolbar_key.emit(keycode, false))
@@ -286,26 +355,49 @@ func _make_toolbar_button(label: String, keycode: int, holdable: bool) -> Button
 
 func _style_toolbar_button(button: Button) -> void:
 	var normal := StyleBoxFlat.new()
-	normal.bg_color = Color(0.0, 0.1, 0.04, 0.75)
+	normal.bg_color = Color(0.018, 0.055, 0.04, 0.96)
 	normal.set_border_width_all(1)
-	normal.border_color = DIM_GREEN
-	normal.set_content_margin_all(3)
+	normal.border_color = Color(0.25, 0.48, 0.34, 0.9)
+	normal.corner_radius_top_left = 2
+	normal.corner_radius_top_right = 2
+	normal.corner_radius_bottom_left = 1
+	normal.corner_radius_bottom_right = 1
+	normal.set_content_margin_all(4)
 	normal.content_margin_left = 6
 	normal.content_margin_right = 6
 	var hover := normal.duplicate()
-	hover.bg_color = Color(0.05, 0.25, 0.1, 0.85)
+	hover.bg_color = Color(0.04, 0.19, 0.105, 0.98)
 	hover.border_color = GREEN
 	var pressed_style := normal.duplicate()
-	pressed_style.bg_color = Color(0.1, 0.45, 0.2, 0.9)
-	pressed_style.border_color = GREEN
+	pressed_style.bg_color = Color(0.34, 0.17, 0.025, 0.98)
+	pressed_style.border_color = AMBER
 
 	button.add_theme_stylebox_override("normal", normal)
 	button.add_theme_stylebox_override("hover", hover)
 	button.add_theme_stylebox_override("pressed", pressed_style)
+	button.add_theme_stylebox_override("hover_pressed", pressed_style)
 	button.add_theme_stylebox_override("focus", normal)
-	button.add_theme_color_override("font_color", DIM_GREEN)
+	button.add_theme_color_override("font_color", BONE)
 	button.add_theme_color_override("font_hover_color", GREEN)
-	button.add_theme_color_override("font_pressed_color", GREEN)
+	button.add_theme_color_override("font_pressed_color", AMBER)
+	button.add_theme_color_override("font_hover_pressed_color", AMBER)
+
+
+func _sync_toolbar_state(ship: ShipSim) -> void:
+	var active_modes := {
+		KEY_F: ShipSim.SasMode.PROGRADE,
+		KEY_B: ShipSim.SasMode.RETROGRADE,
+		KEY_N: ShipSim.SasMode.NORMAL,
+		KEY_G: ShipSim.SasMode.ANTI_NORMAL,
+		KEY_U: ShipSim.SasMode.RADIAL_OUT,
+		KEY_I: ShipSim.SasMode.RADIAL_IN,
+		KEY_T: ShipSim.SasMode.OFF,
+		KEY_V: ShipSim.SasMode.NODE,
+	}
+	for keycode: int in active_modes:
+		var active: bool = ship.sas_mode == active_modes[keycode]
+		for button: Button in _toolbar_buttons.get(keycode, []):
+			button.set_pressed_no_signal(active)
 
 
 func set_paused_indicator(shown: bool) -> void:
@@ -324,8 +416,20 @@ func _label(preset: int, color: Color, size := 19) -> Label:
 	label.add_theme_constant_override("line_spacing", 4)
 	add_child(label)
 	label.set_anchors_and_offsets_preset(preset, Control.PRESET_MODE_MINSIZE, 14)
-	label.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	label.grow_vertical = Control.GROW_DIRECTION_BOTH
+	match preset:
+		Control.PRESET_TOP_LEFT, Control.PRESET_BOTTOM_LEFT:
+			label.grow_horizontal = Control.GROW_DIRECTION_END
+		Control.PRESET_TOP_RIGHT, Control.PRESET_BOTTOM_RIGHT:
+			label.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+		_:
+			label.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	match preset:
+		Control.PRESET_TOP_LEFT, Control.PRESET_TOP_RIGHT, Control.PRESET_CENTER_TOP:
+			label.grow_vertical = Control.GROW_DIRECTION_END
+		Control.PRESET_BOTTOM_LEFT, Control.PRESET_BOTTOM_RIGHT:
+			label.grow_vertical = Control.GROW_DIRECTION_BEGIN
+		_:
+			label.grow_vertical = Control.GROW_DIRECTION_BOTH
 	return label
 
 
