@@ -7,11 +7,12 @@ extends RefCounted
 
 ## Not `const`: GDScript's const requires a compile-time constant
 ## expression, and references to other class_name scripts don't qualify.
-static var LEVELS := [Level01, Level02, Level03, Level04, Level05]
+static var LEVELS := [Level01, Level02, Level03, Level04, Level05, Level06, Level07]
 
 const ACTS := [
-	{"name": "ACT 1 — EARTH ORBIT SCHOOL", "indices": [0, 2]},
+	{"name": "ACT 1 — EARTH ORBIT SCHOOL", "indices": [0, 2, 5]},
 	{"name": "ACT 2 — LUNAR PROGRAM", "indices": [1, 3, 4]},
+	{"name": "ACT 3 — INTERPLANETARY", "indices": [6]},
 ]
 
 

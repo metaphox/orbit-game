@@ -25,6 +25,13 @@ var argp := 0.0
 var m0 := 0.0
 var epoch := 0.0
 
+## Orbit normal (r x v, normalized) in world/render coordinates. `inc` is
+## measured against the classical +Z pole for the internal element math
+## (see _perifocal_basis); this game's orbital plane is XZ with +Y "up",
+## so gameplay code that wants tilt-from-the-game's-reference-plane
+## (e.g. a plane-change objective) should use plane_normal.y, not inc.
+var plane_normal := DVec3.new()
+
 
 static func from_state(r: DVec3, v: DVec3, mu_p: float, t: float) -> OrbitElements:
 	var el := OrbitElements.new()
@@ -34,6 +41,7 @@ static func from_state(r: DVec3, v: DVec3, mu_p: float, t: float) -> OrbitElemen
 	var h_vec := r.cross(v)
 	var h_len := h_vec.length()
 	var p := h_len * h_len / mu_p
+	el.plane_normal = h_vec.scaled(1.0 / h_len)
 
 	var e_vec := v.cross(h_vec).scaled(1.0 / mu_p).sub(r.normalized())
 	var ecc := e_vec.length()

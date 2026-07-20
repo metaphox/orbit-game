@@ -21,10 +21,11 @@ func _clear_save() -> void:
 
 
 func test_campaign_order_and_next() -> void:
-	assert_eq(Campaign.order(), [0, 2, 1, 3, 4], "act-grouped play order")
+	assert_eq(Campaign.order(), [0, 2, 5, 1, 3, 4, 6], "act-grouped play order")
 	assert_eq(Campaign.next_after(0), 2, "orbit school 1 unlocks rendezvous")
-	assert_eq(Campaign.next_after(2), 1, "rendezvous unlocks the lunar program act")
-	assert_eq(Campaign.next_after(4), -1, "no level after the last one")
+	assert_eq(Campaign.next_after(5), 1, "plane change unlocks the lunar program act")
+	assert_eq(Campaign.next_after(4), 6, "lunar return unlocks the interplanetary act")
+	assert_eq(Campaign.next_after(6), -1, "no level after the last one")
 
 
 func test_save_data_round_trip_and_unlock() -> void:
