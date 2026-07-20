@@ -238,3 +238,117 @@ func test_level_select_escape_returns_to_title() -> void:
 	esc.pressed = true
 	screen._unhandled_input(esc)
 	assert_true(back_signaled[0], "Escape returns to the title screen")
+
+
+func test_save_progress_persists_to_active_profile() -> void:
+	var root: Node = CampaignRootScene.instantiate()
+	root.store = ProfileStore.load_or_new(SAVE_TEST_PATH)
+	add_child_autofree(root)
+	root._on_profile_created("Ada")
+	root._launch(1)  # Level02, the lunar TLI mission
+	simulate(root, 2, 1.0 / 60.0)
+
+	root.game.sim_time = 12345.0
+	root.game.ship.advance_to(12345.0)
+	root.game.warp_index = 2
+	root.game._save_progress()
+
+	assert_not_null(root.active_profile.mission_save, "save landed on the active profile")
+	assert_eq(root.active_profile.mission_save["level_index"], 1)
+	assert_eq(root.active_profile.mission_save["sim_time"], 12345.0)
+	assert_eq(root.active_profile.mission_save["warp_index"], 2)
+
+	var reloaded := ProfileStore.load_or_new(SAVE_TEST_PATH)
+	var reloaded_save = reloaded.find_profile("Ada").mission_save
+	assert_not_null(reloaded_save, "save persisted to disk")
+	# JSON has no int type - everything numeric round-trips as float.
+	assert_eq(reloaded_save["level_index"], 1.0)
+
+
+func test_continue_resumes_saved_mission_exactly() -> void:
+	var root: Node = CampaignRootScene.instantiate()
+	root.store = ProfileStore.load_or_new(SAVE_TEST_PATH)
+	add_child_autofree(root)
+	root._on_profile_created("Ada")
+	root._launch(1)
+	simulate(root, 2, 1.0 / 60.0)
+
+	# fly a bit so the state isn't just the launch defaults
+	root.game.ship.throttle = 1.0
+	simulate(root, 60, 1.0 / 60.0)
+	root.game.ship.throttle = 0.0
+	var saved_r: DVec3 = root.game.ship.r
+	var saved_v: DVec3 = root.game.ship.v
+	var saved_prop: float = root.game.ship.prop_mass
+	var saved_time: float = root.game.sim_time
+
+	root.game._save_progress()
+	root.game.exit_requested.emit()
+	simulate(root, 2, 1.0 / 60.0)
+	assert_true(root._current_ui is LevelSelect, "quit without losing the save")
+
+	root._current_ui.back_pressed.emit()
+	simulate(root, 2, 1.0 / 60.0)
+	assert_true(root._current_ui is TitleScreen)
+
+	# load_saved_state() runs synchronously inside _on_continue() (right
+	# after add_child triggers _ready), so check before any further
+	# simulate() call - otherwise the freshly-resumed ship legitimately
+	# coasts a bit further and no longer matches the captured snapshot.
+	root._on_continue()
+	assert_not_null(root.game, "continue resumed straight into flight")
+	assert_eq(root.game.level_index, 1)
+	assert_close(root.game.sim_time, saved_time, 1e-6)
+	assert_dvec_close(root.game.ship.r, saved_r, 1e-6)
+	assert_dvec_close(root.game.ship.v, saved_v, 1e-6)
+	assert_close(root.game.ship.prop_mass, saved_prop, 1e-9)
+
+
+func test_continue_resumes_correctly_after_a_simulated_app_restart() -> void:
+	# Unlike test_continue_resumes_saved_mission_exactly (which resumes via
+	# the same in-memory Profile object), this reloads the store from disk
+	# first - JSON has no int type, so level_index/warp_index/sas_mode
+	# arrive as floats here. Real risk: a typed `var x: int = data.get(...)`
+	# coerces fine, but this is the actual boundary a real app restart
+	# hits, so it's worth checking directly rather than assuming.
+	var writer: Node = CampaignRootScene.instantiate()
+	writer.store = ProfileStore.load_or_new(SAVE_TEST_PATH)
+	add_child_autofree(writer)
+	writer._on_profile_created("Ada")
+	writer._launch(1)
+	simulate(writer, 2, 1.0 / 60.0)
+	writer.game.warp_index = 3
+	writer.game._save_progress()
+	var saved_r: DVec3 = writer.game.ship.r
+	var saved_v: DVec3 = writer.game.ship.v
+
+	var root: Node = CampaignRootScene.instantiate()
+	root.store = ProfileStore.load_or_new(SAVE_TEST_PATH)  # fresh load from disk
+	add_child_autofree(root)
+	root._on_continue()
+	assert_not_null(root.game, "resumed from a disk-loaded store")
+	assert_eq(root.game.level_index, 1)
+	assert_eq(root.game.warp_index, 3)
+	assert_dvec_close(root.game.ship.r, saved_r, 1e-6)
+	assert_dvec_close(root.game.ship.v, saved_v, 1e-6)
+	assert_eq(root.game.ship.body.name, "EARTH")
+
+
+func test_winning_clears_the_mission_save() -> void:
+	var root: Node = CampaignRootScene.instantiate()
+	root.store = ProfileStore.load_or_new(SAVE_TEST_PATH)
+	add_child_autofree(root)
+	root._on_profile_created("Ada")
+	root._launch(0)
+	simulate(root, 2, 1.0 / 60.0)
+	root.game._save_progress()
+	assert_not_null(root.active_profile.mission_save)
+
+	var target: float = root.game.level.objective.target_radius
+	root.game.ship.elements = OrbitElements.from_state(
+		DVec3.new(target, 0.0, 0.0),
+		DVec3.new(0.0, 0.0, -sqrt(root.game.level.body.mu / target)),
+		root.game.level.body.mu, root.game.sim_time)
+	simulate(root, 5, 1.0 / 60.0)
+	assert_eq(root.game.phase, root.game.Phase.WON)
+	assert_null(root.active_profile.mission_save, "no point resuming an already-won mission")

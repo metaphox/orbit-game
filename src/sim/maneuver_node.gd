@@ -26,3 +26,13 @@ func planned_world_dv(el: OrbitElements) -> DVec3:
 	return pro_dir.scaled(prograde) \
 		.add(norm_dir.scaled(normal)) \
 		.add(rad_dir.scaled(radial))
+
+
+func serialize() -> Dictionary:
+	return {
+		"t_node": t_node,
+		"prograde": prograde,
+		"normal": normal,
+		"radial": radial,
+		"remaining": [remaining.x, remaining.y, remaining.z],
+	}

@@ -31,6 +31,7 @@ static func load_or_new(path := DEFAULT_PATH) -> ProfileStore:
 					profile.unlocked[int(k)] = true
 				for k in p_data.get("medals", {}):
 					profile.medals[int(k)] = p_data["medals"][k]
+				profile.mission_save = p_data.get("mission_save")
 				store.profiles.append(profile)
 	return store
 
@@ -46,6 +47,7 @@ func save() -> void:
 			"name": profile.profile_name,
 			"unlocked": profile.unlocked.keys(),
 			"medals": medals_out,
+			"mission_save": profile.mission_save,
 		})
 	f.store_string(JSON.stringify({
 		"last_active": last_active_name,

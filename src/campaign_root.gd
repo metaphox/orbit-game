@@ -62,7 +62,21 @@ func _on_continue() -> void:
 	if profile == null:
 		return  # TitleScreen disables this option in this state; defensive only
 	active_profile = profile
-	_show_mission_select()
+	if profile.mission_save != null:
+		_resume_mission(profile.mission_save)
+	else:
+		_show_mission_select()
+
+
+func _resume_mission(save_data: Dictionary) -> void:
+	_clear_ui()
+	_clear_game()
+	var index: int = save_data.get("level_index", 0)
+	GameRootScript.level_index = index
+	game = GameRootScene.instantiate()
+	add_child(game)
+	game.load_saved_state(save_data)
+	_connect_game_signals()
 
 
 func _show_new_profile() -> void:
@@ -131,14 +145,24 @@ func _launch(index: int) -> void:
 	GameRootScript.level_index = index
 	game = GameRootScene.instantiate()
 	add_child(game)
+	_connect_game_signals()
+
+
+func _connect_game_signals() -> void:
 	game.mission_won.connect(_on_win)
 	game.restart_requested.connect(_on_restart)
 	game.exit_requested.connect(_show_mission_select)
 	game.next_requested.connect(_on_next)
+	game.save_requested.connect(_on_save)
 
 
 func _on_win(index: int, dv_used: float, medal: String) -> void:
 	active_profile.record_win(index, medal, dv_used)
+	store.save()
+
+
+func _on_save(payload: Dictionary) -> void:
+	active_profile.mission_save = payload
 	store.save()
 
 

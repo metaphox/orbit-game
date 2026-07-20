@@ -13,9 +13,11 @@ var engine_label: Label
 var help_label: Label
 var center_label: Label
 var minimap_root: Control
+var warp_label: Label
 var _font: SystemFont
 var _flash_label: Label
 var _flash_left := 0.0
+var _paused_label: Label
 
 
 func build(level: LevelDef) -> void:
@@ -34,8 +36,9 @@ func build(level: LevelDef) -> void:
 	var help_lines := [
 		"W/S PITCH  A/D YAW  Q/E ROLL",
 		"SHIFT/CTRL THROTTLE  Z MAX  X CUT",
-		",/. TIME WARP  R RESTART  ESC MENU",
-		"TAB ORBIT VIEW  DRAG ROTATE  WHEEL ZOOM"]
+		"1-4 WARP 1/2/4/8x  ,/. WARP STEP",
+		"SPACE PAUSE  ESC PAUSE MENU  R RESTART",
+		"TAB ORBIT VIEW  DRAG ROTATE  WHEEL/TRACKPAD ZOOM"]
 	if level.sas_enabled:
 		help_lines.append("SAS: G PRO  H RETRO  N NORM  B ANTI  U/I RADIAL  T OFF")
 	if level.nodes_enabled:
@@ -56,7 +59,13 @@ func build(level: LevelDef) -> void:
 	_flash_label.offset_bottom += 44
 	_flash_label.visible = false
 
+	_paused_label = _label(Control.PRESET_CENTER, GREEN, 22)
+	_paused_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_paused_label.text = "‖ PAUSED — SPACE OR ESC TO RESUME"
+	_paused_label.visible = false
+
 	_build_minimap(level)
+	_build_warp_indicator(level)
 	if Settings.effects_enabled:
 		add_child(ScreenGrade.new())  # drawn last: whole-screen film grade on top
 
@@ -96,6 +105,8 @@ func refresh(ship: ShipSim, level: LevelDef, sim_time: float, warp: int) -> void
 				dv, sim_time - ship.node.t_node, burn_time,
 				ship.node.remaining.length()])
 	engine_label.text = "\n".join(engine_lines)
+
+	warp_label.text = "TIME WARP: %dx" % warp
 
 
 func show_win(level: LevelDef, dv_used: float, has_next: bool) -> void:
@@ -177,6 +188,32 @@ func _build_minimap(level: LevelDef) -> void:
 	cam.make_current()
 	if Settings.effects_enabled:
 		viewport.add_child(CrtOverlay.new())  # last child: composites over the 3D render
+
+
+## Simple text readout of the current warp multiplier, under the minimap
+## for now — a fancier instrument-style gauge can replace it later.
+func _build_warp_indicator(_level: LevelDef) -> void:
+	warp_label = Label.new()
+	warp_label.add_theme_font_override("font", _font)
+	warp_label.add_theme_font_size_override("font_size", 22)
+	warp_label.add_theme_color_override("font_color", GREEN)
+	warp_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	add_child(warp_label)
+	warp_label.anchor_left = 1.0
+	warp_label.anchor_right = 1.0
+	warp_label.anchor_top = 0.0
+	warp_label.anchor_bottom = 0.0
+	warp_label.offset_left = -572.0
+	warp_label.offset_right = -12.0
+	warp_label.offset_top = 540.0
+	warp_label.offset_bottom = 576.0
+	warp_label.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	warp_label.grow_vertical = Control.GROW_DIRECTION_END
+	warp_label.text = "TIME WARP: 1x"
+
+
+func set_paused_indicator(shown: bool) -> void:
+	_paused_label.visible = shown
 
 
 func set_minimap_visible(shown: bool) -> void:

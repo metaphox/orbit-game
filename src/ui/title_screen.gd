@@ -22,8 +22,13 @@ var _cursor := 0
 
 
 func build(store: ProfileStore) -> void:
+	var last_profile := store.last_active_profile()
+	var continue_label := "CONTINUE"
+	if last_profile != null and last_profile.mission_save != null:
+		var saved_index: int = last_profile.mission_save.get("level_index", 0)
+		continue_label = "CONTINUE (%s)" % Campaign.title(saved_index)
 	_items = [
-		["CONTINUE", store.last_active_profile() != null],
+		[continue_label, last_profile != null],
 		["NEW PROFILE", store.can_create_profile()],
 		["LOAD PROFILE", true],
 		["SETTINGS", true],

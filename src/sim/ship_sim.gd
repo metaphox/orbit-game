@@ -229,3 +229,67 @@ func _coast_to(t: float) -> void:
 	var s := elements.state_at_time(t)
 	r = s.r
 	v = s.v
+
+
+## Plain-Dictionary snapshot (JSON-safe: floats/strings/arrays/null only)
+## for a mid-mission save. Bodies aren't included - they're on rails, so
+## sim_time alone reconstructs every body's position on load.
+func serialize() -> Dictionary:
+	return {
+		"body_name": body.name,
+		"r": [r.x, r.y, r.z],
+		"v": [v.x, v.y, v.z],
+		"attitude": _basis_to_array(attitude),
+		"prop_mass": prop_mass,
+		"sas_mode": sas_mode,
+		"node": node.serialize() if node != null else null,
+	}
+
+
+## Restores state from serialize()'s output at the given sim time. Always
+## lands COASTING (elements refit fresh from r,v) with throttle zeroed -
+## resuming mid-burn-substep isn't meaningful across a save boundary.
+func apply_serialized(data: Dictionary, at_time: float) -> void:
+	body = _find_body(data.get("body_name", body.name))
+	var rv: Array = data.get("r", [r.x, r.y, r.z])
+	r = DVec3.new(rv[0], rv[1], rv[2])
+	var vv: Array = data.get("v", [v.x, v.y, v.z])
+	v = DVec3.new(vv[0], vv[1], vv[2])
+	attitude = _array_to_basis(data.get("attitude", []))
+	prop_mass = data.get("prop_mass", prop_mass)
+	sas_mode = data.get("sas_mode", SasMode.OFF) as SasMode
+	throttle = 0.0
+	last_time = at_time
+	_refit_elements(at_time)
+
+	var node_data = data.get("node")
+	if node_data != null:
+		node = ManeuverNode.new()
+		node.t_node = node_data["t_node"]
+		node.prograde = node_data["prograde"]
+		node.normal = node_data["normal"]
+		node.radial = node_data["radial"]
+		var rem: Array = node_data["remaining"]
+		node.remaining = DVec3.new(rem[0], rem[1], rem[2])
+	else:
+		node = null
+
+
+func _find_body(body_name: String) -> BodyDef:
+	if _level.body.name == body_name:
+		return _level.body
+	for moon in _level.moons:
+		if moon.name == body_name:
+			return moon
+	return body  # shouldn't happen; keep current rather than crash
+
+
+static func _basis_to_array(b: Basis) -> Array:
+	return [b.x.x, b.x.y, b.x.z, b.y.x, b.y.y, b.y.z, b.z.x, b.z.y, b.z.z]
+
+
+static func _array_to_basis(a: Array) -> Basis:
+	if a.size() < 9:
+		return Basis.IDENTITY
+	return Basis(
+		Vector3(a[0], a[1], a[2]), Vector3(a[3], a[4], a[5]), Vector3(a[6], a[7], a[8]))

@@ -10,12 +10,18 @@ signal mission_won(index: int, dv_used: float, medal: String)
 signal restart_requested
 signal exit_requested
 signal next_requested(index: int)
+signal save_requested(payload: Dictionary)
 
-enum Phase { FLYING, WON, FAILED }
+enum Phase { FLYING, WON, FAILED, PAUSED }
 
-const WARP_STEPS: Array[int] = [1, 5, 25, 100, 500, 2500]
+## Keys 1-4 jump straight to the first four steps (1/2/4/8x); ,/. step
+## through the whole ladder including the higher warps those keys don't
+## reach.
+const WARP_STEPS: Array[int] = [1, 2, 4, 8, 25, 100, 500, 2500]
 const ROT_RATE := Vector3(0.6, 0.6, 1.1)  # pitch/yaw/roll, rad/s
 const THROTTLE_RATE := 1.4  # full throttle sweep per second
+const ZOOM_PAN_SIGN := -1.0  # flip if trackpad scroll-up zooms out instead of in
+const ZOOM_PAN_SENSITIVITY := 0.01
 
 ## Which mission to build: set by campaign_root before instantiating this
 ## scene, or directly by tests/the temp jump before loading it.
@@ -32,6 +38,7 @@ var flight_view: FlightView
 var map_view: MapView
 var hud: Hud
 
+var _pause_menu: PauseMenu = null
 var _event_revision := -1
 var _event_horizon := -1.0
 var _next_event := INF
@@ -56,6 +63,16 @@ func _ready() -> void:
 	hud.build(level)
 
 	flight_view.camera.make_current()
+
+
+## Overrides the just-built fresh ship with a saved mid-mission state.
+## Called by campaign_root right after add_child() (so _ready has already
+## run ship.setup(level)) and before the first _physics_process.
+func load_saved_state(data: Dictionary) -> void:
+	sim_time = data.get("sim_time", 0.0)
+	warp_index = clampi(data.get("warp_index", 0), 0, WARP_STEPS.size() - 1)
+	ship.apply_serialized(data, sim_time)
+	flight_view.mark_traj_dirty()
 
 
 func _physics_process(delta: float) -> void:
@@ -106,6 +123,23 @@ func _unhandled_input(event: InputEvent) -> void:
 			elif wheel.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 				flight_view.side_zoom(1.14)
 		return
+	# Trackpad two-finger scroll (macOS): arrives as InputEventPanGesture
+	# rather than wheel button events. Sign/scale is a best-effort guess -
+	# untested on real trackpad hardware; flip ZOOM_PAN_SIGN below if it
+	# feels backwards.
+	var pan := event as InputEventPanGesture
+	if pan != null:
+		if side_active:
+			flight_view.side_zoom(1.0 + pan.delta.y * ZOOM_PAN_SIGN * ZOOM_PAN_SENSITIVITY)
+		return
+	# Pinch-to-zoom, offered as a bonus alongside the requested two-finger
+	# scroll: factor > 1 is a pinch-out (spreading fingers), which reads as
+	# "zoom in" - our side_zoom shrinks distance for zoom-in, hence 1/factor.
+	var magnify := event as InputEventMagnifyGesture
+	if magnify != null and magnify.factor > 0.0:
+		if side_active:
+			flight_view.side_zoom(1.0 / magnify.factor)
+		return
 	var key := event as InputEventKey
 	if key == null or not key.pressed or key.echo:
 		return
@@ -118,6 +152,9 @@ func _unhandled_input(event: InputEvent) -> void:
 				warp_index = mini(warp_index + 1, WARP_STEPS.size() - 1)
 		KEY_COMMA:
 			warp_index = maxi(warp_index - 1, 0)
+		KEY_1, KEY_2, KEY_3, KEY_4:
+			if phase == Phase.FLYING and ship.throttle == 0.0:
+				warp_index = key.physical_keycode - KEY_1
 		KEY_Z:
 			if phase == Phase.FLYING:
 				ship.throttle = 1.0
@@ -127,7 +164,22 @@ func _unhandled_input(event: InputEvent) -> void:
 		KEY_R:
 			restart_requested.emit()
 		KEY_ESCAPE:
-			exit_requested.emit()
+			if phase == Phase.FLYING or phase == Phase.PAUSED:
+				if _pause_menu != null:
+					_close_pause_menu()
+				else:
+					_open_pause_menu()
+			else:  # WON or FAILED: no pause concept once the mission has ended
+				exit_requested.emit()
+		KEY_SPACE:
+			if _pause_menu != null:
+				_close_pause_menu()
+			elif phase == Phase.FLYING:
+				phase = Phase.PAUSED
+				hud.set_paused_indicator(true)
+			elif phase == Phase.PAUSED:
+				phase = Phase.FLYING
+				hud.set_paused_indicator(false)
 		KEY_T:
 			if phase == Phase.FLYING:
 				ship.sas_mode = ShipSim.SasMode.OFF
@@ -175,6 +227,38 @@ func _unhandled_input(event: InputEvent) -> void:
 				ship.sas_mode = (ShipSim.SasMode.OFF
 					if ship.sas_mode == ShipSim.SasMode.NODE
 					else ShipSim.SasMode.NODE)
+
+
+func _open_pause_menu() -> void:
+	phase = Phase.PAUSED
+	if _pause_menu != null:
+		return
+	_pause_menu = PauseMenu.new()
+	add_child(_pause_menu)
+	_pause_menu.build()
+	_pause_menu.resume_pressed.connect(_close_pause_menu)
+	_pause_menu.save_pressed.connect(_save_progress)
+	_pause_menu.restart_pressed.connect(func(): restart_requested.emit())
+	_pause_menu.quit_pressed.connect(func(): exit_requested.emit())
+	hud.set_paused_indicator(false)  # the full menu already reads "PAUSED"
+
+
+func _close_pause_menu() -> void:
+	if _pause_menu != null:
+		_pause_menu.queue_free()
+		_pause_menu = null
+	phase = Phase.FLYING
+	hud.set_paused_indicator(false)
+
+
+func _save_progress() -> void:
+	var payload := ship.serialize()
+	payload["level_index"] = level_index
+	payload["sim_time"] = sim_time
+	payload["warp_index"] = warp_index
+	save_requested.emit(payload)
+	if _pause_menu != null:
+		_pause_menu.show_saved_confirmation()
 
 
 func _apply_flight_input(delta: float) -> void:
