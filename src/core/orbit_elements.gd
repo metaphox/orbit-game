@@ -197,7 +197,7 @@ func true_anomaly_at_radius(r_len: float) -> float:
 ## plane at all (equatorial: plane_normal.y ~ ±1). Reachability on a
 ## hyperbolic arc isn't checked here — callers should confirm via
 ## radius_at_true_anomaly / the true-anomaly bound before using a result.
-func xz_plane_crossings() -> Array:
+func xz_plane_crossings() -> Array[float]:
 	if absf(plane_normal.y) > 1.0 - INC_EQUATORIAL:
 		return []
 	var basis := _perifocal_basis()
@@ -242,8 +242,8 @@ func specific_energy() -> float:
 ## Positions along the orbit for drawing. Elliptic orbits that stay under
 ## r_max produce a closed loop; otherwise the arc is clipped at r_max
 ## (or just inside the asymptotes for unbounded hyperbolas).
-func sample_positions(count: int, r_max := INF) -> Array:
-	var pts := []
+func sample_positions(count: int, r_max := INF) -> Array[DVec3]:
+	var pts: Array[DVec3] = []
 	if is_elliptic() and radius_apoapsis() <= r_max:
 		for i in count:
 			pts.append(state_at_true_anomaly(TAU * i / count).r)
@@ -260,7 +260,7 @@ func sample_positions(count: int, r_max := INF) -> Array:
 
 
 ## Unit vectors toward periapsis (P) and 90 degrees ahead in-plane (Q).
-func _perifocal_basis() -> Array:
+func _perifocal_basis() -> Array[DVec3]:
 	var cr := cos(raan)
 	var sr := sin(raan)
 	var ci := cos(inc)

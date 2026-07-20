@@ -50,7 +50,7 @@ func build(profile_store: ProfileStore) -> void:
 
 
 func _refresh() -> void:
-	var lines: Array = []
+	var lines: Array[String] = []
 	if store.profiles.is_empty():
 		lines.append("[color=%s]NO PROFILES YET[/color]" % DIM_GREEN)
 	for i in store.profiles.size():

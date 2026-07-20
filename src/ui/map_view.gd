@@ -21,18 +21,30 @@ var _station_marker: MeshInstance3D
 var _refresh_left := 0.0
 
 
+## Planet/OrbitInstance/ShipMarker - the three nodes always present exactly
+## once regardless of level - come from map_view_layout.tscn. Everything
+## else here is genuinely level-variable (the ghost ring depends on which
+## of five objective types the level uses; moon tracks/markers/SOI rings
+## depend on level.moons.size()), so it stays runtime-built, matching
+## flight_view.gd's planet meshes for the same reason.
 func build(level: LevelDef) -> void:
 	_level = level
-	var planet := MeshInstance3D.new()
-	var sphere := SphereMesh.new()
-	sphere.radius = level.body.radius * MAP_SCALE
-	sphere.height = level.body.radius * MAP_SCALE * 2.0
-	sphere.radial_segments = 48
-	sphere.rings = 24
-	sphere.material = _line_material(Color(0.05, 0.22, 0.1))
-	planet.mesh = sphere
-	planet.layers = MAP_LAYER
-	add_child(planet)
+	var layout := preload("res://src/ui/map_view_layout.tscn").instantiate()
+	add_child(layout)
+
+	var planet: MeshInstance3D = layout.get_node("Planet")
+	var planet_mesh: SphereMesh = planet.mesh
+	planet_mesh.radius = level.body.radius * MAP_SCALE
+	planet_mesh.height = level.body.radius * MAP_SCALE * 2.0
+
+	orbit_instance = layout.get_node("OrbitInstance")
+	orbit_mesh = orbit_instance.mesh
+
+	ship_marker = layout.get_node("ShipMarker")
+	var ship_mesh: SphereMesh = ship_marker.mesh
+	var ship_dot_radius := level.map_extent / 220.0
+	ship_mesh.radius = ship_dot_radius
+	ship_mesh.height = ship_dot_radius * 2.0
 
 	if level.objective is OrbitMatchObjective:
 		var target := level.objective as OrbitMatchObjective
@@ -76,23 +88,6 @@ func build(level: LevelDef) -> void:
 		add_child(soi)
 		_soi_rings.append(soi)
 
-	orbit_mesh = ImmediateMesh.new()
-	orbit_instance = MeshInstance3D.new()
-	orbit_instance.mesh = orbit_mesh
-	orbit_instance.material_override = _line_material(Color(0.35, 1.0, 0.45))
-	orbit_instance.layers = MAP_LAYER
-	add_child(orbit_instance)
-
-	ship_marker = MeshInstance3D.new()
-	var ship_dot := SphereMesh.new()
-	var ship_dot_radius := level.map_extent / 220.0
-	ship_dot.radius = ship_dot_radius
-	ship_dot.height = ship_dot_radius * 2.0
-	ship_dot.material = _line_material(Color(1.0, 1.0, 1.0))
-	ship_marker.mesh = ship_dot
-	ship_marker.layers = MAP_LAYER
-	add_child(ship_marker)
-
 
 func sync(ship: ShipSim, t: float, delta: float) -> void:
 	ship_marker.position = ship.absolute_position(t).scaled(MAP_SCALE).to_vector3()
@@ -114,7 +109,7 @@ func sync(ship: ShipSim, t: float, delta: float) -> void:
 
 
 func _rebuild_orbit_line(el: OrbitElements, r_max: float) -> void:
-	var pts: Array = el.sample_positions(ORBIT_SAMPLES, r_max)
+	var pts: Array[DVec3] = el.sample_positions(ORBIT_SAMPLES, r_max)
 	orbit_mesh.clear_surfaces()
 	orbit_mesh.surface_begin(Mesh.PRIMITIVE_LINE_STRIP)
 	for p: DVec3 in pts:

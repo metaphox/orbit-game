@@ -24,7 +24,7 @@ func describe() -> String:
 		target.name, max_vertical, max_horizontal]
 
 
-func status_lines(ship: ShipSim) -> Array:
+func status_lines(ship: ShipSim) -> Array[String]:
 	if ship.body != target:
 		return ["TRANSIT TO THE %s" % target.name]
 	var up := ship.r.normalized()

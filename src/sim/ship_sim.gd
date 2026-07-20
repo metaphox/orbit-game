@@ -77,18 +77,25 @@ func advance_to(t: float) -> void:
 ## Called after each advance; rails warp is clamped to precomputed event
 ## times upstream, so polling here only ever sees small overshoots.
 ## Returns a short notice for the HUD, or "" when nothing happened.
+##
+## Exit and entry aren't mutually exclusive once nesting is more than one
+## level deep (e.g. a ship inside Earth's SOI, Earth itself a child of the
+## Sun, can still enter a moon of Earth), so both are checked every call -
+## not just at the root. level.moons is a flat list of every non-root body
+## in the level regardless of depth; filtering by moon.parent == body finds
+## the current body's actual children at any depth.
 func apply_soi_transitions(t: float) -> String:
-	if body.parent != null:
-		if r.length() >= body.soi_radius:
-			var st := Frames.to_parent_frame(StateRV.new(r, v), body.orbit, t)
-			var old := body.name
-			body = body.parent
-			r = st.r
-			v = st.v
-			_refit_elements(t)
-			return "LEAVING %s SOI" % old
-		return ""
+	if body.parent != null and r.length() >= body.soi_radius:
+		var st := Frames.to_parent_frame(StateRV.new(r, v), body.orbit, t)
+		var old := body.name
+		body = body.parent
+		r = st.r
+		v = st.v
+		_refit_elements(t)
+		return "LEAVING %s SOI" % old
 	for moon in _level.moons:
+		if moon.parent != body:
+			continue
 		var moon_state := moon.orbit.state_at_time(t)
 		if r.distance_to(moon_state.r) <= moon.soi_radius:
 			var st := Frames.to_child_frame(StateRV.new(r, v), moon.orbit, t)

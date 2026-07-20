@@ -15,7 +15,7 @@ const LOCKED := "#555555"
 const HIGHLIGHT := "#fff59d"
 
 var _text: RichTextLabel
-var _order: Array
+var _order: Array[int]
 var _profile: Profile
 var _cursor := 0
 
@@ -76,7 +76,7 @@ func _first_unlocked_pos() -> int:
 
 
 func _refresh() -> void:
-	var lines: Array = []
+	var lines: Array[String] = []
 	var pos := 0  # 0-based; matches _order index and the number-key mapping
 	for act in Campaign.acts():
 		lines.append("")

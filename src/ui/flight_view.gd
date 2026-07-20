@@ -578,7 +578,7 @@ func _update_orbit_marks(ship: ShipSim, el: OrbitElements) -> void:
 		_ap_marker.position = el.state_at_true_anomaly(PI).r.sub(ship.r).to_vector3()
 		_ap_marker.scale = mark_scale
 
-	var crossings: Array = el.xz_plane_crossings()
+	var crossings: Array[float] = el.xz_plane_crossings()
 	var nodes_valid := (crossings.size() == 2
 		and _nu_reachable(el, crossings[0]) and _nu_reachable(el, crossings[1]))
 	_an_marker.visible = nodes_valid
@@ -597,16 +597,17 @@ func _update_orbit_marks(ship: ShipSim, el: OrbitElements) -> void:
 		_impact_marker.scale = mark_scale
 
 	_encounter_marker.visible = false
-	if ship.body.parent == null:
-		var span := el.period() if el.is_elliptic() else 6.0e4
-		for moon in _level.moons:
-			var entry := OrbitEvents.child_soi_entry_time(
-				el, moon.orbit, moon.soi_radius, t, t + span, maxf(span / 400.0, 1.0))
-			if not is_nan(entry):
-				_encounter_marker.visible = true
-				_encounter_marker.position = el.state_at_time(entry).r.sub(ship.r).to_vector3()
-				_encounter_marker.scale = mark_scale
-				break
+	var encounter_span := el.period() if el.is_elliptic() else 6.0e4
+	for moon in _level.moons:
+		if moon.parent != ship.body:
+			continue
+		var entry := OrbitEvents.child_soi_entry_time(
+			el, moon.orbit, moon.soi_radius, t, t + encounter_span, maxf(encounter_span / 400.0, 1.0))
+		if not is_nan(entry):
+			_encounter_marker.visible = true
+			_encounter_marker.position = el.state_at_time(entry).r.sub(ship.r).to_vector3()
+			_encounter_marker.scale = mark_scale
+			break
 
 	_closest_approach_marker.visible = false
 	if _objective is RendezvousObjective and ship.body.parent == null:
@@ -627,7 +628,7 @@ func _rebuild_node_ghost(ship: ShipSim) -> void:
 		return
 	var pred := ship.predicted_elements()
 	var r_max := minf(_draw_limit, ship.body.soi_radius * 1.15)
-	var pts: Array = pred.sample_positions(TRAJ_SAMPLES, r_max)
+	var pts: Array[DVec3] = pred.sample_positions(TRAJ_SAMPLES, r_max)
 	var closed := pred.is_elliptic() and pred.radius_apoapsis() <= r_max
 	_node_mesh.surface_begin(Mesh.PRIMITIVE_LINE_STRIP)
 	for p: DVec3 in pts:
@@ -637,9 +638,9 @@ func _rebuild_node_ghost(ship: ShipSim) -> void:
 		_node_mesh.surface_add_vertex(first.to_vector3())
 	_node_mesh.surface_end()
 
-	if ship.body.parent != null:
-		return
 	for moon in _level.moons:
+		if moon.parent != ship.body:
+			continue
 		var span := pred.period() if pred.is_elliptic() else 6.0e4
 		var entry := OrbitEvents.child_soi_entry_time(
 			pred, moon.orbit, moon.soi_radius, ship.node.t_node,
@@ -648,7 +649,7 @@ func _rebuild_node_ghost(ship: ShipSim) -> void:
 			continue
 		var rel := Frames.to_child_frame(pred.state_at_time(entry), moon.orbit, entry)
 		var arc := OrbitElements.from_state(rel.r, rel.v, moon.mu, entry)
-		var arc_pts: Array = arc.sample_positions(96, moon.soi_radius)
+		var arc_pts: Array[DVec3] = arc.sample_positions(96, moon.soi_radius)
 		_preview_mesh.surface_begin(Mesh.PRIMITIVE_LINE_STRIP)
 		for p: DVec3 in arc_pts:
 			_preview_mesh.surface_add_vertex(p.to_vector3())
@@ -666,7 +667,7 @@ func _rebuild_trajectory(ship: ShipSim) -> void:
 
 	var r_max := minf(_draw_limit, ship.body.soi_radius * 1.15)
 	var closed := el.is_elliptic() and el.radius_apoapsis() <= r_max
-	var pts: Array
+	var pts: Array[DVec3]
 	if closed:
 		pts = _adaptive_loop_points(el, el.true_anomaly_at_time(ship.last_time))
 	else:
@@ -686,7 +687,7 @@ func _rebuild_trajectory(ship: ShipSim) -> void:
 ## Full loop with vertex density concentrated at the ship: the first point
 ## sits exactly on the ship, neighbors ~0.1 degrees apart (invisible bends
 ## at grazing view), widening to coarse steps on the far side.
-func _adaptive_loop_points(el: OrbitElements, nu_ship: float) -> Array:
+func _adaptive_loop_points(el: OrbitElements, nu_ship: float) -> Array[DVec3]:
 	var offsets: Array[float] = []
 	var step := TRAJ_FINE_STEP
 	var off := 0.0
@@ -694,7 +695,7 @@ func _adaptive_loop_points(el: OrbitElements, nu_ship: float) -> Array:
 		offsets.append(off)
 		off += step
 		step = minf(step * TRAJ_STEP_GROWTH, TRAJ_COARSE_STEP)
-	var pts := []
+	var pts: Array[DVec3] = []
 	for i in range(offsets.size() - 1, 0, -1):
 		pts.append(el.state_at_true_anomaly(nu_ship - offsets[i]).r)
 	for i in offsets.size():

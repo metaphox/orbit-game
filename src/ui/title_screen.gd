@@ -109,7 +109,7 @@ func _first_enabled() -> int:
 
 
 func _refresh() -> void:
-	var lines: Array = []
+	var lines: Array[String] = []
 	for i in _items.size():
 		var label: String = _items[i][0]
 		var enabled: bool = _items[i][1]

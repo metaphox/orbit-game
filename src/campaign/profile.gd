@@ -5,9 +5,13 @@ extends RefCounted
 ## persistence for all profiles together.
 
 var profile_name := ""
-var unlocked: Dictionary = {0: true}  # level_index (int) -> true
-var medals: Dictionary = {}  # level_index (int) -> {"medal": String, "dv": float}
-var mission_save = null  # Dictionary (ShipSim.serialize() + level_index/sim_time/warp_index) or null
+var unlocked: Dictionary[int, bool] = {0: true}
+var medals: Dictionary[int, Dictionary] = {}  # level_index -> {"medal": String, "dv": float}
+# Dictionary (ShipSim.serialize() + level_index/sim_time/warp_index) or null
+# for "no mission in progress" - left untyped: a strictly-typed Dictionary
+# field can't hold null in GDScript (it defaults to {} instead), which
+# would break that meaningful distinction.
+var mission_save = null
 
 
 func is_unlocked(index: int) -> bool:
@@ -15,8 +19,8 @@ func is_unlocked(index: int) -> bool:
 
 
 func medal_for(index: int) -> String:
-	var m = medals.get(index)
-	return m["medal"] if m != null else ""
+	var m: Dictionary = medals.get(index, {})
+	return m.get("medal", "")
 
 
 ## Records a win, keeps the best (lowest-dv) medal per level, unlocks
@@ -24,8 +28,8 @@ func medal_for(index: int) -> String:
 ## save for this mission (nothing to resume once it's won). Caller
 ## (campaign_root) is responsible for calling ProfileStore.save() after.
 func record_win(index: int, medal: String, dv_used: float) -> void:
-	var prev = medals.get(index)
-	if prev == null or dv_used < prev["dv"]:
+	var prev: Dictionary = medals.get(index, {})
+	if prev.is_empty() or dv_used < prev["dv"]:
 		medals[index] = {"medal": medal, "dv": dv_used}
 	var next_index := Campaign.next_after(index)
 	if next_index != -1:

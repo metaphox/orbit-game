@@ -16,6 +16,7 @@ signal next_requested(index: int)
 signal save_requested(payload: Dictionary)
 
 enum Phase { FLYING, WON, FAILED, PAUSED }
+enum NodeField { T_NODE, PROGRADE, NORMAL, RADIAL }
 
 ## Keys 1-9 jump straight to the matching step; -/= walk one step at a time.
 const WARP_STEPS: Array[int] = [1, 5, 10, 25, 50, 100, 200, 500, 1000]
@@ -241,21 +242,21 @@ func _unhandled_input(event: InputEvent) -> void:
 				ship.sas_mode = ShipSim.SasMode.OFF
 			flight_view.mark_traj_dirty()
 	elif key.is_action_pressed("node_time_earlier"):
-		_node_adjust("t_node", -60.0 if key.shift_pressed else -5.0)
+		_node_adjust(NodeField.T_NODE, -60.0 if key.shift_pressed else -5.0)
 	elif key.is_action_pressed("node_time_later"):
-		_node_adjust("t_node", 60.0 if key.shift_pressed else 5.0)
+		_node_adjust(NodeField.T_NODE, 60.0 if key.shift_pressed else 5.0)
 	elif key.is_action_pressed("node_prograde_increase"):
-		_node_adjust("prograde", 10.0 if key.shift_pressed else 1.0)
+		_node_adjust(NodeField.PROGRADE, 10.0 if key.shift_pressed else 1.0)
 	elif key.is_action_pressed("node_prograde_decrease"):
-		_node_adjust("prograde", -10.0 if key.shift_pressed else -1.0)
+		_node_adjust(NodeField.PROGRADE, -10.0 if key.shift_pressed else -1.0)
 	elif key.is_action_pressed("node_normal_increase"):
-		_node_adjust("normal", 10.0 if key.shift_pressed else 1.0)
+		_node_adjust(NodeField.NORMAL, 10.0 if key.shift_pressed else 1.0)
 	elif key.is_action_pressed("node_normal_decrease"):
-		_node_adjust("normal", -10.0 if key.shift_pressed else -1.0)
+		_node_adjust(NodeField.NORMAL, -10.0 if key.shift_pressed else -1.0)
 	elif key.is_action_pressed("node_radial_increase"):
-		_node_adjust("radial", 10.0 if key.shift_pressed else 1.0)
+		_node_adjust(NodeField.RADIAL, 10.0 if key.shift_pressed else 1.0)
 	elif key.is_action_pressed("node_radial_decrease"):
-		_node_adjust("radial", -10.0 if key.shift_pressed else -1.0)
+		_node_adjust(NodeField.RADIAL, -10.0 if key.shift_pressed else -1.0)
 	elif key.is_action_pressed("sas_node_hold"):
 		if phase == Phase.FLYING and level.nodes_enabled and ship.node != null:
 			ship.sas_mode = (ShipSim.SasMode.OFF
@@ -392,13 +393,17 @@ func _recompute_events() -> void:
 		var exit_t := OrbitEvents.soi_exit_time(el, ship.body.soi_radius, sim_time)
 		if not is_nan(exit_t):
 			events.append(exit_t)
-	else:
-		for moon in level.moons:
-			var entry := OrbitEvents.child_soi_entry_time(
-				el, moon.orbit, moon.soi_radius, sim_time, horizon,
-				maxf((horizon - sim_time) / 400.0, 1.0))
-			if not is_nan(entry):
-				events.append(entry)
+	# not an elif: a ship inside a non-root body's SOI can still enter one
+	# of that body's own children (e.g. a moon of Earth while Earth is
+	# itself a child of the Sun) - see ShipSim.apply_soi_transitions.
+	for moon in level.moons:
+		if moon.parent != ship.body:
+			continue
+		var entry := OrbitEvents.child_soi_entry_time(
+			el, moon.orbit, moon.soi_radius, sim_time, horizon,
+			maxf((horizon - sim_time) / 400.0, 1.0))
+		if not is_nan(entry):
+			events.append(entry)
 	_event_horizon = horizon
 	_next_event = events.min() if not events.is_empty() else INF
 
@@ -421,17 +426,17 @@ func _node_create() -> void:
 		flight_view.mark_traj_dirty()
 
 
-func _node_adjust(field: String, amount: float) -> void:
+func _node_adjust(field: NodeField, amount: float) -> void:
 	if phase != Phase.FLYING or ship.node == null:
 		return
 	match field:
-		"t_node":
+		NodeField.T_NODE:
 			ship.node.t_node = maxf(ship.node.t_node + amount, sim_time + 1.0)
-		"prograde":
+		NodeField.PROGRADE:
 			ship.node.prograde += amount
-		"normal":
+		NodeField.NORMAL:
 			ship.node.normal += amount
-		"radial":
+		NodeField.RADIAL:
 			ship.node.radial += amount
 	ship.refresh_node_plan()
 	flight_view.mark_traj_dirty()

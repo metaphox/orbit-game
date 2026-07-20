@@ -38,9 +38,9 @@ func describe() -> String:
 		station_name, max_distance / 1000.0, max_rel_speed]
 
 
-func status_lines(ship: ShipSim) -> Array:
+func status_lines(ship: ShipSim) -> Array[String]:
 	var st := station_orbit.state_at_time(ship.last_time)
-	var lines: Array = ["DIST %8.2f km   REL-V %6.1f m/s" % [
+	var lines: Array[String] = ["DIST %8.2f km   REL-V %6.1f m/s" % [
 		ship.r.distance_to(st.r) / 1000.0, ship.v.sub(st.v).length()]]
 	var ca := closest_approach(ship)
 	lines.append("CLOSEST %8.2f km  T+%4.0f s" % [

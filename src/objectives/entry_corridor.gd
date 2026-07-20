@@ -20,7 +20,7 @@ func describe() -> String:
 		target_periapsis / 1000.0, tolerance / 1000.0]
 
 
-func status_lines(ship: ShipSim) -> Array:
+func status_lines(ship: ShipSim) -> Array[String]:
 	if ship.body.parent != null:
 		return ["ESCAPE THE %s FIRST" % ship.body.name]
 	return ["PE Δ%+9.2f km vs CORRIDOR" % [

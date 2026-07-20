@@ -91,7 +91,7 @@ func test_node_capability_gate_and_game_flow() -> void:
 	simulate(game2, 2, 1.0 / 60.0)
 	game2._node_create()
 	assert_not_null(game2.ship.node, "level 2 grants nodes")
-	game2._node_adjust("prograde", 25.0)
-	game2._node_adjust("t_node", 60.0)
+	game2._node_adjust(GameRootScript.NodeField.PROGRADE, 25.0)
+	game2._node_adjust(GameRootScript.NodeField.T_NODE, 60.0)
 	assert_close(game2.ship.node.remaining.length(), 25.0, 1e-6, "plan updated")
 	simulate(game2, 10, 1.0 / 60.0)  # views rebuild ghost lines without errors

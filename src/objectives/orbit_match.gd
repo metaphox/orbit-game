@@ -34,9 +34,9 @@ func describe() -> String:
 	return base
 
 
-func status_lines(ship: ShipSim) -> Array:
+func status_lines(ship: ShipSim) -> Array[String]:
 	var el := ship.current_elements()
-	var lines: Array
+	var lines: Array[String]
 	if not el.is_elliptic():
 		lines = ["AP  ESCAPE   PE Δ%+8.2f" % ((el.radius_periapsis() - target_radius) / 1000.0)]
 	else:

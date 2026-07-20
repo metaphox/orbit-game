@@ -55,52 +55,59 @@ var _paused_label: Label
 var _toolbar_buttons: Dictionary = {}
 
 
+## Everything static and single-instance (status/objective/engine/help/
+## center/title/flash/paused labels, the minimap) lives in hud_layout.tscn
+## and just gets its node references grabbed here; the toolbar stays
+## code-built since its content is data-driven from TOOLBAR_GROUPS_ROW_1/2,
+## not a fixed set of nodes a scene can pre-author.
 func build(level: LevelDef) -> void:
 	_font = SystemFont.new()
 	_font.font_names = PackedStringArray(["Menlo", "Monaco", "Consolas", "monospace"])
 
-	status_label = _label(Control.PRESET_TOP_LEFT, GREEN)
-	objective_label = _label(Control.PRESET_TOP_RIGHT, GREEN)
-	objective_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	# leave the top-right corner itself to the minimap
-	objective_label.offset_top += 545
-	objective_label.offset_bottom += 545
-	engine_label = _label(Control.PRESET_BOTTOM_LEFT, GREEN)
-	help_label = _label(Control.PRESET_BOTTOM_RIGHT, DIM_GREEN)
-	help_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	var help_lines := [
-		"W/S PITCH  A/D YAW  Q/E ROLL",
-		"SHIFT/CTRL THROTTLE  Z MAX  X CUT",
-		"1-9 WARP LEVEL  -/= WARP STEP",
-		"SPACE/0 PAUSE  ESC PAUSE MENU  R RESET VIEW",
-		"TAB ORBIT VIEW  DRAG ROTATE  WHEEL/TRACKPAD ZOOM"]
-	if level.sas_enabled:
-		help_lines.append("SAS: F PRO  B RETRO  N NORM  G ANTI  U/I RADIAL  T OFF")
-	if level.nodes_enabled:
-		help_lines.append("NODE: ENTER ADD  BKSP DEL  [/] TIME  ↑↓ PRO  ←→ NORM  O/P RAD")
-		help_lines.append("      SHIFT = COARSE   V HOLD NODE")
-	help_label.text = "\n".join(help_lines)
-	center_label = _label(Control.PRESET_CENTER, GREEN, 34)
-	center_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	center_label.visible = false
+	var layout := preload("res://src/ui/hud_layout.tscn").instantiate()
+	add_child(layout)
 
-	var title := _label(Control.PRESET_CENTER_TOP, DIM_GREEN)
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	status_label = layout.get_node("StatusLabel")
+	engine_label = layout.get_node("EngineLabel")
+	help_label = layout.get_node("HelpLabel")
+	center_label = layout.get_node("CenterLabel")
+	var title: Label = layout.get_node("TitleLabel")
+	_flash_label = layout.get_node("FlashLabel")
+	_paused_label = layout.get_node("PausedLabel")
+	objective_label = layout.get_node("RightColumn/ObjectiveLabel")
+	warp_label = layout.get_node("RightColumn/WarpLabel")
+	minimap_root = layout.get_node("RightColumn/MinimapAspect/MinimapRoot")
+
+	var help_lines: Array[String] = [
+		"%s/%s PITCH  %s/%s YAW  %s/%s ROLL" % [
+			_key_label("pitch_down"), _key_label("pitch_up"),
+			_key_label("yaw_left"), _key_label("yaw_right"),
+			_key_label("roll_left"), _key_label("roll_right")],
+		"%s/%s THROTTLE  %s MAX  %s CUT" % [
+			_key_label("throttle_increase"), _key_label("throttle_decrease"),
+			_key_label("throttle_full"), _key_label("throttle_cut")],
+		"1-9 WARP LEVEL  %s/%s WARP STEP" % [
+			_key_label("warp_decrease"), _key_label("warp_increase")],
+		"%s PAUSE  %s PAUSE MENU  %s RESET VIEW" % [
+			_key_label("quick_pause"), _key_label("pause_menu"), _key_label("reset_or_restart")],
+		"%s ORBIT VIEW  DRAG ROTATE  WHEEL/TRACKPAD ZOOM" % _key_label("toggle_side_camera")]
+	if level.sas_enabled:
+		help_lines.append("SAS: %s PRO  %s RETRO  %s NORM  %s ANTI  %s/%s RADIAL  %s OFF" % [
+			_key_label("sas_prograde"), _key_label("sas_retrograde"), _key_label("sas_normal"),
+			_key_label("sas_antinormal"), _key_label("sas_radial_out"), _key_label("sas_radial_in"),
+			_key_label("sas_off")])
+	if level.nodes_enabled:
+		help_lines.append("NODE: %s ADD  %s DEL  %s/%s TIME  %s/%s PRO  %s/%s NORM  %s/%s RAD" % [
+			_key_label("node_create"), _key_label("node_delete"),
+			_key_label("node_time_earlier"), _key_label("node_time_later"),
+			_key_label("node_prograde_increase"), _key_label("node_prograde_decrease"),
+			_key_label("node_normal_increase"), _key_label("node_normal_decrease"),
+			_key_label("node_radial_increase"), _key_label("node_radial_decrease")])
+		help_lines.append("      SHIFT = COARSE   %s HOLD NODE" % _key_label("sas_node_hold"))
+	help_label.text = "\n".join(help_lines)
 	title.text = level.title
 
-	_flash_label = _label(Control.PRESET_CENTER_TOP, GREEN, 24)
-	_flash_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_flash_label.offset_top += 44
-	_flash_label.offset_bottom += 44
-	_flash_label.visible = false
-
-	_paused_label = _label(Control.PRESET_CENTER, GREEN, 22)
-	_paused_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_paused_label.text = "‖ PAUSED — SPACE, 0, OR ESC TO RESUME"
-	_paused_label.visible = false
-
-	_build_minimap(level)
-	_build_warp_indicator(level)
+	_finish_minimap(level)
 	_build_toolbar()
 	if Settings.effects_enabled:
 		add_child(ScreenGrade.new())  # drawn last: whole-screen film grade on top
@@ -120,7 +127,7 @@ func refresh(ship: ShipSim, level: LevelDef, sim_time: float, warp: int) -> void
 			state_text, rad_to_deg(ship.off_prograde_angle()),
 			ShipSim.SAS_NAMES[ship.sas_mode]]])
 
-	var lines: Array = ["OBJECTIVE", level.objective.describe()]
+	var lines: Array[String] = ["OBJECTIVE", level.objective.describe()]
 	lines.append_array(level.objective.status_lines(ship))
 	lines.append("PAR %.0f m/s" % level.dv_par)
 	objective_label.text = "\n".join(lines)
@@ -178,75 +185,20 @@ func show_fail(reason: String) -> void:
 	center_label.visible = true
 
 
-## Picture-in-picture orbit map: a SubViewport sharing the main world with
-## its own camera on the map layer, so it always mirrors the live map.
-func _build_minimap(level: LevelDef) -> void:
-	minimap_root = Control.new()
-	minimap_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(minimap_root)
-	# pin to the top-right corner explicitly: 560x520, 12 px margin
-	minimap_root.anchor_left = 1.0
-	minimap_root.anchor_right = 1.0
-	minimap_root.anchor_top = 0.0
-	minimap_root.anchor_bottom = 0.0
-	minimap_root.offset_left = -572.0
-	minimap_root.offset_right = -12.0
-	minimap_root.offset_top = 12.0
-	minimap_root.offset_bottom = 532.0
-	minimap_root.grow_horizontal = Control.GROW_DIRECTION_BEGIN
-	minimap_root.grow_vertical = Control.GROW_DIRECTION_END
-
-	var back := ColorRect.new()
-	back.color = Color(0.0, 0.06, 0.02, 0.45)
-	back.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	minimap_root.add_child(back)
-	back.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-
-	var container := SubViewportContainer.new()
-	container.stretch = true
-	container.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	minimap_root.add_child(container)
-	container.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-
-	var viewport := SubViewport.new()
-	viewport.transparent_bg = true
-	viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
-	container.add_child(viewport)
-
-	var cam := Camera3D.new()
-	cam.projection = Camera3D.PROJECTION_ORTHOGONAL
+## The minimap's node structure (SubViewport + camera) comes from
+## hud_layout.tscn already; only the level-dependent camera framing (extent
+## varies per level) and the effects-conditional CRT overlay need setting
+## up here, same as before this was a scene.
+func _finish_minimap(level: LevelDef) -> void:
+	var viewport: SubViewport = minimap_root.get_node("SubViewportContainer/SubViewport")
+	var cam: Camera3D = viewport.get_node("Camera3D")
 	cam.size = level.map_extent
-	cam.near = 1.0
 	cam.far = level.map_extent * 6.0
-	cam.cull_mask = MapView.MAP_LAYER
-	viewport.add_child(cam)
 	cam.position = Vector3(0, level.map_extent * 0.9, level.map_extent * 0.42)
 	cam.look_at(Vector3.ZERO, Vector3.UP)
 	cam.make_current()
 	if Settings.effects_enabled:
 		viewport.add_child(CrtOverlay.new())  # last child: composites over the 3D render
-
-
-## Simple text readout of the current warp multiplier, under the minimap
-## for now — a fancier instrument-style gauge can replace it later.
-func _build_warp_indicator(_level: LevelDef) -> void:
-	warp_label = Label.new()
-	warp_label.add_theme_font_override("font", _font)
-	warp_label.add_theme_font_size_override("font_size", 22)
-	warp_label.add_theme_color_override("font_color", GREEN)
-	warp_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	add_child(warp_label)
-	warp_label.anchor_left = 1.0
-	warp_label.anchor_right = 1.0
-	warp_label.anchor_top = 0.0
-	warp_label.anchor_bottom = 0.0
-	warp_label.offset_left = -572.0
-	warp_label.offset_right = -12.0
-	warp_label.offset_top = 540.0
-	warp_label.offset_bottom = 576.0
-	warp_label.grow_horizontal = Control.GROW_DIRECTION_BEGIN
-	warp_label.grow_vertical = Control.GROW_DIRECTION_END
-	warp_label.text = "TIME WARP: 1x"
 
 
 ## Static reference strip of the non-warp keybinds (1-9 warp levels are
@@ -408,29 +360,18 @@ func set_minimap_visible(shown: bool) -> void:
 	minimap_root.visible = shown
 
 
-func _label(preset: int, color: Color, size := 19) -> Label:
-	var label := Label.new()
-	label.add_theme_font_override("font", _font)
-	label.add_theme_font_size_override("font_size", size)
-	label.add_theme_color_override("font_color", color)
-	label.add_theme_constant_override("line_spacing", 4)
-	add_child(label)
-	label.set_anchors_and_offsets_preset(preset, Control.PRESET_MODE_MINSIZE, 14)
-	match preset:
-		Control.PRESET_TOP_LEFT, Control.PRESET_BOTTOM_LEFT:
-			label.grow_horizontal = Control.GROW_DIRECTION_END
-		Control.PRESET_TOP_RIGHT, Control.PRESET_BOTTOM_RIGHT:
-			label.grow_horizontal = Control.GROW_DIRECTION_BEGIN
-		_:
-			label.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	match preset:
-		Control.PRESET_TOP_LEFT, Control.PRESET_TOP_RIGHT, Control.PRESET_CENTER_TOP:
-			label.grow_vertical = Control.GROW_DIRECTION_END
-		Control.PRESET_BOTTOM_LEFT, Control.PRESET_BOTTOM_RIGHT:
-			label.grow_vertical = Control.GROW_DIRECTION_BEGIN
-		_:
-			label.grow_vertical = Control.GROW_DIRECTION_BOTH
-	return label
+## Human-readable key name(s) actually bound to an InputMap action,
+## uppercased to match the HUD's all-caps style and joined with "/" for
+## multi-key actions (e.g. quick_pause is bound to both Space and 0).
+## Generated from the live bindings rather than hardcoded, so the help
+## text can't drift out of sync with project.godot's [input] section -
+## including once a remap UI exists on top of this (not built yet).
+func _key_label(action: String) -> String:
+	var parts: Array[String] = []
+	for event in InputMap.action_get_events(action):
+		if event is InputEventKey:
+			parts.append(OS.get_keycode_string((event as InputEventKey).physical_keycode).to_upper())
+	return "/".join(parts)
 
 
 func _bar(frac: float) -> String:

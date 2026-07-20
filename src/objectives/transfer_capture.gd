@@ -20,7 +20,7 @@ func describe() -> String:
 	return "ACHIEVE ORBIT AROUND THE %s" % target.name
 
 
-func status_lines(ship: ShipSim) -> Array:
+func status_lines(ship: ShipSim) -> Array[String]:
 	if ship.body == target:
 		var el := ship.current_elements()
 		if el.is_elliptic() and el.radius_apoapsis() <= target.soi_radius * 0.98:
@@ -28,7 +28,7 @@ func status_lines(ship: ShipSim) -> Array:
 				return ["CAPTURED — PE BELOW SURFACE, RAISE IT"]
 			return ["CAPTURED — HOLDING ORBIT"]
 		return ["IN %s SOI — BURN RETROGRADE NEAR PE" % target.name]
-	var lines: Array = []
+	var lines: Array[String] = []
 	if ship.body.parent == null:
 		var el := ship.current_elements()
 		var d: float = target.orbit.a

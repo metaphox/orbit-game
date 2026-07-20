@@ -22,7 +22,7 @@ func describe() -> String:
 	return ""
 
 
-func status_lines(_ship: ShipSim) -> Array:
+func status_lines(_ship: ShipSim) -> Array[String]:
 	return []
 
 

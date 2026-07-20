@@ -1,0 +1,41 @@
+[gd_scene format=3]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_3lgav"]
+shading_mode = 0
+albedo_color = Color(0.05, 0.22, 0.1, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_kdxqa"]
+material = SubResource("StandardMaterial3D_3lgav")
+radius = 1.0
+height = 2.0
+radial_segments = 48
+rings = 24
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7jvb0"]
+shading_mode = 0
+albedo_color = Color(0.35, 1, 0.45, 1)
+
+[sub_resource type="ImmediateMesh" id="ImmediateMesh_h0o4d"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sxx5j"]
+shading_mode = 0
+
+[sub_resource type="SphereMesh" id="SphereMesh_j3cxk"]
+material = SubResource("StandardMaterial3D_sxx5j")
+radius = 1.0
+height = 2.0
+
+[node name="MapViewLayout" type="Node3D" unique_id=1597771714]
+
+[node name="Planet" type="MeshInstance3D" parent="." unique_id=2030715069]
+layers = 2
+mesh = SubResource("SphereMesh_kdxqa")
+
+[node name="OrbitInstance" type="MeshInstance3D" parent="." unique_id=1729691307]
+layers = 2
+material_override = SubResource("StandardMaterial3D_7jvb0")
+mesh = SubResource("ImmediateMesh_h0o4d")
+
+[node name="ShipMarker" type="MeshInstance3D" parent="." unique_id=1646117496]
+layers = 2
+mesh = SubResource("SphereMesh_j3cxk")

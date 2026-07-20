@@ -15,7 +15,7 @@ const DIM_GREEN := "#4da362"
 const HIGHLIGHT := "#fff59d"
 
 var _text: RichTextLabel
-var _items := ["RESUME", "SAVE PROGRESS", "RESTART MISSION", "QUIT TO MISSION SELECT"]
+var _items: Array[String] = ["RESUME", "SAVE PROGRESS", "RESTART MISSION", "QUIT TO MISSION SELECT"]
 var _cursor := 0
 var _saved_flash := false
 
@@ -68,7 +68,7 @@ func show_saved_confirmation() -> void:
 
 
 func _refresh() -> void:
-	var lines: Array = []
+	var lines: Array[String] = []
 	for i in _items.size():
 		var selected := i == _cursor
 		var color := HIGHLIGHT if selected else GREEN

@@ -17,7 +17,7 @@ static var LEVELS: Array[LevelDef] = [
 	preload("res://src/levels/data/level_07.tres"),
 ]
 
-const ACTS := [
+const ACTS: Array[Dictionary] = [
 	{"name": "ACT 1 — EARTH ORBIT SCHOOL", "indices": [0, 2, 5]},
 	{"name": "ACT 2 — LUNAR PROGRAM", "indices": [1, 3, 4]},
 	{"name": "ACT 3 — INTERPLANETARY", "indices": [6]},
@@ -40,13 +40,13 @@ static func level_at(index: int) -> LevelDef:
 	return LEVELS[index].duplicate(true)
 
 
-static func acts() -> Array:
+static func acts() -> Array[Dictionary]:
 	return ACTS
 
 
 ## Flat play order: Act 1's levels, then Act 2's, in each act's own order.
-static func order() -> Array:
-	var flat := []
+static func order() -> Array[int]:
+	var flat: Array[int] = []
 	for act in ACTS:
 		flat.append_array(act["indices"])
 	return flat
