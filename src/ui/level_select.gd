@@ -5,6 +5,7 @@ extends CanvasLayer
 ## with the HUD's green-on-black look; the CRT shader pass arrives in M7.
 
 signal level_chosen(index: int)
+signal back_pressed
 
 const GREEN := "#73ff8c"
 const DIM_GREEN := "#4da362"
@@ -13,11 +14,11 @@ const LOCKED := "#555555"
 
 var _text: RichTextLabel
 var _order: Array
-var _save: SaveData
+var _profile: Profile
 
 
-func build(save_data: SaveData) -> void:
-	_save = save_data
+func build(profile: Profile) -> void:
+	_profile = profile
 	_order = Campaign.order()
 
 	var bg := ColorRect.new()
@@ -37,6 +38,15 @@ func build(save_data: SaveData) -> void:
 	add_child(title)
 	title.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP, Control.PRESET_MODE_MINSIZE, 48)
 
+	var pilot := Label.new()
+	pilot.add_theme_font_override("font", font)
+	pilot.add_theme_font_size_override("font_size", 15)
+	pilot.add_theme_color_override("font_color", Color(DIM_GREEN))
+	pilot.text = "PILOT: %s" % profile.profile_name
+	pilot.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	add_child(pilot)
+	pilot.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP, Control.PRESET_MODE_MINSIZE, 84)
+
 	_text = RichTextLabel.new()
 	_text.bbcode_enabled = true
 	_text.fit_content = true
@@ -50,7 +60,8 @@ func build(save_data: SaveData) -> void:
 	_text.grow_vertical = Control.GROW_DIRECTION_BOTH
 
 	_refresh()
-	add_child(ScreenGrade.new())
+	if Settings.effects_enabled:
+		add_child(ScreenGrade.new())
 
 
 func _refresh() -> void:
@@ -61,15 +72,15 @@ func _refresh() -> void:
 		lines.append("[color=%s]%s[/color]" % [DIM_GREEN, act["name"]])
 		for index in act["indices"]:
 			var mission_title: String = Campaign.title(index)
-			if _save.is_unlocked(index):
-				var medal := _save.medal_for(index)
+			if _profile.is_unlocked(index):
+				var medal := _profile.medal_for(index)
 				var medal_tag := "  [color=%s][%s][/color]" % [GOLD, medal] if medal != "" else ""
 				lines.append("  [color=%s][%d][/color] %s%s" % [GREEN, pos, mission_title, medal_tag])
 			else:
 				lines.append("  [color=%s][ ] --- LOCKED ---[/color]" % LOCKED)
 			pos += 1
 	lines.append("")
-	lines.append("[color=%s]PRESS THE MISSION NUMBER TO LAUNCH[/color]" % DIM_GREEN)
+	lines.append("[color=%s]PRESS THE MISSION NUMBER TO LAUNCH   [ESC] TITLE SCREEN[/color]" % DIM_GREEN)
 	_text.text = "\n".join(lines)
 
 
@@ -77,10 +88,13 @@ func _unhandled_input(event: InputEvent) -> void:
 	var key := event as InputEventKey
 	if key == null or not key.pressed or key.echo:
 		return
+	if key.physical_keycode == KEY_ESCAPE:
+		back_pressed.emit()
+		return
 	if key.physical_keycode < KEY_1 or key.physical_keycode > KEY_9:
 		return
 	var pos := key.physical_keycode - KEY_1
 	if pos < _order.size():
 		var index: int = _order[pos]
-		if _save.is_unlocked(index):
+		if _profile.is_unlocked(index):
 			level_chosen.emit(index)

@@ -497,7 +497,8 @@ func _build_status_hologram(level: LevelDef) -> void:
 	viewport.add_child(gauge)
 	gauge.size = Vector2(256, 300)
 	gauge.scale = Vector2(2.0, 2.0)  # crisp 2x render into the 512-wide target
-	viewport.add_child(CrtOverlay.new())  # composited into the baked texture, drawn last
+	if Settings.effects_enabled:
+		viewport.add_child(CrtOverlay.new())  # composited into the baked texture, drawn last
 
 	var sprite := Sprite3D.new()
 	sprite.texture = viewport.get_texture()

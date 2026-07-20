@@ -57,7 +57,8 @@ func build(level: LevelDef) -> void:
 	_flash_label.visible = false
 
 	_build_minimap(level)
-	add_child(ScreenGrade.new())  # drawn last: whole-screen film grade on top
+	if Settings.effects_enabled:
+		add_child(ScreenGrade.new())  # drawn last: whole-screen film grade on top
 
 
 func refresh(ship: ShipSim, level: LevelDef, sim_time: float, warp: int) -> void:
@@ -174,7 +175,8 @@ func _build_minimap(level: LevelDef) -> void:
 	cam.position = Vector3(0, level.map_extent * 0.9, level.map_extent * 0.42)
 	cam.look_at(Vector3.ZERO, Vector3.UP)
 	cam.make_current()
-	viewport.add_child(CrtOverlay.new())  # last child: composites over the 3D render
+	if Settings.effects_enabled:
+		viewport.add_child(CrtOverlay.new())  # last child: composites over the 3D render
 
 
 func set_minimap_visible(shown: bool) -> void:

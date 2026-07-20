@@ -1,5 +1,6 @@
 extends "res://tests/unit/base_orbit_test.gd"
-## M6: campaign registry, save persistence, and the menu-shell scene.
+## Campaign registry, multi-profile save persistence, settings, and the
+## title -> profile -> mission-select -> flight menu-shell scene.
 
 const CampaignRootScene := preload("res://src/campaign_root.tscn")
 const GameRootScript := preload("res://src/game_root.gd")
@@ -8,11 +9,13 @@ const SAVE_TEST_PATH := "user://test_save.json"
 
 func before_each() -> void:
 	_clear_save()
+	Settings.effects_enabled = true
 
 
 func after_each() -> void:
 	_clear_save()
 	GameRootScript.level_index = 0
+	Settings.effects_enabled = true
 
 
 func _clear_save() -> void:
@@ -28,51 +31,111 @@ func test_campaign_order_and_next() -> void:
 	assert_eq(Campaign.next_after(6), -1, "no level after the last one")
 
 
-func test_save_data_round_trip_and_unlock() -> void:
-	var save := SaveData.load_or_new(SAVE_TEST_PATH)
-	assert_true(save.is_unlocked(0), "first level starts unlocked")
-	assert_false(save.is_unlocked(2), "later levels start locked")
+func test_profile_progress_round_trip_and_unlock() -> void:
+	var profile := Profile.new()
+	profile.profile_name = "Ada"
+	assert_true(profile.is_unlocked(0), "first level starts unlocked")
+	assert_false(profile.is_unlocked(2), "later levels start locked")
 
-	save.record_win(0, "GOLD ★★★", 60.0)
-	assert_true(save.is_unlocked(2), "winning unlocks the next campaign level")
-	assert_eq(save.medal_for(0), "GOLD ★★★")
+	profile.record_win(0, "GOLD ★★★", 60.0)
+	assert_true(profile.is_unlocked(2), "winning unlocks the next campaign level")
+	assert_eq(profile.medal_for(0), "GOLD ★★★")
 
-	save.record_win(0, "BRONZE ★", 90.0)
-	assert_eq(save.medal_for(0), "GOLD ★★★", "a worse run does not overwrite the best medal")
-
-	var reloaded := SaveData.load_or_new(SAVE_TEST_PATH)
-	assert_true(reloaded.is_unlocked(2), "unlock persisted to disk")
-	assert_eq(reloaded.medal_for(0), "GOLD ★★★", "medal persisted to disk")
+	profile.record_win(0, "BRONZE ★", 90.0)
+	assert_eq(profile.medal_for(0), "GOLD ★★★", "a worse run does not overwrite the best medal")
 
 
-func test_campaign_root_menu_then_flies_then_restarts() -> void:
+func test_profile_name_validation() -> void:
+	var store := ProfileStore.load_or_new(SAVE_TEST_PATH)
+	assert_eq(store.validate_new_name(""), "ENTER A NAME")
+	assert_eq(store.validate_new_name("   "), "ENTER A NAME", "whitespace-only is empty")
+	assert_eq(store.validate_new_name("a".repeat(21)), "NAME TOO LONG (20 CHARS MAX)")
+	assert_eq(store.validate_new_name("Ada"), "", "a fresh valid name passes")
+
+	store.create_profile("Ada")
+	assert_eq(store.validate_new_name("Ada"), "NAME ALREADY TAKEN")
+	assert_eq(store.validate_new_name(" Ada "), "NAME ALREADY TAKEN", "trims before comparing")
+
+
+func test_profile_slots_limited_to_five() -> void:
+	var store := ProfileStore.load_or_new(SAVE_TEST_PATH)
+	for i in ProfileStore.MAX_PROFILES:
+		assert_true(store.can_create_profile(), "slot %d available" % i)
+		store.create_profile("Pilot%d" % i)
+	assert_false(store.can_create_profile(), "all five slots used")
+	assert_eq(store.validate_new_name("OneMore"), "ALL 5 PROFILE SLOTS FULL")
+
+
+func test_multiple_profiles_persist_independently() -> void:
+	var store := ProfileStore.load_or_new(SAVE_TEST_PATH)
+	var ada := store.create_profile("Ada")
+	var grace := store.create_profile("Grace")
+	ada.record_win(0, "GOLD ★★★", 60.0)
+	store.save()
+
+	var reloaded := ProfileStore.load_or_new(SAVE_TEST_PATH)
+	assert_eq(reloaded.profiles.size(), 2, "both profiles persisted")
+	var reloaded_ada := reloaded.find_profile("Ada")
+	var reloaded_grace := reloaded.find_profile("Grace")
+	assert_true(reloaded_ada.is_unlocked(2), "Ada's progress persisted")
+	assert_false(reloaded_grace.is_unlocked(2), "Grace's progress is independent of Ada's")
+	assert_eq(reloaded.last_active_name, "Grace", "last-created profile is active")
+	assert_eq(reloaded.last_active_profile().profile_name, "Grace")
+
+
+func test_settings_persist_across_reload() -> void:
+	var store := ProfileStore.load_or_new(SAVE_TEST_PATH)
+	Settings.effects_enabled = false
+	store.save()
+	Settings.effects_enabled = true  # simulate a fresh process before reload
+
+	ProfileStore.load_or_new(SAVE_TEST_PATH)
+	assert_false(Settings.effects_enabled, "effects toggle persisted to disk")
+
+
+func test_campaign_root_starts_on_title_screen() -> void:
 	var root: Node = CampaignRootScene.instantiate()
 	add_child_autofree(root)
 	simulate(root, 2, 1.0 / 60.0)
-	assert_not_null(root.menu, "starts on the mission-select menu")
-	assert_null(root.game, "no flight scene until a mission is picked")
+	assert_true(root._current_ui is TitleScreen, "boots to the title screen, not the menu")
+	assert_null(root.game, "no flight scene yet")
+
+
+func test_new_profile_flow_reaches_mission_select_and_flies() -> void:
+	var root: Node = CampaignRootScene.instantiate()
+	root.store = ProfileStore.load_or_new(SAVE_TEST_PATH)
+	add_child_autofree(root)
+	simulate(root, 2, 1.0 / 60.0)
+
+	root._on_profile_created("Ada")
+	simulate(root, 2, 1.0 / 60.0)
+	assert_eq(root.active_profile.profile_name, "Ada")
+	assert_true(root._current_ui is LevelSelect, "new profile lands on mission select")
 
 	root._launch(0)
 	simulate(root, 2, 1.0 / 60.0)
-	assert_null(root.menu, "menu closed on launch")
 	assert_not_null(root.game, "flight scene instantiated")
-	assert_eq(root.game.level.title, Campaign.title(0), "launched the requested mission")
+	assert_eq(root.game.level.title, Campaign.title(0))
 
 	root.game.restart_requested.emit()
 	simulate(root, 2, 1.0 / 60.0)
 	assert_not_null(root.game, "restart rebuilds the flight scene")
-	assert_eq(root.game.level.title, Campaign.title(0), "restart keeps the same mission")
 
 	root.game.exit_requested.emit()
 	simulate(root, 2, 1.0 / 60.0)
-	assert_not_null(root.menu, "exit returns to the menu")
+	assert_true(root._current_ui is LevelSelect, "exit returns to mission select")
 	assert_null(root.game, "flight scene torn down on exit")
 
+	root._current_ui.back_pressed.emit()
+	simulate(root, 2, 1.0 / 60.0)
+	assert_true(root._current_ui is TitleScreen, "mission select can return to the title")
 
-func test_win_signal_persists_and_advances_campaign() -> void:
+
+func test_win_persists_to_active_profile_and_advances_campaign() -> void:
 	var root: Node = CampaignRootScene.instantiate()
-	root.save_data = SaveData.load_or_new(SAVE_TEST_PATH)
+	root.store = ProfileStore.load_or_new(SAVE_TEST_PATH)
 	add_child_autofree(root)
+	root._on_profile_created("Ada")
 	root._launch(0)
 	simulate(root, 2, 1.0 / 60.0)
 
@@ -84,8 +147,23 @@ func test_win_signal_persists_and_advances_campaign() -> void:
 		root.game.level.body.mu, root.game.sim_time)
 	simulate(root, 5, 1.0 / 60.0)
 	assert_eq(root.game.phase, root.game.Phase.WON, "objective met")
-	assert_true(root.save_data.is_unlocked(2), "win unlocked the next mission")
+	assert_true(root.active_profile.is_unlocked(2), "win unlocked the next mission")
+	assert_true(root.store.find_profile("Ada").is_unlocked(2), "and it's saved to the store")
 
 	root.game.next_requested.emit(0)
 	simulate(root, 2, 1.0 / 60.0)
 	assert_eq(root.game.level.title, Campaign.title(2), "N advanced to the next mission")
+
+
+func test_load_profile_switches_active_profile() -> void:
+	var root: Node = CampaignRootScene.instantiate()
+	root.store = ProfileStore.load_or_new(SAVE_TEST_PATH)
+	add_child_autofree(root)
+	root.store.create_profile("Ada")
+	root.store.create_profile("Grace")  # becomes last-active
+	simulate(root, 2, 1.0 / 60.0)
+
+	root._on_profile_chosen("Ada")
+	simulate(root, 2, 1.0 / 60.0)
+	assert_eq(root.active_profile.profile_name, "Ada", "explicitly switched profile")
+	assert_eq(root.store.last_active_name, "Ada", "switch persists as the new default")
