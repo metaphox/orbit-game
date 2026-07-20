@@ -50,6 +50,7 @@ func build(save_data: SaveData) -> void:
 	_text.grow_vertical = Control.GROW_DIRECTION_BOTH
 
 	_refresh()
+	add_child(ScreenGrade.new())
 
 
 func _refresh() -> void:

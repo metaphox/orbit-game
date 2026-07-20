@@ -65,8 +65,12 @@ var _side_marker: MeshInstance3D
 
 func build(level: LevelDef) -> void:
 	var env := Environment.new()
-	env.background_mode = Environment.BG_COLOR
-	env.background_color = Color(0.008, 0.008, 0.016)
+	env.background_mode = Environment.BG_SKY
+	var sky_mat := ShaderMaterial.new()
+	sky_mat.shader = preload("res://src/shaders/starfield_sky.gdshader")
+	var sky := Sky.new()
+	sky.sky_material = sky_mat
+	env.sky = sky
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	env.ambient_light_color = Color(0.25, 0.28, 0.35)
 	env.ambient_light_energy = 0.5
@@ -94,6 +98,12 @@ func build(level: LevelDef) -> void:
 		var mat := StandardMaterial3D.new()
 		mat.albedo_color = body.color
 		mat.roughness = 0.9
+		mat.rim_enabled = true
+		mat.rim = 0.65
+		mat.rim_tint = 0.55
+		mat.emission_enabled = true
+		mat.emission = body.color.lightened(0.3)
+		mat.emission_energy_multiplier = 0.12  # faint grazing-angle atmosphere glow
 		sphere.material = mat
 		mesh_instance.mesh = sphere
 		add_child(mesh_instance)
@@ -431,6 +441,10 @@ func _build_ship_mesh() -> void:
 	var hull_mat := StandardMaterial3D.new()
 	hull_mat.albedo_color = Color(0.92, 0.9, 0.86)
 	hull_mat.roughness = 0.55
+	hull_mat.metallic = 0.15
+	hull_mat.rim_enabled = true
+	hull_mat.rim = 0.35
+	hull_mat.rim_tint = 0.7
 	capsule.material = hull_mat
 	hull.mesh = capsule
 	hull.rotation.x = -PI / 2  # capsule axis (+Y) -> forward (-Z)
@@ -483,6 +497,7 @@ func _build_status_hologram(level: LevelDef) -> void:
 	viewport.add_child(gauge)
 	gauge.size = Vector2(256, 300)
 	gauge.scale = Vector2(2.0, 2.0)  # crisp 2x render into the 512-wide target
+	viewport.add_child(CrtOverlay.new())  # composited into the baked texture, drawn last
 
 	var sprite := Sprite3D.new()
 	sprite.texture = viewport.get_texture()
