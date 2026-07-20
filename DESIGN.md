@@ -4,6 +4,8 @@
 
 Status: agreed via grilling session, 2026-07-19; updated 2026-07-20 to match what was actually built through M9 and the post-ship feature rounds (pause/save, profiles, orbit marks, toolbar). This document is the shared understanding; change it before changing the game. Where implementation diverged from the original plan, that's called out explicitly with the reason — this is a record of decisions, not just a spec.
 
+**The game is not finished.** The current 7-level roster is a testing/vertical-slice set, not the shipped campaign — 15–20 levels is still the goal. RCS/rotation-cost is still planned for later levels, not cut (§4.4). Both are open work, not settled scope decisions; see §13.
+
 ## 1. Pitch
 
 A level-based 3D orbital-mechanics game. Each level you fly a single spacecraft with limited propellant and must reach a target: raise or lower an orbit, rendezvous with a station, transfer to the Moon, land on it, or make it to Mars. Physics is plausible in form (real equations, tuned constants). The fiction and look are late-70s spaceflight: Apollo hardware and green-phosphor flight computers.
@@ -51,7 +53,7 @@ Ship parameters: `dry_mass`, `prop_mass`, `thrust`, `isp`. Burning depletes prop
 ### 4.4 Attitude
 
 - Rate-based rotation (finite turn rate — flying, not twitch-aiming), unchanged from plan.
-- **RCS/rotation-cost constraint was never built.** The original plan called this the second difficulty axis ("constraints imposed": free rotation → RCS propellant cost on later levels). It was speced but not implemented in any of the 7 shipped levels — rotation is free throughout the whole campaign. The capability-unlock axis (manual → SAS → maneuver nodes, below) turned out to carry the difficulty curve on its own without this ever reading as a missing piece. Formally moved to §11 (out of scope) rather than left as stale "planned" text.
+- **RCS/rotation-cost constraint is planned but not yet built.** The original plan called this the second difficulty axis ("constraints imposed": free rotation → RCS propellant cost on later levels). Rotation is free throughout the current 7-level testing roster, but that roster doesn't reach the point in the campaign where this constraint was meant to kick in — it's still intended for later levels once the campaign is built out toward the full 15–20 (§13), not cut. Still open: what "later" means precisely (which act/level introduces it), and whether it needs its own propellant budget or shares the main tank.
 - SAS-style hold modes (prograde/retrograde/normal/anti-normal/radial in/out) exist and are an **unlock**, gated per-level by `LevelDef.sas_enabled` (see §6).
 
 ## 5. Objectives — the win-condition vocabulary
@@ -182,14 +184,23 @@ ProfileStore    up to 5 Profiles + last_active_name + Settings.effects_enabled,
 
 ## 11. Out of scope for v1
 
-Atmospheric flight/drag/heating · staging & rocket building · docking · n-body effects (Lagrange points, free returns) · mobile · sandbox mode (v2 candidate) · life support/comms/thermal · **RCS/rotation-cost constraint** (speced in §4.4 originally, never implemented — see that section for why it didn't end up mattering) · provable-unreachability "mission unrecoverable" detector (§5) · rebindable keys (the toolbar buttons and the keyboard are both hardcoded to the same layout; an `InputMap` migration would be the natural way in if this becomes a real ask).
+Atmospheric flight/drag/heating · staging & rocket building · docking · n-body effects (Lagrange points, free returns) · mobile · sandbox mode (v2 candidate) · life support/comms/thermal · provable-unreachability "mission unrecoverable" detector (§5) · rebindable keys (the toolbar buttons and the keyboard are both hardcoded to the same layout; an `InputMap` migration would be the natural way in if this becomes a real ask).
+
+RCS/rotation-cost is *not* in this list — see §4.4, it's still planned, just not built yet.
 
 ## 12. Resolved during implementation
 
-Decisions the original doc left open, now settled by what shipped:
+Decisions the original doc left open, now genuinely settled by what shipped:
 
 - **Scale constants and warp ladder:** 1/100 length scale; 9-step round-number ladder `1,5,10,25,50,100,200,500,1000×` (§4.2).
-- **Act 3 second destination (Venus):** not added. The roster shipped at **7 levels across 3 acts** (Earth orbit school ×3, lunar program ×3, interplanetary ×1 — Mars only), well short of the original 15–20 stretch goal. That gap is deliberate, not an oversight: DESIGN's own §on content said pars need to be "tuned empirically" via real playtesting, which further autonomous content-authoring can't responsibly simulate. 7 levels covering every act and every objective type was treated as the honest, defensible stopping point for a vertical slice; more levels are a natural next task for a human doing real playtesting, not a backlog item to keep grinding through alone.
+- **Map view fate:** resolved differently than either original option — see §8's rewrite.
+
+## 13. Still open — this game is not finished
+
+Not settled scope decisions, just not done yet:
+
+- **Campaign content: 15–20 levels, not the current 7.** The 7-level roster (Earth orbit school ×3, lunar program ×3, interplanetary ×1 — Mars only) is a testing/vertical-slice set built to exercise every objective type and act, not the intended final campaign. Getting to 15–20 means more levels within the existing acts (and possibly a second Act 3 destination — Venus was floated originally and never ruled out) plus empirically tuning Δv pars per DESIGN's own content process, which needs real playtesting rather than more solo authoring against guessed numbers.
+- **RCS/rotation-cost** (§4.4): planned second difficulty axis, not yet introduced anywhere in the current roster.
 - **Web export:** still not attempted. Neither shipped nor explicitly re-deferred by a real test — genuinely just not gotten to.
 - **Narrative framing/voice:** still not started, unchanged from "after the vertical slice."
-- **Map view fate:** resolved differently than either original option — see §8's rewrite.
+- **Rebindable keys, provable-unreachability detector:** listed in §11 as out of scope for now; revisit if they become a real ask.
