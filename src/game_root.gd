@@ -223,12 +223,16 @@ func _win() -> void:
 	mission_won.emit(level_index, dv_used, medal)
 
 
-## Next impact/SOI event on the current coasting orbit, cached per elements
-## revision. Analytic where possible; child-SOI entries use a scan whose
-## coarse step cannot skip an encounter window.
+## Next impact/SOI/scheduled-node event on the current coasting orbit.
+## Impact and SOI are cached per elements revision (analytic where
+## possible; child-SOI entries use a scan whose coarse step cannot skip an
+## encounter window); the node time is re-checked every call since editing
+## the node doesn't bump ship.revision (no elements refit happens).
 func _next_event_time() -> float:
 	if ship.revision != _event_revision or sim_time > _event_horizon:
 		_recompute_events()
+	if ship.node != null and ship.node.t_node > sim_time:
+		return minf(_next_event, ship.node.t_node)
 	return _next_event
 
 

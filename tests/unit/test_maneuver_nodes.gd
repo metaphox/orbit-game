@@ -54,6 +54,30 @@ func test_burn_depletes_remaining_and_completes_node() -> void:
 	assert_between(ship.dv_used(), 19.0, 21.5, "burned roughly the planned dv")
 
 
+func test_warp_stops_at_scheduled_node_time() -> void:
+	GameRootScript.level_index = 1
+	var game: Node = load("res://src/main.tscn").instantiate()
+	add_child_autofree(game)
+	simulate(game, 2, 1.0 / 60.0)
+	game._node_create()
+	var t_node: float = game.ship.node.t_node  # 120s ahead of sim_time
+
+	# single-step at max warp (~42 s/tick) until an event auto-drops warp,
+	# then check it landed at the node, not blown past it
+	var frames := 0
+	var stopped_near_node := false
+	while frames < 500:
+		game.warp_index = game.WARP_STEPS.size() - 1
+		simulate(game, 1, 1.0 / 60.0)
+		frames += 1
+		if game.warp_index == 0:
+			stopped_near_node = absf(game.sim_time - t_node) < 5.0
+			break
+	assert_true(stopped_near_node,
+		"warp dropped to 1x within 5s of the node time (got sim_time=%s, t_node=%s)"
+		% [game.sim_time, t_node])
+
+
 func test_node_capability_gate_and_game_flow() -> void:
 	var game: Node = load("res://src/main.tscn").instantiate()
 	add_child_autofree(game)
