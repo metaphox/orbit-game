@@ -66,7 +66,7 @@ var _side_azimuth := DEFAULT_SIDE_AZIMUTH
 var _side_elevation := DEFAULT_SIDE_ELEVATION
 var _side_distance := DEFAULT_SIDE_DISTANCE
 var _side_zoom_max := 1.6e6
-var _side_marker: MeshInstance3D
+var _side_marker: Node3D
 
 
 func build(level: LevelDef) -> void:
@@ -201,14 +201,19 @@ func sync(ship: ShipSim, delta: float) -> void:
 	camera.position = chase_basis * Vector3(0, 3.5, 11.0)
 	camera.look_at(Vector3.ZERO, chase_basis.y)
 
-	# side camera: orbits the current parent body, ship-independent
-	var parent_pos := ship.r.neg().to_vector3()
+	# side camera: orbits and tracks the ship, which - thanks to the
+	# floating origin - is always exactly at the render-space origin
 	var side_basis := Basis(Vector3(0, 1, 0), _side_azimuth) \
 		* Basis(Vector3(1, 0, 0), -_side_elevation)
-	side_camera.position = parent_pos + side_basis * Vector3(0, 0, _side_distance)
+	side_camera.position = side_basis * Vector3(0, 0, _side_distance)
 	side_camera.near = maxf(50.0, _side_distance * 0.002)
-	side_camera.look_at(parent_pos, side_basis.y)
-	_side_marker.scale = Vector3.ONE * maxf(_side_distance * 0.006, 1.0)
+	side_camera.look_at(Vector3.ZERO, side_basis.y)
+	# scale grows with distance so the marker's ON-SCREEN (angular) size
+	# stays constant regardless of zoom; 0.006 (the old plain-dot marker's
+	# factor) reads as a barely-visible fleck now that the marker needs to
+	# show a legible directional shape, not just a location.
+	var marker_scale := maxf(_side_distance * 0.024, 4.0)
+	_side_marker.basis = ship.attitude.scaled(Vector3.ONE * marker_scale)
 
 
 func mark_traj_dirty() -> void:
@@ -303,16 +308,7 @@ func _build_trajectory_lines(level: LevelDef) -> void:
 	_target_instance.material_override = dash_mat
 	add_child(_target_instance)
 
-	_side_marker = MeshInstance3D.new()
-	var dot := SphereMesh.new()
-	dot.radius = 1.0
-	dot.height = 2.0
-	var dot_mat := StandardMaterial3D.new()
-	dot_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	dot_mat.albedo_color = Color(1.0, 1.0, 1.0)
-	dot.material = dot_mat
-	_side_marker.mesh = dot
-	_side_marker.layers = SIDE_MARKER_LAYER
+	_side_marker = _build_posture_marker()
 	add_child(_side_marker)  # stays at origin = ship render position
 
 
@@ -525,6 +521,58 @@ func _build_status_hologram(level: LevelDef) -> void:
 	sprite.render_priority = 10
 	sprite.position = Vector3(5.2, 1.2, 0.0)
 	ship_root.add_child(sprite)
+
+
+## Small directional stand-in for the ship in the orbit-view/minimap
+## distance range, where the real hull would be sub-pixel: an elongated
+## nose cone (pitch/yaw legible) plus an off-axis wing (roll legible too),
+## unshaded so it reads clearly regardless of light angle. Its own basis
+## gets set to the ship's attitude each frame, unlike a plain sphere which
+## can't show orientation at all.
+func _build_posture_marker() -> Node3D:
+	var marker := Node3D.new()
+
+	var hull := MeshInstance3D.new()
+	var capsule := CapsuleMesh.new()
+	capsule.radius = 0.5
+	capsule.height = 2.2
+	var hull_mat := StandardMaterial3D.new()
+	hull_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	hull_mat.albedo_color = Color(0.92, 0.9, 0.86)
+	capsule.material = hull_mat
+	hull.mesh = capsule
+	hull.rotation.x = -PI / 2  # capsule axis (+Y) -> forward (-Z)
+	hull.layers = SIDE_MARKER_LAYER
+	marker.add_child(hull)
+
+	var nose := MeshInstance3D.new()
+	var cone := CylinderMesh.new()
+	cone.top_radius = 0.01
+	cone.bottom_radius = 0.48
+	cone.height = 0.9
+	var nose_mat := StandardMaterial3D.new()
+	nose_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	nose_mat.albedo_color = Color(0.95, 0.45, 0.1)
+	cone.material = nose_mat
+	nose.mesh = cone
+	nose.rotation.x = -PI / 2
+	nose.position = Vector3(0, 0, -1.5)
+	nose.layers = SIDE_MARKER_LAYER
+	marker.add_child(nose)
+
+	var wing := MeshInstance3D.new()
+	var wing_mesh := BoxMesh.new()
+	wing_mesh.size = Vector3(1.7, 0.1, 0.5)
+	var wing_mat := StandardMaterial3D.new()
+	wing_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	wing_mat.albedo_color = Color(0.5, 0.85, 1.0)
+	wing_mesh.material = wing_mat
+	wing.mesh = wing_mesh
+	wing.position = Vector3(0, 0, 0.2)
+	wing.layers = SIDE_MARKER_LAYER
+	marker.add_child(wing)
+
+	return marker
 
 
 func _make_marker(color: Color) -> Node3D:
