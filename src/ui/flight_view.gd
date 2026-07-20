@@ -85,12 +85,14 @@ var _closest_approach_marker: MeshInstance3D
 
 const DEFAULT_CAM_YAW := 0.0
 const DEFAULT_CAM_PITCH := 0.0
+const DEFAULT_CHASE_DISTANCE := 1.0
 const DEFAULT_SIDE_AZIMUTH := 0.6
 const DEFAULT_SIDE_ELEVATION := 0.5
 const DEFAULT_SIDE_DISTANCE := 3.0e5
 
 var _cam_yaw := DEFAULT_CAM_YAW
 var _cam_pitch := DEFAULT_CAM_PITCH
+var _chase_distance := DEFAULT_CHASE_DISTANCE
 var _side_azimuth := DEFAULT_SIDE_AZIMUTH
 var _side_elevation := DEFAULT_SIDE_ELEVATION
 var _side_distance := DEFAULT_SIDE_DISTANCE
@@ -363,7 +365,7 @@ func sync(ship: ShipSim, delta: float) -> void:
 	# A slight shoulder angle keeps the radiator silhouette and antenna
 	# readable; a dead-center tail camera collapses the whole craft into the
 	# dark engine bell.
-	camera.position = chase_basis * Vector3(4.2, 3.5, 11.0)
+	camera.position = chase_basis * Vector3(4.2, 3.5, 11.0) * _chase_distance
 	camera.look_at(Vector3.ZERO, chase_basis.y)
 
 	# side camera: orbits and tracks the ship, which - thanks to the
@@ -390,6 +392,7 @@ func mark_traj_dirty() -> void:
 func reset_view() -> void:
 	_cam_yaw = DEFAULT_CAM_YAW
 	_cam_pitch = DEFAULT_CAM_PITCH
+	_chase_distance = DEFAULT_CHASE_DISTANCE
 	_side_azimuth = DEFAULT_SIDE_AZIMUTH
 	_side_elevation = DEFAULT_SIDE_ELEVATION
 	_side_distance = DEFAULT_SIDE_DISTANCE
@@ -414,6 +417,13 @@ func side_drag(relative: Vector2) -> void:
 
 func side_zoom(factor: float) -> void:
 	_side_distance = clampf(_side_distance * factor, 9.0e4, _side_zoom_max)
+
+
+## Ship-detail-scale zoom for the chase camera, deliberately a much
+## tighter range than side_zoom's orbital-scale one - this camera only
+## ever needs to frame the ship itself, not a whole orbit.
+func chase_zoom(factor: float) -> void:
+	_chase_distance = clampf(_chase_distance * factor, 0.35, 3.5)
 
 
 func _build_trajectory_lines(level: LevelDef) -> void:

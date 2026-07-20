@@ -26,3 +26,21 @@ func test_faceted_sphere_renders_outer_surface_with_outward_normals() -> void:
 		"Godot-clockwise faces expose the near hemisphere, not the globe interior")
 	assert_true(normals_outside, "lighting normals still point out of the sphere")
 	assert_eq(uvs.size(), vertices.size(), "every surface vertex has a fixed map UV")
+
+
+func test_chase_zoom_clamps_to_ship_detail_range() -> void:
+	var view := FlightView.new()
+	add_child_autofree(view)
+	view.chase_zoom(0.0001)
+	assert_almost_eq(view._chase_distance, 0.35, 1e-6, "chase zoom-in floors at ship-detail scale")
+	view.chase_zoom(1.0e6)
+	assert_almost_eq(view._chase_distance, 3.5, 1e-6, "chase zoom-out ceilings well short of orbital scale")
+
+
+func test_side_zoom_clamps_between_close_and_orbital_scale() -> void:
+	var view := FlightView.new()
+	add_child_autofree(view)
+	view.side_zoom(0.0001)
+	assert_almost_eq(view._side_distance, 9.0e4, 1.0, "side zoom-in floors at close range")
+	view.side_zoom(1.0e6)
+	assert_almost_eq(view._side_distance, view._side_zoom_max, 1.0, "side zoom-out ceilings at its max")

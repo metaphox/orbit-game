@@ -20,10 +20,16 @@ albedo_color = Color(0.35, 1, 0.45, 1)
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sxx5j"]
 shading_mode = 0
 
-[sub_resource type="SphereMesh" id="SphereMesh_j3cxk"]
-material = SubResource("StandardMaterial3D_sxx5j")
-radius = 1.0
-height = 2.0
+[sub_resource type="ArrayMesh" id="ArrayMesh_3lgav"]
+_surfaces = [{
+"aabb": AABB(-0.65, 0, -1, 1.3, 1e-05, 1.7),
+"format": 34359738375,
+"material": SubResource("StandardMaterial3D_sxx5j"),
+"primitive": 3,
+"uv_scale": Vector4(0, 0, 0, 0),
+"vertex_count": 3,
+"vertex_data": PackedByteArray(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 128, 191, 102, 102, 38, 191, 0, 0, 0, 0, 51, 51, 51, 63, 102, 102, 38, 63, 0, 0, 0, 0, 51, 51, 51, 63, 255, 127, 255, 255, 0, 0, 255, 191, 255, 127, 255, 255, 0, 0, 255, 191, 255, 127, 255, 255, 0, 0, 255, 191)
+}]
 
 [node name="MapViewLayout" type="Node3D" unique_id=1597771714]
 
@@ -38,4 +44,4 @@ mesh = SubResource("ImmediateMesh_h0o4d")
 
 [node name="ShipMarker" type="MeshInstance3D" parent="." unique_id=1646117496]
 layers = 2
-mesh = SubResource("SphereMesh_j3cxk")
+mesh = SubResource("ArrayMesh_3lgav")

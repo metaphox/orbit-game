@@ -19,6 +19,7 @@ var _moon_markers: Array[MeshInstance3D] = []
 var _soi_rings: Array[MeshInstance3D] = []
 var _station_marker: MeshInstance3D
 var _refresh_left := 0.0
+var _ship_marker_scale := 1.0
 
 
 ## Planet/OrbitInstance/ShipMarker - the three nodes always present exactly
@@ -41,10 +42,10 @@ func build(level: LevelDef) -> void:
 	orbit_mesh = orbit_instance.mesh
 
 	ship_marker = layout.get_node("ShipMarker")
-	var ship_mesh: SphereMesh = ship_marker.mesh
-	var ship_dot_radius := level.map_extent / 220.0
-	ship_mesh.radius = ship_dot_radius
-	ship_mesh.height = ship_dot_radius * 2.0
+	# ShipMarker's baked mesh is a unit-scale directional wedge (tip at -Z);
+	# scaling its basis in sync() both sizes it per-level and lets the
+	# heading-up rotation spin it in place without touching mesh geometry.
+	_ship_marker_scale = level.map_extent / 220.0
 
 	if level.objective is OrbitMatchObjective:
 		var target := level.objective as OrbitMatchObjective
@@ -89,8 +90,19 @@ func build(level: LevelDef) -> void:
 		_soi_rings.append(soi)
 
 
+## Ship's current heading (nose direction, projected onto the orbital
+## plane) as a yaw angle - single source of truth shared by the ship
+## marker's own basis and the minimap camera's heading-up rotation in
+## hud.gd, so the two always agree regardless of the reference convention
+## chosen here.
+static func ship_heading_angle(ship: ShipSim) -> float:
+	var f := ship.forward_dir()
+	return atan2(f.x, f.z)
+
+
 func sync(ship: ShipSim, t: float, delta: float) -> void:
 	ship_marker.position = ship.absolute_position(t).scaled(MAP_SCALE).to_vector3()
+	ship_marker.basis = Basis(Vector3.UP, ship_heading_angle(ship)).scaled(Vector3.ONE * _ship_marker_scale)
 	for i in _level.moons.size():
 		var moon_pos := _level.moons[i].position_at(t).scaled(MAP_SCALE).to_vector3()
 		_moon_markers[i].position = moon_pos

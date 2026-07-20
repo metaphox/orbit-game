@@ -143,6 +143,7 @@ func test_r_resets_the_view_during_flight() -> void:
 	var game := _boot()
 	game.flight_view._cam_yaw = 1.2
 	game.flight_view._cam_pitch = -0.4
+	game.flight_view._chase_distance = 2.5
 	game.flight_view._side_azimuth = 2.0
 	game.flight_view._side_elevation = -1.0
 	game.flight_view._side_distance = 8.0e5
@@ -150,6 +151,7 @@ func test_r_resets_the_view_during_flight() -> void:
 	game._unhandled_input(_key(KEY_R))
 	assert_eq(game.flight_view._cam_yaw, game.flight_view.DEFAULT_CAM_YAW)
 	assert_eq(game.flight_view._cam_pitch, game.flight_view.DEFAULT_CAM_PITCH)
+	assert_eq(game.flight_view._chase_distance, game.flight_view.DEFAULT_CHASE_DISTANCE)
 	assert_eq(game.flight_view._side_azimuth, game.flight_view.DEFAULT_SIDE_AZIMUTH)
 	assert_eq(game.flight_view._side_elevation, game.flight_view.DEFAULT_SIDE_ELEVATION)
 	assert_eq(game.flight_view._side_distance, game.flight_view.DEFAULT_SIDE_DISTANCE)

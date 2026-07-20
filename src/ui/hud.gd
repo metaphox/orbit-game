@@ -53,6 +53,10 @@ var _flash_label: Label
 var _flash_left := 0.0
 var _paused_label: Label
 var _toolbar_buttons: Dictionary = {}
+var _minimap_aspect: AspectRatioContainer
+var _right_column: VBoxContainer
+var _minimap_cam: Camera3D
+var _minimap_base_pos := Vector3.ZERO
 
 
 ## Everything static and single-instance (status/objective/engine/help/
@@ -76,6 +80,8 @@ func build(level: LevelDef) -> void:
 	_paused_label = layout.get_node("PausedLabel")
 	objective_label = layout.get_node("RightColumn/ObjectiveLabel")
 	warp_label = layout.get_node("RightColumn/WarpLabel")
+	_right_column = layout.get_node("RightColumn")
+	_minimap_aspect = layout.get_node("RightColumn/MinimapAspect")
 	minimap_root = layout.get_node("RightColumn/MinimapAspect/MinimapRoot")
 
 	var help_lines: Array[String] = [
@@ -108,12 +114,21 @@ func build(level: LevelDef) -> void:
 	title.text = level.title
 
 	_finish_minimap(level)
+	get_viewport().size_changed.connect(_update_minimap_size)
 	_build_toolbar()
 	if Settings.effects_enabled:
 		add_child(ScreenGrade.new())  # drawn last: whole-screen film grade on top
 
 
 func refresh(ship: ShipSim, level: LevelDef, sim_time: float, warp: int) -> void:
+	# Heading-up minimap: rotate the camera's azimuth so the ship's current
+	# nose direction always renders toward the top of the map, matching
+	# what's ahead in the main flight view. MapView.ship_heading_angle is
+	# the single source of truth also used by the ship marker's own basis.
+	var heading := MapView.ship_heading_angle(ship)
+	_minimap_cam.position = Basis(Vector3.UP, heading) * _minimap_base_pos
+	_minimap_cam.look_at(Vector3.ZERO, Vector3.UP)
+
 	var el := ship.current_elements()
 	var state_text := "BURNING" if ship.flight_state == ShipSim.FlightState.BURNING else "COASTING"
 	var ap := el.radius_apoapsis()
@@ -191,14 +206,37 @@ func show_fail(reason: String) -> void:
 ## up here, same as before this was a scene.
 func _finish_minimap(level: LevelDef) -> void:
 	var viewport: SubViewport = minimap_root.get_node("SubViewportContainer/SubViewport")
-	var cam: Camera3D = viewport.get_node("Camera3D")
-	cam.size = level.map_extent
-	cam.far = level.map_extent * 6.0
-	cam.position = Vector3(0, level.map_extent * 0.9, level.map_extent * 0.42)
-	cam.look_at(Vector3.ZERO, Vector3.UP)
-	cam.make_current()
+	_minimap_cam = viewport.get_node("Camera3D")
+	_minimap_cam.size = level.map_extent
+	_minimap_cam.far = level.map_extent * 6.0
+	_minimap_base_pos = Vector3(0, level.map_extent * 0.9, level.map_extent * 0.42)
+	_minimap_cam.position = _minimap_base_pos
+	_minimap_cam.look_at(Vector3.ZERO, Vector3.UP)
+	_minimap_cam.make_current()
 	if Settings.effects_enabled:
 		viewport.add_child(CrtOverlay.new())  # last child: composites over the 3D render
+
+	# The old flat 0.45-alpha near-black tint was nearly indistinguishable
+	# from the space background behind it - brightened here so the panel
+	# actually reads as a console backdrop instead of just vanishing.
+	var back: ColorRect = minimap_root.get_node("Back")
+	back.color = Color(0.03, 0.22, 0.12, 0.55)
+	var panel_mat := ShaderMaterial.new()
+	panel_mat.shader = preload("res://src/shaders/minimap_panel.gdshader")
+	back.material = panel_mat
+
+	_update_minimap_size()
+
+
+## Caps the minimap to a modest, resolution-independent fraction of the
+## screen instead of the fixed 560x520 the layout scene bakes in as a
+## pre-first-layout default - a small starting window otherwise lets the
+## minimap dominate the view.
+func _update_minimap_size() -> void:
+	var vp := get_viewport().get_visible_rect().size
+	var w := clampf(vp.x * 0.22, 220.0, 340.0)
+	_minimap_aspect.custom_minimum_size = Vector2(w, w / _minimap_aspect.ratio)
+	_right_column.custom_minimum_size.x = w
 
 
 ## Static reference strip of the non-warp keybinds (1-9 warp levels are

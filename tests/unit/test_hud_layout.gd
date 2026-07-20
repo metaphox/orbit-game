@@ -39,3 +39,21 @@ func test_minimap_and_objective_panel_dont_overlap_at_min_window_size() -> void:
 
 func test_minimap_and_objective_panel_dont_overlap_at_a_larger_window_size() -> void:
 	await _assert_no_overlap_at_size(Vector2i(1920, 1080))
+
+
+## Regression for the minimap dominating a small window: it must stay
+## within its clamped pixel bounds and well under a third of the window's
+## width, instead of the old fixed 560px block (54% of the 1024 base).
+func test_minimap_stays_within_a_bounded_fraction_of_a_small_window() -> void:
+	get_tree().root.size = DEFAULT_SIZE
+	var level := Campaign.level_at(0)
+	var hud := Hud.new()
+	add_child_autofree(hud)
+	hud.build(level)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	var minimap_rect := hud.minimap_root.get_global_rect()
+	assert_gt(minimap_rect.size.x, 219.0, "minimap width respects its lower clamp")
+	assert_lt(minimap_rect.size.x, 341.0, "minimap width respects its upper clamp")
+	assert_lt(minimap_rect.size.x, DEFAULT_SIZE.x * 0.3,
+		"minimap should not cover close to a third of a small window's width")
