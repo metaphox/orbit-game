@@ -120,3 +120,75 @@ func test_no_encounter_when_moon_out_of_phase() -> void:
 	var t_entry := OrbitEvents.child_soi_entry_time(
 		ship, moon, SOI_MOON, 0.0, minf(t_apo, quarter_moon_period), 3600.0)
 	assert_true(is_nan(t_entry), "no SOI entry when badly phased")
+
+
+## A fast hyperbolic ship and a small, distant "moon" placed so their
+## closest approach (impact parameter half the SOI radius) falls at
+## t_probe=6000s, strictly inside the first [0, coarse_dt] scan interval.
+func _fast_flyby_scenario(offset_y: float) -> Dictionary:
+	var r0 := DVec3.new(R_LEO, 0.0, 0.0)
+	var v_esc := sqrt(2.0 * MU_EARTH / r0.x)
+	var ship := OrbitElements.from_state(
+		r0, DVec3.new(v_esc * 3.0, 2000.0, 0.0), MU_EARTH, 0.0)
+	var t_probe := 6000.0
+	var ship_pos_at_probe := ship.state_at_time(t_probe).r
+	var v_moon := circular_speed(MU_EARTH, 8.0e7)
+	var moon := OrbitElements.from_state(
+		ship_pos_at_probe.add(DVec3.new(0.0, offset_y, 0.0)),
+		DVec3.new(0.0, v_moon, 0.0), MU_EARTH, t_probe)
+	return {"ship": ship, "moon": moon}
+
+
+func test_child_soi_entry_finds_transit_hidden_between_coarse_samples() -> void:
+	var s := _fast_flyby_scenario(1.0e6)
+	var ship: OrbitElements = s["ship"]
+	var moon: OrbitElements = s["moon"]
+	var soi := 2.0e6
+	var coarse_dt := 20000.0
+
+	# what an endpoint-only scan would have sampled: both outside, so the
+	# algorithm this replaces reports no encounter at all.
+	assert_gt(ship.state_at_time(0.0).r.distance_to(moon.state_at_time(0.0).r), soi,
+		"t=0 sample lands outside the SOI")
+	assert_gt(ship.state_at_time(coarse_dt).r.distance_to(moon.state_at_time(coarse_dt).r), soi,
+		"t=coarse_dt sample also lands outside - the whole transit is hidden in between")
+
+	var t_entry := OrbitEvents.child_soi_entry_time(ship, moon, soi, 0.0, 80000.0, coarse_dt)
+	assert_false(is_nan(t_entry), "interval-contained encounter is still found")
+	assert_between(t_entry, 0.0, coarse_dt, "entry falls inside the interval an endpoint-only scan would skip")
+	assert_close(
+		ship.state_at_time(t_entry).r.distance_to(moon.state_at_time(t_entry).r), soi, 1e-6,
+		"distance equals SOI at the found entry")
+
+
+func test_child_soi_entry_finds_grazing_tangent_encounter() -> void:
+	# impact parameter just under the SOI radius (2.05e6 -> just above it
+	# confirms no false positive right at the boundary; see below)
+	var s := _fast_flyby_scenario(1.999e6)
+	var ship: OrbitElements = s["ship"]
+	var moon: OrbitElements = s["moon"]
+	var soi := 2.0e6
+	var t_entry := OrbitEvents.child_soi_entry_time(ship, moon, soi, 0.0, 80000.0, 20000.0)
+	assert_false(is_nan(t_entry), "a grazing dip just under the SOI radius is still caught")
+	assert_close(
+		ship.state_at_time(t_entry).r.distance_to(moon.state_at_time(t_entry).r), soi, 1e-6,
+		"distance equals SOI at the found entry")
+
+	var s_miss := _fast_flyby_scenario(2.05e6)
+	var t_miss := OrbitEvents.child_soi_entry_time(
+		s_miss["ship"], s_miss["moon"], soi, 0.0, 80000.0, 20000.0)
+	assert_true(is_nan(t_miss), "a closest approach just outside the SOI radius is correctly not an encounter")
+
+
+func test_child_soi_entry_detects_encounter_right_at_the_horizon_boundary() -> void:
+	var s := _fast_flyby_scenario(1.0e6)
+	var ship: OrbitElements = s["ship"]
+	var moon: OrbitElements = s["moon"]
+	var soi := 2.0e6
+	# t_end lands exactly at the encounter's true closest-approach time
+	# (see _fast_flyby_scenario) instead of somewhere comfortably past it.
+	var t_entry := OrbitEvents.child_soi_entry_time(ship, moon, soi, 0.0, 6000.0, 20000.0)
+	assert_false(is_nan(t_entry), "encounter at the very edge of the horizon is still found")
+	assert_close(
+		ship.state_at_time(t_entry).r.distance_to(moon.state_at_time(t_entry).r), soi, 1e-6,
+		"distance equals SOI at the found entry")

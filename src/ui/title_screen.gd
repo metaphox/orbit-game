@@ -15,6 +15,7 @@ const GREEN := "#73ff8c"
 const DIM_GREEN := "#4da362"
 const DISABLED := "#4a4a4a"
 const HIGHLIGHT := "#fff59d"
+const WARNING := "#ffcc66"
 
 var _text: RichTextLabel
 var _items: Array = []  # [label: String, enabled: bool]
@@ -62,6 +63,16 @@ func build(store: ProfileStore) -> void:
 	tagline.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	add_child(tagline)
 	tagline.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP, Control.PRESET_MODE_MINSIZE, 150)
+
+	if store.load_warning != "":
+		var warning := Label.new()
+		warning.add_theme_font_override("font", font)
+		warning.add_theme_font_size_override("font_size", 14)
+		warning.add_theme_color_override("font_color", Color(WARNING))
+		warning.text = "⚠ %s" % store.load_warning
+		warning.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		add_child(warning)
+		warning.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP, Control.PRESET_MODE_MINSIZE, 185)
 
 	_text = RichTextLabel.new()
 	_text.bbcode_enabled = true

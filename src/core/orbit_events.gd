@@ -45,25 +45,78 @@ static func apoapsis_time(el: OrbitElements, after_t: float) -> float:
 
 
 ## First time in [t_start, t_end] when the ship enters a child body's SOI.
-## No closed form exists (two independent conics), so: coarse scan for a
-## sign change of distance - soi, then bisection. coarse_dt must be small
-## enough not to step over a whole encounter; a fraction of the child's
-## period is a safe choice.
+## No closed form exists (two independent conics), so: coarse scan, but
+## checking each interval's actual minimum distance (not just its
+## endpoints) so an encounter fully contained between two samples - a fast
+## or grazing flyby - still shows up. coarse_dt is only a suggested step;
+## it's tightened internally to a bound derived from relative speed and the
+## SOI radius, so no caller-supplied step can hide an encounter.
 static func child_soi_entry_time(
 		ship_el: OrbitElements, child_el: OrbitElements, soi_radius: float,
 		t_start: float, t_end: float, coarse_dt: float) -> float:
-	var prev_t := t_start
-	var prev_outside := _distance(ship_el, child_el, t_start) > soi_radius
-	if not prev_outside:
+	if t_end <= t_start:
+		return NAN
+	if _distance(ship_el, child_el, t_start) <= soi_radius:
 		return t_start
-	var t := t_start + coarse_dt
-	while t < t_end + coarse_dt:
-		var t_clamped := minf(t, t_end)
-		if _distance(ship_el, child_el, t_clamped) <= soi_radius:
-			return _bisect_entry(ship_el, child_el, soi_radius, prev_t, t_clamped)
+	var dt := _bounded_step(ship_el, child_el, t_start, t_end, soi_radius, coarse_dt)
+	var prev_t := t_start
+	while prev_t < t_end:
+		var t_clamped := minf(prev_t + dt, t_end)
+		var m := _interval_min(ship_el, child_el, prev_t, t_clamped)
+		if m.distance <= soi_radius:
+			return _bisect_entry(ship_el, child_el, soi_radius, prev_t, m.time)
 		prev_t = t_clamped
-		t += coarse_dt
 	return NAN
+
+
+## Suggested_dt tightened to a bound derived from the fastest relative speed
+## sampled across [t_start, t_end] and the SOI radius, so a step can never
+## span more than roughly one SOI crossing. Floored at suggested_dt / 64 so
+## a near-zero relative speed (co-orbital case) can't blow up the iteration
+## count; suggested_dt is never exceeded either way.
+static func _bounded_step(
+		ship_el: OrbitElements, child_el: OrbitElements, t_start: float, t_end: float,
+		soi_radius: float, suggested_dt: float) -> float:
+	const SAMPLES := 16
+	var max_rel_speed := 0.0
+	for i in SAMPLES + 1:
+		var t := t_start + (t_end - t_start) * float(i) / float(SAMPLES)
+		var rel_speed := ship_el.state_at_time(t).v.sub(child_el.state_at_time(t).v).length()
+		max_rel_speed = maxf(max_rel_speed, rel_speed)
+	var dt_speed := soi_radius / maxf(max_rel_speed * 1.2, 1e-9)
+	return clampf(dt_speed, suggested_dt / 64.0, suggested_dt)
+
+
+## Minimum relative distance in [t0, t1]: an 8-point sub-scan to locate the
+## neighborhood of the minimum, then ternary refinement around it. Mirrors
+## closest_approach()'s coarse-scan-then-ternary shape, scoped to one
+## interval instead of the whole window.
+static func _interval_min(
+		ship_el: OrbitElements, child_el: OrbitElements, t0: float, t1: float) -> Dictionary:
+	const SUB := 8
+	var best_t := t0
+	var best_d := _distance(ship_el, child_el, t0)
+	for i in range(1, SUB + 1):
+		var t := t0 + (t1 - t0) * float(i) / float(SUB)
+		var d := _distance(ship_el, child_el, t)
+		if d < best_d:
+			best_d = d
+			best_t = t
+	var half_width := (t1 - t0) / float(SUB)
+	var lo := maxf(best_t - half_width, t0)
+	var hi := minf(best_t + half_width, t1)
+	for _i in 40:
+		var m1 := lo + (hi - lo) / 3.0
+		var m2 := hi - (hi - lo) / 3.0
+		if _distance(ship_el, child_el, m1) < _distance(ship_el, child_el, m2):
+			hi = m2
+		else:
+			lo = m1
+	var t_final := 0.5 * (lo + hi)
+	var d_final := _distance(ship_el, child_el, t_final)
+	if d_final < best_d:
+		return {"time": t_final, "distance": d_final}
+	return {"time": best_t, "distance": best_d}
 
 
 ## Time and distance of closest approach between two conics in [t0, t1].

@@ -19,8 +19,17 @@ func after_each() -> void:
 
 
 func _clear_save() -> void:
-	if FileAccess.file_exists(SAVE_TEST_PATH):
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(SAVE_TEST_PATH))
+	var suffixes: Array[String] = ["", ProfileStore.BACKUP_SUFFIX, ProfileStore.TMP_SUFFIX]
+	for suffix in suffixes:
+		var p: String = SAVE_TEST_PATH + suffix
+		if FileAccess.file_exists(p):
+			DirAccess.remove_absolute(ProjectSettings.globalize_path(p))
+
+
+func _write_raw(path: String, text: String) -> void:
+	var f := FileAccess.open(path, FileAccess.WRITE)
+	f.store_string(text)
+	f.close()
 
 
 func test_campaign_order_and_next() -> void:
@@ -91,6 +100,68 @@ func test_settings_persist_across_reload() -> void:
 
 	ProfileStore.load_or_new(SAVE_TEST_PATH)
 	assert_false(Settings.effects_enabled, "effects toggle persisted to disk")
+
+
+func test_save_includes_schema_version() -> void:
+	var store := ProfileStore.load_or_new(SAVE_TEST_PATH)
+	store.create_profile("Ada")
+	var f := FileAccess.open(SAVE_TEST_PATH, FileAccess.READ)
+	var parsed = JSON.parse_string(f.get_as_text())
+	f.close()
+	# JSON has no int type - everything numeric round-trips as float.
+	assert_eq(parsed.get("version"), 1.0)
+
+
+func test_save_reports_success_and_failure() -> void:
+	var store := ProfileStore.load_or_new(SAVE_TEST_PATH)
+	assert_true(store.save(), "happy path succeeds")
+
+	var broken := ProfileStore.load_or_new("user://no_such_dir/save.json")
+	assert_false(broken.save(), "an unwritable path fails cleanly instead of throwing")
+	assert_push_error("could not open", "the failure is logged, not silent")
+
+
+func test_corrupt_save_recovers_from_backup() -> void:
+	var store := ProfileStore.load_or_new(SAVE_TEST_PATH)
+	store.create_profile("Ada")  # save #1: no prior primary, so no backup yet
+	store.create_profile("Grace")  # save #2: save #1's primary (Ada only) becomes the backup
+	_write_raw(SAVE_TEST_PATH, "{not valid json")  # simulate a crash mid-write
+
+	var reloaded := ProfileStore.load_or_new(SAVE_TEST_PATH)
+	assert_eq(reloaded.load_warning, "SAVE FILE WAS DAMAGED - RECOVERED FROM BACKUP")
+	assert_not_null(reloaded.find_profile("Ada"), "recovered from the one-save-behind backup")
+	assert_null(reloaded.find_profile("Grace"), "backup is one save behind - Grace isn't in it")
+	assert_engine_error("Variant()", "malformed JSON logs an engine-level parse error")
+	assert_push_error("does not contain a valid save", "and ProfileStore logs its own detail")
+
+
+func test_corrupt_save_with_no_backup_starts_fresh_with_a_warning() -> void:
+	_write_raw(SAVE_TEST_PATH, "not json at all")
+	var store := ProfileStore.load_or_new(SAVE_TEST_PATH)
+	assert_eq(store.profiles.size(), 0, "nothing to recover, so starts empty")
+	assert_eq(store.load_warning, "SAVE FILE WAS UNREADABLE - STARTING FRESH")
+	assert_engine_error("Variant()", "malformed JSON logs an engine-level parse error")
+	assert_push_error("does not contain a valid save", "and ProfileStore logs its own detail")
+
+
+func test_missing_save_file_has_no_warning() -> void:
+	var store := ProfileStore.load_or_new(SAVE_TEST_PATH)
+	assert_eq(store.load_warning, "", "a first-ever run isn't a save failure")
+
+
+func test_malformed_profile_entry_is_skipped_not_fatal() -> void:
+	_write_raw(SAVE_TEST_PATH, JSON.stringify({
+		"version": 1,
+		"last_active": "Ada",
+		"profiles": [
+			{"name": "Ada", "unlocked": [0, 2], "medals": {}, "mission_save": null},
+			"not even a dictionary",
+		],
+	}))
+	var store := ProfileStore.load_or_new(SAVE_TEST_PATH)
+	assert_eq(store.profiles.size(), 1, "the malformed entry is skipped, not fatal")
+	assert_not_null(store.find_profile("Ada"))
+	assert_true(store.find_profile("Ada").is_unlocked(2))
 
 
 func test_campaign_root_starts_on_title_screen() -> void:

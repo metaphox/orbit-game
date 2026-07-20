@@ -158,12 +158,14 @@ func _connect_game_signals() -> void:
 
 func _on_win(index: int, dv_used: float, medal: String) -> void:
 	active_profile.record_win(index, medal, dv_used)
-	store.save()
+	if not store.save():
+		game.hud.flash("SAVE FAILED - PROGRESS MAY NOT PERSIST")
 
 
 func _on_save(payload: Dictionary) -> void:
 	active_profile.mission_save = payload
-	store.save()
+	if not store.save():
+		game.hud.flash("SAVE FAILED - PROGRESS MAY NOT PERSIST")
 
 
 func _on_restart() -> void:
