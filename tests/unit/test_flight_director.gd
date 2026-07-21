@@ -44,29 +44,29 @@ func _assert_won(index: int, max_frames: int) -> void:
 	assert_eq(game.phase, game.Phase.WON, "%s: director reached WON" % Campaign.title(index))
 
 
-func test_director_wins_level_01_raise() -> void:
+func test_director_wins_level_01_01_raise() -> void:
 	_assert_won(0, 30000)
 
 
-func test_director_wins_level_06_plane_change() -> void:
-	_assert_won(5, 30000)
+func test_director_wins_level_01_03_plane_change() -> void:
+	_assert_won(2, 30000)
 
 
-func test_director_wins_level_03_rendezvous() -> void:
-	_assert_won(2, 60000)
+func test_director_wins_level_01_02_rendezvous() -> void:
+	_assert_won(1, 60000)
 
 
-func test_director_wins_level_02_translunar() -> void:
-	_assert_won(1, 120000)
-
-
-func test_director_wins_level_05_come_home() -> void:
-	_assert_won(4, 120000)
-
-
-func test_director_wins_level_04_landing() -> void:
+func test_director_wins_level_02_01_translunar() -> void:
 	_assert_won(3, 120000)
 
 
-func test_director_wins_level_07_earth_to_mars() -> void:
+func test_director_wins_level_02_03_come_home() -> void:
+	_assert_won(5, 120000)
+
+
+func test_director_wins_level_02_02_landing() -> void:
+	_assert_won(4, 120000)
+
+
+func test_director_wins_level_03_01_earth_to_mars() -> void:
 	_assert_won(6, 200000)

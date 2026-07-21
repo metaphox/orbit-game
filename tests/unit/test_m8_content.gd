@@ -9,7 +9,7 @@ func after_each() -> void:
 
 
 func test_orbit_match_inclination_gate() -> void:
-	var level := Campaign.level_at(5)
+	var level := Campaign.level_at(2)
 	var objective: OrbitMatchObjective = level.objective
 	var earth := level.body
 	var v_circ := circular_speed(earth.mu, 70000.0)
@@ -31,13 +31,13 @@ func test_orbit_match_inclination_gate() -> void:
 	assert_true(objective.is_met(ship), "15-degree inclined orbit meets the target")
 
 
-func test_level06_boots_and_flies() -> void:
-	GameRootScript.level_index = 5
+func test_level_01_03_plane_change_boots_and_flies() -> void:
+	GameRootScript.level_index = 2
 	var game: Node = load("res://src/main.tscn").instantiate()
 	add_child_autofree(game)
 	simulate(game, 5, 1.0 / 60.0)
 	assert_eq(game.phase, game.Phase.FLYING)
-	assert_eq(game.level.title, Campaign.title(5))
+	assert_eq(game.level.title, Campaign.title(2))
 
 
 func test_mars_level_boots_inside_earth_soi() -> void:

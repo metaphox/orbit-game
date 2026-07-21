@@ -26,7 +26,7 @@ func _assert_solved(level: LevelDef, ship: ShipSim) -> void:
 		level.title, dv, level.dv_par, 100.0 * dv / level.dv_par])
 
 
-func test_level_01_raise_orbit() -> void:
+func test_level_01_01_raise_orbit() -> void:
 	var level := Campaign.level_at(0)
 	var ship := _fresh_ship(level)
 	var obj: OrbitMatchObjective = level.objective
@@ -34,24 +34,24 @@ func test_level_01_raise_orbit() -> void:
 	_assert_solved(level, ship)
 
 
-func test_level_06_plane_change() -> void:
-	var level := Campaign.level_at(5)
+func test_level_01_03_plane_change() -> void:
+	var level := Campaign.level_at(2)
 	var ship := _fresh_ship(level)
 	var obj: OrbitMatchObjective = level.objective
 	Autopilot.achieve_circular(ship, obj.target_radius, obj.target_inclination)
 	_assert_solved(level, ship)
 
 
-func test_level_03_rendezvous() -> void:
-	var level := Campaign.level_at(2)
+func test_level_01_02_rendezvous() -> void:
+	var level := Campaign.level_at(1)
 	var ship := _fresh_ship(level)
 	var obj: RendezvousObjective = level.objective
 	Autopilot.rendezvous(ship, obj.station_orbit, obj.max_distance, obj.max_rel_speed)
 	_assert_solved(level, ship)
 
 
-func test_level_02_translunar_injection() -> void:
-	var level := Campaign.level_at(1)
+func test_level_02_01_translunar_injection() -> void:
+	var level := Campaign.level_at(3)
 	var ship := _fresh_ship(level)
 	var obj: TransferCaptureObjective = level.objective
 	assert_true(Autopilot.transfer_and_capture(ship, obj.target),
@@ -59,8 +59,8 @@ func test_level_02_translunar_injection() -> void:
 	_assert_solved(level, ship)
 
 
-func test_level_05_come_home() -> void:
-	var level := Campaign.level_at(4)
+func test_level_02_03_come_home() -> void:
+	var level := Campaign.level_at(5)
 	var ship := _fresh_ship(level)
 	var obj: EntryCorridorObjective = level.objective
 	assert_true(Autopilot.return_to_periapsis(ship, obj.target_periapsis, obj.tolerance),
@@ -68,7 +68,7 @@ func test_level_05_come_home() -> void:
 	_assert_solved(level, ship)
 
 
-func test_level_07_earth_to_mars() -> void:
+func test_level_03_01_earth_to_mars() -> void:
 	var level := Campaign.level_at(6)
 	var ship := _fresh_ship(level)
 	var obj: TransferCaptureObjective = level.objective
@@ -77,8 +77,8 @@ func test_level_07_earth_to_mars() -> void:
 	_assert_solved(level, ship)
 
 
-func test_level_04_airless_landing() -> void:
-	var level := Campaign.level_at(3)
+func test_level_02_02_airless_landing() -> void:
+	var level := Campaign.level_at(4)
 	var ship := _fresh_ship(level)
 	var obj: AirlessLandingObjective = level.objective
 	assert_true(Autopilot.land(ship, obj.target), "autopilot flew a powered descent to the surface")

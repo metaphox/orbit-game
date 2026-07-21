@@ -49,7 +49,7 @@ func test_side_zoom_clamps_between_close_and_orbital_scale() -> void:
 func test_station_model_keeps_physical_and_orbit_marker_scales_separate() -> void:
 	var view := FlightView.new()
 	add_child_autofree(view)
-	view._objective = preload("res://src/levels/data/level_03.tres").objective
+	view._objective = preload("res://src/levels/data/level_01_02.tres").objective
 	view._build_node_visuals()
 
 	assert_not_null(view._station_marker, "rendezvous level builds the close-up station")

@@ -10,7 +10,10 @@ extends RefCounted
 const DEFAULT_PATH := "user://save.json"
 const MAX_PROFILES := 5
 const NAME_MAX_LENGTH := 20
-const SCHEMA_VERSION := 1
+## v2: LEVELS was renumbered into act order (level_<act>_<level>.tres), so
+## index-keyed progress from a v1 save points at the wrong levels and is
+## discarded on load (see _apply).
+const SCHEMA_VERSION := 2
 const BACKUP_SUFFIX := ".bak"
 const TMP_SUFFIX := ".tmp"
 
@@ -75,25 +78,32 @@ static func _as_level_index(k: Variant) -> Variant:
 func _apply(parsed: Dictionary) -> void:
 	last_active_name = parsed.get("last_active", "")
 	Settings.effects_enabled = parsed.get("effects_enabled", true)
+	# Progress is keyed by LEVELS index; a pre-v2 save predates the act-order
+	# renumbering, so its indices point at the wrong levels. Keep the named
+	# profiles but reset their progress to a fresh campaign.
+	var stale := int(parsed.get("version", 0)) < SCHEMA_VERSION
+	if stale:
+		load_warning = "SAVE PREDATES LEVEL RENUMBERING - PROGRESS RESET"
 	for p_data: Variant in parsed.get("profiles", []):
 		if not (p_data is Dictionary):
 			push_warning("ProfileStore: skipping a malformed profile entry")
 			continue
 		var profile := Profile.new()
 		profile.profile_name = p_data.get("name", "")
-		profile.unlocked.clear()
-		for k: Variant in p_data.get("unlocked", []):
-			var index: Variant = _as_level_index(k)
-			if index != null:
-				profile.unlocked[index] = true
-		var medals: Variant = p_data.get("medals", {})
-		if medals is Dictionary:
-			for k: Variant in medals:
+		if not stale:
+			profile.unlocked.clear()
+			for k: Variant in p_data.get("unlocked", []):
 				var index: Variant = _as_level_index(k)
-				if index != null and medals[k] is Dictionary:
-					profile.medals[index] = medals[k]
-		var mission_save: Variant = p_data.get("mission_save")
-		profile.mission_save = mission_save if mission_save is Dictionary else null
+				if index != null:
+					profile.unlocked[index] = true
+			var medals: Variant = p_data.get("medals", {})
+			if medals is Dictionary:
+				for k: Variant in medals:
+					var index: Variant = _as_level_index(k)
+					if index != null and medals[k] is Dictionary:
+						profile.medals[index] = medals[k]
+			var mission_save: Variant = p_data.get("mission_save")
+			profile.mission_save = mission_save if mission_save is Dictionary else null
 		profiles.append(profile)
 
 

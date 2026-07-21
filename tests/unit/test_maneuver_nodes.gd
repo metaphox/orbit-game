@@ -10,7 +10,7 @@ func after_each() -> void:
 
 func _lunar_ship() -> ShipSim:
 	var ship := ShipSim.new()
-	ship.setup(Campaign.level_at(1))
+	ship.setup(Campaign.level_at(3))
 	return ship
 
 
@@ -55,7 +55,7 @@ func test_burn_depletes_remaining_and_completes_node() -> void:
 
 
 func test_warp_stops_at_scheduled_node_time() -> void:
-	GameRootScript.level_index = 1
+	GameRootScript.level_index = 3
 	var game: Node = load("res://src/main.tscn").instantiate()
 	add_child_autofree(game)
 	simulate(game, 2, 1.0 / 60.0)
@@ -85,7 +85,7 @@ func test_node_capability_gate_and_game_flow() -> void:
 	game._node_create()  # level 1: computer not installed
 	assert_null(game.ship.node, "level 1 refuses nodes")
 
-	GameRootScript.level_index = 1
+	GameRootScript.level_index = 3
 	var game2: Node = load("res://src/main.tscn").instantiate()
 	add_child_autofree(game2)
 	simulate(game2, 2, 1.0 / 60.0)

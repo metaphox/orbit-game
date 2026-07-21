@@ -1,25 +1,26 @@
 class_name Campaign
 extends RefCounted
-## The level registry and act grouping (DESIGN.md section 7). LEVELS keeps
-## its existing index meaning (tests and save files reference indices
-## directly); ACTS reorders those same indices for display and unlock
-## progression without renumbering anything.
+## The level registry and act grouping (DESIGN.md section 7). LEVELS is
+## ordered by act (level_<act>_<level>.tres), so its index equals play
+## order; ACTS carves those indices into contiguous per-act ranges. The
+## index is still the stable ID that tests and save files reference, so
+## append new levels at the end of their act's range rather than reordering.
 
 ## Not `const`: GDScript's const requires a compile-time constant
 ## expression, and preload() calls don't qualify.
 static var LEVELS: Array[LevelDef] = [
-	preload("res://src/levels/data/level_01.tres"),
-	preload("res://src/levels/data/level_02.tres"),
-	preload("res://src/levels/data/level_03.tres"),
-	preload("res://src/levels/data/level_04.tres"),
-	preload("res://src/levels/data/level_05.tres"),
-	preload("res://src/levels/data/level_06.tres"),
-	preload("res://src/levels/data/level_07.tres"),
+	preload("res://src/levels/data/level_01_01.tres"),
+	preload("res://src/levels/data/level_01_02.tres"),
+	preload("res://src/levels/data/level_01_03.tres"),
+	preload("res://src/levels/data/level_02_01.tres"),
+	preload("res://src/levels/data/level_02_02.tres"),
+	preload("res://src/levels/data/level_02_03.tres"),
+	preload("res://src/levels/data/level_03_01.tres"),
 ]
 
 const ACTS: Array[Dictionary] = [
-	{"name": "ACT 1 — EARTH ORBIT SCHOOL", "indices": [0, 2, 5]},
-	{"name": "ACT 2 — LUNAR PROGRAM", "indices": [1, 3, 4]},
+	{"name": "ACT 1 — EARTH ORBIT SCHOOL", "indices": [0, 1, 2]},
+	{"name": "ACT 2 — LUNAR PROGRAM", "indices": [3, 4, 5]},
 	{"name": "ACT 3 — INTERPLANETARY", "indices": [6]},
 ]
 

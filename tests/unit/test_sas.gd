@@ -16,7 +16,7 @@ func _boot() -> Node:
 
 
 func test_sas_target_directions() -> void:
-	var level := Campaign.level_at(1)
+	var level := Campaign.level_at(3)
 	var ship := ShipSim.new()
 	ship.setup(level)
 	# start state: r = +X, v = -Z, h = +Y
@@ -41,7 +41,7 @@ func test_sas_gated_by_level_capability() -> void:
 
 
 func test_sas_converges_on_retrograde_hold() -> void:
-	GameRootScript.level_index = 1  # level 2 has the avionics
+	GameRootScript.level_index = 3  # translunar: SAS + nodes enabled
 	var game := _boot()
 	var ship: ShipSim = game.ship
 	game._toggle_sas(ShipSim.SasMode.RETROGRADE)
@@ -63,7 +63,7 @@ func _key(keycode: Key) -> InputEventKey:
 
 
 func test_f_and_b_lock_prograde_and_retrograde_with_toggle_release() -> void:
-	GameRootScript.level_index = 1  # level 2 has the avionics
+	GameRootScript.level_index = 3  # translunar: SAS + nodes enabled
 	var game := _boot()
 	var ship: ShipSim = game.ship
 
@@ -79,7 +79,7 @@ func test_f_and_b_lock_prograde_and_retrograde_with_toggle_release() -> void:
 
 
 func test_g_still_reaches_anti_normal_after_the_remap() -> void:
-	GameRootScript.level_index = 1
+	GameRootScript.level_index = 3
 	var game := _boot()
 	var ship: ShipSim = game.ship
 	game._unhandled_input(_key(KEY_G))

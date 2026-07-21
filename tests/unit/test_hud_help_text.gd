@@ -12,7 +12,7 @@ func after_each() -> void:
 
 
 func test_help_text_reflects_live_input_bindings() -> void:
-	GameRootScript.level_index = 1  # level 2: SAS + nodes both enabled
+	GameRootScript.level_index = 3  # translunar: SAS + nodes both enabled
 	var game: Node = load("res://src/main.tscn").instantiate()
 	add_child_autofree(game)
 	simulate(game, 2, 1.0 / 60.0)

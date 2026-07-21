@@ -8,7 +8,7 @@ const ANGLE_TOLERANCE := 1e-3
 
 
 func _heading_for_yaw_deg(yaw_deg: float) -> float:
-	var level := Campaign.level_at(1)
+	var level := Campaign.level_at(3)
 	var ship := ShipSim.new()
 	ship.setup(level)
 	ship.attitude = Basis(Vector3.UP, deg_to_rad(yaw_deg))

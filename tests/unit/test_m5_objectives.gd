@@ -9,7 +9,7 @@ func after_each() -> void:
 
 
 func test_closest_approach_matches_brute_force() -> void:
-	var level := Campaign.level_at(2)
+	var level := Campaign.level_at(1)
 	var ship := ShipSim.new()
 	ship.setup(level)
 	var objective: RendezvousObjective = level.objective
@@ -28,7 +28,7 @@ func test_closest_approach_matches_brute_force() -> void:
 
 
 func test_rendezvous_met_only_in_proximity() -> void:
-	var level := Campaign.level_at(2)
+	var level := Campaign.level_at(1)
 	var objective: RendezvousObjective = level.objective
 	var ship := ShipSim.new()
 	ship.setup(level)
@@ -43,7 +43,7 @@ func test_rendezvous_met_only_in_proximity() -> void:
 
 
 func test_landing_contact_win_and_crash() -> void:
-	var level := Campaign.level_at(3)
+	var level := Campaign.level_at(4)
 	var objective: AirlessLandingObjective = level.objective
 	var ship := ShipSim.new()
 	ship.setup(level)
@@ -62,7 +62,7 @@ func test_landing_contact_win_and_crash() -> void:
 
 
 func test_entry_corridor_met_on_dipping_orbit() -> void:
-	var level := Campaign.level_at(4)
+	var level := Campaign.level_at(5)
 	var objective: EntryCorridorObjective = level.objective
 	var earth := level.body
 	var ship := ShipSim.new()
@@ -85,13 +85,13 @@ func test_entry_corridor_met_on_dipping_orbit() -> void:
 
 
 func test_new_levels_boot() -> void:
-	for index in [2, 3, 4]:
+	for index in [1, 4, 5]:
 		GameRootScript.level_index = index
 		var game: Node = load("res://src/main.tscn").instantiate()
 		add_child_autofree(game)
 		simulate(game, 5, 1.0 / 60.0)
-		assert_eq(game.phase, game.Phase.FLYING, "level %d boots and flies" % (index + 1))
-	GameRootScript.level_index = 3
+		assert_eq(game.phase, game.Phase.FLYING, "%s boots and flies" % Campaign.title(index))
+	GameRootScript.level_index = 4
 	var landing_game: Node = load("res://src/main.tscn").instantiate()
 	add_child_autofree(landing_game)
 	simulate(landing_game, 5, 1.0 / 60.0)

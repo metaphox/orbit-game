@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #050705; }
+  ::selection { background: #ffb100; color: #050705; }
+  a { color: #4dffa0; text-decoration: none; }
+  a:hover { color: #ffb100; }
+  @keyframes opblink { 0%,49%{opacity:1} 50%,100%{opacity:.1} }
+  @keyframes oppulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+</style>
+</helmet>
+<div style="--bg:#050705;--bg2:#0d110d;--line:#232b24;--green:#4dffa0;--greendk:#0e2e1d;--amber:#ffb100;--amberdk:#2e2100;--red:#ff3b2a;--reddk:#330d08;--cyan:#4fd8e2;--ink:#f2ecdb;--dim:#7f877d;font-family:'Chakra Petch',system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;position:relative;overflow-x:hidden;">
+
+  <sc-if value="{{ crtGlow }}" hint-placeholder-val="{{ true }}">
+    <div style="position:fixed;inset:0;pointer-events:none;z-index:60;background:radial-gradient(ellipse 130% 95% at 50% 45%, transparent 60%, rgba(0,0,0,.5) 100%);"></div>
+  </sc-if>
+  <sc-if value="{{ scanlines }}" hint-placeholder-val="{{ true }}">
+    <div style="position:fixed;inset:0;pointer-events:none;z-index:61;background:repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 2px, rgba(0,0,0,.14) 3px, rgba(0,0,0,0) 4px);mix-blend-mode:multiply;"></div>
+  </sc-if>
+
+  <!-- ══ TOP BAR ══ -->
+  <header style="display:flex;align-items:center;justify-content:space-between;padding:14px 28px;border-bottom:3px solid var(--green);background:#050705;position:sticky;top:0;z-index:40;">
+    <div style="display:flex;align-items:center;gap:14px;">
+      <div style="width:24px;height:24px;background:var(--green);clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);"></div>
+      <span style="font-weight:700;letter-spacing:.16em;font-size:16px;">ORBITAL&nbsp;OS</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.2em;color:var(--amber);background:var(--amberdk);padding:3px 8px;">V2 · BOLD</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:22px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.16em;">
+      <span style="color:var(--green);">■ SYS NOMINAL</span>
+      <span style="color:var(--amber);animation:oppulse 1.4s infinite;">■ TELEM LIVE</span>
+      <span style="color:var(--dim);">REV 2.0</span>
+    </div>
+  </header>
+
+  <!-- hazard divider -->
+  <div style="height:14px;background:repeating-linear-gradient(45deg,var(--amber) 0 14px,#050705 14px 28px);border-bottom:3px solid #000;"></div>
+
+  <div style="max-width:1240px;margin:0 auto;padding:0 28px;">
+
+    <!-- ══ HERO ══ -->
+    <section style="padding:70px 0 56px;border-bottom:3px solid var(--line);">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.34em;color:#050705;background:var(--green);display:inline-block;padding:6px 14px;font-weight:600;">DOC-77 · VISUAL SYSTEM · BOLD CUT</div>
+      <h1 style="margin:26px 0 0;font-weight:700;font-size:110px;line-height:.85;letter-spacing:-.02em;text-transform:uppercase;">NASA&#8209;Punk</h1>
+      <h1 style="margin:8px 0 0;font-weight:700;font-size:110px;line-height:.85;letter-spacing:-.02em;text-transform:uppercase;color:transparent;-webkit-text-stroke:2px var(--green);">Interface</h1>
+      <div style="display:flex;align-items:center;gap:24px;margin-top:34px;">
+        <div style="width:90px;height:4px;background:var(--amber);flex:none;"></div>
+        <p style="max-width:600px;margin:0;font-size:18px;line-height:1.5;color:#c9c3b2;">High-contrast mission control. Black void, phosphor green, hazard amber — type set loud enough to read through a launch. For an orbital sim where every burn is a statement.</p>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;margin-top:44px;border:3px solid var(--ink);">
+        <div style="flex:1;min-width:180px;padding:18px 22px;border-right:3px solid var(--ink);background:var(--green);color:#050705;">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;font-weight:600;">ERA</div>
+          <div style="font-size:17px;font-weight:700;margin-top:5px;">70s–80s SHUTTLE</div>
+        </div>
+        <div style="flex:1;min-width:180px;padding:18px 22px;border-right:3px solid var(--ink);">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;color:var(--dim);">TONE</div>
+          <div style="font-size:17px;font-weight:700;margin-top:5px;">BOLD &amp; GRAPHIC</div>
+        </div>
+        <div style="flex:1;min-width:180px;padding:18px 22px;border-right:3px solid var(--ink);">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;color:var(--dim);">DISPLAY</div>
+          <div style="font-size:17px;font-weight:700;margin-top:5px;">CHAKRA PETCH 700</div>
+        </div>
+        <div style="flex:1;min-width:180px;padding:18px 22px;">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;color:var(--dim);">DATA</div>
+          <div style="font-size:17px;font-weight:700;margin-top:5px;">IBM PLEX MONO</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ 01 COLOR ══ -->
+    <section style="padding:56px 0;border-bottom:3px solid var(--line);">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:34px;">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:700;color:#050705;background:var(--ink);padding:4px 10px;">01</span>
+        <h2 style="margin:0;font-size:38px;font-weight:700;letter-spacing:.01em;text-transform:uppercase;">Color</h2>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:3px solid var(--ink);">
+        <div style="background:#050705;padding:26px 20px;min-height:170px;display:flex;flex-direction:column;justify-content:flex-end;border-right:3px solid var(--ink);"><div style="font-size:26px;font-weight:700;font-family:'IBM Plex Mono',monospace;">#050705</div><div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;color:var(--dim);margin-top:4px;">VOID · CANVAS</div></div>
+        <div style="background:var(--green);color:#050705;padding:26px 20px;min-height:170px;display:flex;flex-direction:column;justify-content:flex-end;border-right:3px solid var(--ink);"><div style="font-size:26px;font-weight:700;font-family:'IBM Plex Mono',monospace;">#4DFFA0</div><div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;font-weight:600;margin-top:4px;">PHOSPHOR · LIVE DATA</div></div>
+        <div style="background:var(--amber);color:#050705;padding:26px 20px;min-height:170px;display:flex;flex-direction:column;justify-content:flex-end;border-right:3px solid var(--ink);"><div style="font-size:26px;font-weight:700;font-family:'IBM Plex Mono',monospace;">#FFB100</div><div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;font-weight:600;margin-top:4px;">HAZARD · INTENT</div></div>
+        <div style="background:var(--red);color:#050705;padding:26px 20px;min-height:170px;display:flex;flex-direction:column;justify-content:flex-end;"><div style="font-size:26px;font-weight:700;font-family:'IBM Plex Mono',monospace;">#FF3B2A</div><div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;font-weight:600;margin-top:4px;">WARNING · RARE</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:3px solid var(--ink);border-top:none;">
+        <div style="background:#f2ecdb;color:#050705;padding:18px 20px;border-right:3px solid var(--ink);"><div style="font-size:16px;font-weight:700;font-family:'IBM Plex Mono',monospace;">#F2ECDB</div><div style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.18em;margin-top:3px;">INK · LABELS</div></div>
+        <div style="background:#4fd8e2;color:#050705;padding:18px 20px;border-right:3px solid var(--ink);"><div style="font-size:16px;font-weight:700;font-family:'IBM Plex Mono',monospace;">#4FD8E2</div><div style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.18em;margin-top:3px;">CYAN · TARGET</div></div>
+        <div style="background:#0d110d;padding:18px 20px;border-right:3px solid var(--ink);"><div style="font-size:16px;font-weight:700;font-family:'IBM Plex Mono',monospace;">#0D110D</div><div style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.18em;color:var(--dim);margin-top:3px;">PANEL</div></div>
+        <div style="background:#232b24;padding:18px 20px;"><div style="font-size:16px;font-weight:700;font-family:'IBM Plex Mono',monospace;">#232B24</div><div style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.18em;color:var(--dim);margin-top:3px;">HAIRLINE</div></div>
+      </div>
+      <div style="display:flex;gap:0;margin-top:24px;border-left:6px solid var(--amber);background:var(--bg2);padding:16px 22px;">
+        <div style="font-size:14px;line-height:1.55;color:#c9c3b2;"><strong style="color:var(--ink);">Rule of loud:</strong> one saturated field per view. Green owns live telemetry, amber owns planned intent and hazard stripes, red fires only when something can kill the vessel. Everything else is black, ink, and hairlines.</div>
+      </div>
+    </section>
+
+    <!-- ══ 02 TYPE ══ -->
+    <section style="padding:56px 0;border-bottom:3px solid var(--line);">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:34px;">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:700;color:#050705;background:var(--ink);padding:4px 10px;">02</span>
+        <h2 style="margin:0;font-size:38px;font-weight:700;letter-spacing:.01em;text-transform:uppercase;">Type</h2>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;border:3px solid var(--ink);margin-bottom:28px;">
+        <div style="padding:30px;border-right:3px solid var(--ink);">
+          <div style="display:flex;justify-content:space-between;margin-bottom:18px;"><span style="font-size:15px;font-weight:700;letter-spacing:.1em;">CHAKRA PETCH</span><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;color:var(--amber);">DISPLAY · 700 ONLY</span></div>
+          <div style="font-size:84px;font-weight:700;line-height:.9;">ABURN</div>
+          <div style="font-size:24px;font-weight:700;letter-spacing:.04em;margin-top:14px;color:transparent;-webkit-text-stroke:1.2px var(--green);">OUTLINE VARIANT 0123</div>
+        </div>
+        <div style="padding:30px;background:var(--bg2);">
+          <div style="display:flex;justify-content:space-between;margin-bottom:18px;"><span style="font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:700;letter-spacing:.06em;">IBM PLEX MONO</span><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;color:var(--green);">DATA · 400–700</span></div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:84px;font-weight:600;line-height:.9;color:var(--green);">7 673</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:24px;margin-top:14px;color:#c9c3b2;">+Δv −θ m/s ()[]#%</div>
+        </div>
+      </div>
+      <div style="border:3px solid var(--ink);">
+        <div style="display:flex;align-items:baseline;gap:20px;padding:18px 24px;border-bottom:1px solid var(--line);"><span style="width:130px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;color:var(--dim);flex:none;">DISPLAY · 110/700</span><span style="font-size:52px;font-weight:700;line-height:1;text-transform:uppercase;">Trans-Lunar</span></div>
+        <div style="display:flex;align-items:baseline;gap:20px;padding:18px 24px;border-bottom:1px solid var(--line);"><span style="width:130px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;color:var(--dim);flex:none;">H1 · 38/700</span><span style="font-size:38px;font-weight:700;text-transform:uppercase;">Maneuver</span></div>
+        <div style="display:flex;align-items:baseline;gap:20px;padding:18px 24px;border-bottom:1px solid var(--line);"><span style="width:130px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;color:var(--dim);flex:none;">H2 · 22/700</span><span style="font-size:22px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;">Orbital Elements</span></div>
+        <div style="display:flex;align-items:baseline;gap:20px;padding:18px 24px;border-bottom:1px solid var(--line);"><span style="width:130px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;color:var(--dim);flex:none;">BODY · 16/400</span><span style="font-size:16px;color:#c9c3b2;">Set periapsis to 185 km and stage prograde.</span></div>
+        <div style="display:flex;align-items:baseline;gap:20px;padding:18px 24px;"><span style="width:130px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;color:var(--dim);flex:none;">DATA · 16/600</span><span style="font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:600;color:var(--green);">AP 402.6km PE 184.1km ECC 0.0163</span></div>
+      </div>
+    </section>
+
+    <!-- ══ 03 COMPONENTS ══ -->
+    <section style="padding:56px 0;border-bottom:3px solid var(--line);">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:34px;">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:700;color:#050705;background:var(--ink);padding:4px 10px;">03</span>
+        <h2 style="margin:0;font-size:38px;font-weight:700;letter-spacing:.01em;text-transform:uppercase;">Components</h2>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+
+        <div style="border:3px solid var(--ink);padding:24px;">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;color:var(--dim);margin-bottom:20px;">BUTTONS &amp; TOGGLES</div>
+          <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:center;">
+            <button style="font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:#050705;background:var(--green);border:2px solid var(--green);padding:12px 22px;cursor:pointer;box-shadow:5px 5px 0 var(--greendk);" style-hover="transform:translate(2px,2px);box-shadow:3px 3px 0 var(--greendk);">Execute Burn</button>
+            <button style="font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);background:transparent;border:2px solid var(--ink);padding:12px 22px;cursor:pointer;box-shadow:5px 5px 0 var(--line);" style-hover="color:var(--green);border-color:var(--green);">Add Node</button>
+            <button style="font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:#050705;background:var(--red);border:2px solid var(--red);padding:12px 22px;cursor:pointer;box-shadow:5px 5px 0 var(--reddk);">Abort</button>
+          </div>
+          <div style="display:flex;gap:26px;align-items:center;margin-top:26px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="width:58px;height:30px;background:#050705;border:2px solid var(--green);position:relative;"><div style="position:absolute;top:2px;right:2px;width:26px;height:22px;background:var(--green);"></div></div>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;letter-spacing:.14em;color:var(--green);">SAS ON</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="width:58px;height:30px;background:#050705;border:2px solid var(--line);position:relative;"><div style="position:absolute;top:2px;left:2px;width:26px;height:22px;background:var(--line);"></div></div>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.14em;color:var(--dim);">RCS OFF</span>
+            </div>
+          </div>
+          <div style="display:flex;margin-top:26px;border:2px solid var(--ink);width:fit-content;">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:700;letter-spacing:.1em;padding:9px 18px;background:var(--amber);color:#050705;">PRO</div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.1em;padding:9px 18px;color:var(--dim);border-left:2px solid var(--ink);">RETRO</div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.1em;padding:9px 18px;color:var(--dim);border-left:2px solid var(--ink);">NORM</div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.1em;padding:9px 18px;color:var(--dim);border-left:2px solid var(--ink);">RAD</div>
+          </div>
+        </div>
+
+        <div style="border:3px solid var(--ink);padding:24px;">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;color:var(--dim);margin-bottom:20px;">PROGRESS &amp; GAUGES</div>
+          <div style="display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.14em;margin-bottom:7px;"><span style="color:var(--dim);">OXIDIZER</span><span style="color:var(--green);">72%</span></div>
+          <div style="display:flex;gap:3px;height:22px;margin-bottom:20px;border:2px solid var(--line);padding:2px;">
+            <div style="flex:1;background:var(--green);"></div><div style="flex:1;background:var(--green);"></div><div style="flex:1;background:var(--green);"></div><div style="flex:1;background:var(--green);"></div><div style="flex:1;background:var(--green);"></div><div style="flex:1;background:var(--green);"></div><div style="flex:1;background:var(--green);"></div><div style="flex:1;background:var(--greendk);"></div><div style="flex:1;background:var(--greendk);"></div><div style="flex:1;background:var(--greendk);"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.14em;margin-bottom:7px;"><span style="color:var(--dim);">MONOPROP</span><span style="color:var(--amber);">28%</span></div>
+          <div style="display:flex;gap:3px;height:22px;margin-bottom:20px;border:2px solid var(--line);padding:2px;">
+            <div style="flex:1;background:var(--amber);"></div><div style="flex:1;background:var(--amber);"></div><div style="flex:1;background:var(--amber);"></div><div style="flex:1;background:var(--amberdk);"></div><div style="flex:1;background:var(--amberdk);"></div><div style="flex:1;background:var(--amberdk);"></div><div style="flex:1;background:var(--amberdk);"></div><div style="flex:1;background:var(--amberdk);"></div><div style="flex:1;background:var(--amberdk);"></div><div style="flex:1;background:var(--amberdk);"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.14em;margin-bottom:7px;"><span style="color:var(--dim);">BURN · T-04.2s</span><span style="color:var(--green);">64%</span></div>
+          <div style="height:14px;border:2px solid var(--green);padding:2px;"><div style="width:64%;height:100%;background:var(--green);"></div></div>
+        </div>
+
+        <div style="border:3px solid var(--ink);overflow:hidden;">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;color:var(--dim);padding:24px 24px 16px;">FLIGHT LOG</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;">
+            <div style="display:grid;grid-template-columns:82px 58px 1fr;gap:10px;padding:9px 24px;background:var(--ink);color:#050705;font-size:10px;font-weight:700;letter-spacing:.14em;"><span>MET</span><span>LVL</span><span>EVENT</span></div>
+            <div style="display:grid;grid-template-columns:82px 58px 1fr;gap:10px;padding:10px 24px;border-bottom:1px solid var(--line);"><span style="color:var(--dim);">00:42:18</span><span style="color:var(--green);font-weight:600;">OK</span><span style="color:#c9c3b2;">Circularization complete</span></div>
+            <div style="display:grid;grid-template-columns:82px 58px 1fr;gap:10px;padding:10px 24px;border-bottom:1px solid var(--line);background:var(--amberdk);"><span style="color:var(--dim);">00:43:55</span><span style="color:var(--amber);font-weight:600;">CAU</span><span style="color:#c9c3b2;">Battery below 20%</span></div>
+            <div style="display:grid;grid-template-columns:82px 58px 1fr;gap:10px;padding:10px 24px;border-bottom:1px solid var(--line);"><span style="color:var(--dim);">00:45:02</span><span style="color:var(--cyan);font-weight:600;">NAV</span><span style="color:#c9c3b2;">Intercept in 1 orbit</span></div>
+            <div style="display:grid;grid-template-columns:82px 58px 1fr;gap:10px;padding:10px 24px;background:var(--red);color:#050705;"><span style="font-weight:600;">00:47:31</span><span style="font-weight:700;">WRN</span><span style="font-weight:700;">PERIAPSIS INSIDE ATMOSPHERE</span></div>
+          </div>
+        </div>
+
+        <div style="border:3px solid var(--ink);padding:24px;">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;color:var(--dim);margin-bottom:18px;">ALERT STATES</div>
+          <div style="display:flex;align-items:stretch;margin-bottom:10px;border:2px solid var(--green);"><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.16em;color:#050705;background:var(--green);padding:10px 14px;flex:none;">NOMINAL</span><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#c9c3b2;padding:10px 14px;">All systems within limits</span></div>
+          <div style="display:flex;align-items:stretch;margin-bottom:10px;border:2px solid var(--amber);"><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.16em;color:#050705;background:var(--amber);padding:10px 14px;flex:none;">CAUTION</span><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#c9c3b2;padding:10px 14px;">Δv margin approaching zero</span></div>
+          <div style="display:flex;align-items:stretch;margin-bottom:22px;border:2px solid var(--red);"><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.16em;color:#050705;background:var(--red);padding:10px 14px;flex:none;animation:opblink 1s steps(1) infinite;">WARNING</span><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--red);font-weight:600;padding:10px 14px;">COLLISION COURSE · TERRAIN</span></div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;color:var(--dim);margin-bottom:14px;">ICONOGRAPHY · 2PX GEOMETRIC</div>
+          <div style="display:flex;gap:20px;align-items:center;color:var(--green);">
+            <svg width="32" height="32" viewBox="0 0 30 30" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="15" cy="15" r="9"/><circle cx="15" cy="15" r="2.4" fill="currentColor" stroke="none"/><line x1="15" y1="1" x2="15" y2="6"/><line x1="15" y1="24" x2="15" y2="29"/><line x1="1" y1="15" x2="6" y2="15"/><line x1="24" y1="15" x2="29" y2="15"/></svg>
+            <svg width="32" height="32" viewBox="0 0 30 30" fill="none" stroke="var(--amber)" stroke-width="2.2"><path d="M15 3 L27 15 L15 27 L3 15 Z"/></svg>
+            <svg width="32" height="32" viewBox="0 0 30 30" fill="none" stroke="var(--red)" stroke-width="2.2"><path d="M15 4 L27 25 L3 25 Z"/><line x1="15" y1="12" x2="15" y2="19"/></svg>
+            <svg width="32" height="32" viewBox="0 0 30 30" fill="none" stroke="currentColor" stroke-width="2.2"><ellipse cx="15" cy="15" rx="12" ry="6"/><circle cx="15" cy="15" r="3.5" fill="currentColor" stroke="none"/></svg>
+            <svg width="32" height="32" viewBox="0 0 30 30" fill="none" stroke="var(--cyan)" stroke-width="2.2"><circle cx="15" cy="15" r="10"/><line x1="5" y1="15" x2="25" y2="15"/><line x1="15" y1="5" x2="15" y2="25"/></svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ 04 SAMPLE SCREEN ══ -->
+    <section style="padding:56px 0 80px;">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:8px;">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:700;color:#050705;background:var(--ink);padding:4px 10px;">04</span>
+        <h2 style="margin:0;font-size:38px;font-weight:700;letter-spacing:.01em;text-transform:uppercase;">Maneuver Planner</h2>
+      </div>
+      <p style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--dim);margin:0 0 26px;letter-spacing:.06em;">Hohmann transfer, set loud.</p>
+
+      <div style="border:3px solid var(--ink);background:#040604;position:relative;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:0;border-bottom:3px solid var(--ink);">
+          <div style="display:flex;align-items:stretch;font-family:'IBM Plex Mono',monospace;">
+            <div style="padding:12px 20px;background:var(--green);color:#050705;"><span style="font-size:9px;letter-spacing:.2em;display:block;font-weight:700;">MET</span><span style="font-size:20px;font-weight:700;letter-spacing:.04em;">T+ 00:47:31</span></div>
+            <div style="padding:12px 20px;border-right:1px solid var(--line);"><span style="font-size:9px;letter-spacing:.2em;color:var(--dim);display:block;">VESSEL</span><span style="font-size:15px;font-weight:600;">KERBAL-VII</span></div>
+            <div style="padding:12px 20px;"><span style="font-size:9px;letter-spacing:.2em;color:var(--dim);display:block;">BODY</span><span style="font-size:15px;font-weight:600;">EARTH</span></div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:center;padding-right:20px;">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.16em;color:#050705;background:var(--amber);padding:6px 12px;">WARP ×10</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.16em;color:var(--green);padding:6px 12px;border:2px solid var(--green);">SAS: HOLD NODE</span>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:260px 1fr 260px;min-height:470px;">
+          <div style="border-right:3px solid var(--ink);padding:18px;">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.22em;color:#050705;background:var(--green);padding:5px 10px;display:inline-block;margin-bottom:16px;">CURRENT ORBIT</div>
+            <div style="font-family:'IBM Plex Mono',monospace;">
+              <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);"><span style="font-size:11px;letter-spacing:.1em;color:var(--dim);">APOAPSIS</span><span style="font-size:15px;font-weight:600;color:var(--green);">402.6 km</span></div>
+              <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);"><span style="font-size:11px;letter-spacing:.1em;color:var(--dim);">PERIAPSIS</span><span style="font-size:15px;font-weight:600;color:var(--green);">184.1 km</span></div>
+              <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);"><span style="font-size:11px;letter-spacing:.1em;color:var(--dim);">INCLIN</span><span style="font-size:15px;font-weight:600;color:var(--green);">28.51°</span></div>
+              <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);"><span style="font-size:11px;letter-spacing:.1em;color:var(--dim);">ECC</span><span style="font-size:15px;font-weight:600;color:var(--green);">0.0163</span></div>
+              <div style="display:flex;justify-content:space-between;padding:10px 0;"><span style="font-size:11px;letter-spacing:.1em;color:var(--dim);">VEL</span><span style="font-size:15px;font-weight:600;color:var(--green);">7 673 m/s</span></div>
+            </div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.22em;color:#050705;background:var(--cyan);padding:5px 10px;display:inline-block;margin:22px 0 12px;">TARGET</div>
+            <div style="font-family:'IBM Plex Mono',monospace;">
+              <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);"><span style="font-size:11px;letter-spacing:.1em;color:var(--dim);">APOAPSIS</span><span style="font-size:15px;font-weight:600;color:var(--cyan);">768.0 km</span></div>
+              <div style="display:flex;justify-content:space-between;padding:10px 0;"><span style="font-size:11px;letter-spacing:.1em;color:var(--dim);">Δ ALT</span><span style="font-size:15px;font-weight:600;color:var(--cyan);">+365.4 km</span></div>
+            </div>
+          </div>
+
+          <div style="position:relative;display:flex;align-items:center;justify-content:center;background:#040604;overflow:hidden;">
+            <div style="position:absolute;top:14px;left:18px;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:.2em;color:var(--dim);">MAP · RETROGRADE VIEW</div>
+            <div style="position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:44px 44px;opacity:.2;"></div>
+            <svg width="410" height="410" viewBox="0 0 410 410" style="position:relative;">
+              <ellipse cx="205" cy="205" rx="165" ry="120" fill="none" stroke="#4dffa0" stroke-width="2.4"/>
+              <ellipse cx="188" cy="205" rx="188" ry="150" fill="none" stroke="#4fd8e2" stroke-width="2.4" stroke-dasharray="10 8"/>
+              <circle cx="205" cy="205" r="58" fill="#0d110d" stroke="#f2ecdb" stroke-width="2"/>
+              <ellipse cx="205" cy="205" rx="40" ry="58" fill="none" stroke="#232b24" stroke-width="1.4"/>
+              <line x1="147" y1="205" x2="263" y2="205" stroke="#232b24" stroke-width="1.4"/>
+              <circle cx="370" cy="205" r="5" fill="#4dffa0"/><text x="360" y="190" fill="#4dffa0" font-family="'IBM Plex Mono',monospace" font-size="11" font-weight="700" text-anchor="end">AP</text>
+              <circle cx="40" cy="205" r="5" fill="#4dffa0"/><text x="50" y="190" fill="#4dffa0" font-family="'IBM Plex Mono',monospace" font-size="11" font-weight="700">PE</text>
+              <g transform="translate(330,120)"><path d="M0 -8 L7 7 L0 3 L-7 7 Z" fill="#f2ecdb"/></g>
+              <g transform="translate(376,205)"><path d="M0 -11 L11 0 L0 11 L-11 0 Z" fill="none" stroke="#ffb100" stroke-width="2.4"/><circle cx="0" cy="0" r="2.6" fill="#ffb100"/></g>
+            </svg>
+            <div style="position:absolute;bottom:14px;left:18px;right:18px;display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:.14em;">
+              <span style="color:#4dffa0;">— CURRENT</span>
+              <span style="color:#4fd8e2;">-- TARGET</span>
+              <span style="color:#ffb100;">◇ NODE</span>
+            </div>
+          </div>
+
+          <div style="border-left:3px solid var(--ink);padding:18px;display:flex;flex-direction:column;">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.22em;color:#050705;background:var(--amber);padding:5px 10px;display:inline-block;align-self:flex-start;margin-bottom:16px;">NODE · 01</div>
+            <div style="border:2px solid var(--amber);padding:14px;margin-bottom:16px;">
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;color:var(--dim);">TOTAL Δv</div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:36px;font-weight:700;color:var(--amber);margin-top:2px;">142.8<span style="font-size:15px;"> m/s</span></div>
+            </div>
+            <div style="font-family:'IBM Plex Mono',monospace;">
+              <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);"><span style="font-size:11px;color:var(--dim);">▲ PROGRADE</span><span style="font-size:14px;font-weight:600;color:var(--amber);">+142.8</span></div>
+              <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);"><span style="font-size:11px;color:var(--dim);">◄ NORMAL</span><span style="font-size:14px;color:#c9c3b2;">0.0</span></div>
+              <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);"><span style="font-size:11px;color:var(--dim);">● RADIAL</span><span style="font-size:14px;color:#c9c3b2;">0.0</span></div>
+              <div style="display:flex;justify-content:space-between;padding:9px 0;"><span style="font-size:11px;color:var(--dim);">BURN TIME</span><span style="font-size:14px;font-weight:600;color:var(--green);">00:08.4</span></div>
+            </div>
+            <div style="margin-top:14px;">
+              <div style="display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.16em;color:var(--dim);margin-bottom:6px;"><span>TIME TO NODE</span><span style="color:var(--green);font-weight:600;">00:12:47</span></div>
+              <div style="height:12px;border:2px solid var(--line);padding:2px;"><div style="width:38%;height:100%;background:var(--amber);"></div></div>
+            </div>
+            <button style="margin-top:auto;font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#050705;background:var(--green);border:2px solid var(--green);padding:14px;cursor:pointer;box-shadow:5px 5px 0 var(--greendk);" style-hover="transform:translate(2px,2px);box-shadow:3px 3px 0 var(--greendk);">Execute · Auto</button>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:stretch;border-top:3px solid var(--ink);">
+          <div style="width:80px;flex:none;background:repeating-linear-gradient(45deg,var(--amber) 0 10px,#050705 10px 20px);"></div>
+          <span style="display:flex;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:700;letter-spacing:.16em;color:var(--amber);padding:12px 18px;">CAUTION · Δv MARGIN 6%</span>
+          <span style="display:flex;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;color:var(--dim);flex:1;padding:12px 0;">STAGE 2 · LOX/RP-1 · TWR 1.42</span>
+          <div style="display:flex;align-items:center;gap:10px;padding-right:20px;"><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:var(--dim);">THROTTLE</span><div style="width:130px;height:12px;border:2px solid var(--green);padding:2px;"><div style="width:100%;height:100%;background:var(--green);"></div></div><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:700;color:var(--green);">100%</span></div>
+        </div>
+
+        <sc-if value="{{ panelWear }}" hint-placeholder-val="{{ true }}">
+          <div style="position:absolute;top:90px;right:70px;width:100px;height:44px;background:radial-gradient(ellipse,rgba(0,0,0,.45),transparent 70%);pointer-events:none;opacity:.6;transform:rotate(-12deg);"></div>
+        </sc-if>
+      </div>
+    </section>
+
+    <footer style="padding:26px 0 60px;border-top:3px solid var(--line);display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;color:var(--dim);">
+      <span>ORBITAL OS · NASA-PUNK · BOLD CUT</span>
+      <span>DOC-77 · REV 2.0</span>
+    </footer>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 1240, &quot;height&quot;: 3400 },
+  &quot;scanlines&quot;: { &quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;CRT Effects&quot; },
+  &quot;crtGlow&quot;: { &quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;CRT Effects&quot; },
+  &quot;panelWear&quot;: { &quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;CRT Effects&quot; }
+}">
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      scanlines: this.props.scanlines ?? true,
+      crtGlow: this.props.crtGlow ?? true,
+      panelWear: this.props.panelWear ?? true,
+    };
+  }
+}
+</script>
+</body>
+</html>

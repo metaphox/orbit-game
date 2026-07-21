@@ -9,8 +9,8 @@ func after_each() -> void:
 	GameRootScript.level_index = 0
 
 
-## Transfer ellipse from the level-2 parking radius aimed to meet the moon
-## at apoapsis, given the level's starting moon phase.
+## Transfer ellipse from the translunar level's parking radius aimed to meet
+## the moon at apoapsis, given the level's starting moon phase.
 func _phased_transfer(level: LevelDef, t0: float) -> OrbitElements:
 	var earth := level.body
 	var moon: BodyDef = level.moons[0]
@@ -20,7 +20,7 @@ func _phased_transfer(level: LevelDef, t0: float) -> OrbitElements:
 	var transfer_time := PI * sqrt(pow(a, 3.0) / earth.mu)
 	var n_moon := moon.orbit.mean_motion()
 	# moon angle now + travel during transfer = burn angle + PI
-	var theta_now := 2.0 + n_moon * t0  # level 2 starts the moon at 2.0 rad
+	var theta_now := 2.0 + n_moon * t0  # translunar level starts the moon at 2.0 rad
 	var phi := theta_now + n_moon * transfer_time - PI
 	var vp := sqrt(earth.mu * (2.0 / r0 - 1.0 / a))
 	return OrbitElements.from_state(
@@ -30,7 +30,7 @@ func _phased_transfer(level: LevelDef, t0: float) -> OrbitElements:
 
 
 func test_soi_entry_handoff_in_ship_sim() -> void:
-	var level := Campaign.level_at(1)
+	var level := Campaign.level_at(3)
 	var ship := ShipSim.new()
 	ship.setup(level)
 	var moon: BodyDef = level.moons[0]
@@ -55,7 +55,7 @@ func test_soi_entry_handoff_in_ship_sim() -> void:
 
 
 func test_soi_exit_handoff_back_to_earth() -> void:
-	var level := Campaign.level_at(1)
+	var level := Campaign.level_at(3)
 	var ship := ShipSim.new()
 	ship.setup(level)
 	var moon: BodyDef = level.moons[0]
@@ -80,7 +80,7 @@ func test_soi_exit_handoff_back_to_earth() -> void:
 
 
 func test_transfer_capture_objective() -> void:
-	var level := Campaign.level_at(1)
+	var level := Campaign.level_at(3)
 	var objective: TransferCaptureObjective = level.objective
 	var ship := ShipSim.new()
 	ship.setup(level)
@@ -111,7 +111,7 @@ func test_transfer_capture_objective() -> void:
 ## encounter exists, is skipped on unchanged frames (cache key stable), and
 ## re-runs once the node's plan is edited (cache key changes).
 func test_node_ghost_scan_is_cached_across_unchanged_frames() -> void:
-	GameRootScript.level_index = 1
+	GameRootScript.level_index = 3
 	var game: Node = load("res://src/main.tscn").instantiate()
 	add_child_autofree(game)
 	simulate(game, 2, 1.0 / 60.0)
@@ -145,7 +145,7 @@ func test_node_ghost_scan_is_cached_across_unchanged_frames() -> void:
 ## big return ellipse. Confirms the encounter marker appears, the scan is
 ## reused while the orbit is unchanged, and a refit re-runs it.
 func test_encounter_marker_scan_is_cached_across_unchanged_frames() -> void:
-	GameRootScript.level_index = 1
+	GameRootScript.level_index = 3
 	var game: Node = load("res://src/main.tscn").instantiate()
 	add_child_autofree(game)
 	simulate(game, 2, 1.0 / 60.0)
@@ -172,7 +172,7 @@ func test_encounter_marker_scan_is_cached_across_unchanged_frames() -> void:
 
 
 func test_rails_warp_clamps_to_soi_boundary() -> void:
-	GameRootScript.level_index = 1
+	GameRootScript.level_index = 3
 	var game: Node = load("res://src/main.tscn").instantiate()
 	add_child_autofree(game)
 	simulate(game, 2, 1.0 / 60.0)

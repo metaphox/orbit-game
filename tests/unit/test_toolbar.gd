@@ -19,7 +19,7 @@ func _boot() -> Node:
 
 
 func test_one_shot_button_taps_press_and_release() -> void:
-	GameRootScript.level_index = 1  # level 2 has the avionics
+	GameRootScript.level_index = 3  # translunar: SAS + nodes enabled
 	var game := _boot()
 	game.hud.toolbar_key.emit(KEY_F, true)
 	game.hud.toolbar_key.emit(KEY_F, false)
@@ -31,7 +31,7 @@ func test_one_shot_button_taps_press_and_release() -> void:
 
 
 func test_toolbar_button_triggers_same_as_direct_click() -> void:
-	GameRootScript.level_index = 1
+	GameRootScript.level_index = 3
 	var game := _boot()
 	var f_button := _find_button(game.hud, "F")
 	assert_not_null(f_button, "F button exists in the toolbar")
@@ -63,7 +63,7 @@ func test_throttle_buttons_are_press_and_hold_not_a_tap() -> void:
 
 
 func test_node_cluster_buttons_create_and_delete_a_node() -> void:
-	GameRootScript.level_index = 1
+	GameRootScript.level_index = 3
 	var game := _boot()
 	assert_null(game.ship.node)
 	game.hud.toolbar_key.emit(KEY_ENTER, true)
@@ -76,7 +76,7 @@ func test_node_cluster_buttons_create_and_delete_a_node() -> void:
 
 
 func test_node_adjust_buttons_change_the_plan() -> void:
-	GameRootScript.level_index = 1
+	GameRootScript.level_index = 3
 	var game := _boot()
 	game._node_create()
 	var before: float = game.ship.node.prograde

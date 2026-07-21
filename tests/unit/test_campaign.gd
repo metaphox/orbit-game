@@ -35,10 +35,10 @@ func _write_raw(path: String, text: String) -> void:
 
 
 func test_campaign_order_and_next() -> void:
-	assert_eq(Campaign.order(), [0, 2, 5, 1, 3, 4, 6], "act-grouped play order")
-	assert_eq(Campaign.next_after(0), 2, "orbit school 1 unlocks rendezvous")
-	assert_eq(Campaign.next_after(5), 1, "plane change unlocks the lunar program act")
-	assert_eq(Campaign.next_after(4), 6, "lunar return unlocks the interplanetary act")
+	assert_eq(Campaign.order(), [0, 1, 2, 3, 4, 5, 6], "act-grouped play order")
+	assert_eq(Campaign.next_after(0), 1, "orbit school 1 unlocks rendezvous")
+	assert_eq(Campaign.next_after(2), 3, "plane change unlocks the lunar program act")
+	assert_eq(Campaign.next_after(5), 6, "lunar return unlocks the interplanetary act")
 	assert_eq(Campaign.next_after(6), -1, "no level after the last one")
 
 
@@ -46,10 +46,10 @@ func test_profile_progress_round_trip_and_unlock() -> void:
 	var profile := Profile.new()
 	profile.profile_name = "Ada"
 	assert_true(profile.is_unlocked(0), "first level starts unlocked")
-	assert_false(profile.is_unlocked(2), "later levels start locked")
+	assert_false(profile.is_unlocked(1), "later levels start locked")
 
 	profile.record_win(0, "GOLD ★★★", 60.0)
-	assert_true(profile.is_unlocked(2), "winning unlocks the next campaign level")
+	assert_true(profile.is_unlocked(1), "winning unlocks the next campaign level")
 	assert_eq(profile.medal_for(0), "GOLD ★★★")
 
 	profile.record_win(0, "BRONZE ★", 90.0)
@@ -88,8 +88,8 @@ func test_multiple_profiles_persist_independently() -> void:
 	assert_eq(reloaded.profiles.size(), 2, "both profiles persisted")
 	var reloaded_ada := reloaded.find_profile("Ada")
 	var reloaded_grace := reloaded.find_profile("Grace")
-	assert_true(reloaded_ada.is_unlocked(2), "Ada's progress persisted")
-	assert_false(reloaded_grace.is_unlocked(2), "Grace's progress is independent of Ada's")
+	assert_true(reloaded_ada.is_unlocked(1), "Ada's progress persisted")
+	assert_false(reloaded_grace.is_unlocked(1), "Grace's progress is independent of Ada's")
 	assert_eq(reloaded.last_active_name, "Grace", "last-created profile is active")
 	assert_eq(reloaded.last_active_profile().profile_name, "Grace")
 
@@ -111,7 +111,7 @@ func test_save_includes_schema_version() -> void:
 	var parsed = JSON.parse_string(f.get_as_text())
 	f.close()
 	# JSON has no int type - everything numeric round-trips as float.
-	assert_eq(parsed.get("version"), 1.0)
+	assert_eq(parsed.get("version"), 2.0)
 
 
 func test_save_reports_success_and_failure() -> void:
@@ -153,7 +153,7 @@ func test_missing_save_file_has_no_warning() -> void:
 
 func test_malformed_profile_entry_is_skipped_not_fatal() -> void:
 	_write_raw(SAVE_TEST_PATH, JSON.stringify({
-		"version": 1,
+		"version": 2,
 		"last_active": "Ada",
 		"profiles": [
 			{"name": "Ada", "unlocked": [0, 2], "medals": {}, "mission_save": null},
@@ -220,12 +220,12 @@ func test_win_persists_to_active_profile_and_advances_campaign() -> void:
 		root.game.level.body.mu, root.game.sim_time)
 	simulate(root, 5, 1.0 / 60.0)
 	assert_eq(root.game.phase, root.game.Phase.WON, "objective met")
-	assert_true(root.active_profile.is_unlocked(2), "win unlocked the next mission")
-	assert_true(root.store.find_profile("Ada").is_unlocked(2), "and it's saved to the store")
+	assert_true(root.active_profile.is_unlocked(1), "win unlocked the next mission")
+	assert_true(root.store.find_profile("Ada").is_unlocked(1), "and it's saved to the store")
 
 	root.game.next_requested.emit(0)
 	simulate(root, 2, 1.0 / 60.0)
-	assert_eq(root.game.level.title, Campaign.title(2), "N advanced to the next mission")
+	assert_eq(root.game.level.title, Campaign.title(1), "N advanced to the next mission")
 
 
 func test_load_profile_switches_active_profile() -> void:
@@ -341,7 +341,7 @@ func test_save_progress_persists_to_active_profile() -> void:
 	root.store = ProfileStore.load_or_new(SAVE_TEST_PATH)
 	add_child_autofree(root)
 	root._on_profile_created("Ada")
-	root._launch(1)  # Level02, the lunar TLI mission
+	root._launch(3)  # the lunar TLI mission (translunar)
 	simulate(root, 2, 1.0 / 60.0)
 
 	root.game.sim_time = 12345.0
@@ -350,7 +350,7 @@ func test_save_progress_persists_to_active_profile() -> void:
 	root.game._save_progress()
 
 	assert_not_null(root.active_profile.mission_save, "save landed on the active profile")
-	assert_eq(root.active_profile.mission_save["level_index"], 1)
+	assert_eq(root.active_profile.mission_save["level_index"], 3)
 	assert_eq(root.active_profile.mission_save["sim_time"], 12345.0)
 	assert_eq(root.active_profile.mission_save["warp_index"], 2)
 
@@ -358,7 +358,7 @@ func test_save_progress_persists_to_active_profile() -> void:
 	var reloaded_save = reloaded.find_profile("Ada").mission_save
 	assert_not_null(reloaded_save, "save persisted to disk")
 	# JSON has no int type - everything numeric round-trips as float.
-	assert_eq(reloaded_save["level_index"], 1.0)
+	assert_eq(reloaded_save["level_index"], 3.0)
 
 
 func test_continue_resumes_saved_mission_exactly() -> void:
@@ -366,7 +366,7 @@ func test_continue_resumes_saved_mission_exactly() -> void:
 	root.store = ProfileStore.load_or_new(SAVE_TEST_PATH)
 	add_child_autofree(root)
 	root._on_profile_created("Ada")
-	root._launch(1)
+	root._launch(3)
 	simulate(root, 2, 1.0 / 60.0)
 
 	# fly a bit so the state isn't just the launch defaults
@@ -393,7 +393,7 @@ func test_continue_resumes_saved_mission_exactly() -> void:
 	# coasts a bit further and no longer matches the captured snapshot.
 	root._on_continue()
 	assert_not_null(root.game, "continue resumed straight into flight")
-	assert_eq(root.game.level_index, 1)
+	assert_eq(root.game.level_index, 3)
 	assert_close(root.game.sim_time, saved_time, 1e-6)
 	assert_dvec_close(root.game.ship.r, saved_r, 1e-6)
 	assert_dvec_close(root.game.ship.v, saved_v, 1e-6)
@@ -411,7 +411,7 @@ func test_continue_resumes_correctly_after_a_simulated_app_restart() -> void:
 	writer.store = ProfileStore.load_or_new(SAVE_TEST_PATH)
 	add_child_autofree(writer)
 	writer._on_profile_created("Ada")
-	writer._launch(1)
+	writer._launch(3)
 	simulate(writer, 2, 1.0 / 60.0)
 	writer.game.warp_index = 3
 	writer.game._save_progress()
@@ -423,7 +423,7 @@ func test_continue_resumes_correctly_after_a_simulated_app_restart() -> void:
 	add_child_autofree(root)
 	root._on_continue()
 	assert_not_null(root.game, "resumed from a disk-loaded store")
-	assert_eq(root.game.level_index, 1)
+	assert_eq(root.game.level_index, 3)
 	assert_eq(root.game.warp_index, 3)
 	assert_dvec_close(root.game.ship.r, saved_r, 1e-6)
 	assert_dvec_close(root.game.ship.v, saved_v, 1e-6)
