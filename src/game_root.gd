@@ -352,10 +352,19 @@ func _toggle_quick_pause() -> void:
 		hud.set_paused_indicator(false)
 
 
+## The director's phases capture it in a RefCounted cycle; break it on teardown
+## (scene freed, mission exited, app quit) so it doesn't leak at exit.
+func _exit_tree() -> void:
+	if director != null:
+		director.dispose()
+		director = null
+
+
 ## Engage/disengage the live autopilot for the current mission. Bound to J in
 ## debug mode; also auto-engaged on launch when autopilot_on_launch is set.
 func _toggle_autopilot() -> void:
 	if director != null:
+		director.dispose()  # break the phase-lambda reference cycle before dropping it
 		director = null
 		ship.throttle = 0.0
 		_last_director_status = ""

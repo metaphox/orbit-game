@@ -79,6 +79,17 @@ func update(game) -> void:
 		game.ship.throttle = 0.0
 
 
+## Drops all phase references so the director can be freed. The phases' lambdas
+## capture the director (self), forming a RefCounted cycle that never reaches
+## zero on its own; clearing the queue and current phase breaks it. Must be
+## called before dropping the last reference to the director - especially when
+## a mission ends mid-phase (the game's is_met can win before a burn phase's
+## own done condition), leaving _current live and the cycle intact.
+func dispose() -> void:
+	_current = null
+	_queue.clear()
+
+
 ## Phases a follow-up phase (or several) to run next, ahead of the rest of the
 ## queue - used by phases whose successors can only be computed mid-flight
 ## (e.g. a Lambert correction after the real escape state is known).

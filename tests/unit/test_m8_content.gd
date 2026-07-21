@@ -64,11 +64,11 @@ func test_mars_departure_guidance_uses_absolute_position() -> void:
 
 
 ## Mirrors test_tli_scenario.gd's structure: an idealized departure phase
-## (not Level07's deliberately-offset 60 degree start, which exists so the
-## *player* has to wait for the window) proves the interplanetary pipeline
-## itself - Sun-centered coast, child-SOI detection two hops from the
-## ship's start, capture - works, using the same mu_sun/r_earth/r_mars the
-## level ships with.
+## (Level07 starts Mars near alignment so its launch window arrives ~15
+## in-game minutes in - this test overrides that phase for a dead-center
+## Hohmann instead) proves the interplanetary pipeline itself - Sun-centered
+## coast, child-SOI detection two hops from the ship's start, capture - works,
+## using the same mu_sun/r_earth/r_mars the level ships with.
 func test_mars_hohmann_transfer_reaches_and_captures() -> void:
 	var level := Campaign.level_at(6)
 	var sun_mu: float = level.body.mu

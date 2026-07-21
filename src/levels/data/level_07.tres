@@ -30,7 +30,7 @@ soi_radius = 3000000.0
 parent = SubResource("Resource_ynib7")
 color = Color(0.72, 0.36, 0.22, 1)
 orbit_radius = 60000000.0
-orbit_phase_deg = 60.0
+orbit_phase_deg = 43.76
 
 [sub_resource type="Resource" id="Resource_fhmye"]
 script = ExtResource("2_uibme")
