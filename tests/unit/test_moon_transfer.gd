@@ -137,6 +137,40 @@ func test_node_ghost_scan_is_cached_across_unchanged_frames() -> void:
 		"editing the node's plan invalidates the cache and re-runs the scan")
 
 
+## Companion to test_node_ghost_scan_is_cached: the SAME expensive
+## child-SOI scan also runs in _update_orbit_marks for the current orbit's
+## encounter marker (independent of any maneuver node). Uncached, it dropped
+## lunar-return framerate to ~10 FPS - fine inside the Moon's SOI (its loop
+## finds no children of the Moon) but crippling back in Earth's SOI on the
+## big return ellipse. Confirms the encounter marker appears, the scan is
+## reused while the orbit is unchanged, and a refit re-runs it.
+func test_encounter_marker_scan_is_cached_across_unchanged_frames() -> void:
+	GameRootScript.level_index = 1
+	var game: Node = load("res://src/main.tscn").instantiate()
+	add_child_autofree(game)
+	simulate(game, 2, 1.0 / 60.0)
+	game.ship.elements = _phased_transfer(game.level, game.sim_time)
+	game.ship.revision += 1  # elements swapped under the sim: invalidate caches
+	game.flight_view.mark_traj_dirty()
+
+	simulate(game, 20, 1.0 / 60.0)  # let TRAJ_REFRESH fire and the scan run
+	assert_true(game.flight_view._encounter_marker.visible,
+		"the transfer's Moon encounter is marked from Earth's SOI")
+
+	# Poison the cached entry time: an unchanged orbit must reuse it verbatim
+	# rather than paying the ~165 ms scan again on the next rebuild.
+	game.flight_view._encounter_entry_t = -12345.0
+	simulate(game, 20, 1.0 / 60.0)
+	assert_eq(game.flight_view._encounter_entry_t, -12345.0,
+		"a stationary orbit reuses the cached encounter time instead of rescanning")
+
+	# A refit (revision bump) invalidates the cache and the scan runs again.
+	game.ship.revision += 1
+	simulate(game, 20, 1.0 / 60.0)
+	assert_ne(game.flight_view._encounter_entry_t, -12345.0,
+		"a refit invalidates the cache and the encounter scan re-runs")
+
+
 func test_rails_warp_clamps_to_soi_boundary() -> void:
 	GameRootScript.level_index = 1
 	var game: Node = load("res://src/main.tscn").instantiate()

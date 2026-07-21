@@ -85,6 +85,11 @@ var _dn_marker: MeshInstance3D
 var _impact_marker: MeshInstance3D
 var _encounter_marker: MeshInstance3D
 var _closest_approach_marker: MeshInstance3D
+## Cache for the current-orbit child-SOI encounter scan - see
+## _encounter_entry_time.
+var _encounter_revision := -1
+var _encounter_horizon := -INF
+var _encounter_entry_t := NAN
 
 const DEFAULT_CAM_YAW := 0.0
 const DEFAULT_CAM_PITCH := 0.0
@@ -609,18 +614,11 @@ func _update_orbit_marks(ship: ShipSim, el: OrbitElements) -> void:
 		_impact_marker.position = el.state_at_time(impact_t).r.sub(ship.r).to_vector3()
 		_impact_marker.scale = mark_scale
 
-	_encounter_marker.visible = false
-	var encounter_span := el.period() if el.is_elliptic() else 6.0e4
-	for moon in _level.moons:
-		if moon.parent != ship.body:
-			continue
-		var entry := OrbitEvents.child_soi_entry_time(
-			el, moon.orbit, moon.soi_radius, t, t + encounter_span, maxf(encounter_span / 400.0, 1.0))
-		if not is_nan(entry):
-			_encounter_marker.visible = true
-			_encounter_marker.position = el.state_at_time(entry).r.sub(ship.r).to_vector3()
-			_encounter_marker.scale = mark_scale
-			break
+	var encounter_t := _encounter_entry_time(ship, el)
+	_encounter_marker.visible = not is_nan(encounter_t)
+	if _encounter_marker.visible:
+		_encounter_marker.position = el.state_at_time(encounter_t).r.sub(ship.r).to_vector3()
+		_encounter_marker.scale = mark_scale
 
 	_closest_approach_marker.visible = false
 	if _objective is RendezvousObjective and ship.body.parent == null:
@@ -628,6 +626,35 @@ func _update_orbit_marks(ship: ShipSim, el: OrbitElements) -> void:
 		_closest_approach_marker.visible = true
 		_closest_approach_marker.position = el.state_at_time(ca.time).r.sub(ship.r).to_vector3()
 		_closest_approach_marker.scale = mark_scale
+
+
+## Next time the current coasting orbit enters a child body's SOI, or NAN.
+## OrbitEvents.child_soi_entry_time is a ~150 ms numerical scan for a
+## lunar-distance window; the elements only change on a refit, so this caches
+## on ship.revision (plus the scanned horizon) instead of re-running every
+## TRAJ_REFRESH tick. That per-tick rescan was what dropped lunar-return
+## framerate to ~10 FPS: inside the Moon's SOI the loop is skipped (the Moon
+## has no children of its own), but the moment the ship hands back to Earth's
+## SOI the big return ellipse made every rebuild pay the full scan again.
+## Mirrors game_root._recompute_events, which caches the same scan the same
+## way for the physics-side event clamp.
+func _encounter_entry_time(ship: ShipSim, el: OrbitElements) -> float:
+	var t := ship.last_time
+	if ship.revision == _encounter_revision and t <= _encounter_horizon:
+		return _encounter_entry_t
+	_encounter_revision = ship.revision
+	var span := el.period() if el.is_elliptic() else 6.0e4
+	_encounter_horizon = t + span
+	_encounter_entry_t = NAN
+	for moon in _level.moons:
+		if moon.parent != ship.body:
+			continue
+		var entry := OrbitEvents.child_soi_entry_time(
+			el, moon.orbit, moon.soi_radius, t, t + span, maxf(span / 400.0, 1.0))
+		if not is_nan(entry):
+			_encounter_entry_t = entry
+			break
+	return _encounter_entry_t
 
 
 ## Predicted post-burn conic (cyan), plus a moon-centric arc when the
