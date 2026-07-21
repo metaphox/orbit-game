@@ -25,8 +25,17 @@ const BODY_SHADER := preload("res://src/shaders/celestial_body.gdshader")
 const ATMOSPHERE_SHADER := preload("res://src/shaders/atmosphere.gdshader")
 const EARTH_MAP := preload("res://assets/textures/earth_abstract.svg")
 const STATION_MODEL := preload("res://src/ui/station_model.tscn")
-const STATION_PHYSICAL_SCALE := 3.0  # ~95 m across, close to an ISS-scale silhouette
-const STATION_MARKER_SCALE_PER_METER := 0.000158
+const STATION_PHYSICAL_SCALE := 32.0  # deliberately absurd: just over 1 km across
+# The distant station is intentionally larger than the ship marker too. The
+# base ratio accounts for their authored dimensions; the multiplier sells the
+# station's exaggerated scale without letting it cover an entire orbit view.
+const SIDE_MARKER_SCALE_PER_CAMERA_DISTANCE := 0.024
+const SHIP_POSTURE_MARKER_LENGTH := 3.05
+const STATION_MODEL_WIDTH := 31.8
+const STATION_MARKER_SIZE_MULTIPLIER := 1.8
+const STATION_MARKER_SCALE_PER_CAMERA_DISTANCE := \
+	SIDE_MARKER_SCALE_PER_CAMERA_DISTANCE * SHIP_POSTURE_MARKER_LENGTH \
+	* STATION_MARKER_SIZE_MULTIPLIER / STATION_MODEL_WIDTH
 
 const BODY_GENERIC := 0
 const BODY_EARTH := 1
@@ -366,7 +375,8 @@ func sync(ship: ShipSim, delta: float) -> void:
 		_station_marker.basis = station_basis.scaled(Vector3.ONE * STATION_PHYSICAL_SCALE)
 		_station_orbit_marker.position = station_position
 		_station_orbit_marker.basis = station_basis.scaled(
-			Vector3.ONE * maxf(_side_distance * STATION_MARKER_SCALE_PER_METER, 1.0))
+			Vector3.ONE * maxf(
+				_side_distance * STATION_MARKER_SCALE_PER_CAMERA_DISTANCE, 1.0))
 
 	var has_maneuver_node := ship.node != null
 	_node_marker.visible = has_maneuver_node
@@ -399,7 +409,7 @@ func sync(ship: ShipSim, delta: float) -> void:
 	# stays constant regardless of zoom; 0.006 (the old plain-dot marker's
 	# factor) reads as a barely-visible fleck now that the marker needs to
 	# show a legible directional shape, not just a location.
-	var marker_scale := maxf(_side_distance * 0.024, 4.0)
+	var marker_scale := maxf(_side_distance * SIDE_MARKER_SCALE_PER_CAMERA_DISTANCE, 4.0)
 	_side_marker.basis = ship.attitude.scaled(Vector3.ONE * marker_scale)
 
 

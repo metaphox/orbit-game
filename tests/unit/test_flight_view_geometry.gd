@@ -59,3 +59,15 @@ func test_station_model_keeps_physical_and_orbit_marker_scales_separate() -> voi
 	var icon_mesh := view._station_orbit_marker.get_node("CentralHub") as VisualInstance3D
 	assert_eq(icon_mesh.layers, view.SIDE_MARKER_LAYER,
 		"the enlarged station copy is visible only to the orbit camera")
+
+
+func test_giant_station_marker_is_larger_than_ship_in_zoomed_out_view() -> void:
+	var ship_span: float = FlightView.SHIP_POSTURE_MARKER_LENGTH \
+		* FlightView.SIDE_MARKER_SCALE_PER_CAMERA_DISTANCE
+	var station_span: float = FlightView.STATION_MODEL_WIDTH \
+		* FlightView.STATION_MARKER_SCALE_PER_CAMERA_DISTANCE
+	assert_almost_eq(station_span,
+		ship_span * FlightView.STATION_MARKER_SIZE_MULTIPLIER, 0.000001,
+		"the giant station reads larger than the player marker at every zoom")
+	assert_gt(FlightView.STATION_PHYSICAL_SCALE * FlightView.STATION_MODEL_WIDTH, 1000.0,
+		"the physical station is comically wider than the real ISS")
