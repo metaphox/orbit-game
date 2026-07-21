@@ -36,7 +36,7 @@ static func _read_json(path: String) -> Variant:
 		return null
 	var text := f.get_as_text()
 	f.close()
-	var parsed = JSON.parse_string(text)
+	var parsed: Variant = JSON.parse_string(text)
 	if not (parsed is Dictionary):
 		push_error("ProfileStore: %s does not contain a valid save (bad JSON)" % path)
 		return null
@@ -46,7 +46,7 @@ static func _read_json(path: String) -> Variant:
 static func load_or_new(path := DEFAULT_PATH) -> ProfileStore:
 	var store := ProfileStore.new()
 	store._path = path
-	var parsed = _read_json(path)
+	var parsed: Variant = _read_json(path)
 	if parsed == null and FileAccess.file_exists(path):
 		# the primary file exists but is corrupt - try the backup before
 		# giving up and treating this as a brand new player.
@@ -64,7 +64,7 @@ static func load_or_new(path := DEFAULT_PATH) -> ProfileStore:
 ## or strings on disk, depending on whether they came from an array or a
 ## dict key - accept any of those, reject anything else instead of crashing
 ## on int() of a non-numeric value.
-static func _as_level_index(k) -> Variant:
+static func _as_level_index(k: Variant) -> Variant:
 	if k is int or k is float:
 		return int(k)
 	if k is String and k.is_valid_int():
@@ -75,24 +75,24 @@ static func _as_level_index(k) -> Variant:
 func _apply(parsed: Dictionary) -> void:
 	last_active_name = parsed.get("last_active", "")
 	Settings.effects_enabled = parsed.get("effects_enabled", true)
-	for p_data in parsed.get("profiles", []):
+	for p_data: Variant in parsed.get("profiles", []):
 		if not (p_data is Dictionary):
 			push_warning("ProfileStore: skipping a malformed profile entry")
 			continue
 		var profile := Profile.new()
 		profile.profile_name = p_data.get("name", "")
 		profile.unlocked.clear()
-		for k in p_data.get("unlocked", []):
-			var index = _as_level_index(k)
+		for k: Variant in p_data.get("unlocked", []):
+			var index: Variant = _as_level_index(k)
 			if index != null:
 				profile.unlocked[index] = true
-		var medals = p_data.get("medals", {})
+		var medals: Variant = p_data.get("medals", {})
 		if medals is Dictionary:
-			for k in medals:
-				var index = _as_level_index(k)
+			for k: Variant in medals:
+				var index: Variant = _as_level_index(k)
 				if index != null and medals[k] is Dictionary:
 					profile.medals[index] = medals[k]
-		var mission_save = p_data.get("mission_save")
+		var mission_save: Variant = p_data.get("mission_save")
 		profile.mission_save = mission_save if mission_save is Dictionary else null
 		profiles.append(profile)
 

@@ -70,9 +70,15 @@ func build(profile: Profile) -> void:
 
 func _first_unlocked_pos() -> int:
 	for i in _order.size():
-		if _profile.is_unlocked(_order[i]):
+		if _is_selectable(_order[i]):
 			return i
 	return 0
+
+
+## True if the mission can be flown right now: either actually unlocked on
+## the profile, or Settings.debug_mode is bypassing the lock entirely.
+func _is_selectable(index: int) -> bool:
+	return Settings.debug_mode or _profile.is_unlocked(index)
 
 
 func _refresh() -> void:
@@ -81,23 +87,27 @@ func _refresh() -> void:
 	for act in Campaign.acts():
 		lines.append("")
 		lines.append("[color=%s]%s[/color]" % [DIM_GREEN, act["name"]])
-		for index in act["indices"]:
+		for index: int in act["indices"]:
 			var mission_title: String = Campaign.title(index)
 			var selected := pos == _cursor
 			var marker := "▶ " if selected else "  "
-			if _profile.is_unlocked(index):
+			var unlocked := _profile.is_unlocked(index)
+			if unlocked or Settings.debug_mode:
 				var medal := _profile.medal_for(index)
 				var medal_tag := "  [color=%s][%s][/color]" % [GOLD, medal] if medal != "" else ""
+				var debug_tag := "  [color=%s][DEBUG][/color]" % GOLD if not unlocked else ""
 				var num_color := HIGHLIGHT if selected else GREEN
 				var title_text := (
 					"[color=%s]%s[/color]" % [HIGHLIGHT, mission_title] if selected
 					else mission_title)
-				lines.append("%s[color=%s][%d][/color] %s%s" % [
-					marker, num_color, pos + 1, title_text, medal_tag])
+				lines.append("%s[color=%s][%d][/color] %s%s%s" % [
+					marker, num_color, pos + 1, title_text, medal_tag, debug_tag])
 			else:
 				lines.append("%s[color=%s][ ] --- LOCKED ---[/color]" % [marker, LOCKED])
 			pos += 1
 	lines.append("")
+	if Settings.debug_mode:
+		lines.append("[color=%s][DEBUG MODE — ALL LEVELS UNLOCKED][/color]" % GOLD)
 	lines.append("[color=%s]↑↓ SELECT  ENTER LAUNCH  OR PRESS NUMBER   [ESC] TITLE SCREEN[/color]"
 		% DIM_GREEN)
 	_text.text = "\n".join(lines)
@@ -110,7 +120,7 @@ func _move_cursor(delta: int) -> void:
 	var i := _cursor
 	for _step in n:
 		i = wrapi(i + delta, 0, n)
-		if _profile.is_unlocked(_order[i]):
+		if _is_selectable(_order[i]):
 			_cursor = i
 			_refresh()
 			return
@@ -120,7 +130,7 @@ func _select_and_activate(pos: int) -> void:
 	if pos < 0 or pos >= _order.size():
 		return
 	var index: int = _order[pos]
-	if not _profile.is_unlocked(index):
+	if not _is_selectable(index):
 		return
 	_cursor = pos
 	level_chosen.emit(index)

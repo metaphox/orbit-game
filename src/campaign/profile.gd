@@ -8,10 +8,10 @@ var profile_name := ""
 var unlocked: Dictionary[int, bool] = {0: true}
 var medals: Dictionary[int, Dictionary] = {}  # level_index -> {"medal": String, "dv": float}
 # Dictionary (ShipSim.serialize() + level_index/sim_time/warp_index) or null
-# for "no mission in progress" - left untyped: a strictly-typed Dictionary
-# field can't hold null in GDScript (it defaults to {} instead), which
-# would break that meaningful distinction.
-var mission_save = null
+# for "no mission in progress" - typed Variant rather than Dictionary: a
+# strictly-typed Dictionary field can't hold null in GDScript (it defaults
+# to {} instead), which would break that meaningful distinction.
+var mission_save: Variant = null
 
 
 func is_unlocked(index: int) -> bool:

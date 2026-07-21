@@ -57,6 +57,7 @@ var _minimap_aspect: AspectRatioContainer
 var _right_column: VBoxContainer
 var _minimap_cam: Camera3D
 var _minimap_base_pos := Vector3.ZERO
+var _fps_label: Label
 
 
 ## Everything static and single-instance (status/objective/engine/help/
@@ -116,6 +117,8 @@ func build(level: LevelDef) -> void:
 	_finish_minimap(level)
 	get_viewport().size_changed.connect(_update_minimap_size)
 	_build_toolbar()
+	if Settings.debug_mode:
+		_build_fps_label()
 	if Settings.effects_enabled:
 		add_child(ScreenGrade.new())  # drawn last: whole-screen film grade on top
 
@@ -192,6 +195,20 @@ func _process(delta: float) -> void:
 		_flash_left -= delta
 		if _flash_left <= 0.0:
 			_flash_label.visible = false
+	if _fps_label != null:
+		_fps_label.text = "FPS %d" % Engine.get_frames_per_second()
+
+
+## Debug-mode-only readout (Settings.debug_mode), top-left corner clear of
+## StatusLabel (which starts at y=14) - not part of hud_layout.tscn since
+## it's a dev aid, not a player-facing HUD element.
+func _build_fps_label() -> void:
+	_fps_label = Label.new()
+	_fps_label.add_theme_font_override("font", _font)
+	_fps_label.add_theme_font_size_override("font_size", 14)
+	_fps_label.add_theme_color_override("font_color", AMBER)
+	add_child(_fps_label)
+	_fps_label.position = Vector2(14, 0)
 
 
 func show_fail(reason: String) -> void:
@@ -283,7 +300,7 @@ func _build_toolbar_row(parent: Control, groups: Array) -> void:
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	parent.add_child(row)
-	for group in groups:
+	for group: Array in groups:
 		row.add_child(_make_toolbar_group(group[0], group[1]))
 
 
@@ -315,7 +332,7 @@ func _make_toolbar_group(title: String, entries: Array) -> Control:
 	buttons.add_theme_constant_override("separation", 2)
 	buttons.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	stack.add_child(buttons)
-	for entry in entries:
+	for entry: Array in entries:
 		buttons.add_child(_make_toolbar_button(entry[0], entry[1], entry[2]))
 	return panel
 
@@ -334,10 +351,10 @@ func _make_toolbar_button(label: String, keycode: int, holdable: bool) -> Button
 		_toolbar_buttons[keycode] = []
 	(_toolbar_buttons[keycode] as Array).append(button)
 	if holdable:
-		button.button_down.connect(func(): toolbar_key.emit(keycode, true))
-		button.button_up.connect(func(): toolbar_key.emit(keycode, false))
+		button.button_down.connect(func() -> void: toolbar_key.emit(keycode, true))
+		button.button_up.connect(func() -> void: toolbar_key.emit(keycode, false))
 	else:
-		button.pressed.connect(func():
+		button.pressed.connect(func() -> void:
 			toolbar_key.emit(keycode, true)
 			toolbar_key.emit(keycode, false))
 	return button

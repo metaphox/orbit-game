@@ -11,6 +11,7 @@ const DEFAULT_SIZE := Vector2i(1024, 768)
 
 func after_each() -> void:
 	get_tree().root.size = DEFAULT_SIZE
+	Settings.debug_mode = false
 
 
 func _assert_no_overlap_at_size(size: Vector2i) -> void:
@@ -57,3 +58,19 @@ func test_minimap_stays_within_a_bounded_fraction_of_a_small_window() -> void:
 	assert_lt(minimap_rect.size.x, 341.0, "minimap width respects its upper clamp")
 	assert_lt(minimap_rect.size.x, DEFAULT_SIZE.x * 0.3,
 		"minimap should not cover close to a third of a small window's width")
+
+
+func test_fps_label_only_appears_in_debug_mode() -> void:
+	var level := Campaign.level_at(0)
+	var hud := Hud.new()
+	add_child_autofree(hud)
+	hud.build(level)
+	assert_null(hud._fps_label, "no FPS readout for regular play")
+
+	Settings.debug_mode = true
+	var debug_hud := Hud.new()
+	add_child_autofree(debug_hud)
+	debug_hud.build(level)
+	assert_not_null(debug_hud._fps_label, "debug mode adds the FPS readout")
+	debug_hud._process(0.016)
+	assert_true(debug_hud._fps_label.text.begins_with("FPS "), "shows a live FPS reading")

@@ -71,6 +71,9 @@ var _preview_mesh: ImmediateMesh
 var _preview_instance: MeshInstance3D
 var _preview_anchor: DVec3  # parent-frame moon position at predicted entry
 var _preview_active := false
+## [ship.revision, node.t_node, node.prograde, node.normal, node.radial] as
+## of the last child-SOI encounter scan - see _rebuild_node_ghost.
+var _ghost_key: Array = []
 var _node_marker: MeshInstance3D
 var _station_marker: MeshInstance3D
 var _level: LevelDef
@@ -348,9 +351,9 @@ func sync(ship: ShipSim, delta: float) -> void:
 		_station_marker.position = st.r.sub(ship_abs).to_vector3()
 		_station_marker.scale = Vector3.ONE * maxf(_side_distance * 0.002, 1.0)
 
-	var has_node := ship.node != null
-	_node_marker.visible = has_node
-	if has_node:
+	var has_maneuver_node := ship.node != null
+	_node_marker.visible = has_maneuver_node
+	if has_maneuver_node:
 		_node_marker.position = ship.current_elements() \
 			.state_at_time(ship.node.t_node).r.sub(ship.r).to_vector3()
 		_node_marker.scale = Vector3.ONE * maxf(_side_distance * 0.004, 4.0)
@@ -632,9 +635,10 @@ func _update_orbit_marks(ship: ShipSim, el: OrbitElements) -> void:
 ## predicted entry time, KSP-style.
 func _rebuild_node_ghost(ship: ShipSim) -> void:
 	_node_mesh.clear_surfaces()
-	_preview_mesh.clear_surfaces()
-	_preview_active = false
 	if ship.node == null:
+		_preview_mesh.clear_surfaces()
+		_preview_active = false
+		_ghost_key = []
 		return
 	var pred := ship.predicted_elements()
 	var r_max := minf(_draw_limit, ship.body.soi_radius * 1.15)
@@ -648,13 +652,33 @@ func _rebuild_node_ghost(ship: ShipSim) -> void:
 		_node_mesh.surface_add_vertex(first.to_vector3())
 	_node_mesh.surface_end()
 
+	# OrbitEvents.child_soi_entry_time below is a numerical root-find with no
+	# closed form - a coarse scan (up to a few hundred steps, tightened
+	# further for slow relative speeds) each refined by 40 ternary-search
+	# iterations, so potentially thousands of Kepler solves per call. Redoing
+	# that from scratch every TRAJ_REFRESH tick (4x/second) for as long as a
+	# node exists was the actual cost of lunar missions: pred only changes
+	# when the ship refits (ship.revision) or the node's plan is edited, so
+	# while coasting toward an untouched node - the common case, e.g. most of
+	# a TLI/LOI coast - the scan was pure repeated waste. Cache on that
+	# signature and skip the whole moon loop (leaving the preview mesh/
+	# anchor exactly as they were, which is still correct) when neither
+	# moved since the last call.
+	var node := ship.node
+	var key: Array = [ship.revision, node.t_node, node.prograde, node.normal, node.radial]
+	if key == _ghost_key:
+		return
+	_ghost_key = key
+
+	_preview_mesh.clear_surfaces()
+	_preview_active = false
 	for moon in _level.moons:
 		if moon.parent != ship.body:
 			continue
 		var span := pred.period() if pred.is_elliptic() else 6.0e4
 		var entry := OrbitEvents.child_soi_entry_time(
-			pred, moon.orbit, moon.soi_radius, ship.node.t_node,
-			ship.node.t_node + span, maxf(span / 400.0, 1.0))
+			pred, moon.orbit, moon.soi_radius, node.t_node,
+			node.t_node + span, maxf(span / 400.0, 1.0))
 		if is_nan(entry):
 			continue
 		var rel := Frames.to_child_frame(pred.state_at_time(entry), moon.orbit, entry)

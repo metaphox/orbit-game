@@ -10,12 +10,14 @@ const SAVE_TEST_PATH := "user://test_save.json"
 func before_each() -> void:
 	_clear_save()
 	Settings.effects_enabled = true
+	Settings.debug_mode = false
 
 
 func after_each() -> void:
 	_clear_save()
 	GameRootScript.level_index = 0
 	Settings.effects_enabled = true
+	Settings.debug_mode = false
 
 
 func _clear_save() -> void:
@@ -295,6 +297,29 @@ func test_level_select_arrow_navigation_skips_locked_missions() -> void:
 	screen.level_chosen.connect(func(index): chosen[0] = index)
 	screen._select_and_activate(screen._cursor)
 	assert_eq(chosen[0], Campaign.order()[1], "Enter launches the highlighted, unlocked mission")
+
+
+func test_level_select_debug_mode_unlocks_everything() -> void:
+	Settings.debug_mode = true
+	var profile := Profile.new()  # only level 0 unlocked
+	var screen := LevelSelect.new()
+	add_child_autofree(screen)
+	screen.build(profile)
+
+	screen._move_cursor(1)
+	assert_eq(screen._cursor, 1, "debug mode lets the cursor reach a locked mission")
+
+	var chosen := [-1]
+	screen.level_chosen.connect(func(index): chosen[0] = index)
+	screen._select_and_activate(screen._cursor)
+	assert_eq(chosen[0], Campaign.order()[1], "and launch it even though it's not actually unlocked")
+	assert_false(profile.is_unlocked(Campaign.order()[1]), "debug mode doesn't touch profile save data")
+
+
+func test_apply_cmdline_args_reads_debug_flag() -> void:
+	Settings.debug_mode = true
+	Settings.apply_cmdline_args()
+	assert_false(Settings.debug_mode, "the test runner isn't launched with --debug-mode")
 
 
 func test_level_select_escape_returns_to_title() -> void:

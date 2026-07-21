@@ -46,8 +46,8 @@ func status_lines(ship: ShipSim) -> Array[String]:
 
 func trajectory_closeness(ship: ShipSim) -> float:
 	if ship.body == target:
-		var el := ship.current_elements()
-		if el.is_elliptic() and el.radius_apoapsis() <= target.soi_radius:
+		var captured_el := ship.current_elements()
+		if captured_el.is_elliptic() and captured_el.radius_apoapsis() <= target.soi_radius:
 			return 1.0
 		return 0.55
 	if ship.body.parent != null:

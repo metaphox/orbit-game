@@ -111,7 +111,7 @@ static func _from_state_unchecked(r: DVec3, v: DVec3, mu_p: float, t: float) -> 
 
 	el.inc = acos(clampf(h_vec.z / h_len, -1.0, 1.0))
 	var equatorial := el.inc < INC_EQUATORIAL or el.inc > PI - INC_EQUATORIAL
-	var circular := ecc < ECC_CIRCULAR
+	var is_circular := ecc < ECC_CIRCULAR
 
 	var node := DVec3.new(-h_vec.y, h_vec.x, 0.0)
 	if equatorial:
@@ -121,8 +121,8 @@ static func _from_state_unchecked(r: DVec3, v: DVec3, mu_p: float, t: float) -> 
 		el.raan = atan2(node.y, node.x)
 	node = node.normalized()
 
-	var peri := node if circular else e_vec.normalized()
-	el.argp = 0.0 if circular else _signed_angle(node, peri, h_vec)
+	var peri := node if is_circular else e_vec.normalized()
+	el.argp = 0.0 if is_circular else _signed_angle(node, peri, h_vec)
 
 	var nu := _signed_angle(peri, r.normalized(), h_vec)
 	el.m0 = el.mean_from_true(nu)

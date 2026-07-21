@@ -103,6 +103,40 @@ func test_transfer_capture_objective() -> void:
 	assert_false(objective.is_met(ship), "not met on a hyperbolic flyby")
 
 
+## Regression for the lunar-mission perf fix: OrbitEvents.child_soi_entry_time
+## is an expensive numerical scan, and flight_view used to redo it from
+## scratch every TRAJ_REFRESH tick (4x/second) for as long as a node existed,
+## even when nothing about the ship or the node had changed since the last
+## scan. Confirms the scan actually runs once a node with a real lunar
+## encounter exists, is skipped on unchanged frames (cache key stable), and
+## re-runs once the node's plan is edited (cache key changes).
+func test_node_ghost_scan_is_cached_across_unchanged_frames() -> void:
+	GameRootScript.level_index = 1
+	var game: Node = load("res://src/main.tscn").instantiate()
+	add_child_autofree(game)
+	simulate(game, 2, 1.0 / 60.0)
+	game.ship.elements = _phased_transfer(game.level, game.sim_time)
+	game.ship.revision += 1  # elements swapped under the sim: invalidate caches
+
+	game._node_create()  # dv stays zero: pred just re-epochs the same transfer, which already meets the moon
+	game.flight_view.mark_traj_dirty()
+
+	simulate(game, 20, 1.0 / 60.0)  # let TRAJ_REFRESH fire and the scan run
+	assert_true(game.flight_view._preview_active, "the phased transfer does reach the moon's SOI")
+	var key_after_first_scan: Array = game.flight_view._ghost_key.duplicate()
+	assert_false(key_after_first_scan.is_empty(), "the scan recorded a cache key")
+
+	simulate(game, 20, 1.0 / 60.0)  # nothing changed since - should hit the cache
+	assert_eq(game.flight_view._ghost_key, key_after_first_scan,
+		"cache key unchanged when neither the ship nor the node moved")
+
+	game.ship.node.prograde += 50.0
+	game.ship.refresh_node_plan()
+	simulate(game, 20, 1.0 / 60.0)
+	assert_ne(game.flight_view._ghost_key, key_after_first_scan,
+		"editing the node's plan invalidates the cache and re-runs the scan")
+
+
 func test_rails_warp_clamps_to_soi_boundary() -> void:
 	GameRootScript.level_index = 1
 	var game: Node = load("res://src/main.tscn").instantiate()

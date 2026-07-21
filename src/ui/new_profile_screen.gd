@@ -56,7 +56,7 @@ func build(profile_store: ProfileStore) -> void:
 	_line_edit.set_anchors_and_offsets_preset(Control.PRESET_CENTER, Control.PRESET_MODE_MINSIZE)
 	_line_edit.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	_line_edit.grow_vertical = Control.GROW_DIRECTION_BOTH
-	_line_edit.text_submitted.connect(func(_t): _attempt_create())
+	_line_edit.text_submitted.connect(func(_t: String) -> void: _attempt_create())
 
 	_error_label = Label.new()
 	_error_label.add_theme_font_override("font", font)

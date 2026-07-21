@@ -22,6 +22,7 @@ func _ready() -> void:
 	# there's no real window to constrain.
 	if DisplayServer.get_name() != "headless":
 		DisplayServer.window_set_min_size(Vector2i(1024, 768))
+	Settings.apply_cmdline_args()
 	# Only initialize if a test (or future caller) hasn't already injected
 	# one - previously this unconditionally clobbered a pre-set store,
 	# silently redirecting to the default save path.
@@ -53,7 +54,7 @@ func _show_title() -> void:
 	screen.load_pressed.connect(_show_load_profile)
 	screen.settings_pressed.connect(_show_settings)
 	screen.credits_pressed.connect(_show_credits)
-	screen.quit_pressed.connect(func(): get_tree().quit())
+	screen.quit_pressed.connect(func() -> void: get_tree().quit())
 	_current_ui = screen
 
 

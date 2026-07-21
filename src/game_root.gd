@@ -95,7 +95,7 @@ func _on_toolbar_key(keycode: int, pressed: bool) -> void:
 			Input.action_release("throttle_decrease")
 		return
 	var event := InputEventKey.new()
-	event.physical_keycode = keycode
+	event.physical_keycode = keycode as Key
 	event.pressed = pressed
 	_unhandled_input(event)
 
@@ -160,9 +160,15 @@ func _unhandled_input(event: InputEvent) -> void:
 	if wheel != null:
 		if wheel.pressed:
 			if wheel.button_index == MOUSE_BUTTON_WHEEL_UP:
-				flight_view.side_zoom(0.88) if side_active else flight_view.chase_zoom(0.88)
+				if side_active:
+					flight_view.side_zoom(0.88)
+				else:
+					flight_view.chase_zoom(0.88)
 			elif wheel.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-				flight_view.side_zoom(1.14) if side_active else flight_view.chase_zoom(1.14)
+				if side_active:
+					flight_view.side_zoom(1.14)
+				else:
+					flight_view.chase_zoom(1.14)
 		return
 	# Trackpad two-finger scroll (macOS): arrives as InputEventPanGesture
 	# rather than wheel button events. Sign/scale is a best-effort guess -
@@ -171,7 +177,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	var pan := event as InputEventPanGesture
 	if pan != null:
 		var pan_factor := 1.0 + pan.delta.y * ZOOM_PAN_SIGN * ZOOM_PAN_SENSITIVITY
-		flight_view.side_zoom(pan_factor) if side_active else flight_view.chase_zoom(pan_factor)
+		if side_active:
+			flight_view.side_zoom(pan_factor)
+		else:
+			flight_view.chase_zoom(pan_factor)
 		return
 	# Pinch-to-zoom, offered as a bonus alongside the requested two-finger
 	# scroll: factor > 1 is a pinch-out (spreading fingers), which reads as
@@ -179,7 +188,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	var magnify := event as InputEventMagnifyGesture
 	if magnify != null and magnify.factor > 0.0:
 		var magnify_factor := 1.0 / magnify.factor
-		flight_view.side_zoom(magnify_factor) if side_active else flight_view.chase_zoom(magnify_factor)
+		if side_active:
+			flight_view.side_zoom(magnify_factor)
+		else:
+			flight_view.chase_zoom(magnify_factor)
 		return
 	var key := event as InputEventKey
 	if key == null or not key.pressed or key.echo:
@@ -282,8 +294,8 @@ func _open_pause_menu() -> void:
 	_pause_menu.build()
 	_pause_menu.resume_pressed.connect(_close_pause_menu)
 	_pause_menu.save_pressed.connect(_save_progress)
-	_pause_menu.restart_pressed.connect(func(): restart_requested.emit())
-	_pause_menu.quit_pressed.connect(func(): exit_requested.emit())
+	_pause_menu.restart_pressed.connect(func() -> void: restart_requested.emit())
+	_pause_menu.quit_pressed.connect(func() -> void: exit_requested.emit())
 	hud.set_paused_indicator(false)  # the full menu already reads "PAUSED"
 
 

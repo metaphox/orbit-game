@@ -249,6 +249,9 @@ func _coast_to(t: float) -> void:
 ## for a mid-mission save. Bodies aren't included - they're on rails, so
 ## sim_time alone reconstructs every body's position on load.
 func serialize() -> Dictionary:
+	var node_payload: Variant = null
+	if node != null:
+		node_payload = node.serialize()
 	return {
 		"body_name": body.name,
 		"r": [r.x, r.y, r.z],
@@ -256,7 +259,7 @@ func serialize() -> Dictionary:
 		"attitude": _basis_to_array(attitude),
 		"prop_mass": prop_mass,
 		"sas_mode": sas_mode,
-		"node": node.serialize() if node != null else null,
+		"node": node_payload,
 	}
 
 
@@ -276,7 +279,7 @@ func apply_serialized(data: Dictionary, at_time: float) -> void:
 	last_time = at_time
 	_refit_elements(at_time)
 
-	var node_data = data.get("node")
+	var node_data: Variant = data.get("node")
 	if node_data != null:
 		node = ManeuverNode.new()
 		node.t_node = node_data["t_node"]
