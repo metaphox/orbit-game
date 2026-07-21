@@ -49,8 +49,12 @@ func build(level: LevelDef) -> void:
 
 	if level.objective is OrbitMatchObjective:
 		var target := level.objective as OrbitMatchObjective
-		add_child(_line_instance(
-			_circle_points(target.target_radius * MAP_SCALE), Color(0.2, 0.55, 0.28)))
+		var pts := _circle_points(target.target_radius * MAP_SCALE)
+		if target.target_inclination > 0.0:
+			var tilt := Basis(Vector3(1, 0, 0), target.target_inclination)
+			for i in pts.size():
+				pts[i] = tilt * pts[i]
+		add_child(_line_instance(pts, Color(0.2, 0.55, 0.28)))
 	elif level.objective is RendezvousObjective:
 		var rdv := level.objective as RendezvousObjective
 		add_child(_line_instance(

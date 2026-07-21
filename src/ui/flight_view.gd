@@ -445,8 +445,13 @@ func _build_trajectory_lines(level: LevelDef) -> void:
 	_traj_instance.material_override = _traj_material
 	add_child(_traj_instance)
 
-	# target ring: whatever circle best marks the goal for this objective
+	# target ring: whatever circle best marks the goal for this objective.
+	# ring_tilt inclines it off the equatorial plane so a plane-change goal
+	# reads as a tilted hoop the ship must line its orbit up with, not just a
+	# number - the flat radius circle alone hid the inclination target.
 	var ring_radius: float
+	var ring_tilt := 0.0
+	var corridor_tol := 0.0  # > 0 switches to the entry-corridor band render
 	if _objective is TransferCaptureObjective:
 		var capture := _objective as TransferCaptureObjective
 		_ring_body = capture.target
@@ -463,36 +468,84 @@ func _build_trajectory_lines(level: LevelDef) -> void:
 		var corridor := _objective as EntryCorridorObjective
 		_ring_body = level.body
 		ring_radius = corridor.target_periapsis
+		corridor_tol = corridor.tolerance
 	else:
 		var match_obj := _objective as OrbitMatchObjective
 		_ring_body = level.body
 		ring_radius = match_obj.target_radius
+		ring_tilt = match_obj.target_inclination
 
-	var dash_mesh := ImmediateMesh.new()
-	dash_mesh.surface_begin(Mesh.PRIMITIVE_LINES)
-	var dashes := 96
-	for i in dashes:
-		if i % 2 == 1:
-			continue
-		for k in 2:
-			var ang := TAU * (i + k * 0.85) / dashes
-			dash_mesh.surface_add_vertex(Vector3(
-				cos(ang) * ring_radius, 0.0, sin(ang) * ring_radius))
-	dash_mesh.surface_end()
-	var dash_mat := StandardMaterial3D.new()
-	dash_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	dash_mat.albedo_color = Color(0.5, 0.85, 0.6, 0.55)
-	dash_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	dash_mat.emission_enabled = true
-	dash_mat.emission = Color(0.5, 0.85, 0.6)
-	dash_mat.emission_energy_multiplier = 1.2
 	_target_instance = MeshInstance3D.new()
-	_target_instance.mesh = dash_mesh
-	_target_instance.material_override = dash_mat
+	if corridor_tol > 0.0:
+		# A hairline ring at the corridor radius read as "on the planet" (the
+		# 66 km corridor sits barely above Earth's ~64 km surface). Render the
+		# ±tolerance band instead - a filled amber annulus with bright edge
+		# rings - so it's an unmistakable gate hovering just above the surface
+		# that the ship's periapsis must drop into.
+		_target_instance.mesh = _build_corridor_band(ring_radius, corridor_tol)
+	else:
+		var tilt_basis := Basis(Vector3(1, 0, 0), ring_tilt)
+		var dash_mesh := ImmediateMesh.new()
+		dash_mesh.surface_begin(Mesh.PRIMITIVE_LINES)
+		var dashes := 96
+		for i in dashes:
+			if i % 2 == 1:
+				continue
+			for k in 2:
+				var ang := TAU * (i + k * 0.85) / dashes
+				dash_mesh.surface_add_vertex(tilt_basis * Vector3(
+					cos(ang) * ring_radius, 0.0, sin(ang) * ring_radius))
+		dash_mesh.surface_end()
+		var dash_mat := StandardMaterial3D.new()
+		dash_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		dash_mat.albedo_color = Color(0.5, 0.85, 0.6, 0.55)
+		dash_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		dash_mat.emission_enabled = true
+		dash_mat.emission = Color(0.5, 0.85, 0.6)
+		dash_mat.emission_energy_multiplier = 1.2
+		_target_instance.mesh = dash_mesh
+		_target_instance.material_override = dash_mat
 	add_child(_target_instance)
 
 	_side_marker = _build_posture_marker()
 	add_child(_side_marker)  # stays at origin = ship render position
+
+
+## The entry-corridor gate: a faint filled amber annulus between the periapsis
+## tolerance bounds plus a bright ring on each edge, so the shallow corridor
+## reads as a distinct band above the surface instead of a hairline circle.
+func _build_corridor_band(radius: float, tol: float) -> ImmediateMesh:
+	var inner := radius - tol
+	var outer := radius + tol
+	var seg := 96
+	var mesh := ImmediateMesh.new()
+
+	var fill_mat := StandardMaterial3D.new()
+	fill_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	fill_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	fill_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	fill_mat.albedo_color = Color(1.0, 0.72, 0.24, 0.16)
+	mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP, fill_mat)
+	for i in seg + 1:
+		var ang := TAU * i / seg
+		mesh.surface_add_vertex(Vector3(cos(ang) * inner, 0.0, sin(ang) * inner))
+		mesh.surface_add_vertex(Vector3(cos(ang) * outer, 0.0, sin(ang) * outer))
+	mesh.surface_end()
+
+	var edge_mat := StandardMaterial3D.new()
+	edge_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	edge_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	edge_mat.albedo_color = Color(1.0, 0.72, 0.24, 0.9)
+	edge_mat.emission_enabled = true
+	edge_mat.emission = Color(1.0, 0.72, 0.24)
+	edge_mat.emission_energy_multiplier = 1.5
+	for edge_radius in [inner, outer]:
+		mesh.surface_begin(Mesh.PRIMITIVE_LINE_STRIP, edge_mat)
+		for i in seg + 1:
+			var ang := TAU * i / seg
+			mesh.surface_add_vertex(Vector3(cos(ang) * edge_radius, 0.0, sin(ang) * edge_radius))
+		mesh.surface_end()
+	return mesh
 
 
 func _build_node_visuals() -> void:

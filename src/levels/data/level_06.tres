@@ -28,5 +28,5 @@ prop_mass = 750.0
 thrust = 6000.0
 isp = 82.0
 objective = SubResource("Resource_1ajdf")
-dv_par = 300.0
+dv_par = 350.0
 sas_enabled = true

@@ -33,12 +33,21 @@ const ZOOM_PAN_SENSITIVITY := 0.01
 ## scene, or directly by tests/the temp jump before loading it.
 static var level_index := 0
 
+## When true, the flight director engages automatically on _ready so the
+## mission flies itself (used by the live-autopilot demo and its tests).
+static var autopilot_on_launch := false
+
 var level: LevelDef
 var ship: ShipSim
 var sim_time := 0.0
 var warp_index := 0
 var phase := Phase.FLYING
 var side_active := false
+
+## The live autopilot (src/autopilot/flight_director). Non-null while engaged;
+## takes over throttle/attitude/warp in place of player input.
+var director: FlightDirector = null
+var _last_director_status := ""
 
 var flight_view: FlightView
 var map_view: MapView
@@ -70,6 +79,9 @@ func _ready() -> void:
 	hud.toolbar_key.connect(_on_toolbar_key)
 
 	flight_view.camera.make_current()
+
+	if autopilot_on_launch:
+		_toggle_autopilot()
 
 
 ## Toolbar buttons don't duplicate any input logic - they just construct
@@ -113,7 +125,14 @@ func load_saved_state(data: Dictionary) -> void:
 func _physics_process(delta: float) -> void:
 	if phase != Phase.FLYING:
 		return
-	_apply_flight_input(delta)
+	if director != null:
+		director.update(self)
+		var status := director.status()
+		if status != _last_director_status:
+			_last_director_status = status
+			hud.flash(status)
+	else:
+		_apply_flight_input(delta)
 	var t_target := sim_time + delta * WARP_STEPS[warp_index]
 	# Rails warp must not step across an SOI boundary or impact: clamp the
 	# jump to the precomputed next event and drop out of warp there.
@@ -195,6 +214,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	var key := event as InputEventKey
 	if key == null or not key.pressed or key.echo:
+		return
+	if Settings.debug_mode and key.physical_keycode == KEY_J:
+		_toggle_autopilot()
 		return
 	if _dispatch_warp_step(key):
 		return
@@ -328,6 +350,22 @@ func _toggle_quick_pause() -> void:
 	elif phase == Phase.PAUSED:
 		phase = Phase.FLYING
 		hud.set_paused_indicator(false)
+
+
+## Engage/disengage the live autopilot for the current mission. Bound to J in
+## debug mode; also auto-engaged on launch when autopilot_on_launch is set.
+func _toggle_autopilot() -> void:
+	if director != null:
+		director = null
+		ship.throttle = 0.0
+		_last_director_status = ""
+		hud.flash("AUTOPILOT DISENGAGED")
+		return
+	var d := FlightDirector.new()
+	if d.setup(self):
+		director = d
+	else:
+		hud.flash("NO AUTOPILOT PLAN FOR THIS LEVEL")
 
 
 func _apply_flight_input(delta: float) -> void:
