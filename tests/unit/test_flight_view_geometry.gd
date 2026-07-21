@@ -44,3 +44,18 @@ func test_side_zoom_clamps_between_close_and_orbital_scale() -> void:
 	assert_almost_eq(view._side_distance, 9.0e4, 1.0, "side zoom-in floors at close range")
 	view.side_zoom(1.0e6)
 	assert_almost_eq(view._side_distance, view._side_zoom_max, 1.0, "side zoom-out ceilings at its max")
+
+
+func test_station_model_keeps_physical_and_orbit_marker_scales_separate() -> void:
+	var view := FlightView.new()
+	add_child_autofree(view)
+	view._objective = preload("res://src/levels/data/level_03.tres").objective
+	view._build_node_visuals()
+
+	assert_not_null(view._station_marker, "rendezvous level builds the close-up station")
+	assert_not_null(view._station_orbit_marker, "rendezvous level builds a distant marker")
+	assert_eq(view._station_marker.scale, Vector3.ONE,
+		"the close-up station does not inherit the orbit camera's marker scale")
+	var icon_mesh := view._station_orbit_marker.get_node("CentralHub") as VisualInstance3D
+	assert_eq(icon_mesh.layers, view.SIDE_MARKER_LAYER,
+		"the enlarged station copy is visible only to the orbit camera")

@@ -24,6 +24,9 @@ const SIDE_MARKER_LAYER := 8  # ship dot only the side camera can see
 const BODY_SHADER := preload("res://src/shaders/celestial_body.gdshader")
 const ATMOSPHERE_SHADER := preload("res://src/shaders/atmosphere.gdshader")
 const EARTH_MAP := preload("res://assets/textures/earth_abstract.svg")
+const STATION_MODEL := preload("res://src/ui/station_model.tscn")
+const STATION_PHYSICAL_SCALE := 3.0  # ~95 m across, close to an ISS-scale silhouette
+const STATION_MARKER_SCALE_PER_METER := 0.000158
 
 const BODY_GENERIC := 0
 const BODY_EARTH := 1
@@ -75,7 +78,8 @@ var _preview_active := false
 ## of the last child-SOI encounter scan - see _rebuild_node_ghost.
 var _ghost_key: Array = []
 var _node_marker: MeshInstance3D
-var _station_marker: MeshInstance3D
+var _station_marker: Node3D
+var _station_orbit_marker: Node3D
 var _level: LevelDef
 
 var _ap_marker: MeshInstance3D
@@ -353,8 +357,16 @@ func sync(ship: ShipSim, delta: float) -> void:
 		_preview_instance.position = _preview_anchor.sub(ship.r).to_vector3()
 	if _station_marker != null:
 		var st := (_objective as RendezvousObjective).station_orbit.state_at_time(t)
-		_station_marker.position = st.r.sub(ship_abs).to_vector3()
-		_station_marker.scale = Vector3.ONE * maxf(_side_distance * 0.002, 1.0)
+		var station_position := st.r.sub(ship_abs).to_vector3()
+		var radial := st.r.normalized().to_vector3()
+		var tangent := st.v.normalized().to_vector3()
+		var orbit_normal := radial.cross(tangent).normalized()
+		var station_basis := Basis(orbit_normal, radial, tangent)
+		_station_marker.position = station_position
+		_station_marker.basis = station_basis.scaled(Vector3.ONE * STATION_PHYSICAL_SCALE)
+		_station_orbit_marker.position = station_position
+		_station_orbit_marker.basis = station_basis.scaled(
+			Vector3.ONE * maxf(_side_distance * STATION_MARKER_SCALE_PER_METER, 1.0))
 
 	var has_maneuver_node := ship.node != null
 	_node_marker.visible = has_maneuver_node
@@ -582,18 +594,22 @@ func _build_node_visuals() -> void:
 	add_child(_node_marker)
 
 	if _objective is RendezvousObjective:
-		_station_marker = MeshInstance3D.new()
-		var box := BoxMesh.new()
-		box.size = Vector3(3, 3, 3)
-		var station_mat := StandardMaterial3D.new()
-		station_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-		station_mat.albedo_color = Color(1.0, 0.7, 0.2)
-		station_mat.emission_enabled = true
-		station_mat.emission = Color(1.0, 0.7, 0.2)
-		box.material = station_mat
-		_station_marker.mesh = box
-		_station_marker.layers = 1 | SIDE_MARKER_LAYER
+		# The close-approach camera gets a physically scaled station, while the
+		# orbit camera gets a second, enlarged copy on its private marker layer.
+		# Scaling the physical model itself made the old 3 m placeholder become
+		# kilometers wide just when the player arrived at it.
+		_station_marker = STATION_MODEL.instantiate()
 		add_child(_station_marker)
+		_station_orbit_marker = STATION_MODEL.instantiate()
+		_set_visual_layer(_station_orbit_marker, SIDE_MARKER_LAYER)
+		add_child(_station_orbit_marker)
+
+
+func _set_visual_layer(root: Node, layer: int) -> void:
+	if root is VisualInstance3D:
+		(root as VisualInstance3D).layers = layer
+	for child in root.get_children():
+		_set_visual_layer(child, layer)
 
 
 ## Apoapsis/periapsis/nodes/impact/encounter/closest-approach: small
