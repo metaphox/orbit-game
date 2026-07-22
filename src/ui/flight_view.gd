@@ -25,6 +25,11 @@ const TRAJ_STEP_GROWTH := 1.18
 const MATCH_COLOR := Color(0.35, 1.0, 0.45)
 const FAR_COLOR := Color(1.0, 0.55, 0.12)
 const SIDE_MARKER_LAYER := 8  # ship dot only the side camera can see
+## Chase view: bodies past this distance are drawn as billboard proxies pulled
+## to this range and shrunk by the same factor (true angular size preserved),
+## so a distant Sun/planet still shows despite the tight chase far plane. The
+## orbit view has a scaling far plane and draws bodies at their true positions.
+const CHASE_BODY_CAP := 3.0e5
 const BODY_SHADER := preload("res://src/shaders/celestial_body.gdshader")
 const ATMOSPHERE_SHADER := preload("res://src/shaders/atmosphere.gdshader")
 const EARTH_MAP := preload("res://assets/textures/earth_abstract.svg")
@@ -60,6 +65,8 @@ const CLOSEST_APPROACH_COLOR := Color(1.0, 0.3, 0.6)
 
 var camera: Camera3D
 var side_camera: Camera3D
+var _side_active := false  # which camera is current; drives the far-body proxy
+var _max_body_dist := 0.0  # farthest body from the ship this frame; sizes the orbit-view far plane
 var ship_root: Node3D
 var prograde_marker: Node3D
 var retrograde_marker: Node3D
@@ -345,8 +352,20 @@ func sync(ship: ShipSim, delta: float) -> void:
 	var t := ship.last_time
 	var ship_abs := ship.absolute_position(t)
 	ship_root.basis = ship.attitude
+	_max_body_dist = 0.0
 	for i in _bodies.size():
-		_body_meshes[i].position = _bodies[i].position_at(t).sub(ship_abs).to_vector3()
+		var rel := _bodies[i].position_at(t).sub(ship_abs)
+		_max_body_dist = maxf(_max_body_dist, rel.length())  # for the orbit-view far plane
+		# Chase view only: pull a too-far body (past the tight chase far plane)
+		# to CHASE_BODY_CAP and shrink it by the same factor, preserving its true
+		# angular size. The orbit view draws bodies at true positions.
+		var body_scale := 1.0
+		if not _side_active:
+			var dist := rel.length()
+			if dist > CHASE_BODY_CAP:
+				body_scale = CHASE_BODY_CAP / dist
+		_body_meshes[i].position = rel.scaled(body_scale).to_vector3()
+		_body_meshes[i].scale = Vector3.ONE * body_scale
 		_body_meshes[i].rotation.y = fposmod(t * _body_rotation_rates[i], TAU)
 
 	var v_dir := ship.v.normalized().to_vector3()
@@ -419,6 +438,13 @@ func sync(ship: ShipSim, delta: float) -> void:
 		* Basis(Vector3(1, 0, 0), -_side_elevation)
 	side_camera.position = side_basis * Vector3(0, 0, _side_distance)
 	side_camera.near = maxf(50.0, _side_distance * 0.002)
+	# Far must reach from the (possibly very distant) camera past the farthest
+	# thing on screen, from ANY orbit angle - the camera sits _side_distance from
+	# the ship, and a body/target orbit can be that plus its own distance away on
+	# the far side. Sizing to the real scene extent (bodies + draw limit) keeps
+	# the Sun, target planet and target orbit from clipping in/out as you rotate.
+	var scene_reach := maxf(_max_body_dist, _draw_limit)
+	side_camera.far = _side_distance + scene_reach * 1.25 + 1000.0
 	side_camera.look_at(Vector3.ZERO, side_basis.y)
 	# scale grows with distance so the marker's ON-SCREEN (angular) size
 	# stays constant regardless of zoom; 0.006 (the old plain-dot marker's
@@ -444,6 +470,7 @@ func reset_view() -> void:
 
 
 func set_side_active(active: bool) -> void:
+	_side_active = active
 	if active:
 		side_camera.make_current()
 	else:

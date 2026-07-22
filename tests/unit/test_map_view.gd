@@ -1,22 +1,32 @@
 extends "res://tests/unit/base_orbit_test.gd"
-## MapView.ship_heading_angle() is the single source of truth for the
-## minimap's heading-up rotation (both the camera in hud.gd and the ship
-## marker's own basis in map_view.gd derive from it) - confirm it tracks
-## the ship's actual yaw with real, empirically-verified numbers.
+## MapView.velocity_heading_angle() drives the minimap's PROGRADE-up rotation
+## (hud.gd rotates the camera by it, so the ship glyph can show real attitude).
+## Confirm it tracks the ship's velocity projected onto the map plane, and holds
+## the last angle across a momentary zero velocity so the map never spins.
 
 const ANGLE_TOLERANCE := 1e-3
 
 
-func _heading_for_yaw_deg(yaw_deg: float) -> float:
-	var level := Campaign.level_at(3)
+func _heading_for_velocity(vx: float, vz: float) -> float:
 	var ship := ShipSim.new()
-	ship.setup(level)
-	ship.attitude = Basis(Vector3.UP, deg_to_rad(yaw_deg))
-	return MapView.ship_heading_angle(ship)
+	ship.setup(Campaign.level_at(3))
+	ship.v = DVec3.new(vx, 0.0, vz)
+	var mv: MapView = autofree(MapView.new())
+	return mv.velocity_heading_angle(ship)
 
 
-func test_heading_tracks_ship_yaw() -> void:
-	assert_almost_eq(_heading_for_yaw_deg(0.0), PI, ANGLE_TOLERANCE, "yaw 0")
-	assert_almost_eq(_heading_for_yaw_deg(90.0), -PI / 2.0, ANGLE_TOLERANCE, "yaw 90")
-	assert_almost_eq(_heading_for_yaw_deg(180.0), 0.0, ANGLE_TOLERANCE, "yaw 180")
-	assert_almost_eq(_heading_for_yaw_deg(-90.0), PI / 2.0, ANGLE_TOLERANCE, "yaw -90")
+func test_heading_tracks_ship_velocity() -> void:
+	assert_almost_eq(_heading_for_velocity(0.0, -1.0), PI, ANGLE_TOLERANCE, "prograde -Z")
+	assert_almost_eq(_heading_for_velocity(1.0, 0.0), PI / 2.0, ANGLE_TOLERANCE, "prograde +X")
+	assert_almost_eq(_heading_for_velocity(0.0, 1.0), 0.0, ANGLE_TOLERANCE, "prograde +Z")
+	assert_almost_eq(_heading_for_velocity(-1.0, 0.0), -PI / 2.0, ANGLE_TOLERANCE, "prograde -X")
+
+
+func test_heading_holds_through_zero_velocity() -> void:
+	var ship := ShipSim.new()
+	ship.setup(Campaign.level_at(3))
+	ship.v = DVec3.new(1.0, 0.0, 0.0)
+	var mv: MapView = autofree(MapView.new())
+	var held := mv.velocity_heading_angle(ship)
+	ship.v = DVec3.new(0.0, 0.0, 0.0)  # momentary null velocity -> keep last heading
+	assert_almost_eq(mv.velocity_heading_angle(ship), held, ANGLE_TOLERANCE, "held across zero velocity")

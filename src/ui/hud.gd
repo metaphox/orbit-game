@@ -336,8 +336,13 @@ func _sync_minimap_camera(ship: ShipSim, t: float) -> void:
 	_minimap_cam.size = lerpf(_minimap_cam.size, target_size, 0.15)
 
 	var s := _minimap_cam.size
+	if map_view != null:
+		map_view.minimap_ortho_size = s  # markers scale off this to stay constant on-screen
 	var focus := map_view.focus_point(ship, t) if map_view != null else Vector3.ZERO
-	var heading := MapView.ship_heading_angle(ship)
+	# Prograde-up: velocity points to the top of the map (stable regardless of
+	# attitude), so the ship glyph can show where the nose actually points. The
+	# +PI puts the velocity vector at the top (not the bottom) of the panel.
+	var heading := (map_view.velocity_heading_angle(ship) + PI) if map_view != null else 0.0
 	_minimap_cam.position = focus + Basis(Vector3.UP, heading) * Vector3(0.0, s * 0.9, s * 0.42)
 	_minimap_cam.look_at(focus, Vector3.UP)
 	_minimap_cam.far = s * 8.0 + focus.length() + 10.0

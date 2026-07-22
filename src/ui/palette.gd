@@ -11,13 +11,15 @@ const INTENT := Color("ffb100")   # planned intent: maneuver node, planned burn
 const TARGET := Color("4fd8e2")   # the objective: target orbit / target point / station
 const WARNING := Color("ff3b2a")  # imminent danger: impact / collision (rare, loud)
 const INK := Color("f2ecdb")      # labels
-const DIM := Color("7f877d")      # secondary structure: moon tracks, SOI rings, grid
+const DIM := Color("7f877d")      # secondary structure: orbit tracks, grid
+const SOI := Color("c9722b")      # sphere-of-influence boundary: dotted dark orange (its own code)
 
 ## Per-body fill tints (UI-DESIGN.md → Celestial body tints). Bodies render as
 ## a dark, faintly-tinted disc (no bright outline) so the tint alone identifies
 ## which world you're looking at. Keyed by BodyDef.name, upper-cased.
 const BODY_TINTS := {
-	"SUN": Color(0.22, 0.15, 0.03),      # warm solar amber
+	"SUN": Color(0.28, 0.19, 0.04),      # warm solar amber
+	"SOL": Color(0.28, 0.19, 0.04),      # the Sun, as named in the interplanetary levels
 	"MERCURY": Color(0.14, 0.12, 0.10),  # grey-brown
 	"VENUS": Color(0.20, 0.17, 0.10),    # pale sulphur cream
 	"EARTH": Color(0.05, 0.16, 0.18),    # green-blue ocean world
