@@ -42,9 +42,6 @@ static var autopilot_on_launch := false
 ## predictive flight aids (DESIGN.md §14.4). Defaults false for tests.
 static var hardcore := false
 
-## Physical key that opens the rewind scrubber (from FLYING or FAILED). Raw
-## keycode for now; a proper InputMap action + rebinding is a follow-up.
-const REWIND_OPEN_KEY := KEY_H
 const REWIND_SWEEP_DURATION := 0.5  # the reverse-sweep tween between anchors
 
 var level: LevelDef
@@ -82,6 +79,7 @@ var _next_event := INF
 
 
 func _ready() -> void:
+	InputBindings.install()  # register rewind/autopilot actions + apply rebinds (idempotent)
 	level_index = clampi(level_index, 0, Campaign.level_count() - 1)
 	level = Campaign.level_at(level_index)
 	ship = ShipSim.new()
@@ -284,10 +282,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	if phase == Phase.REWINDING:
 		_handle_rewind_keys(key)
 		return
-	if key.physical_keycode == REWIND_OPEN_KEY:
+	if key.is_action_pressed("rewind_open"):
 		_enter_rewind()
 		return
-	if Settings.debug_mode and key.physical_keycode == KEY_J:
+	if Settings.debug_mode and key.is_action_pressed("autopilot_toggle"):
 		_toggle_autopilot()
 		return
 	if _dispatch_warp_step(key):
@@ -518,15 +516,14 @@ func _enter_rewind() -> void:
 
 
 func _handle_rewind_keys(key: InputEventKey) -> void:
-	match key.physical_keycode:
-		KEY_LEFT, KEY_A:
-			_rewind_step(-1)  # older
-		KEY_RIGHT, KEY_D:
-			_rewind_step(1)  # newer
-		KEY_ENTER, KEY_KP_ENTER:
-			_rewind_resume()
-		KEY_ESCAPE, REWIND_OPEN_KEY:
-			_rewind_cancel()
+	if key.is_action_pressed("rewind_prev"):
+		_rewind_step(-1)  # older
+	elif key.is_action_pressed("rewind_next"):
+		_rewind_step(1)  # newer
+	elif key.is_action_pressed("rewind_confirm"):
+		_rewind_resume()
+	elif key.is_action_pressed("rewind_cancel") or key.is_action_pressed("rewind_open"):
+		_rewind_cancel()
 
 
 func _rewind_step(dir: int) -> void:
@@ -631,7 +628,7 @@ func _rewind_pips() -> String:
 		return ""
 	var filled := "●".repeat(rewind.charges)
 	var empty := "○".repeat(maxi(level.rewind_budget - rewind.charges, 0))
-	return "REWIND %s%s   [%s]" % [filled, empty, OS.get_keycode_string(REWIND_OPEN_KEY)]
+	return "REWIND %s%s   [%s]" % [filled, empty, InputBindings.primary_key_label("rewind_open")]
 
 
 func _win() -> void:

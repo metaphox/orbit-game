@@ -1,6 +1,6 @@
 [gd_scene format=3]
 
-[ext_resource type="SystemFont" path="res://src/ui/materials/hud_font.tres" id="1_jjujh"]
+[ext_resource type="FontFile" path="res://assets/fonts/IBMPlexMono-Regular.ttf" id="1_jjujh"]
 
 [node name="HudLayout" type="Control" unique_id=352993158]
 layout_mode = 3

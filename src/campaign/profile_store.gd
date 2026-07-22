@@ -77,7 +77,12 @@ static func _as_level_index(k: Variant) -> Variant:
 
 func _apply(parsed: Dictionary) -> void:
 	last_active_name = parsed.get("last_active", "")
-	Settings.effects_enabled = parsed.get("effects_enabled", true)
+	# Device prefs live under "settings"; fall back to the pre-store top-level
+	# "effects_enabled" key so old saves migrate cleanly.
+	var settings_data: Dictionary = parsed.get("settings", {})
+	if settings_data.is_empty() and parsed.has("effects_enabled"):
+		settings_data = {"effects_enabled": parsed["effects_enabled"]}
+	Settings.from_dict(settings_data)
 	# Progress is keyed by LEVELS index; a pre-v2 save predates the act-order
 	# renumbering, so its indices point at the wrong levels. Keep the named
 	# profiles but reset their progress to a fresh campaign.
@@ -128,7 +133,7 @@ func save() -> bool:
 	var json_text := JSON.stringify({
 		"version": SCHEMA_VERSION,
 		"last_active": last_active_name,
-		"effects_enabled": Settings.effects_enabled,
+		"settings": Settings.to_dict(),
 		"profiles": profiles_out,
 	})
 

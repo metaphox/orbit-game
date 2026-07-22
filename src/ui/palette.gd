@@ -7,12 +7,26 @@ extends RefCounted
 
 const VOID := Color("050705")     # background void
 const LIVE := Color("4dffa0")     # your current state: own orbit, apoapsis, periapsis, ship
+const LIVE_DIM := Color("2f9e63")  # dimmed phosphor: secondary HUD readouts
 const INTENT := Color("ffb100")   # planned intent: maneuver node, planned burn
 const TARGET := Color("4fd8e2")   # the objective: target orbit / target point / station
 const WARNING := Color("ff3b2a")  # imminent danger: impact / collision (rare, loud)
 const INK := Color("f2ecdb")      # labels
 const DIM := Color("7f877d")      # secondary structure: orbit tracks, grid
 const SOI := Color("c9722b")      # sphere-of-influence boundary: dotted dark orange (its own code)
+
+## UI-chrome tokens (the design-ref "ORBITAL OS" system, ref/design-ref.html).
+## The single source of truth for menus + HUD styling; screens must not redefine
+## their own colour constants.
+const PANEL := Color("0d110d")       # panel / card background
+const PANEL_HI := Color("111811")    # raised panel
+const HAIRLINE := Color("232b24")    # 1px rules and borders
+const INK_SOFT := Color("c9c3b2")    # secondary body text
+const SELECT := Color("ffb100")      # selection / hover (amber; same as INTENT by design)
+const DISABLED := Color("4a5349")    # disabled control text
+const LIVE_DK := Color("0e2e1d")     # green button drop-shadow / fill-dark
+const INTENT_DK := Color("2e2100")   # amber drop-shadow / fill-dark
+const WARNING_DK := Color("330d08")  # red drop-shadow / fill-dark
 
 ## Per-body fill tints (UI-DESIGN.md → Celestial body tints). Bodies render as
 ## a dark, faintly-tinted disc (no bright outline) so the tint alone identifies

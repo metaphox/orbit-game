@@ -9,14 +9,14 @@ const SAVE_TEST_PATH := "user://test_save.json"
 
 func before_each() -> void:
 	_clear_save()
-	Settings.effects_enabled = true
+	Settings.reset_to_defaults()
 	Settings.debug_mode = false
 
 
 func after_each() -> void:
 	_clear_save()
 	GameRootScript.level_index = 0
-	Settings.effects_enabled = true
+	Settings.reset_to_defaults()
 	Settings.debug_mode = false
 
 
@@ -102,6 +102,25 @@ func test_settings_persist_across_reload() -> void:
 
 	ProfileStore.load_or_new(SAVE_TEST_PATH)
 	assert_false(Settings.effects_enabled, "effects toggle persisted to disk")
+
+
+func test_settings_store_round_trips_arbitrary_prefs() -> void:
+	var store := ProfileStore.load_or_new(SAVE_TEST_PATH)
+	Settings.set_value("volume_music", 0.33)
+	Settings.set_value("key_bindings", {"rewind_open": ["H"]})
+	store.save()
+	Settings.reset_to_defaults()  # simulate a fresh process
+
+	ProfileStore.load_or_new(SAVE_TEST_PATH)
+	assert_almost_eq(Settings.get_float("volume_music"), 0.33, 1e-6, "audio pref persisted")
+	assert_eq(Settings.get_value("key_bindings"), {"rewind_open": ["H"]}, "bindings persisted")
+
+
+func test_old_top_level_effects_flag_migrates() -> void:
+	# Pre-store saves wrote effects_enabled at the top level, not under "settings".
+	_write_raw(SAVE_TEST_PATH, '{"version": 2, "effects_enabled": false, "profiles": []}')
+	ProfileStore.load_or_new(SAVE_TEST_PATH)
+	assert_false(Settings.effects_enabled, "legacy top-level effects flag still loads")
 
 
 func test_save_includes_schema_version() -> void:

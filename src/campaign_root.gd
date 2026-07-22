@@ -28,6 +28,7 @@ func _ready() -> void:
 	# silently redirecting to the default save path.
 	if store == null:
 		store = ProfileStore.load_or_new()
+	InputBindings.install()  # register extra actions + apply saved rebinds (after settings load)
 	_show_title()
 
 

@@ -9,12 +9,14 @@ extends CanvasLayer
 ## real key-presses and headless tests already use.
 signal toolbar_key(keycode: int, pressed: bool)
 
-const GREEN := Color(0.45, 1.0, 0.55)
-const DIM_GREEN := Color(0.3, 0.65, 0.38)
-const AMBER := Color(1.0, 0.67, 0.2)
-const BONE := Color(0.86, 0.84, 0.72)
-const CONSOLE_BLACK := Color(0.008, 0.025, 0.02, 0.94)
-const RED := Color(1.0, 0.4, 0.3)
+# Colours sourced from the shared Palette (TD-1); names kept as local aliases
+# for the many call sites. Font is UiTheme.MONO (IBM Plex Mono).
+const GREEN := Palette.LIVE
+const DIM_GREEN := Palette.LIVE_DIM
+const AMBER := Palette.INTENT
+const BONE := Palette.INK
+const CONSOLE_BLACK := Color(0.02, 0.055, 0.035, 0.94)
+const RED := Palette.WARNING
 
 # [label, physical keycode, holdable]. Holdable buttons (throttle) fire on
 # button_down/button_up like a held key; everything else taps press+release
@@ -48,7 +50,7 @@ var help_label: Label
 var center_label: Label
 var minimap_root: Control
 var warp_label: Label
-var _font: SystemFont
+var _font: Font
 var _flash_label: Label
 var _flash_left := 0.0
 var _paused_label: Label
@@ -75,8 +77,7 @@ var _fps_label: Label
 ## code-built since its content is data-driven from TOOLBAR_GROUPS_ROW_1/2,
 ## not a fixed set of nodes a scene can pre-author.
 func build(level: LevelDef) -> void:
-	_font = SystemFont.new()
-	_font.font_names = PackedStringArray(["Menlo", "Monaco", "Consolas", "monospace"])
+	_font = UiTheme.MONO
 
 	var layout := preload("res://src/ui/hud_layout.tscn").instantiate()
 	add_child(layout)
