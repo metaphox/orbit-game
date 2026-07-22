@@ -47,9 +47,7 @@ const IMPACT_COLOR := Color(1.0, 0.2, 0.15)
 const ENCOUNTER_COLOR := Color(1.0, 1.0, 1.0)
 const CLOSEST_APPROACH_COLOR := Color(1.0, 0.3, 0.6)
 
-var camera: Camera3D
-var side_camera: Camera3D
-var _side_active := false  # which camera is current; drives the far-body proxy
+var _camera_rig := CameraRig.new()
 var _theme: RenderTheme
 var _body_renderer: BodyRenderer
 var ship_root: Node3D
@@ -100,20 +98,6 @@ var _encounter_revision := -1
 var _encounter_horizon := -INF
 var _encounter_entry_t := NAN
 
-const DEFAULT_CAM_YAW := 0.0
-const DEFAULT_CAM_PITCH := 0.0
-const DEFAULT_CHASE_DISTANCE := 1.0
-const DEFAULT_SIDE_AZIMUTH := 0.6
-const DEFAULT_SIDE_ELEVATION := 0.5
-const DEFAULT_SIDE_DISTANCE := 3.0e5
-
-var _cam_yaw := DEFAULT_CAM_YAW
-var _cam_pitch := DEFAULT_CAM_PITCH
-var _chase_distance := DEFAULT_CHASE_DISTANCE
-var _side_azimuth := DEFAULT_SIDE_AZIMUTH
-var _side_elevation := DEFAULT_SIDE_ELEVATION
-var _side_distance := DEFAULT_SIDE_DISTANCE
-var _side_zoom_max := 1.6e6
 var _side_marker: Node3D
 
 
@@ -159,7 +143,7 @@ func build(level: LevelDef, theme: RenderTheme = null) -> void:
 
 	_objective = level.objective
 	_draw_limit = level.draw_limit
-	_side_zoom_max = maxf(1.6e6, level.draw_limit * 1.4)
+	_camera_rig.configure(level.draw_limit)
 	_level = level
 	_build_trajectory_lines(level)
 	_build_node_visuals()
@@ -168,25 +152,14 @@ func build(level: LevelDef, theme: RenderTheme = null) -> void:
 	prograde_marker = _make_marker(Color(0.3, 1.0, 0.4))
 	retrograde_marker = _make_marker(Color(1.0, 0.35, 0.25))
 
-	camera = rig.get_node("ChaseCamera")
-	side_camera = rig.get_node("SideCamera")
-	# The world sun often sits behind a tail-following camera, which turned
-	# the small craft into a silhouette.  A short-range camera fill affects
-	# only nearby hardware (never the kilometer-scale bodies) and reads like
-	# the chase rig's own inspection lamp.
-	var chase_fill := OmniLight3D.new()
-	chase_fill.light_color = Color(0.78, 0.86, 0.92)
-	chase_fill.light_energy = 2.1
-	chase_fill.omni_range = 22.0
-	chase_fill.shadow_enabled = false
-	camera.add_child(chase_fill)
+	_camera_rig.bind(rig.get_node("ChaseCamera"), rig.get_node("SideCamera"))
 
 
 func sync(ship: ShipSim, delta: float) -> void:
 	var t := ship.last_time
 	var ship_abs := ship.absolute_position(t)
 	ship_root.basis = ship.attitude
-	_body_renderer.sync(t, ship_abs, _side_active)
+	_body_renderer.sync(t, ship_abs, _camera_rig.side_active)
 
 	var v_dir := ship.v.normalized().to_vector3()
 	_place_marker(prograde_marker, v_dir)
@@ -222,14 +195,14 @@ func sync(ship: ShipSim, delta: float) -> void:
 		_station_orbit_marker.position = station_position
 		_station_orbit_marker.basis = station_basis.scaled(
 			Vector3.ONE * maxf(
-				_side_distance * STATION_MARKER_SCALE_PER_CAMERA_DISTANCE, 1.0))
+				_camera_rig.side_distance * STATION_MARKER_SCALE_PER_CAMERA_DISTANCE, 1.0))
 
 	var has_maneuver_node := ship.node != null
 	_node_marker.visible = has_maneuver_node
 	if has_maneuver_node:
 		_node_marker.position = ship.current_elements() \
 			.state_at_time(ship.node.t_node).r.sub(ship.r).to_vector3()
-		_node_marker.scale = Vector3.ONE * maxf(_side_distance * 0.004, 4.0)
+		_node_marker.scale = Vector3.ONE * maxf(_camera_rig.side_distance * 0.004, 4.0)
 	_rebuild_traj_line(ship)  # every frame: keeps the line anchored to the ship
 	_traj_timer -= delta
 	if _traj_timer <= 0.0:
@@ -243,34 +216,13 @@ func sync(ship: ShipSim, delta: float) -> void:
 		_preview_instance.visible = false
 		_node_marker.visible = false
 
-	# chase camera: ship-relative orbit, offset by mouse drag
-	var chase_basis := ship.attitude \
-		* Basis(Vector3(0, 1, 0), _cam_yaw) * Basis(Vector3(1, 0, 0), _cam_pitch)
-	# A slight shoulder angle keeps the radiator silhouette and antenna
-	# readable; a dead-center tail camera collapses the whole craft into the
-	# dark engine bell.
-	camera.position = chase_basis * Vector3(4.2, 3.5, 11.0) * _chase_distance
-	camera.look_at(Vector3.ZERO, chase_basis.y)
-
-	# side camera: orbits and tracks the ship, which - thanks to the
-	# floating origin - is always exactly at the render-space origin
-	var side_basis := Basis(Vector3(0, 1, 0), _side_azimuth) \
-		* Basis(Vector3(1, 0, 0), -_side_elevation)
-	side_camera.position = side_basis * Vector3(0, 0, _side_distance)
-	side_camera.near = maxf(50.0, _side_distance * 0.002)
-	# Far must reach from the (possibly very distant) camera past the farthest
-	# thing on screen, from ANY orbit angle - the camera sits _side_distance from
-	# the ship, and a body/target orbit can be that plus its own distance away on
-	# the far side. Sizing to the real scene extent (bodies + draw limit) keeps
-	# the Sun, target planet and target orbit from clipping in/out as you rotate.
 	var scene_reach := maxf(_body_renderer.max_body_dist, _draw_limit)
-	side_camera.far = _side_distance + scene_reach * 1.25 + 1000.0
-	side_camera.look_at(Vector3.ZERO, side_basis.y)
+	_camera_rig.update(ship.attitude, scene_reach)
 	# scale grows with distance so the marker's ON-SCREEN (angular) size
 	# stays constant regardless of zoom; 0.006 (the old plain-dot marker's
 	# factor) reads as a barely-visible fleck now that the marker needs to
 	# show a legible directional shape, not just a location.
-	var marker_scale := maxf(_side_distance * SIDE_MARKER_SCALE_PER_CAMERA_DISTANCE, 4.0)
+	var marker_scale := maxf(_camera_rig.side_distance * SIDE_MARKER_SCALE_PER_CAMERA_DISTANCE, 4.0)
 	_side_marker.basis = ship.attitude.scaled(Vector3.ONE * marker_scale)
 
 
@@ -278,44 +230,30 @@ func mark_traj_dirty() -> void:
 	_traj_timer = 0.0
 
 
-## Resets both cameras (chase-cam mouse-drag offset and the orbit-view
-## rotation/zoom) back to their starting state.
+## Camera control delegates to the CameraRig; kept here as FlightView's public
+## surface so game_root drives the view without reaching into the rig.
 func reset_view() -> void:
-	_cam_yaw = DEFAULT_CAM_YAW
-	_cam_pitch = DEFAULT_CAM_PITCH
-	_chase_distance = DEFAULT_CHASE_DISTANCE
-	_side_azimuth = DEFAULT_SIDE_AZIMUTH
-	_side_elevation = DEFAULT_SIDE_ELEVATION
-	_side_distance = DEFAULT_SIDE_DISTANCE
+	_camera_rig.reset()
 
 
 func set_side_active(active: bool) -> void:
-	_side_active = active
-	if active:
-		side_camera.make_current()
-	else:
-		camera.make_current()
+	_camera_rig.set_side_active(active)
 
 
 func chase_drag(relative: Vector2) -> void:
-	_cam_yaw = wrapf(_cam_yaw - relative.x * 0.008, -PI, PI)
-	_cam_pitch = clampf(_cam_pitch - relative.y * 0.008, -1.3, 1.3)
+	_camera_rig.chase_drag(relative)
 
 
 func side_drag(relative: Vector2) -> void:
-	_side_azimuth = wrapf(_side_azimuth - relative.x * 0.008, -PI, PI)
-	_side_elevation = clampf(_side_elevation + relative.y * 0.008, -1.45, 1.45)
+	_camera_rig.side_drag(relative)
 
 
 func side_zoom(factor: float) -> void:
-	_side_distance = clampf(_side_distance * factor, 9.0e4, _side_zoom_max)
+	_camera_rig.side_zoom(factor)
 
 
-## Ship-detail-scale zoom for the chase camera, deliberately a much
-## tighter range than side_zoom's orbital-scale one - this camera only
-## ever needs to frame the ship itself, not a whole orbit.
 func chase_zoom(factor: float) -> void:
-	_chase_distance = clampf(_chase_distance * factor, 0.35, 3.5)
+	_camera_rig.chase_zoom(factor)
 
 
 func _build_trajectory_lines(level: LevelDef) -> void:
@@ -526,7 +464,7 @@ func _nu_reachable(el: OrbitElements, nu: float) -> bool:
 
 
 func _update_orbit_marks(ship: ShipSim, el: OrbitElements) -> void:
-	var mark_scale := Vector3.ONE * maxf(_side_distance * 0.006, 1.0)
+	var mark_scale := Vector3.ONE * maxf(_camera_rig.side_distance * 0.006, 1.0)
 
 	_pe_marker.visible = true
 	_pe_marker.position = el.state_at_true_anomaly(0.0).r.sub(ship.r).to_vector3()

@@ -104,7 +104,7 @@ func _ready() -> void:
 	hud.map_view = map_view  # minimap auto-fit / focus / marked points
 	hud.toolbar_key.connect(_on_toolbar_key)
 
-	flight_view.camera.make_current()
+	flight_view.set_side_active(false)
 
 	if autopilot_on_launch:
 		_toggle_autopilot()

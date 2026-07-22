@@ -141,20 +141,21 @@ func test_zero_key_is_a_pause_alias_for_space() -> void:
 
 func test_r_resets_the_view_during_flight() -> void:
 	var game := _boot()
-	game.flight_view._cam_yaw = 1.2
-	game.flight_view._cam_pitch = -0.4
-	game.flight_view._chase_distance = 2.5
-	game.flight_view._side_azimuth = 2.0
-	game.flight_view._side_elevation = -1.0
-	game.flight_view._side_distance = 8.0e5
+	var rig: CameraRig = game.flight_view._camera_rig
+	rig.cam_yaw = 1.2
+	rig.cam_pitch = -0.4
+	rig.chase_distance = 2.5
+	rig.side_azimuth = 2.0
+	rig.side_elevation = -1.0
+	rig.side_distance = 8.0e5
 
 	game._unhandled_input(_key(KEY_R))
-	assert_eq(game.flight_view._cam_yaw, game.flight_view.DEFAULT_CAM_YAW)
-	assert_eq(game.flight_view._cam_pitch, game.flight_view.DEFAULT_CAM_PITCH)
-	assert_eq(game.flight_view._chase_distance, game.flight_view.DEFAULT_CHASE_DISTANCE)
-	assert_eq(game.flight_view._side_azimuth, game.flight_view.DEFAULT_SIDE_AZIMUTH)
-	assert_eq(game.flight_view._side_elevation, game.flight_view.DEFAULT_SIDE_ELEVATION)
-	assert_eq(game.flight_view._side_distance, game.flight_view.DEFAULT_SIDE_DISTANCE)
+	assert_eq(rig.cam_yaw, rig.DEFAULT_CAM_YAW)
+	assert_eq(rig.cam_pitch, rig.DEFAULT_CAM_PITCH)
+	assert_eq(rig.chase_distance, rig.DEFAULT_CHASE_DISTANCE)
+	assert_eq(rig.side_azimuth, rig.DEFAULT_SIDE_AZIMUTH)
+	assert_eq(rig.side_elevation, rig.DEFAULT_SIDE_ELEVATION)
+	assert_eq(rig.side_distance, rig.DEFAULT_SIDE_DISTANCE)
 	assert_eq(game.phase, game.Phase.FLYING, "R does not restart the mission while flying")
 
 
