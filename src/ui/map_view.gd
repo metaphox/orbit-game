@@ -37,11 +37,9 @@ func build(level: LevelDef) -> void:
 	var planet_mesh: SphereMesh = planet.mesh
 	planet_mesh.radius = level.body.radius * MAP_SCALE
 	planet_mesh.height = level.body.radius * MAP_SCALE * 2.0
-	# Dark fill + bright rim so the body reads as a disc without drowning the
-	# orbits/markers in one big green blob (UI-DESIGN.md: bodies = dark + INK).
-	planet.material_override = _line_material(Color(0.02, 0.08, 0.05))
-	add_child(_line_instance(
-		_circle_points(level.body.radius * MAP_SCALE), Color(Palette.INK, 0.7)))
+	# Dark, faintly body-tinted fill, no bright rim: the tint alone says which
+	# world this is (UI-DESIGN.md → Celestial body tints).
+	planet.material_override = _line_material(Palette.body_tint(level.body.name))
 
 	orbit_instance = layout.get_node("OrbitInstance")
 	orbit_mesh = orbit_instance.mesh
@@ -88,7 +86,7 @@ func build(level: LevelDef) -> void:
 		var dot_radius := maxf(moon.radius * MAP_SCALE, level.map_extent / 130.0)
 		dot.radius = dot_radius
 		dot.height = dot_radius * 2.0
-		dot.material = _line_material(Palette.BODY)
+		dot.material = _line_material(Palette.body_tint(moon.name))
 		marker.mesh = dot
 		marker.layers = MAP_LAYER
 		add_child(marker)
@@ -179,7 +177,7 @@ func marked_points(ship: ShipSim, t: float) -> Array:
 	for moon in _level.moons:
 		out.append({
 			"pos": moon.position_at(t).scaled(MAP_SCALE).to_vector3(),
-			"color": Palette.BODY, "label": moon.name})
+			"color": Palette.DIM, "label": moon.name})
 	return out
 
 

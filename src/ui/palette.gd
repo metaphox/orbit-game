@@ -10,6 +10,26 @@ const LIVE := Color("4dffa0")     # your current state: own orbit, apoapsis, per
 const INTENT := Color("ffb100")   # planned intent: maneuver node, planned burn
 const TARGET := Color("4fd8e2")   # the objective: target orbit / target point / station
 const WARNING := Color("ff3b2a")  # imminent danger: impact / collision (rare, loud)
-const INK := Color("f2ecdb")      # labels, body outlines
+const INK := Color("f2ecdb")      # labels
 const DIM := Color("7f877d")      # secondary structure: moon tracks, SOI rings, grid
-const BODY := Color("8a9188")     # neutral celestial-body fill (moons)
+
+## Per-body fill tints (UI-DESIGN.md → Celestial body tints). Bodies render as
+## a dark, faintly-tinted disc (no bright outline) so the tint alone identifies
+## which world you're looking at. Keyed by BodyDef.name, upper-cased.
+const BODY_TINTS := {
+	"SUN": Color(0.22, 0.15, 0.03),      # warm solar amber
+	"MERCURY": Color(0.14, 0.12, 0.10),  # grey-brown
+	"VENUS": Color(0.20, 0.17, 0.10),    # pale sulphur cream
+	"EARTH": Color(0.05, 0.16, 0.18),    # green-blue ocean world
+	"MOON": Color(0.17, 0.18, 0.19),     # light neutral grey
+	"MARS": Color(0.20, 0.07, 0.05),     # rust red
+	"JUPITER": Color(0.19, 0.13, 0.08),  # tan banded
+	"SATURN": Color(0.20, 0.17, 0.11),   # pale gold
+	"URANUS": Color(0.09, 0.19, 0.20),   # pale cyan
+	"NEPTUNE": Color(0.06, 0.10, 0.23),  # deep blue
+}
+const BODY_TINT_DEFAULT := Color(0.12, 0.13, 0.13)  # unknown body: neutral dark grey
+
+
+static func body_tint(body_name: String) -> Color:
+	return BODY_TINTS.get(body_name.to_upper(), BODY_TINT_DEFAULT)

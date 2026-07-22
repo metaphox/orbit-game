@@ -14,12 +14,30 @@ Defined in code as `Palette` (`src/ui/palette.gd`); keep the two in lockstep.
 | **INTENT** | hazard amber | `#ffb100` | planned intent — maneuver node, planned burn |
 | **TARGET** | cyan | `#4fd8e2` | the objective — target orbit, target point, station |
 | **WARNING** | red | `#ff3b2a` | imminent danger — impact / collision corridor (rare, loud) |
-| **INK** | bone | `#f2ecdb` | labels, body outlines |
-| **DIM** | grey-green | `#7f877d` | secondary structure — moon tracks, SOI rings, grid |
-| **BODY** | neutral grey | `#8a9188` | celestial-body fill (moons) |
+| **INK** | bone | `#f2ecdb` | labels |
+| **DIM** | grey-green | `#7f877d` | secondary structure — moon tracks, SOI rings, grid, body-name labels |
 | **VOID** | near-black | `#050705` | background |
 
 **Rule of loud:** one saturated field per view. Green owns your live telemetry, amber owns intent, cyan owns the target, red fires only when something can end the mission.
+
+## Celestial body tints
+
+Bodies render as a **dark, faintly-tinted disc — no outline**. The tint is a low-saturation dark cast of the real world's colour, enough to identify which body you're looking at without competing with the orbits and markers drawn over it. Defined in `Palette.BODY_TINTS`, keyed by body name; unknown bodies fall back to a neutral dark grey.
+
+| Body | Tint feel | Hex |
+|---|---|---|
+| Sun | warm solar amber | `#382603` |
+| Mercury | grey-brown | `#241f1a` |
+| Venus | pale sulphur cream | `#332b1a` |
+| Earth | green-blue ocean | `#0d2a2e` |
+| Moon | light neutral grey | `#2b2e30` |
+| Mars | rust red | `#33120d` |
+| Jupiter | tan banded | `#302114` |
+| Saturn | pale gold | `#332b1c` |
+| Uranus | pale cyan | `#172f33` |
+| Neptune | deep blue | `#0f1a3b` |
+
+Further bodies (e.g. Jupiter's moons) get their tint added here when a level first needs them.
 
 ## Point-label vocabulary
 
@@ -42,7 +60,7 @@ The schematic mission-computer map, top-right of the HUD. A slightly-tilted top-
 ### What it shows
 - **Your orbit** — solid LIVE-green conic.
 - **Target** — TARGET-cyan ring (orbit-match / entry corridor) or point (rendezvous station), matching the objective.
-- **Bodies** — the focused body (INK outline) and any moons (BODY dots, DIM orbit tracks, DIM SOI rings).
+- **Bodies** — the focused body and any moons as dark tinted discs (see Celestial body tints), with DIM orbit tracks and DIM SOI rings.
 - **Ship** — a LIVE-green directional wedge (shows heading; the map rotates so it points up).
 - **Marked points** — coloured dots with tiny labels per the vocabulary above: `AP`, `PE`, `NODE`, `TGT`, moon names. `AP`/`PE` are hidden when the orbit is effectively circular (they'd coincide and mean nothing).
 
