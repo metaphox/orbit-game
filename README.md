@@ -1,8 +1,9 @@
-# Orbit Game
+# Limited Propellant
 
 **KSP distilled to "burn fuel to change orbit," in a NASA‑punk retro‑futurist skin.**
 
-A level‑based 3D orbital‑mechanics game built in Godot. Each level hands you a
+*Limited Propellant* (**LP** — also *Lambert's Problem*) is a level‑based 3D
+orbital‑mechanics game built in Godot. Each level hands you a
 single spacecraft with a fixed tank of propellant and one job: raise an orbit,
 rendezvous with a station, slip through a plane change, transfer to the Moon,
 land on it, come home through an entry corridor, or make the crossing to Mars.

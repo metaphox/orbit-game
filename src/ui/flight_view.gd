@@ -11,12 +11,16 @@ extends Node3D
 ## the target (orbit or SOI) is a dashed ring.
 
 const TRAJ_SAMPLES := 256
+# The node ghost / SOI-encounter preview and the orbit marks are throttled
+# to this interval (they can be expensive). The orbit LINE itself is rebuilt
+# every frame so it stays glued to the ship instead of snapping at 4 Hz.
 const TRAJ_REFRESH := 0.25
 # Adaptive orbit-line sampling: the camera rides ON the line, so chords
 # near the ship are seen edge-on and must be near-tangent-continuous.
-# Steps in true anomaly start fine at the ship and grow geometrically.
+# Steps in true anomaly start fine at the ship and grow geometrically. The
+# coarse cap also bounds how angular the foreshortened apoapsis fold looks.
 const TRAJ_FINE_STEP := 0.002
-const TRAJ_COARSE_STEP := 0.06
+const TRAJ_COARSE_STEP := 0.03
 const TRAJ_STEP_GROWTH := 1.18
 const MATCH_COLOR := Color(0.35, 1.0, 0.45)
 const FAR_COLOR := Color(1.0, 0.55, 0.12)
@@ -83,6 +87,9 @@ var _preview_mesh: ImmediateMesh
 var _preview_instance: MeshInstance3D
 var _preview_anchor: DVec3  # parent-frame moon position at predicted entry
 var _preview_active := false
+## Hardcore (DESIGN.md §14.4) strips the predictive aids: the forward
+## trajectory line and the maneuver-node preview ghost. The target ring stays.
+var guidance_enabled := true
 ## [ship.revision, node.t_node, node.prograde, node.normal, node.radial] as
 ## of the last child-SOI encounter scan - see _rebuild_node_ghost.
 var _ghost_key: Array = []
@@ -384,10 +391,18 @@ func sync(ship: ShipSim, delta: float) -> void:
 		_node_marker.position = ship.current_elements() \
 			.state_at_time(ship.node.t_node).r.sub(ship.r).to_vector3()
 		_node_marker.scale = Vector3.ONE * maxf(_side_distance * 0.004, 4.0)
+	_rebuild_traj_line(ship)  # every frame: keeps the line anchored to the ship
 	_traj_timer -= delta
 	if _traj_timer <= 0.0:
 		_traj_timer = TRAJ_REFRESH
-		_rebuild_trajectory(ship)
+		_rebuild_node_ghost(ship)
+		_update_orbit_marks(ship, ship.current_elements())
+
+	if not guidance_enabled:  # hardcore: no predicted path, no node ghost
+		_traj_instance.visible = false
+		_node_instance.visible = false
+		_preview_instance.visible = false
+		_node_marker.visible = false
 
 	# chase camera: ship-relative orbit, offset by mouse drag
 	var chase_basis := ship.attitude \
@@ -799,7 +814,11 @@ func _rebuild_node_ghost(ship: ShipSim) -> void:
 		break
 
 
-func _rebuild_trajectory(ship: ShipSim) -> void:
+## The orbit line itself, rebuilt every frame. Cheap (analytic sampling of a
+## conic) and it keeps the first vertex sitting exactly on the ship, so the
+## ship never drifts off the line and the far-side fold never twitches at the
+## old 4 Hz refresh rate. The pricier node ghost / orbit marks stay throttled.
+func _rebuild_traj_line(ship: ShipSim) -> void:
 	var el := ship.current_elements()
 	var color := FAR_COLOR.lerp(MATCH_COLOR, _objective.trajectory_closeness(ship))
 	_traj_material.albedo_color = color
@@ -820,8 +839,6 @@ func _rebuild_trajectory(ship: ShipSim) -> void:
 		var first: DVec3 = pts[0]
 		_traj_mesh.surface_add_vertex(first.to_vector3())
 	_traj_mesh.surface_end()
-	_rebuild_node_ghost(ship)
-	_update_orbit_marks(ship, el)
 
 
 ## Full loop with vertex density concentrated at the ship: the first point

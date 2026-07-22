@@ -74,6 +74,7 @@ func _resume_mission(save_data: Dictionary) -> void:
 	_clear_game()
 	var index: int = save_data.get("level_index", 0)
 	GameRootScript.level_index = index
+	GameRootScript.hardcore = active_profile.hardcore
 	game = GameRootScene.instantiate()
 	add_child(game)
 	game.load_saved_state(save_data)
@@ -90,8 +91,8 @@ func _show_new_profile() -> void:
 	_current_ui = screen
 
 
-func _on_profile_created(profile_name: String) -> void:
-	active_profile = store.create_profile(profile_name)
+func _on_profile_created(profile_name: String, hardcore: bool) -> void:
+	active_profile = store.create_profile(profile_name, hardcore)
 	_show_mission_select()
 
 
@@ -144,6 +145,7 @@ func _launch(index: int) -> void:
 	_clear_ui()
 	_clear_game()
 	GameRootScript.level_index = index
+	GameRootScript.hardcore = active_profile.hardcore
 	game = GameRootScene.instantiate()
 	add_child(game)
 	_connect_game_signals()
@@ -157,8 +159,8 @@ func _connect_game_signals() -> void:
 	game.save_requested.connect(_on_save)
 
 
-func _on_win(index: int, dv_used: float, medal: String) -> void:
-	active_profile.record_win(index, medal, dv_used)
+func _on_win(index: int, dv_used: float, medal: String, rewinds_used: int) -> void:
+	active_profile.record_win(index, medal, dv_used, rewinds_used)
 	if not store.save():
 		game.hud.flash("SAVE FAILED - PROGRESS MAY NOT PERSIST")
 

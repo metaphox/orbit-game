@@ -37,9 +37,15 @@ func build(level: LevelDef) -> void:
 	var planet_mesh: SphereMesh = planet.mesh
 	planet_mesh.radius = level.body.radius * MAP_SCALE
 	planet_mesh.height = level.body.radius * MAP_SCALE * 2.0
+	# Dark fill + bright rim so the body reads as a disc without drowning the
+	# orbits/markers in one big green blob (UI-DESIGN.md: bodies = dark + INK).
+	planet.material_override = _line_material(Color(0.02, 0.08, 0.05))
+	add_child(_line_instance(
+		_circle_points(level.body.radius * MAP_SCALE), Color(Palette.INK, 0.7)))
 
 	orbit_instance = layout.get_node("OrbitInstance")
 	orbit_mesh = orbit_instance.mesh
+	orbit_instance.material_override = _line_material(Palette.LIVE)  # own orbit = live green
 
 	ship_marker = layout.get_node("ShipMarker")
 	# ShipMarker's baked mesh is a unit-scale directional wedge (tip at -Z);
@@ -54,42 +60,42 @@ func build(level: LevelDef) -> void:
 			var tilt := Basis(Vector3(1, 0, 0), target.target_inclination)
 			for i in pts.size():
 				pts[i] = tilt * pts[i]
-		add_child(_line_instance(pts, Color(0.2, 0.55, 0.28)))
+		add_child(_line_instance(pts, Palette.TARGET))
 	elif level.objective is RendezvousObjective:
 		var rdv := level.objective as RendezvousObjective
 		add_child(_line_instance(
-			_circle_points(rdv.station_orbit.a * MAP_SCALE), Color(0.2, 0.55, 0.28)))
+			_circle_points(rdv.station_orbit.a * MAP_SCALE), Palette.TARGET))
 		_station_marker = MeshInstance3D.new()
 		var st_dot := SphereMesh.new()
 		var st_radius := level.map_extent / 200.0
 		st_dot.radius = st_radius
 		st_dot.height = st_radius * 2.0
-		st_dot.material = _line_material(Color(1.0, 0.7, 0.2))
+		st_dot.material = _line_material(Palette.TARGET)
 		_station_marker.mesh = st_dot
 		_station_marker.layers = MAP_LAYER
 		add_child(_station_marker)
 	elif level.objective is EntryCorridorObjective:
 		var corridor := level.objective as EntryCorridorObjective
 		add_child(_line_instance(
-			_circle_points(corridor.target_periapsis * MAP_SCALE), Color(0.2, 0.55, 0.28)))
+			_circle_points(corridor.target_periapsis * MAP_SCALE), Palette.TARGET))
 
 	for moon in level.moons:
 		# the moon's orbit track around the root
 		add_child(_line_instance(
-			_circle_points(moon.orbit.a * MAP_SCALE), Color(0.16, 0.35, 0.2)))
+			_circle_points(moon.orbit.a * MAP_SCALE), Color(Palette.DIM, 0.5)))
 		var marker := MeshInstance3D.new()
 		var dot := SphereMesh.new()
 		var dot_radius := maxf(moon.radius * MAP_SCALE, level.map_extent / 130.0)
 		dot.radius = dot_radius
 		dot.height = dot_radius * 2.0
-		dot.material = _line_material(Color(0.55, 0.53, 0.5))
+		dot.material = _line_material(Palette.BODY)
 		marker.mesh = dot
 		marker.layers = MAP_LAYER
 		add_child(marker)
 		_moon_markers.append(marker)
 
 		var soi := _line_instance(
-			_circle_points(moon.soi_radius * MAP_SCALE), Color(0.2, 0.55, 0.28))
+			_circle_points(moon.soi_radius * MAP_SCALE), Color(Palette.DIM, 0.6))
 		add_child(soi)
 		_soi_rings.append(soi)
 
@@ -122,6 +128,70 @@ func sync(ship: ShipSim, t: float, delta: float) -> void:
 	_refresh_left = REFRESH_INTERVAL
 	var r_max := minf(_level.draw_limit, ship.body.soi_radius * 1.15)
 	_rebuild_orbit_line(ship.current_elements(), r_max)
+
+
+## Map-scene position of the body the ship currently orbits - the point the
+## minimap camera frames and rotates around (Earth, or the Moon inside its SOI).
+func focus_point(ship: ShipSim, t: float) -> Vector3:
+	return ship.body.position_at(t).scaled(MAP_SCALE).to_vector3()
+
+
+## Orthographic size (render units) that frames the ship's current orbit and,
+## when the ship is at the root body, its target - so AUTO zoom fills the panel
+## instead of leaving dead margin. Measured from the current parent centre.
+func auto_extent(ship: ShipSim, t: float) -> float:
+	var el := ship.current_elements()
+	var r_max := minf(_level.draw_limit, ship.body.soi_radius * 1.15)
+	var reach := ship.r.length()
+	if el.is_elliptic():
+		reach = maxf(reach, minf(el.radius_apoapsis(), r_max))
+	if ship.body == _level.body:
+		reach = maxf(reach, _target_reach())
+	reach = maxf(reach, ship.body.radius * 1.2)
+	return reach * 3.0 * MAP_SCALE  # *2 for diameter, *1.5 margin inside the round bezel
+
+
+## The marked points (dots + labels) for the overlay, in map-scene coords.
+## See UI-DESIGN.md for the colour/label convention.
+func marked_points(ship: ShipSim, t: float) -> Array:
+	var out: Array = []
+	var el := ship.current_elements()
+	var parent := focus_point(ship, t)
+	var r_max := minf(_level.draw_limit, ship.body.soi_radius * 1.15)
+	# AP/PE only when the orbit is eccentric enough for them to be distinct.
+	if el.is_elliptic() and el.radius_apoapsis() <= r_max \
+			and el.radius_apoapsis() - el.radius_periapsis() > el.a * 0.03:
+		out.append({
+			"pos": parent + el.state_at_true_anomaly(PI).r.scaled(MAP_SCALE).to_vector3(),
+			"color": Palette.LIVE, "label": "AP"})
+		out.append({
+			"pos": parent + el.state_at_true_anomaly(0.0).r.scaled(MAP_SCALE).to_vector3(),
+			"color": Palette.LIVE, "label": "PE"})
+	if ship.node != null:
+		out.append({
+			"pos": parent + el.state_at_time(ship.node.t_node).r.scaled(MAP_SCALE).to_vector3(),
+			"color": Palette.INTENT, "label": "NODE"})
+	if _station_marker != null:
+		out.append({
+			"pos": (_level.objective as RendezvousObjective).station_orbit
+				.state_at_time(t).r.scaled(MAP_SCALE).to_vector3(),
+			"color": Palette.TARGET, "label": "TGT"})
+	for moon in _level.moons:
+		out.append({
+			"pos": moon.position_at(t).scaled(MAP_SCALE).to_vector3(),
+			"color": Palette.BODY, "label": moon.name})
+	return out
+
+
+func _target_reach() -> float:
+	var o := _level.objective
+	if o is OrbitMatchObjective:
+		return (o as OrbitMatchObjective).target_radius
+	if o is RendezvousObjective:
+		return (o as RendezvousObjective).station_orbit.a
+	if o is EntryCorridorObjective:
+		return (o as EntryCorridorObjective).target_periapsis
+	return 0.0
 
 
 func _rebuild_orbit_line(el: OrbitElements, r_max: float) -> void:

@@ -9,13 +9,13 @@ extends Node3D
 ## separate, lower-risk convention (arrow keys/Enter/number-select) and are
 ## intentionally not part of this migration.
 
-signal mission_won(index: int, dv_used: float, medal: String)
+signal mission_won(index: int, dv_used: float, medal: String, rewinds_used: int)
 signal restart_requested
 signal exit_requested
 signal next_requested(index: int)
 signal save_requested(payload: Dictionary)
 
-enum Phase { FLYING, WON, FAILED, PAUSED }
+enum Phase { FLYING, WON, FAILED, PAUSED, REWINDING }
 enum NodeField { T_NODE, PROGRADE, NORMAL, RADIAL }
 
 ## Keys 1-9 jump straight to the matching step; -/= walk one step at a time.
@@ -37,12 +37,34 @@ static var level_index := 0
 ## mission flies itself (used by the live-autopilot demo and its tests).
 static var autopilot_on_launch := false
 
+## Set by campaign_root from the active profile before this scene is built
+## (like level_index). Hardcore zeroes the rewind budget and strips the
+## predictive flight aids (DESIGN.md §14.4). Defaults false for tests.
+static var hardcore := false
+
+## Physical key that opens the rewind scrubber (from FLYING or FAILED). Raw
+## keycode for now; a proper InputMap action + rebinding is a follow-up.
+const REWIND_OPEN_KEY := KEY_H
+const REWIND_SWEEP_DURATION := 0.5  # the reverse-sweep tween between anchors
+
 var level: LevelDef
 var ship: ShipSim
 var sim_time := 0.0
 var warp_index := 0
 var phase := Phase.FLYING
 var side_active := false
+
+## Undo history for this mission (DESIGN.md §14). Anchors recorded at burn
+## edges; commit spends a charge and truncates the future.
+var rewind: RewindBuffer
+var _was_burning := false
+var _rewind_cursor := 0
+# Live state captured on entering REWINDING, so CANCEL returns to "now" free.
+var _rewind_return: Dictionary = {}
+var _sweep_left := 0.0
+var _sweep_from := 0.0
+var _sweep_to := 0.0
+var _fail_reason := ""  # kept so CANCEL from a rewind restores the fail screen
 
 ## The live autopilot (src/autopilot/flight_director). Non-null while engaged;
 ## takes over throttle/attitude/warp in place of player input.
@@ -65,9 +87,14 @@ func _ready() -> void:
 	ship = ShipSim.new()
 	ship.setup(level)
 
+	rewind = RewindBuffer.new()
+	rewind.setup(0 if hardcore else level.rewind_budget)
+	rewind.record_launch(ship.serialize())
+
 	flight_view = FlightView.new()
 	add_child(flight_view)
 	flight_view.build(level)
+	flight_view.guidance_enabled = not hardcore
 
 	map_view = MapView.new()
 	add_child(map_view)
@@ -76,6 +103,7 @@ func _ready() -> void:
 	hud = Hud.new()
 	add_child(hud)
 	hud.build(level)
+	hud.map_view = map_view  # minimap auto-fit / focus / marked points
 	hud.toolbar_key.connect(_on_toolbar_key)
 
 	flight_view.camera.make_current()
@@ -119,10 +147,23 @@ func load_saved_state(data: Dictionary) -> void:
 	sim_time = data.get("sim_time", 0.0)
 	warp_index = clampi(data.get("warp_index", 0), 0, WARP_STEPS.size() - 1)
 	ship.apply_serialized(data, sim_time)
+	# Charges persist across a save; the anchor history does not (v1, §14.5),
+	# so the saved point becomes the rewind floor.
+	rewind.setup(0 if hardcore else data.get("rewind_charges", level.rewind_budget))
+	rewind.rewinds_used = data.get("rewinds_used", 0)
+	rewind.set_floor(sim_time, warp_index, ship.serialize(), "RESUME POINT")
 	flight_view.mark_traj_dirty()
 
 
 func _physics_process(delta: float) -> void:
+	# The mission is won but not frozen: the ship keeps coasting its new orbit
+	# on rails so the player can watch it (DESIGN.md §14.3). No input, no fail
+	# checks, no anchor recording - the result is already locked.
+	if phase == Phase.WON:
+		sim_time += delta * WARP_STEPS[warp_index]
+		ship.advance_to(sim_time)
+		ship.apply_soi_transitions(sim_time)
+		return
 	if phase != Phase.FLYING:
 		return
 	if director != null:
@@ -133,6 +174,14 @@ func _physics_process(delta: float) -> void:
 			hud.flash(status)
 	else:
 		_apply_flight_input(delta)
+
+	# Rising edge of a burn: record the pre-ignition coast state as an anchor
+	# (before advancing, so it's the moment just before thrust). Coalescing of
+	# near-back-to-back burns lives in RewindBuffer.note_burn_start.
+	var will_burn := ship.throttle > 0.0 and ship.prop_mass > 0.0
+	if will_burn and not _was_burning:
+		rewind.note_burn_start(sim_time, warp_index, ship.serialize())
+
 	var t_target := sim_time + delta * WARP_STEPS[warp_index]
 	# Rails warp must not step across an SOI boundary or impact: clamp the
 	# jump to the precomputed next event and drop out of warp there.
@@ -147,6 +196,15 @@ func _physics_process(delta: float) -> void:
 	if notice != "":
 		warp_index = 0
 		hud.flash(notice)
+		rewind.add_landmark(sim_time, notice)
+
+	# Falling edge of a burn (throttle cut or tank ran dry this frame): record
+	# the end time so the next burn's coalescing window is measured from here.
+	var burning_after := ship.throttle > 0.0 and ship.prop_mass > 0.0
+	if _was_burning and not burning_after:
+		rewind.note_burn_end(sim_time)
+	_was_burning = burning_after
+
 	if ship.node_completed:
 		ship.node_completed = false
 		hud.flash("NODE COMPLETE")
@@ -155,15 +213,23 @@ func _physics_process(delta: float) -> void:
 
 
 func _process(delta: float) -> void:
+	if phase == Phase.REWINDING:
+		_advance_rewind_sweep(delta)
+		_refresh_rewind_hud()
+	elif phase == Phase.FLYING:
+		hud.set_rewind_line(_rewind_pips())
+		hud.hide_rewind_timeline()
+	else:
+		hud.set_rewind_line("")
+		hud.hide_rewind_timeline()
 	flight_view.sync(ship, delta)
 	map_view.sync(ship, sim_time, delta)
 	hud.refresh(ship, level, sim_time, WARP_STEPS[warp_index])
 	# star dust runs its own clock independent of sim_time, so it needs an
-	# explicit freeze whenever the sim itself isn't advancing (paused, or
-	# the mission already ended) - covers every path that can reach a
-	# non-FLYING phase (pause menu, space/0 quick-pause, win, fail) from
-	# one place instead of duplicating the call at each transition site.
-	flight_view.star_dust.set_frozen(phase != Phase.FLYING)
+	# explicit freeze whenever the sim itself isn't advancing. WON now keeps
+	# coasting (§14.3), so only the genuinely-frozen phases freeze the dust.
+	var frozen := phase == Phase.PAUSED or phase == Phase.REWINDING or phase == Phase.FAILED
+	flight_view.star_dust.set_frozen(frozen)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -214,6 +280,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	var key := event as InputEventKey
 	if key == null or not key.pressed or key.echo:
+		return
+	if phase == Phase.REWINDING:
+		_handle_rewind_keys(key)
+		return
+	if key.physical_keycode == REWIND_OPEN_KEY:
+		_enter_rewind()
 		return
 	if Settings.debug_mode and key.physical_keycode == KEY_J:
 		_toggle_autopilot()
@@ -334,6 +406,8 @@ func _save_progress() -> void:
 	payload["level_index"] = level_index
 	payload["sim_time"] = sim_time
 	payload["warp_index"] = warp_index
+	payload["rewind_charges"] = rewind.charges
+	payload["rewinds_used"] = rewind.rewinds_used
 	save_requested.emit(payload)
 	if _pause_menu != null:
 		_pause_menu.show_saved_confirmation()
@@ -398,32 +472,176 @@ func _apply_flight_input(delta: float) -> void:
 
 func _check_end_conditions() -> void:
 	if not ship.elements.is_valid:
-		phase = Phase.FAILED
-		hud.show_fail("ORBIT TRAJECTORY DEGENERATE")
+		_fail("ORBIT TRAJECTORY DEGENERATE")
 	elif ship.r.length() <= ship.body.radius:
 		match level.objective.contact_result(ship):
 			Objective.ContactResult.WIN:
 				_win()
 			Objective.ContactResult.CRASH:
-				phase = Phase.FAILED
-				hud.show_fail("TOUCHDOWN TOO HARD")
+				_fail("TOUCHDOWN TOO HARD")
 			_:
-				phase = Phase.FAILED
-				hud.show_fail("%s SURFACE IMPACT" % ship.body.name)
+				_fail("%s SURFACE IMPACT" % ship.body.name)
 	elif (level.fail_radius > 0.0 and ship.body.parent == null
 			and ship.r.length() > level.fail_radius):
-		phase = Phase.FAILED
-		hud.show_fail("MISSION ENVELOPE EXCEEDED")
+		_fail("MISSION ENVELOPE EXCEEDED")
 	elif level.objective.is_met(ship):
 		_win()
 
 
+## A failure is recoverable: the fail screen offers rewind first (when
+## charges remain), restart as the fallback (DESIGN.md §14.3).
+func _fail(reason: String) -> void:
+	phase = Phase.FAILED
+	_fail_reason = reason
+	hud.set_rewind_line("")
+	hud.show_fail(reason, rewind.charges)
+
+
+# --- Rewind scrubber (DESIGN.md §14) ---------------------------------------
+
+## Open the paused scrubber from FLYING or FAILED. Captures the live state so
+## CANCEL can return to "now" for free.
+func _enter_rewind() -> void:
+	if phase != Phase.FLYING and phase != Phase.FAILED:
+		return
+	if rewind.anchors.is_empty():
+		return
+	ship.throttle = 0.0
+	hud.center_label.visible = false  # clear a fail banner if we came from FAILED
+	_rewind_return = {
+		"state": ship.serialize(), "sim_time": sim_time,
+		"warp_index": warp_index, "phase": phase}
+	phase = Phase.REWINDING
+	_rewind_cursor = rewind.anchors.size() - 1
+	_show_anchor(_rewind_cursor, true)
+	_refresh_rewind_hud()
+
+
+func _handle_rewind_keys(key: InputEventKey) -> void:
+	match key.physical_keycode:
+		KEY_LEFT, KEY_A:
+			_rewind_step(-1)  # older
+		KEY_RIGHT, KEY_D:
+			_rewind_step(1)  # newer
+		KEY_ENTER, KEY_KP_ENTER:
+			_rewind_resume()
+		KEY_ESCAPE, REWIND_OPEN_KEY:
+			_rewind_cancel()
+
+
+func _rewind_step(dir: int) -> void:
+	var target := clampi(_rewind_cursor + dir, 0, rewind.anchors.size() - 1)
+	if target == _rewind_cursor:
+		return
+	_rewind_cursor = target
+	_show_anchor(_rewind_cursor, false)
+	_refresh_rewind_hud()
+
+
+## Restore the scene to anchor `index`. When not `instant` and the anchor is
+## in the past of what's shown, kick off the 0.5s reverse-sweep tween.
+func _show_anchor(index: int, instant: bool) -> void:
+	var a: Dictionary = rewind.anchors[index]
+	var from_time := sim_time
+	var to_time: float = a["sim_time"]
+	ship.apply_serialized(a["state"], to_time)
+	warp_index = a["warp_index"]
+	_event_revision = -1  # invalidate event cache; recomputed lazily once settled
+	flight_view.mark_traj_dirty()
+	if instant or from_time <= to_time:
+		sim_time = to_time
+		_sweep_left = 0.0
+	else:
+		_sweep_from = from_time
+		_sweep_to = to_time
+		_sweep_left = REWIND_SWEEP_DURATION
+
+
+## Cosmetic reverse-sweep: slide the displayed clock from where we were down to
+## the target anchor, moving the ship backward along the anchor's coast orbit
+## (closed-form, so any direction is free). Bodies follow because sync reads
+## ship.last_time. Runs only while REWINDING.
+func _advance_rewind_sweep(delta: float) -> void:
+	if _sweep_left <= 0.0:
+		return
+	_sweep_left = maxf(_sweep_left - delta, 0.0)
+	var frac := 1.0 - _sweep_left / REWIND_SWEEP_DURATION
+	sim_time = lerpf(_sweep_from, _sweep_to, frac)
+	ship.last_time = sim_time
+	var s := ship.elements.state_at_time(sim_time)
+	ship.r = s.r
+	ship.v = s.v
+
+
+## Abandon the rewind: restore the live state captured on entry, free. Returns
+## to whichever phase we opened from (FLYING, or a restored FAILED screen).
+func _rewind_cancel() -> void:
+	var ret: Dictionary = _rewind_return
+	_restore_live(ret["state"], ret["sim_time"], ret["warp_index"])
+	hud.set_rewind_line("")
+	phase = ret["phase"]
+	if phase == Phase.FAILED:
+		hud.show_fail(_fail_reason, rewind.charges)
+
+
+## Commit: branch the timeline at the selected anchor. Spends a charge unless
+## the anchor is effectively "now" (no time was discarded). Disabled at 0
+## charges when a charge is due.
+func _rewind_resume() -> void:
+	var a: Dictionary = rewind.anchors[_rewind_cursor]
+	var charged: bool = float(_rewind_return["sim_time"]) - float(a["sim_time"]) > 1e-6
+	if charged and not rewind.has_charges():
+		return
+	rewind.commit(_rewind_cursor, charged)
+	_restore_live(a["state"], a["sim_time"], a["warp_index"])
+	hud.set_rewind_line("")
+	phase = Phase.FLYING
+
+
+func _restore_live(state: Dictionary, at_time: float, warp: int) -> void:
+	ship.apply_serialized(state, at_time)
+	sim_time = at_time
+	warp_index = warp
+	_was_burning = false
+	_sweep_left = 0.0
+	_event_revision = -1
+	flight_view.mark_traj_dirty()
+
+
+func _refresh_rewind_hud() -> void:
+	var a: Dictionary = rewind.anchors[_rewind_cursor]
+	var charged: bool = float(_rewind_return["sim_time"]) - float(a["sim_time"]) > 1e-6
+	var resume_text: String
+	if not charged:
+		resume_text = "[ENTER] RESUME (FREE)"
+	elif rewind.has_charges():
+		resume_text = "[ENTER] RESUME HERE — USES 1 OF %d" % rewind.charges
+	else:
+		resume_text = "— NO REWINDS LEFT —"
+	hud.set_rewind_line("←/→ (or A/D) STEP ANCHOR    %s    [ESC] CANCEL" % resume_text)
+	hud.update_rewind_timeline(
+		rewind.anchors[0]["sim_time"], float(_rewind_return["sim_time"]), sim_time,
+		_rewind_cursor, rewind.anchors, rewind.landmarks)
+
+
+## The persistent charge readout while flying; empty when rewind is unavailable
+## (hardcore, or a level that grants none).
+func _rewind_pips() -> String:
+	if hardcore or level.rewind_budget <= 0:
+		return ""
+	var filled := "●".repeat(rewind.charges)
+	var empty := "○".repeat(maxi(level.rewind_budget - rewind.charges, 0))
+	return "REWIND %s%s   [%s]" % [filled, empty, OS.get_keycode_string(REWIND_OPEN_KEY)]
+
+
 func _win() -> void:
 	phase = Phase.WON
+	hud.set_rewind_line("")
 	var dv_used := ship.dv_used()
 	var medal := level.medal(dv_used)
-	hud.show_win(level, dv_used, Campaign.next_after(level_index) != -1)
-	mission_won.emit(level_index, dv_used, medal)
+	var clean := hardcore or rewind.rewinds_used == 0
+	hud.show_win(level, dv_used, Campaign.next_after(level_index) != -1, clean)
+	mission_won.emit(level_index, dv_used, medal, rewind.rewinds_used)
 
 
 ## Next impact/SOI/scheduled-node event on the current coasting orbit.

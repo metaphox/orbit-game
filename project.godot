@@ -10,7 +10,7 @@ config_version=5
 
 [application]
 
-config/name="Orbit Game"
+config/name="Limited Propellant"
 run/main_scene="res://src/campaign_root.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
 

@@ -77,6 +77,7 @@ func _refresh() -> void:
 	if _saved_flash:
 		lines.append("")
 		lines.append("[color=%s]✓ PROGRESS SAVED[/color]" % GREEN)
+		lines.append("[color=%s]  (rewind anchors are not saved)[/color]" % DIM_GREEN)
 	_text.text = "\n".join(lines)
 
 

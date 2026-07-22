@@ -229,7 +229,9 @@ func test_star_dust_freezes_while_paused_and_resumes_cleanly() -> void:
 	assert_eq(dust.speed_scale, 1.0, "resumes cleanly, no jump")
 
 
-func test_star_dust_freezes_on_win() -> void:
+func test_star_dust_keeps_running_on_win() -> void:
+	# DESIGN.md §14.3: a win no longer freezes - the ship keeps coasting its
+	# new orbit, so the star dust keeps moving too.
 	var game := _boot()
 	var target: float = game.level.objective.target_radius
 	game.ship.elements = OrbitElements.from_state(
@@ -238,4 +240,4 @@ func test_star_dust_freezes_on_win() -> void:
 		game.level.body.mu, game.sim_time)
 	simulate(game, 5, 1.0 / 60.0)
 	assert_eq(game.phase, game.Phase.WON)
-	assert_eq(game.flight_view.star_dust.speed_scale, 0.0, "frozen once the mission ends")
+	assert_eq(game.flight_view.star_dust.speed_scale, 1.0, "keeps flying after the win")

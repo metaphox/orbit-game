@@ -52,11 +52,20 @@ var _font: SystemFont
 var _flash_label: Label
 var _flash_left := 0.0
 var _paused_label: Label
+var _rewind_label: Label  # top-center: persistent charge pips + the scrub panel
+var _rewind_timeline: RewindTimeline
 var _toolbar_buttons: Dictionary = {}
 var _minimap_aspect: AspectRatioContainer
 var _right_column: VBoxContainer
 var _minimap_cam: Camera3D
-var _minimap_base_pos := Vector3.ZERO
+var _minimap_overlay: MinimapOverlay
+var _minimap_zoom_auto := true
+var _minimap_manual_size := 0.0
+var _minimap_min_size := 1.0
+var _minimap_max_size := 1.0e9
+## Set by game_root after both are built; the minimap needs it for auto-fit,
+## the parent-centred focus, and the marked-point list.
+var map_view: MapView
 var _fps_label: Label
 
 
@@ -114,6 +123,27 @@ func build(level: LevelDef) -> void:
 	help_label.text = "\n".join(help_lines)
 	title.text = level.title
 
+	_rewind_label = Label.new()
+	_rewind_label.add_theme_font_override("font", _font)
+	_rewind_label.add_theme_font_size_override("font_size", 16)
+	_rewind_label.add_theme_color_override("font_color", AMBER)
+	_rewind_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_rewind_label.visible = false
+	add_child(_rewind_label)
+	# Low-centre band, clear of the top-left status block, the title, the
+	# top-right minimap, and the bottom toolbar.
+	_rewind_label.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+	_rewind_label.offset_top = 588
+
+	_rewind_timeline = RewindTimeline.new()
+	_rewind_timeline.font = _font
+	_rewind_timeline.mouse_filter = Control.MOUSE_FILTER_IGNORE  # never eat camera drags
+	_rewind_timeline.custom_minimum_size = Vector2(780, 80)
+	_rewind_timeline.visible = false
+	add_child(_rewind_timeline)
+	_rewind_timeline.set_anchors_and_offsets_preset(
+		Control.PRESET_CENTER_TOP, Control.PRESET_MODE_MINSIZE, 498)
+
 	_finish_minimap(level)
 	get_viewport().size_changed.connect(_update_minimap_size)
 	_build_toolbar()
@@ -124,13 +154,7 @@ func build(level: LevelDef) -> void:
 
 
 func refresh(ship: ShipSim, level: LevelDef, sim_time: float, warp: int) -> void:
-	# Heading-up minimap: rotate the camera's azimuth so the ship's current
-	# nose direction always renders toward the top of the map, matching
-	# what's ahead in the main flight view. MapView.ship_heading_angle is
-	# the single source of truth also used by the ship marker's own basis.
-	var heading := MapView.ship_heading_angle(ship)
-	_minimap_cam.position = Basis(Vector3.UP, heading) * _minimap_base_pos
-	_minimap_cam.look_at(Vector3.ZERO, Vector3.UP)
+	_sync_minimap_camera(ship, sim_time)
 
 	var el := ship.current_elements()
 	var state_text := "BURNING" if ship.flight_state == ShipSim.FlightState.BURNING else "COASTING"
@@ -171,12 +195,43 @@ func refresh(ship: ShipSim, level: LevelDef, sim_time: float, warp: int) -> void
 	_sync_toolbar_state(ship)
 
 
-func show_win(level: LevelDef, dv_used: float, has_next: bool) -> void:
+## The whole rewind readout: game_root composes the text (persistent charge
+## pips while flying, or the full scrub panel while REWINDING) and this just
+## displays it. Empty string hides it.
+func set_rewind_line(text: String) -> void:
+	if _rewind_label == null:
+		return
+	_rewind_label.text = text
+	_rewind_label.visible = text != ""
+
+
+func update_rewind_timeline(
+		t_start: float, t_now: float, playhead: float, cursor: int,
+		anchors: Array, landmarks: Array) -> void:
+	_rewind_timeline.t_start = t_start
+	_rewind_timeline.t_now = t_now
+	_rewind_timeline.playhead = playhead
+	_rewind_timeline.cursor = cursor
+	_rewind_timeline.anchors = anchors
+	_rewind_timeline.landmarks = landmarks
+	_rewind_timeline.visible = true
+	_rewind_timeline.queue_redraw()
+
+
+func hide_rewind_timeline() -> void:
+	if _rewind_timeline != null:
+		_rewind_timeline.visible = false
+
+
+func show_win(level: LevelDef, dv_used: float, has_next: bool, clean := false) -> void:
 	center_label.add_theme_color_override("font_color", GREEN)
+	var medal_line := "MEDAL: %s" % level.medal(dv_used)
+	if clean:
+		medal_line += "   ◇ CLEAN"
 	var lines := [
 		"■ OBJECTIVE COMPLETE ■", "",
 		"ΔV USED %.1f m/s — PAR %.0f" % [dv_used, level.dv_par],
-		"MEDAL: %s" % level.medal(dv_used), "",
+		medal_line, "",
 		"[R] FLY AGAIN"]
 	if has_next:
 		lines.append("[N] NEXT MISSION")
@@ -211,9 +266,13 @@ func _build_fps_label() -> void:
 	_fps_label.position = Vector2(14, 0)
 
 
-func show_fail(reason: String) -> void:
+func show_fail(reason: String, rewinds_left := 0) -> void:
 	center_label.add_theme_color_override("font_color", RED)
-	center_label.text = "\n".join(["■ %s ■" % reason, "", "[R] RESTART"])
+	var lines := ["■ %s ■" % reason, ""]
+	if rewinds_left > 0:
+		lines.append("[Z] REWIND — %d LEFT" % rewinds_left)
+	lines.append("[R] RESTART")
+	center_label.text = "\n".join(lines)
 	center_label.visible = true
 
 
@@ -225,13 +284,22 @@ func _finish_minimap(level: LevelDef) -> void:
 	var viewport: SubViewport = minimap_root.get_node("SubViewportContainer/SubViewport")
 	_minimap_cam = viewport.get_node("Camera3D")
 	_minimap_cam.size = level.map_extent
-	_minimap_cam.far = level.map_extent * 6.0
-	_minimap_base_pos = Vector3(0, level.map_extent * 0.9, level.map_extent * 0.42)
-	_minimap_cam.position = _minimap_base_pos
-	_minimap_cam.look_at(Vector3.ZERO, Vector3.UP)
+	# Zoom clamps: from roughly the body's surface out to the draw limit.
+	_minimap_min_size = level.body.radius * 1.6 * MapView.MAP_SCALE
+	_minimap_max_size = level.draw_limit * 2.6 * MapView.MAP_SCALE
+	_minimap_manual_size = level.map_extent
+	_minimap_zoom_auto = true
 	_minimap_cam.make_current()
 	if Settings.effects_enabled:
 		viewport.add_child(CrtOverlay.new())  # last child: composites over the 3D render
+
+	# 2D marker/label overlay, above the SubViewport render.
+	_minimap_overlay = MinimapOverlay.new()
+	_minimap_overlay.font = _font
+	_minimap_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	minimap_root.add_child(_minimap_overlay)
+	_minimap_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_build_minimap_zoom_controls()
 
 	# The old flat 0.45-alpha near-black tint was nearly indistinguishable
 	# from the space background behind it - brightened here so the panel
@@ -254,6 +322,81 @@ func _update_minimap_size() -> void:
 	var w := clampf(vp.x * 0.22, 220.0, 340.0)
 	_minimap_aspect.custom_minimum_size = Vector2(w, w / _minimap_aspect.ratio)
 	_right_column.custom_minimum_size.x = w
+
+
+## Per-frame minimap framing: centre on the current parent body, heading-up,
+## at the AUTO-fit or manual zoom (eased). Also feeds the marker overlay.
+func _sync_minimap_camera(ship: ShipSim, t: float) -> void:
+	if _minimap_cam == null:
+		return
+	var target_size := _minimap_manual_size
+	if _minimap_zoom_auto and map_view != null:
+		target_size = map_view.auto_extent(ship, t)
+	target_size = clampf(target_size, _minimap_min_size, _minimap_max_size)
+	_minimap_cam.size = lerpf(_minimap_cam.size, target_size, 0.15)
+
+	var s := _minimap_cam.size
+	var focus := map_view.focus_point(ship, t) if map_view != null else Vector3.ZERO
+	var heading := MapView.ship_heading_angle(ship)
+	_minimap_cam.position = focus + Basis(Vector3.UP, heading) * Vector3(0.0, s * 0.9, s * 0.42)
+	_minimap_cam.look_at(focus, Vector3.UP)
+	_minimap_cam.far = s * 8.0 + focus.length() + 10.0
+
+	if _minimap_overlay != null and map_view != null:
+		_minimap_overlay.cam = _minimap_cam
+		_minimap_overlay.points = map_view.marked_points(ship, t)
+		_minimap_overlay.queue_redraw()
+
+
+func _build_minimap_zoom_controls() -> void:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 3)
+	minimap_root.add_child(row)
+	row.set_anchors_and_offsets_preset(
+		Control.PRESET_BOTTOM_RIGHT, Control.PRESET_MODE_MINSIZE, 7)
+	row.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	row.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	_minimap_button("AUTO", 42, func() -> void: _on_minimap_zoom("auto"), row)
+	_minimap_button("+", 24, func() -> void: _on_minimap_zoom("in"), row)
+	_minimap_button("−", 24, func() -> void: _on_minimap_zoom("out"), row)
+
+
+func _minimap_button(text: String, width: float, on_press: Callable, row: HBoxContainer) -> void:
+	var b := Button.new()
+	b.text = text
+	b.focus_mode = Control.FOCUS_NONE
+	b.custom_minimum_size = Vector2(width, 22)
+	b.add_theme_font_override("font", _font)
+	b.add_theme_font_size_override("font_size", 13)
+	b.add_theme_color_override("font_color", GREEN)
+	b.add_theme_color_override("font_hover_color", AMBER)
+	b.add_theme_color_override("font_pressed_color", AMBER)
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.02, 0.06, 0.03, 0.88)
+	sb.set_border_width_all(1)
+	sb.border_color = Color(DIM_GREEN, 0.85)
+	sb.set_content_margin_all(2)
+	b.add_theme_stylebox_override("normal", sb)
+	b.add_theme_stylebox_override("hover", sb)
+	b.add_theme_stylebox_override("pressed", sb)
+	b.pressed.connect(on_press)
+	row.add_child(b)
+
+
+func _on_minimap_zoom(mode: String) -> void:
+	match mode:
+		"auto":
+			_minimap_zoom_auto = true
+		"in":
+			if _minimap_zoom_auto:
+				_minimap_manual_size = _minimap_cam.size
+			_minimap_zoom_auto = false
+			_minimap_manual_size = maxf(_minimap_manual_size / 1.35, _minimap_min_size)
+		"out":
+			if _minimap_zoom_auto:
+				_minimap_manual_size = _minimap_cam.size
+			_minimap_zoom_auto = false
+			_minimap_manual_size = minf(_minimap_manual_size * 1.35, _minimap_max_size)
 
 
 ## Static reference strip of the non-warp keybinds (1-9 warp levels are

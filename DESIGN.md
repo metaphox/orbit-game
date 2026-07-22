@@ -1,4 +1,4 @@
-# Orbit Game — Design Document
+# Limited Propellant — Design Document
 
 *KSP distilled to "burn fuel to change orbit," in a NASA-punk retro-futurist skin.*
 
@@ -9,6 +9,8 @@ Status: agreed via grilling session, 2026-07-19; updated 2026-07-20 to match wha
 ## 1. Pitch
 
 A level-based 3D orbital-mechanics game. Each level you fly a single spacecraft with limited propellant and must reach a target: raise or lower an orbit, rendezvous with a station, transfer to the Moon, land on it, or make it to Mars. Physics is plausible in form (real equations, tuned constants). The fiction and look are late-70s spaceflight: Apollo hardware and green-phosphor flight computers.
+
+**The name.** *Limited Propellant* names the one constraint every level is built around — a fixed tank and a Δv budget you cannot exceed. Its initials, **LP**, also read as **Lambert's Problem**, the classic orbital-mechanics task of finding the transfer orbit that connects two positions in a given time — which is, under the hood, exactly what every intercept and transfer in the game asks you to solve. The double meaning is deliberate: a plain statement of the mechanic on the surface, an insider handshake for anyone who knows the math.
 
 ## 2. Design pillars
 
@@ -204,3 +206,36 @@ Not settled scope decisions, just not done yet:
 - **Web export:** still not attempted. Neither shipped nor explicitly re-deferred by a real test — genuinely just not gotten to.
 - **Narrative framing/voice:** still not started, unchanged from "after the vertical slice."
 - **Rebindable keys, provable-unreachability detector:** listed in §11 as out of scope for now; revisit if they become a real ask.
+
+## 14. Rewind, difficulty & hardcore
+
+Agreed via grilling session, 2026-07-21. Rewind is the continuous extension of pillar 3 ("failure is information — free instant retries"): instead of re-flying 40 minutes to Mars over one mistake, you rewind to before it. It is a **tool, not a scored mechanic** — but a *limited* one, so it has weight.
+
+**Why the architecture makes this cheap.** The universe is a pure function of `sim_time` (bodies on rails), coasting is closed-form and time-symmetric (`OrbitElements.state_at_time`), and `ShipSim.serialize()`/`apply_serialized()` already round-trip the complete dynamic state (it's the save system). Rewind is a small in-memory snapshot buffer over primitives that already exist and are tested. The only path-dependent part is powered flight (RK4 + mass loss), which is not reversible — handled by snapshotting per-frame *only while burning*.
+
+### 14.1 The unit and its cost
+- You rewind to discrete **anchors**. Scrubbing the timeline to *look* is always free.
+- A **charge is spent the instant you RESUME live play from an earlier anchor** — that branches the timeline and discards the future after it. First change burns the charge; no grace window.
+- Anchors = `{ mission start } ∪ { the start of each burn }`. A burn is the only player action that changes the trajectory (attitude/SAS during coast don't), so burns are the only things worth undoing.
+- Burns whose start is within **0.5 s** of the previous burn ending coalesce into one anchor (no tap-burn spam). Tunable.
+- Burns are **atomic**: you redo a whole burn, never trim its tail.
+- **SOI crossings** are labelled **scrub landmarks** (navigation only), not resume points.
+
+### 14.2 The interaction
+- A paused **`REWINDING`** phase (reuses the pause plumbing) shows a mission timeline: anchor ticks + SOI landmarks. Stepping between anchors plays a **0.5 s reverse-sweep tween** (the whole scene animates backward, because everything renders from `sim_time`).
+- Two exits: **`RESUME HERE — USES 1 OF N REWINDS`** (commit, spend a charge, truncate the future, go FLYING) or **CANCEL** (snap back to now, free).
+- At **0 charges** you can still enter and scrub to *look*; RESUME is disabled ("NO REWINDS LEFT").
+- The labelled RESUME button is the only confirmation.
+
+### 14.3 Failure and success
+- Rewind reaches into **FAILED**: same rules, costs a charge; the fail screen offers rewind first, restart as the 0-charge fallback.
+- **Success no longer freezes.** The win locks the instant it is achieved (medal, Δv, and CLEAN/rewinds-used frozen; rewind dead). The ship keeps coasting its new orbit on rails, **camera free, no ship input**, under a non-modal "MISSION COMPLETE" banner (Next / Restart / Exit).
+
+### 14.4 Budget, scoring and hardcore
+- `rewind_budget` is authored **per level** (like `dv_par`; e.g. Act 1 L1 → 1, a long Mars run → 3; default 1). Per-mission; **resets on restart**; the remaining count persists across mid-mission save/reload.
+- Δv medals are unchanged. A run that spends **zero** rewinds earns a **`◇ CLEAN`** ribbon (sticky once earned); `rewinds_used` is recorded per level. There is no aggregate score — scoring stays per-level.
+- **Hardcore** is a binary profile choice made at creation, **immutable**, and explicitly prompted. Hardcore forces `rewind_budget` to 0 everywhere, **strips the predictive aids** (forward trajectory line + maneuver-node preview; keeps the target ring), wears a profile emblem, and makes every win inherently CLEAN. Same pars throughout — hardcore's achievement is the *same* targets with fewer aids.
+
+### 14.5 Persistence (v1) and fast-follows
+- **v1:** anchor history is session-only — the mid-mission save point is the rewind floor; only the remaining charge count persists. The save confirmation warns "rewind anchors will not be saved."
+- **Fast-follows (not first cut):** ghost of the discarded trajectory on resume · free-form fine scrub between anchors · full cross-save history persistence · a diegetic "mission simulator" framing (rewind = "reset sim to timestamp", hardcore = "live-fire") if/when the game gets a narrative voice.

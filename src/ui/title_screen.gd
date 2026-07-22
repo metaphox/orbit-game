@@ -48,21 +48,23 @@ func build(store: ProfileStore) -> void:
 
 	var title := Label.new()
 	title.add_theme_font_override("font", font)
-	title.add_theme_font_size_override("font_size", 54)
+	title.add_theme_font_size_override("font_size", 46)
 	title.add_theme_color_override("font_color", Color(GREEN))
-	title.text = "■ O R B I T ■"
+	title.text = "■ LIMITED PROPELLANT ■"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	add_child(title)
-	title.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP, Control.PRESET_MODE_MINSIZE, 90)
+	title.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+	title.offset_top = 90
 
 	var tagline := Label.new()
 	tagline.add_theme_font_override("font", font)
 	tagline.add_theme_font_size_override("font_size", 16)
 	tagline.add_theme_color_override("font_color", Color(DIM_GREEN))
-	tagline.text = "BURN FUEL. CHANGE ORBIT."
+	tagline.text = "LP · BURN FUEL. CHANGE ORBIT. SOLVE LAMBERT'S PROBLEM."
 	tagline.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	add_child(tagline)
-	tagline.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP, Control.PRESET_MODE_MINSIZE, 150)
+	tagline.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+	tagline.offset_top = 155
 
 	if store.load_warning != "":
 		var warning := Label.new()

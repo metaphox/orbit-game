@@ -90,6 +90,7 @@ func _apply(parsed: Dictionary) -> void:
 			continue
 		var profile := Profile.new()
 		profile.profile_name = p_data.get("name", "")
+		profile.hardcore = p_data.get("hardcore", false)
 		if not stale:
 			profile.unlocked.clear()
 			for k: Variant in p_data.get("unlocked", []):
@@ -119,6 +120,7 @@ func save() -> bool:
 			medals_out[str(k)] = profile.medals[k]
 		profiles_out.append({
 			"name": profile.profile_name,
+			"hardcore": profile.hardcore,
 			"unlocked": profile.unlocked.keys(),
 			"medals": medals_out,
 			"mission_save": profile.mission_save,
@@ -176,10 +178,12 @@ func validate_new_name(profile_name: String) -> String:
 	return ""
 
 
-## Assumes validate_new_name(profile_name) == "" already.
-func create_profile(profile_name: String) -> Profile:
+## Assumes validate_new_name(profile_name) == "" already. `hardcore` is
+## fixed here at creation and never changes for the profile's life (§14.4).
+func create_profile(profile_name: String, hardcore := false) -> Profile:
 	var profile := Profile.new()
 	profile.profile_name = profile_name.strip_edges()
+	profile.hardcore = hardcore
 	profiles.append(profile)
 	last_active_name = profile.profile_name
 	save()

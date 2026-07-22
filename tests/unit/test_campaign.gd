@@ -180,7 +180,7 @@ func test_new_profile_flow_reaches_mission_select_and_flies() -> void:
 	add_child_autofree(root)
 	simulate(root, 2, 1.0 / 60.0)
 
-	root._on_profile_created("Ada")
+	root._on_profile_created("Ada", false)
 	simulate(root, 2, 1.0 / 60.0)
 	assert_eq(root.active_profile.profile_name, "Ada")
 	assert_true(root._current_ui is LevelSelect, "new profile lands on mission select")
@@ -208,7 +208,7 @@ func test_win_persists_to_active_profile_and_advances_campaign() -> void:
 	var root: Node = CampaignRootScene.instantiate()
 	root.store = ProfileStore.load_or_new(SAVE_TEST_PATH)
 	add_child_autofree(root)
-	root._on_profile_created("Ada")
+	root._on_profile_created("Ada", false)
 	root._launch(0)
 	simulate(root, 2, 1.0 / 60.0)
 
@@ -340,7 +340,7 @@ func test_save_progress_persists_to_active_profile() -> void:
 	var root: Node = CampaignRootScene.instantiate()
 	root.store = ProfileStore.load_or_new(SAVE_TEST_PATH)
 	add_child_autofree(root)
-	root._on_profile_created("Ada")
+	root._on_profile_created("Ada", false)
 	root._launch(3)  # the lunar TLI mission (translunar)
 	simulate(root, 2, 1.0 / 60.0)
 
@@ -365,7 +365,7 @@ func test_continue_resumes_saved_mission_exactly() -> void:
 	var root: Node = CampaignRootScene.instantiate()
 	root.store = ProfileStore.load_or_new(SAVE_TEST_PATH)
 	add_child_autofree(root)
-	root._on_profile_created("Ada")
+	root._on_profile_created("Ada", false)
 	root._launch(3)
 	simulate(root, 2, 1.0 / 60.0)
 
@@ -410,7 +410,7 @@ func test_continue_resumes_correctly_after_a_simulated_app_restart() -> void:
 	var writer: Node = CampaignRootScene.instantiate()
 	writer.store = ProfileStore.load_or_new(SAVE_TEST_PATH)
 	add_child_autofree(writer)
-	writer._on_profile_created("Ada")
+	writer._on_profile_created("Ada", false)
 	writer._launch(3)
 	simulate(writer, 2, 1.0 / 60.0)
 	writer.game.warp_index = 3
@@ -434,7 +434,7 @@ func test_winning_clears_the_mission_save() -> void:
 	var root: Node = CampaignRootScene.instantiate()
 	root.store = ProfileStore.load_or_new(SAVE_TEST_PATH)
 	add_child_autofree(root)
-	root._on_profile_created("Ada")
+	root._on_profile_created("Ada", false)
 	root._launch(0)
 	simulate(root, 2, 1.0 / 60.0)
 	root.game._save_progress()

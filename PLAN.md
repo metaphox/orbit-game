@@ -1,4 +1,4 @@
-# Orbit Game — Implementation Plan
+# Limited Propellant — Implementation Plan
 
 **Status as of 2026-07-20: M0–M9 complete, game not finished.** All milestones below are implemented, tested (headless via `./tools/test.sh`), and exportable (`./tools/export.sh`, macOS/Windows/Linux). The current 7-level roster exercises every act and objective type but is a testing/vertical-slice set, not the intended campaign — DESIGN.md's 15–20 level goal is still active work, along with the planned RCS/rotation-cost constraint (DESIGN §4.4) that hasn't been introduced yet. See DESIGN.md §13 for the full still-open list, and git log for the milestone-by-milestone commit history and the bugs each one surfaced.
 
