@@ -16,12 +16,11 @@ var game: Node
 
 
 func _ready() -> void:
-	# Belt-and-suspenders alongside project.godot's display/window/size/
-	# min_* settings: guarantees the floor even if that project setting
-	# doesn't apply on a given platform. Skipped headless (tests) since
-	# there's no real window to constrain.
+	# The sole minimum-window-size enforcement: Godot 4 exposes no min-size
+	# project setting, so the 1280x720 floor is set here at runtime. Skipped
+	# headless (tests) since there's no real window to constrain.
 	if DisplayServer.get_name() != "headless":
-		DisplayServer.window_set_min_size(Vector2i(1024, 768))
+		DisplayServer.window_set_min_size(Vector2i(1280, 720))
 	Settings.apply_cmdline_args()
 	# Only initialize if a test (or future caller) hasn't already injected
 	# one - previously this unconditionally clobbered a pre-set store,

@@ -50,6 +50,99 @@ static func eyebrow(text: String, accent := Palette.LIVE) -> Label:
 	return l
 
 
+## A top-bar telemetry cell: a tiny dim eyebrow over a bright value. Returns
+## {"root": VBoxContainer, "value": Label} — the caller sets value.text each frame.
+static func stat_cell(label: String, value_color := Palette.LIVE, value_size := 18) -> Dictionary:
+	var cell := VBoxContainer.new()
+	cell.add_theme_constant_override("separation", 1)
+	cell.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var eb := Label.new()
+	eb.text = label.to_upper()
+	eb.add_theme_font_override("font", MONO_SEMI)
+	eb.add_theme_font_size_override("font_size", 9)
+	eb.add_theme_color_override("font_color", Palette.DIM)
+	var val := Label.new()
+	val.add_theme_font_override("font", MONO_SEMI)
+	val.add_theme_font_size_override("font_size", value_size)
+	val.add_theme_color_override("font_color", value_color)
+	cell.add_child(eb)
+	cell.add_child(val)
+	return {"root": cell, "value": val}
+
+
+## A bordered card with an accent eyebrow header (+ a right-hand slot) and an empty
+## body VBox. Returns {"root": PanelContainer, "body": VBoxContainer, "header": HBoxContainer}.
+static func panel_header_card(title: String, accent := Palette.LIVE) -> Dictionary:
+	var panel := PanelContainer.new()
+	var box := panel_box(Palette.PANEL, Palette.HAIRLINE, 2)
+	box.set_content_margin_all(10)
+	panel.add_theme_stylebox_override("panel", box)
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", 8)
+	panel.add_child(col)
+	var header := HBoxContainer.new()
+	header.add_theme_constant_override("separation", 6)
+	header.add_child(eyebrow(title, accent))
+	var spacer := Control.new()
+	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	header.add_child(spacer)
+	col.add_child(header)
+	var body := VBoxContainer.new()
+	body.add_theme_constant_override("separation", 5)
+	col.add_child(body)
+	return {"root": panel, "body": body, "header": header}
+
+
+## A "LABEL ........ VALUE" data row (OBJECTIVE / GUIDANCE tables). Returns
+## {"root": HBoxContainer, "value": Label}.
+static func data_row(label: String, value_color := Palette.LIVE) -> Dictionary:
+	var row := HBoxContainer.new()
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var l := Label.new()
+	l.text = label.to_upper()
+	l.add_theme_font_override("font", MONO)
+	l.add_theme_font_size_override("font_size", 11)
+	l.add_theme_color_override("font_color", Palette.DIM)
+	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var v := Label.new()
+	v.add_theme_font_override("font", MONO_SEMI)
+	v.add_theme_font_size_override("font_size", 13)
+	v.add_theme_color_override("font_color", value_color)
+	v.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	row.add_child(l)
+	row.add_child(v)
+	return {"root": row, "value": v}
+
+
+## A small bordered mono chip (key hints / status pills). kind: "ghost" (outline),
+## "solid" (amber fill), "dim" (dim outline).
+static func chip(text: String, kind := "ghost") -> Label:
+	var l := Label.new()
+	l.text = text
+	l.add_theme_font_override("font", MONO_SEMI)
+	l.add_theme_font_size_override("font_size", 11)
+	var box := StyleBoxFlat.new()
+	box.set_content_margin(SIDE_LEFT, 7)
+	box.set_content_margin(SIDE_RIGHT, 7)
+	box.set_content_margin(SIDE_TOP, 3)
+	box.set_content_margin(SIDE_BOTTOM, 3)
+	match kind:
+		"solid":
+			box.bg_color = Palette.INTENT
+			l.add_theme_color_override("font_color", Palette.VOID)
+		"dim":
+			box.set_border_width_all(1)
+			box.border_color = Palette.HAIRLINE
+			l.add_theme_color_override("font_color", Palette.DIM)
+		_:
+			box.set_border_width_all(1)
+			box.border_color = Palette.HAIRLINE
+			l.add_theme_color_override("font_color", Palette.INK)
+	l.add_theme_stylebox_override("normal", box)
+	return l
+
+
 ## Style a Button in the design-ref idiom.
 ## kind: "primary" (solid phosphor), "danger" (solid red), "" (ghost/outline).
 static func style_button(b: Button, kind := "") -> void:

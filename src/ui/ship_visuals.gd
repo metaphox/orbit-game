@@ -1,10 +1,11 @@
 class_name ShipVisuals
 extends Node3D
 ## Everything that represents the player craft in the flight view, extracted from
-## FlightView (TECH_DEBTS.md TD-2): the ship attitude, engine flame, the floating
-## status hologram (a SubViewport gauge billboarded beside the hull), the drifting
+## FlightView (TECH_DEBTS.md TD-2): the ship attitude, engine flame, the drifting
 ## star dust, the prograde/retrograde velocity markers, and the orbit-view posture
 ## marker (a directional stand-in for the sub-pixel hull at orbital range).
+## (The old diegetic status hologram was removed once the screen HUD became the
+## single source of ACC/VEL/Δv/PROP.)
 ##
 ## It also renders the rendezvous-target station, because the station's orbit
 ## marker is deliberately sized as a matched pair with the ship's posture marker
@@ -25,7 +26,6 @@ const STATION_MARKER_SCALE_PER_CAMERA_DISTANCE := \
 	* STATION_MARKER_SIZE_MULTIPLIER / STATION_MODEL_WIDTH
 
 var star_dust: StarDust
-var gauge: AccelGauge
 var prograde_marker: Node3D
 var retrograde_marker: Node3D
 
@@ -34,21 +34,17 @@ var _flame: MeshInstance3D
 var _side_marker: Node3D  # posture stand-in, stays at origin = ship render position
 var _station_marker: Node3D
 var _station_orbit_marker: Node3D
-var _prop_full := 1.0
 var _objective: Objective
 
 
 func build(level: LevelDef, ship_root: Node3D, flame: MeshInstance3D) -> void:
 	_ship_root = ship_root
 	_flame = flame
-	_prop_full = level.prop_mass
 	_objective = level.objective
 
 	star_dust = StarDust.new()
 	add_child(star_dust)
 	star_dust.build()
-
-	_build_status_hologram(level)
 
 	_side_marker = _build_posture_marker()
 	add_child(_side_marker)
@@ -72,11 +68,6 @@ func sync(ship: ShipSim, ship_abs: DVec3, t: float, side_distance: float) -> voi
 	if thrusting:
 		_flame.scale = Vector3(1.0, 1.0, ship.throttle * randf_range(0.85, 1.15))
 
-	gauge.speed = ship.speed()
-	gauge.accel = ship.accel_along_track
-	gauge.prop_frac = ship.prop_mass / _prop_full
-	gauge.dv_left = ship.dv_remaining()
-
 	if _station_marker != null:
 		var st := (_objective as RendezvousObjective).station_orbit.state_at_time(t)
 		var station_position := st.r.sub(ship_abs).to_vector3()
@@ -97,36 +88,6 @@ func sync(ship: ShipSim, ship_abs: DVec3, t: float, side_distance: float) -> voi
 	# show a legible directional shape, not just a location.
 	var marker_scale := maxf(side_distance * SIDE_MARKER_SCALE_PER_CAMERA_DISTANCE, 4.0)
 	_side_marker.basis = ship.attitude.scaled(Vector3.ONE * marker_scale)
-
-
-## The status dial lives on a SubViewport texture floated beside the hull:
-## positioned in ship-local space (it travels and turns with the ship) but
-## billboarded toward the camera — a virtual instrument, not a physical one.
-func _build_status_hologram(level: LevelDef) -> void:
-	var viewport := SubViewport.new()
-	viewport.size = Vector2i(512, 600)
-	viewport.transparent_bg = true
-	viewport.disable_3d = true
-	viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
-	add_child(viewport)
-
-	gauge = AccelGauge.new()
-	gauge.accel_max = level.thrust / level.dry_mass * 1.1
-	viewport.add_child(gauge)
-	gauge.size = Vector2(256, 300)
-	gauge.scale = Vector2(2.0, 2.0)  # crisp 2x render into the 512-wide target
-	if Settings.effects_enabled:
-		viewport.add_child(CrtOverlay.new())  # composited into the baked texture, drawn last
-
-	var sprite := Sprite3D.new()
-	sprite.texture = viewport.get_texture()
-	sprite.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	sprite.pixel_size = 0.012  # 512 px -> ~6 m panel
-	sprite.modulate = Color(1.0, 1.0, 1.0, 0.92)
-	sprite.no_depth_test = true  # hologram never hides behind the hull
-	sprite.render_priority = 10
-	sprite.position = Vector3(5.2, 1.2, 0.0)
-	_ship_root.add_child(sprite)
 
 
 ## Small directional stand-in for the ship in the orbit-view/minimap

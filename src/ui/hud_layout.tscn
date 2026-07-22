@@ -1,189 +1,49 @@
 [gd_scene format=3]
 
-[ext_resource type="FontFile" path="res://assets/fonts/IBMPlexMono-Regular.ttf" id="1_jjujh"]
+; Shell scene: only the minimap SubViewport subtree lives here (its render setup
+; is fiddly and worth keeping as a scene). hud.gd re-parents MinimapAspect into
+; the code-built left-rail "ORBIT MAP" panel and builds every other region in
+; code from Palette/UiTheme tokens (TD-1: one colour source).
 
-[node name="HudLayout" type="Control" unique_id=352993158]
+[node name="HudLayout" type="Control"]
 layout_mode = 3
-anchors_preset = 0
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
 
-[node name="StatusLabel" type="Label" parent="." unique_id=1805709954]
-layout_mode = 0
-offset_left = 14.0
-offset_top = 14.0
-offset_right = 15.0
-offset_bottom = 37.0
-theme_override_constants/line_spacing = 4
-theme_override_fonts/font = ExtResource("1_jjujh")
-theme_override_font_sizes/font_size = 19
-theme_override_colors/font_color = Color(0.45, 1, 0.55, 1)
-
-[node name="EngineLabel" type="Label" parent="." unique_id=748325189]
-layout_mode = 0
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_left = 14.0
-offset_top = -37.0
-offset_right = 15.0
-offset_bottom = -14.0
-grow_vertical = 0
-theme_override_constants/line_spacing = 4
-theme_override_fonts/font = ExtResource("1_jjujh")
-theme_override_font_sizes/font_size = 19
-theme_override_colors/font_color = Color(0.45, 1, 0.55, 1)
-
-[node name="HelpLabel" type="Label" parent="." unique_id=1521169388]
-layout_mode = 0
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -15.0
-offset_top = -37.0
-offset_right = -14.0
-offset_bottom = -14.0
-grow_horizontal = 0
-grow_vertical = 0
-theme_override_constants/line_spacing = 4
-theme_override_fonts/font = ExtResource("1_jjujh")
-theme_override_font_sizes/font_size = 19
-theme_override_colors/font_color = Color(0.3, 0.65, 0.38, 1)
-horizontal_alignment = 2
-
-[node name="CenterLabel" type="Label" parent="." unique_id=1932603891]
-visible = false
-layout_mode = 0
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -0.5
-offset_top = -11.5
-offset_right = 0.5
-offset_bottom = 11.5
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_constants/line_spacing = 4
-theme_override_fonts/font = ExtResource("1_jjujh")
-theme_override_font_sizes/font_size = 34
-theme_override_colors/font_color = Color(0.45, 1, 0.55, 1)
-horizontal_alignment = 1
-
-[node name="TitleLabel" type="Label" parent="." unique_id=1990256154]
-layout_mode = 0
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -0.5
-offset_top = 14.0
-offset_right = 0.5
-offset_bottom = 37.0
-grow_horizontal = 2
-theme_override_constants/line_spacing = 4
-theme_override_fonts/font = ExtResource("1_jjujh")
-theme_override_font_sizes/font_size = 19
-theme_override_colors/font_color = Color(0.3, 0.65, 0.38, 1)
-horizontal_alignment = 1
-
-[node name="FlashLabel" type="Label" parent="." unique_id=624912267]
-visible = false
-layout_mode = 0
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -0.5
-offset_top = 58.0
-offset_right = 0.5
-offset_bottom = 81.0
-grow_horizontal = 2
-theme_override_constants/line_spacing = 4
-theme_override_fonts/font = ExtResource("1_jjujh")
-theme_override_font_sizes/font_size = 24
-theme_override_colors/font_color = Color(0.45, 1, 0.55, 1)
-horizontal_alignment = 1
-
-[node name="PausedLabel" type="Label" parent="." unique_id=1032059452]
-visible = false
-layout_mode = 0
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -0.5
-offset_top = -11.5
-offset_right = 0.5
-offset_bottom = 11.5
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_constants/line_spacing = 4
-theme_override_fonts/font = ExtResource("1_jjujh")
-theme_override_font_sizes/font_size = 22
-theme_override_colors/font_color = Color(0.45, 1, 0.55, 1)
-text = "‖ PAUSED — SPACE, 0, OR ESC TO RESUME"
-horizontal_alignment = 1
-
-[node name="RightColumn" type="VBoxContainer" parent="." unique_id=1805189540]
-custom_minimum_size = Vector2(560, 0)
-layout_mode = 0
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -12.0
-offset_top = 12.0
-offset_right = -12.0
-offset_bottom = 12.0
-grow_horizontal = 0
-mouse_filter = 2
-theme_override_constants/separation = 6
-
-[node name="MinimapAspect" type="AspectRatioContainer" parent="RightColumn" unique_id=1258999199]
-custom_minimum_size = Vector2(560, 520)
+[node name="MinimapAspect" type="AspectRatioContainer" parent="."]
+custom_minimum_size = Vector2(280, 207)
 layout_mode = 2
 mouse_filter = 2
-ratio = 1.0769231
+ratio = 1.35
 
-[node name="MinimapRoot" type="Control" parent="RightColumn/MinimapAspect" unique_id=357152713]
+[node name="MinimapRoot" type="Control" parent="MinimapAspect"]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="Back" type="ColorRect" parent="RightColumn/MinimapAspect/MinimapRoot" unique_id=995704050]
+[node name="Back" type="ColorRect" parent="MinimapAspect/MinimapRoot"]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
 color = Color(0, 0.06, 0.02, 0.45)
 
-[node name="SubViewportContainer" type="SubViewportContainer" parent="RightColumn/MinimapAspect/MinimapRoot" unique_id=238936907]
+[node name="SubViewportContainer" type="SubViewportContainer" parent="MinimapAspect/MinimapRoot"]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
 stretch = true
 
-[node name="SubViewport" type="SubViewport" parent="RightColumn/MinimapAspect/MinimapRoot/SubViewportContainer" unique_id=2102303433]
+[node name="SubViewport" type="SubViewport" parent="MinimapAspect/MinimapRoot/SubViewportContainer"]
 transparent_bg = true
 render_target_update_mode = 4
 
-[node name="Camera3D" type="Camera3D" parent="RightColumn/MinimapAspect/MinimapRoot/SubViewportContainer/SubViewport" unique_id=109776995]
+[node name="Camera3D" type="Camera3D" parent="MinimapAspect/MinimapRoot/SubViewportContainer/SubViewport"]
 transform = Transform3D(1, 0, 0, 0, 0.42288542, 0.9061832, 0, -0.9061832, 0.42288542, 0, 900, 420)
 cull_mask = 2
 projection = 1
 size = 1000.0
 near = 1.0
 far = 6000.0
-
-[node name="ObjectiveLabel" type="Label" parent="RightColumn" unique_id=1460524112]
-layout_mode = 2
-theme_override_constants/line_spacing = 4
-theme_override_fonts/font = ExtResource("1_jjujh")
-theme_override_font_sizes/font_size = 19
-theme_override_colors/font_color = Color(0.45, 1, 0.55, 1)
-horizontal_alignment = 2
-
-[node name="WarpLabel" type="Label" parent="RightColumn" unique_id=1325000922]
-layout_mode = 2
-theme_override_constants/line_spacing = 4
-theme_override_fonts/font = ExtResource("1_jjujh")
-theme_override_font_sizes/font_size = 22
-theme_override_colors/font_color = Color(0.45, 1, 0.55, 1)
-text = "TIME WARP: 1x"
-horizontal_alignment = 1

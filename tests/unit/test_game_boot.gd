@@ -78,5 +78,5 @@ func test_fail_on_degenerate_orbit() -> void:
 	simulate(game, 5, 1.0 / 60.0)
 	assert_eq(game.phase, game.Phase.FAILED, "degenerate orbit triggers a diagnosed fail")
 	assert_true(
-		game.hud.center_label.text.contains("ORBIT TRAJECTORY DEGENERATE"),
+		game.hud._banner_title.text.contains("ORBIT TRAJECTORY DEGENERATE"),
 		"fail reason is shown, not a silent/frozen HUD")

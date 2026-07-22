@@ -6,7 +6,7 @@ extends "res://tests/unit/base_orbit_test.gd"
 ## they actually don't overlap - at more than one window size, since that
 ## was the whole point of switching to a container.
 
-const DEFAULT_SIZE := Vector2i(1024, 768)
+const DEFAULT_SIZE := Vector2i(1920, 1080)
 
 
 func after_each() -> void:
@@ -39,7 +39,7 @@ func test_minimap_and_objective_panel_dont_overlap_at_min_window_size() -> void:
 
 
 func test_minimap_and_objective_panel_dont_overlap_at_a_larger_window_size() -> void:
-	await _assert_no_overlap_at_size(Vector2i(1920, 1080))
+	await _assert_no_overlap_at_size(Vector2i(2560, 1440))
 
 
 ## Regression for the minimap dominating a small window: it must stay
