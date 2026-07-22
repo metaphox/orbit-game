@@ -3,9 +3,8 @@ extends "res://tests/unit/base_orbit_test.gd"
 
 
 func test_faceted_sphere_renders_outer_surface_with_outward_normals() -> void:
-	var view := FlightView.new()
-	add_child_autofree(view)
-	var mesh: ArrayMesh = view._make_faceted_sphere(10.0, 12, 6)
+	# Body geometry moved to BodyRenderer (TD-2 render decomposition).
+	var mesh: ArrayMesh = BodyRenderer._make_faceted_sphere(10.0, 12, 6)
 	var arrays: Array = mesh.surface_get_arrays(0)
 	var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
 	var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
