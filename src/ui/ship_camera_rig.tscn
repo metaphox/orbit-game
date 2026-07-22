@@ -1,178 +1,26 @@
-[gd_scene load_steps=20 format=3]
+[gd_scene load_steps=4 format=3]
 
-[ext_resource type="Material" path="res://src/ui/materials/ship_hull_material.tres" id="1_hull"]
-[ext_resource type="Material" path="res://src/ui/materials/ship_nose_material.tres" id="2_nose"]
-[ext_resource type="Material" path="res://src/ui/materials/ship_flame_material.tres" id="3_flame"]
-[ext_resource type="Material" path="res://src/ui/materials/ship_dark_material.tres" id="4_dark"]
-[ext_resource type="Material" path="res://src/ui/materials/ship_solar_material.tres" id="5_solar"]
-[ext_resource type="Material" path="res://src/ui/materials/ship_light_material.tres" id="6_light"]
-[ext_resource type="Material" path="res://src/ui/materials/ship_engine_glow_material.tres" id="7_engine_glow"]
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_hull"]
-material = ExtResource("1_hull")
-top_radius = 0.72
-bottom_radius = 0.72
-height = 2.4
-radial_segments = 12
-rings = 2
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_nose"]
-material = ExtResource("2_nose")
-top_radius = 0.035
-bottom_radius = 0.68
-height = 1.5
-radial_segments = 12
-rings = 1
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_forward_collar"]
-material = ExtResource("4_dark")
-top_radius = 0.79
-bottom_radius = 0.79
-height = 0.18
-radial_segments = 12
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_aft_collar"]
-material = ExtResource("2_nose")
-top_radius = 0.87
-bottom_radius = 0.87
-height = 0.3
-radial_segments = 12
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_band"]
-material = ExtResource("2_nose")
-top_radius = 0.755
-bottom_radius = 0.755
-height = 0.075
-radial_segments = 12
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_engine"]
-material = ExtResource("4_dark")
-top_radius = 0.28
-bottom_radius = 0.56
-height = 0.62
-radial_segments = 12
+[ext_resource type="ArrayMesh" uid="uid://ib83x5ft7aao" path="res://assets/models/sp_prototype.obj" id="1_ship"]
+[ext_resource type="Material" path="res://src/ui/materials/ship_flame_material.tres" id="2_flame"]
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_flame"]
-material = ExtResource("3_flame")
+material = ExtResource("2_flame")
 top_radius = 0.08
 bottom_radius = 0.42
 height = 2.35
 radial_segments = 12
 rings = 3
 
-[sub_resource type="BoxMesh" id="BoxMesh_boom"]
-material = ExtResource("4_dark")
-size = Vector3(5.5, 0.07, 0.09)
-
-[sub_resource type="BoxMesh" id="BoxMesh_panel"]
-material = ExtResource("5_solar")
-size = Vector3(2.05, 0.075, 1.18)
-subdivide_width = 3
-subdivide_depth = 2
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_mast"]
-material = ExtResource("4_dark")
-top_radius = 0.035
-bottom_radius = 0.045
-height = 0.82
-radial_segments = 8
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_dish"]
-material = ExtResource("5_solar")
-top_radius = 0.38
-bottom_radius = 0.13
-height = 0.11
-radial_segments = 12
-
-[sub_resource type="SphereMesh" id="SphereMesh_light"]
-material = ExtResource("6_light")
-radius = 0.075
-height = 0.15
-radial_segments = 8
-rings = 4
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_engine_glow"]
-material = ExtResource("7_engine_glow")
-top_radius = 0.23
-bottom_radius = 0.23
-height = 0.025
-radial_segments = 12
-
-[sub_resource type="SphereMesh" id="SphereMesh_engine_core"]
-material = ExtResource("7_engine_glow")
-radius = 0.24
-height = 0.48
-radial_segments = 12
-rings = 6
-
 [node name="ShipCameraRig" type="Node3D"]
 
 [node name="Ship" type="Node3D" parent="."]
 
-[node name="ServiceModule" type="MeshInstance3D" parent="Ship"]
-transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0.2)
-mesh = SubResource("CylinderMesh_hull")
-
-[node name="ForwardCollar" type="MeshInstance3D" parent="Ship"]
-transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, -1.08)
-mesh = SubResource("CylinderMesh_forward_collar")
-
-[node name="Nose" type="MeshInstance3D" parent="Ship"]
-transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, -1.9)
-mesh = SubResource("CylinderMesh_nose")
-
-[node name="AftCollar" type="MeshInstance3D" parent="Ship"]
-transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 1.53)
-mesh = SubResource("CylinderMesh_aft_collar")
-
-[node name="HullBandForward" type="MeshInstance3D" parent="Ship"]
-transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, -0.48)
-mesh = SubResource("CylinderMesh_band")
-
-[node name="HullBandAft" type="MeshInstance3D" parent="Ship"]
-transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0.83)
-mesh = SubResource("CylinderMesh_band")
-
-[node name="EngineBell" type="MeshInstance3D" parent="Ship"]
-transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 1.95)
-mesh = SubResource("CylinderMesh_engine")
-
-[node name="EngineAperture" type="MeshInstance3D" parent="Ship"]
-transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 2.27)
-mesh = SubResource("CylinderMesh_engine_glow")
-
-[node name="EngineCore" type="MeshInstance3D" parent="Ship"]
-position = Vector3(0, 0, 2.29)
-mesh = SubResource("SphereMesh_engine_core")
-
-[node name="RadiatorBoom" type="MeshInstance3D" parent="Ship"]
-position = Vector3(0, -0.02, 0.28)
-mesh = SubResource("BoxMesh_boom")
-
-[node name="PortRadiator" type="MeshInstance3D" parent="Ship"]
-position = Vector3(-1.78, 0, 0.28)
-mesh = SubResource("BoxMesh_panel")
-
-[node name="StarboardRadiator" type="MeshInstance3D" parent="Ship"]
-position = Vector3(1.78, 0, 0.28)
-mesh = SubResource("BoxMesh_panel")
-
-[node name="AntennaMast" type="MeshInstance3D" parent="Ship"]
-position = Vector3(0.43, 0.93, 0.58)
-rotation = Vector3(0, 0, -0.18)
-mesh = SubResource("CylinderMesh_mast")
-
-[node name="AntennaDish" type="MeshInstance3D" parent="Ship"]
-position = Vector3(0.5, 1.36, 0.58)
-rotation = Vector3(0.08, 0, -0.18)
-mesh = SubResource("CylinderMesh_dish")
-
-[node name="NavigationLight" type="MeshInstance3D" parent="Ship"]
-position = Vector3(-0.74, 0.12, -0.42)
-mesh = SubResource("SphereMesh_light")
+[node name="Hull" type="MeshInstance3D" parent="Ship"]
+transform = Transform3D(-0.2, 0, 0, 0, 0.2, 0, 0, 0, -0.2, 0, -0.986, -0.042)
+mesh = ExtResource("1_ship")
 
 [node name="Flame" type="MeshInstance3D" parent="Ship"]
-transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 3.3)
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 2.9)
 visible = false
 mesh = SubResource("CylinderMesh_flame")
 

@@ -1,0 +1,55 @@
+# Exported by three-d-stage
+newmtl hull_white
+Kd 0.8388 0.7913 0.6654
+Ks 0.2000 0.2000 0.2000
+Ns 60
+d 1.0000
+
+newmtl hull_beige
+Kd 0.5906 0.5210 0.3467
+Ks 0.2000 0.2000 0.2000
+Ns 50
+d 1.0000
+
+newmtl panel_dark
+Kd 0.0331 0.0437 0.0356
+Ks 0.2000 0.2000 0.2000
+Ns 80
+d 1.0000
+
+newmtl hazard_amber
+Kd 1.0000 0.6940 0.0000
+Ks 0.2000 0.2000 0.2000
+Ns 70
+d 1.0000
+
+newmtl frame_alloy
+Kd 0.2747 0.2462 0.1946
+Ks 0.2000 0.2000 0.2000
+Ns 90
+d 1.0000
+
+newmtl nozzle_steel
+Kd 0.0908 0.0802 0.0685
+Ks 0.2000 0.2000 0.2000
+Ns 120
+d 1.0000
+
+newmtl nozzle_scorched
+Kd 0.2542 0.1441 0.0685
+Ks 0.2000 0.2000 0.2000
+Ns 130
+d 1.0000
+
+newmtl solar_cell
+Kd 0.0070 0.0356 0.0232
+Ks 0.2000 0.2000 0.2000
+Ns 130
+d 1.0000
+
+newmtl foil_gold
+Kd 0.4793 0.2384 0.0273
+Ks 0.2000 0.2000 0.2000
+Ns 110
+d 1.0000
+

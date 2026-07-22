@@ -1,9 +1,10 @@
 extends CanvasLayer
 ## Dev design-grid: a 16 px reference grid toggled off → white → black → red by
-## pressing "#" (shift+3) at any time. Purely guidelines — draws above everything
-## and never eats input except the toggle key. Registered as an autoload so it is
-## available on every screen. 16 px is the base unit the UI is laid out against
-## (the 1920×1080 base is 120×67.5 cells).
+## pressing "#" (shift+3). Debug-mode only (`--debug-mode`) — the toggle is inert
+## in a normal build. Purely guidelines — draws above everything and never eats
+## input except the toggle key. Registered as an autoload so it is available on
+## every screen. 16 px is the base unit the UI is laid out against (the 1920×1080
+## base is 120×67.5 cells).
 
 enum Mode { OFF, WHITE, BLACK, RED }
 
@@ -22,6 +23,8 @@ func _ready() -> void:
 
 
 func _input(event: InputEvent) -> void:
+	if not Settings.debug_mode:  # dev aid only; inert in a normal build
+		return
 	var k := event as InputEventKey
 	if k != null and k.pressed and not k.echo and k.unicode == 0x23:  # '#'
 		_mode = (int(_mode) + 1) % Mode.size()
