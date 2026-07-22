@@ -122,18 +122,18 @@ func test_node_ghost_scan_is_cached_across_unchanged_frames() -> void:
 	game.flight_view.mark_traj_dirty()
 
 	simulate(game, 20, 1.0 / 60.0)  # let TRAJ_REFRESH fire and the scan run
-	assert_true(game.flight_view._preview_active, "the phased transfer does reach the moon's SOI")
-	var key_after_first_scan: Array = game.flight_view._ghost_key.duplicate()
+	assert_true(game.flight_view._maneuver._preview_active, "the phased transfer does reach the moon's SOI")
+	var key_after_first_scan: Array = game.flight_view._maneuver._ghost_key.duplicate()
 	assert_false(key_after_first_scan.is_empty(), "the scan recorded a cache key")
 
 	simulate(game, 20, 1.0 / 60.0)  # nothing changed since - should hit the cache
-	assert_eq(game.flight_view._ghost_key, key_after_first_scan,
+	assert_eq(game.flight_view._maneuver._ghost_key, key_after_first_scan,
 		"cache key unchanged when neither the ship nor the node moved")
 
 	game.ship.node.prograde += 50.0
 	game.ship.refresh_node_plan()
 	simulate(game, 20, 1.0 / 60.0)
-	assert_ne(game.flight_view._ghost_key, key_after_first_scan,
+	assert_ne(game.flight_view._maneuver._ghost_key, key_after_first_scan,
 		"editing the node's plan invalidates the cache and re-runs the scan")
 
 
@@ -154,20 +154,20 @@ func test_encounter_marker_scan_is_cached_across_unchanged_frames() -> void:
 	game.flight_view.mark_traj_dirty()
 
 	simulate(game, 20, 1.0 / 60.0)  # let TRAJ_REFRESH fire and the scan run
-	assert_true(game.flight_view._encounter_marker.visible,
+	assert_true(game.flight_view._maneuver._encounter_marker.visible,
 		"the transfer's Moon encounter is marked from Earth's SOI")
 
 	# Poison the cached entry time: an unchanged orbit must reuse it verbatim
 	# rather than paying the ~165 ms scan again on the next rebuild.
-	game.flight_view._encounter_entry_t = -12345.0
+	game.flight_view._maneuver._encounter_entry_t = -12345.0
 	simulate(game, 20, 1.0 / 60.0)
-	assert_eq(game.flight_view._encounter_entry_t, -12345.0,
+	assert_eq(game.flight_view._maneuver._encounter_entry_t, -12345.0,
 		"a stationary orbit reuses the cached encounter time instead of rescanning")
 
 	# A refit (revision bump) invalidates the cache and the scan runs again.
 	game.ship.revision += 1
 	simulate(game, 20, 1.0 / 60.0)
-	assert_ne(game.flight_view._encounter_entry_t, -12345.0,
+	assert_ne(game.flight_view._maneuver._encounter_entry_t, -12345.0,
 		"a refit invalidates the cache and the encounter scan re-runs")
 
 

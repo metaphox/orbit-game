@@ -46,27 +46,27 @@ func test_side_zoom_clamps_between_close_and_orbital_scale() -> void:
 
 
 func test_station_model_keeps_physical_and_orbit_marker_scales_separate() -> void:
-	var view := FlightView.new()
-	add_child_autofree(view)
-	view._objective = preload("res://src/levels/data/level_01_02.tres").objective
-	view._build_node_visuals()
+	var sv := ShipVisuals.new()
+	add_child_autofree(sv)
+	sv._objective = preload("res://src/levels/data/level_01_02.tres").objective
+	sv._build_station_markers()
 
-	assert_not_null(view._station_marker, "rendezvous level builds the close-up station")
-	assert_not_null(view._station_orbit_marker, "rendezvous level builds a distant marker")
-	assert_eq(view._station_marker.scale, Vector3.ONE,
+	assert_not_null(sv._station_marker, "rendezvous level builds the close-up station")
+	assert_not_null(sv._station_orbit_marker, "rendezvous level builds a distant marker")
+	assert_eq(sv._station_marker.scale, Vector3.ONE,
 		"the close-up station does not inherit the orbit camera's marker scale")
-	var icon_mesh := view._station_orbit_marker.get_node("CentralHub") as VisualInstance3D
-	assert_eq(icon_mesh.layers, view.SIDE_MARKER_LAYER,
+	var icon_mesh := sv._station_orbit_marker.get_node("CentralHub") as VisualInstance3D
+	assert_eq(icon_mesh.layers, ManeuverVisuals.SIDE_MARKER_LAYER,
 		"the enlarged station copy is visible only to the orbit camera")
 
 
 func test_giant_station_marker_is_larger_than_ship_in_zoomed_out_view() -> void:
-	var ship_span: float = FlightView.SHIP_POSTURE_MARKER_LENGTH \
-		* FlightView.SIDE_MARKER_SCALE_PER_CAMERA_DISTANCE
-	var station_span: float = FlightView.STATION_MODEL_WIDTH \
-		* FlightView.STATION_MARKER_SCALE_PER_CAMERA_DISTANCE
+	var ship_span: float = ShipVisuals.SHIP_POSTURE_MARKER_LENGTH \
+		* ShipVisuals.SIDE_MARKER_SCALE_PER_CAMERA_DISTANCE
+	var station_span: float = ShipVisuals.STATION_MODEL_WIDTH \
+		* ShipVisuals.STATION_MARKER_SCALE_PER_CAMERA_DISTANCE
 	assert_almost_eq(station_span,
-		ship_span * FlightView.STATION_MARKER_SIZE_MULTIPLIER, 0.000001,
+		ship_span * ShipVisuals.STATION_MARKER_SIZE_MULTIPLIER, 0.000001,
 		"the giant station reads larger than the player marker at every zoom")
-	assert_gt(FlightView.STATION_PHYSICAL_SCALE * FlightView.STATION_MODEL_WIDTH, 1000.0,
+	assert_gt(ShipVisuals.STATION_PHYSICAL_SCALE * ShipVisuals.STATION_MODEL_WIDTH, 1000.0,
 		"the physical station is comically wider than the real ISS")

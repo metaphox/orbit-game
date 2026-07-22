@@ -13,8 +13,8 @@ core is clean and well-tested.
 | ID | Debt | Where | Status |
 |---|---|---|---|
 | TD-1 | No shared UI theme — `SystemFont.new()` in 9 files, `const GREEN`/`DIM_GREEN` copy-pasted across 7 screens; `Palette` only used by the 3D views | `src/ui/*_screen.gd`, `pause_menu.gd`, `level_select.gd`, `hud.gd` | **Partly paid** — foundation (bundled fonts, `Palette` as sole colour source, `UiTheme`) built; `title_screen` + `hud` migrated. **Remaining/deferred:** the other menu screens (`new_profile`, `load_profile`, `settings`, `credits`, `level_select`, `pause_menu`) still use `SystemFont.new()` + local colour consts — deferred to the later UI-redesign stage per owner's call. |
-| TD-2 | `flight_view.gd` is a ~1000-line god object rendering cameras, bodies, trajectory, markers, station, hologram, starfield, node visuals — all in one file | `src/ui/flight_view.gd` | **In progress** (Phase 4) — `BodyRenderer` (993→813) + `CameraRig` (813→751) extracted, each pinned by unit tests + baseline screenshot diff (orbit views byte-identical). Remaining collaborators: TrajectoryRenderer, ManeuverVisuals, ShipVisuals. |
-| TD-3 | Visuals hardcoded (materials, shaders, colors, meshes inline) — blocks the "Themes" feature | `src/ui/flight_view.gd`, `map_view.gd`, shaders | **In progress** (Phase 4) — `RenderTheme` resource introduced (env, bodies, atmosphere, trajectory colours); `flight_view` + `BodyRenderer` read from it. Marker/orbit-mark colours still inline. |
+| TD-2 | `flight_view.gd` is a ~1000-line god object rendering cameras, bodies, trajectory, markers, station, hologram, starfield, node visuals — all in one file | `src/ui/flight_view.gd` | **Paid** (Phase 4) — decomposed **993→117 lines**, now a thin orchestrator delegating to five focused collaborators: `CameraRig`, `BodyRenderer`, `TrajectoryRenderer`, `ManeuverVisuals`, `ShipVisuals` (the rendezvous station lives with `ShipVisuals`, sized as a matched pair with the ship posture marker). Each extraction pinned by unit tests + baseline screenshot diff (orbit views byte-identical; chase diffs within star-dust noise). |
+| TD-3 | Visuals hardcoded (materials, shaders, colors, meshes inline) — blocks the "Themes" feature | `src/ui/flight_view.gd`, `map_view.gd`, shaders | **Substantially paid** (Phase 4) — the `RenderTheme` seam exists and is proven swappable end-to-end (an alt theme re-skins env/atmosphere/bodies/trajectory); every flight-view renderer reads its look from it. The Themes feature is unblocked. **Remaining (incremental, non-blocking):** migrate the still-inline colours — orbit-mark/node-ghost cyan, target-ring green, corridor amber, prograde/retrograde, posture/station — into `RenderTheme`, and bring `map_view.gd` under the same seam. |
 | TD-4 | Gameplay input partly bypasses InputMap (raw `KEY_H` rewind, `KEY_J` autopilot); no key rebinding | `src/game_root.gd` | **Paid** (Phase 3) — `InputBindings` registers the rewind/autopilot actions; `game_root` uses `is_action_pressed`; rebinds persist in Settings + apply at startup (`apply_overrides`). Note: the rebind *UI* is left to the deferred menu redesign — mechanism is done and unit-tested. |
 | TD-5 | `Settings` is 2 static vars with no store — no room for audio, theme choice, rebinds, window prefs | `src/campaign/settings.gd` | **Paid** (Phase 2) — typed key→value store with `DEFAULTS`, persisted via `ProfileStore` under `"settings"` (old top-level `effects_enabled` migrates); seeded for audio/rebind keys |
 | TD-6 | The test runner silently drops test files that fail to parse (a broken file went from 162→161 unnoticed while still reporting "all passed") | `tools/test.sh` | **Paid** (Phase 0) |
@@ -33,10 +33,12 @@ and is independently shippable.
   (via `ProfileStore`'s atomic save), seeded for audio/rebind/theme keys.
 - **Phase 3 — TD-4.** Move all input to InputMap actions; add a rebinding layer
   backed by the settings store.
-- **Phase 4 — TD-2 & TD-3.** Introduce a `RenderTheme` resource and decompose
-  `flight_view` into focused renderers (CameraRig, BodyRenderer,
-  TrajectoryRenderer, ManeuverVisuals, ShipVisuals) that read from it. One
-  collaborator at a time, verified against baseline screenshots — no visual change.
+- **Phase 4 — TD-2 & TD-3.** ✅ Done. Introduced the `RenderTheme` resource and
+  decomposed `flight_view` (993→117 lines) into focused renderers — CameraRig,
+  BodyRenderer, TrajectoryRenderer, ManeuverVisuals, ShipVisuals — that read from
+  it. Extracted one collaborator at a time, each verified against baseline
+  screenshots (orbit views byte-identical) and pinned by unit tests. TD-2 paid;
+  TD-3 substantially paid (seam proven swappable; some inline colours remain).
 
 ## Notes for future debt entries
 
