@@ -5,9 +5,6 @@ extends CanvasLayer
 signal profile_chosen(profile_name: String)
 signal cancelled
 
-const GREEN := "#73ff8c"
-const DIM_GREEN := "#4da362"
-
 var store: ProfileStore
 var _text: RichTextLabel
 
@@ -16,7 +13,7 @@ func build(profile_store: ProfileStore) -> void:
 	store = profile_store
 
 	var bg := ColorRect.new()
-	bg.color = Color(0.008, 0.008, 0.016)
+	bg.color = Palette.MENU_BG
 	add_child(bg)
 	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
@@ -26,7 +23,7 @@ func build(profile_store: ProfileStore) -> void:
 	var title := Label.new()
 	title.add_theme_font_override("font", font)
 	title.add_theme_font_size_override("font_size", 26)
-	title.add_theme_color_override("font_color", Color(GREEN))
+	title.add_theme_color_override("font_color", Palette.MENU_GREEN)
 	title.text = "■ LOAD PILOT ■"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	add_child(title)
@@ -50,9 +47,11 @@ func build(profile_store: ProfileStore) -> void:
 
 
 func _refresh() -> void:
+	var green := Palette.hex(Palette.MENU_GREEN)
+	var dim := Palette.hex(Palette.MENU_GREEN_DIM)
 	var lines: Array[String] = []
 	if store.profiles.is_empty():
-		lines.append("[color=%s]NO PROFILES YET[/color]" % DIM_GREEN)
+		lines.append("[color=%s]NO PROFILES YET[/color]" % dim)
 	for i in store.profiles.size():
 		var profile: Profile = store.profiles[i]
 		var completed := 0
@@ -60,9 +59,9 @@ func _refresh() -> void:
 			if profile.medal_for(index) != "":
 				completed += 1
 		lines.append("[color=%s][%d][/color] %s   [color=%s](%d/%d COMPLETE)[/color]" % [
-			GREEN, i + 1, profile.profile_name, DIM_GREEN, completed, Campaign.level_count()])
+			green, i + 1, profile.profile_name, dim, completed, Campaign.level_count()])
 	lines.append("")
-	lines.append("[color=%s][ESC] CANCEL[/color]" % DIM_GREEN)
+	lines.append("[color=%s][ESC] CANCEL[/color]" % dim)
 	_text.text = "\n".join(lines)
 
 

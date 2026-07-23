@@ -134,7 +134,7 @@ func _build_top_bar(level: LevelDef) -> void:
 	bar.offset_bottom = 46
 
 	var bg := ColorRect.new()
-	bg.color = Color(0.016, 0.027, 0.02, 0.9)
+	bg.color = Palette.BAR_BG
 	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	bar.add_child(bg)
 	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -273,7 +273,7 @@ func _build_title_chip(bar: Control, level: LevelDef) -> void:
 	var panel := PanelContainer.new()
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var box := StyleBoxFlat.new()
-	box.bg_color = Color(0.02, 0.035, 0.024, 0.6)
+	box.bg_color = Palette.PANEL_BG_SOFT
 	box.set_border_width_all(1)
 	box.border_color = Palette.HAIRLINE
 	box.border_width_top = 0
@@ -416,7 +416,7 @@ func _build_bottom_strip(level: LevelDef) -> void:
 	strip.offset_top = -56
 
 	var bg := ColorRect.new()
-	bg.color = Color(0.016, 0.027, 0.02, 0.94)
+	bg.color = Palette.BAR_BG
 	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	strip.add_child(bg)
 	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -599,7 +599,7 @@ func _build_banner() -> void:
 	var panel := PanelContainer.new()
 	center_label = panel
 	panel.visible = false
-	var box := UiTheme.panel_box(Color(0.02, 0.035, 0.024, 0.96), GREEN, 2)
+	var box := UiTheme.panel_box(Palette.PANEL_BG, GREEN, 2)
 	box.set_content_margin_all(26)
 	panel.add_theme_stylebox_override("panel", box)
 	var col := VBoxContainer.new()
@@ -655,7 +655,7 @@ func show_fail(reason: String, rewinds_left := 0) -> void:
 
 
 func _style_banner(accent: Color) -> void:
-	var box := UiTheme.panel_box(Color(0.02, 0.035, 0.024, 0.96), accent, 2)
+	var box := UiTheme.panel_box(Palette.PANEL_BG, accent, 2)
 	box.set_content_margin_all(26)
 	(center_label as PanelContainer).add_theme_stylebox_override("panel", box)
 
@@ -663,7 +663,7 @@ func _style_banner(accent: Color) -> void:
 func _build_flash() -> void:
 	_flash_panel = PanelContainer.new()
 	_flash_panel.visible = false
-	var box := UiTheme.panel_box(Color(0.02, 0.035, 0.024, 0.92), AMBER, 1)
+	var box := UiTheme.panel_box(Palette.PANEL_BG, AMBER, 1)
 	box.set_content_margin(SIDE_LEFT, 18)
 	box.set_content_margin(SIDE_RIGHT, 18)
 	box.set_content_margin(SIDE_TOP, 8)
@@ -689,7 +689,7 @@ func _build_paused() -> void:
 	add_child(_paused_panel)
 	_paused_panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var scrim := ColorRect.new()
-	scrim.color = Color(0.0, 0.0, 0.0, 0.45)
+	scrim.color = Palette.SCRIM
 	scrim.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_paused_panel.add_child(scrim)
 	scrim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -708,7 +708,7 @@ func set_paused_indicator(shown: bool) -> void:
 func _build_keys_overlay(level: LevelDef) -> void:
 	_keys_panel = PanelContainer.new()
 	_keys_panel.visible = false
-	var box := UiTheme.panel_box(Color(0.02, 0.035, 0.024, 0.97), Palette.HAIRLINE, 2)
+	var box := UiTheme.panel_box(Palette.PANEL_BG, Palette.HAIRLINE, 2)
 	box.set_content_margin_all(20)
 	(_keys_panel as PanelContainer).add_theme_stylebox_override("panel", box)
 	var col := VBoxContainer.new()
@@ -841,7 +841,7 @@ func _finish_minimap(level: LevelDef) -> void:
 	_minimap_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 	var back: ColorRect = minimap_root.get_node("Back")
-	back.color = Color(0.03, 0.22, 0.12, 0.55)
+	back.color = Palette.MAP_BG
 	var panel_mat := ShaderMaterial.new()
 	panel_mat.shader = preload("res://src/shaders/minimap_panel.gdshader")
 	back.material = panel_mat
@@ -937,7 +937,7 @@ func _build_toolbar() -> Control:
 	console.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	console.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.02, 0.05, 0.036, 0.6)
+	style.bg_color = Palette.CONSOLE_BG
 	style.set_border_width_all(1)
 	style.border_color = Palette.HAIRLINE
 	style.set_content_margin_all(6)

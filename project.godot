@@ -19,14 +19,17 @@ config/features=PackedStringArray("4.7", "Forward Plus")
 DesignGrid="*res://src/ui/grid_overlay.gd"
 UiScale="*res://src/ui/ui_scale.gd"
 
+[debug]
+
+gdscript/warnings/untyped_declaration=1
+
 [display]
 
 window/size/viewport_width=1920
 window/size/viewport_height=1080
 window/size/mode=3
-window/size/mode.editor=0
-window/stretch/mode="disabled"
 window/stretch/aspect="expand"
+window/size/mode.editor=0
 
 [input]
 
@@ -246,10 +249,6 @@ sas_node_hold={
 "events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":16,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":86,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
 ]
 }
-
-[debug]
-
-gdscript/warnings/untyped_declaration=1
 
 [rendering]
 

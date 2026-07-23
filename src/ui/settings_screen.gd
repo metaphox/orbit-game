@@ -7,9 +7,6 @@ extends CanvasLayer
 
 signal back_pressed
 
-const GREEN := "#73ff8c"
-const DIM_GREEN := "#4da362"
-
 var store: ProfileStore
 var _text: RichTextLabel
 
@@ -18,7 +15,7 @@ func build(profile_store: ProfileStore) -> void:
 	store = profile_store
 
 	var bg := ColorRect.new()
-	bg.color = Color(0.008, 0.008, 0.016)
+	bg.color = Palette.MENU_BG
 	add_child(bg)
 	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
@@ -28,7 +25,7 @@ func build(profile_store: ProfileStore) -> void:
 	var title := Label.new()
 	title.add_theme_font_override("font", font)
 	title.add_theme_font_size_override("font_size", 26)
-	title.add_theme_color_override("font_color", Color(GREEN))
+	title.add_theme_color_override("font_color", Palette.MENU_GREEN)
 	title.text = "■ SETTINGS ■"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	add_child(title)
@@ -53,11 +50,13 @@ func build(profile_store: ProfileStore) -> void:
 
 func _refresh() -> void:
 	var state := "ON" if Settings.effects_enabled else "OFF"
+	var green := Palette.hex(Palette.MENU_GREEN)
+	var dim := Palette.hex(Palette.MENU_GREEN_DIM)
 	var lines := [
-		"[color=%s][1] SCREEN EFFECTS: %s[/color]" % [GREEN, state],
-		"[color=%s]    (film grade + CRT scanlines)[/color]" % DIM_GREEN,
+		"[color=%s][1] SCREEN EFFECTS: %s[/color]" % [green, state],
+		"[color=%s]    (film grade + CRT scanlines)[/color]" % dim,
 		"",
-		"[color=%s][ESC] BACK[/color]" % DIM_GREEN,
+		"[color=%s][ESC] BACK[/color]" % dim,
 	]
 	_text.text = "\n".join(lines)
 

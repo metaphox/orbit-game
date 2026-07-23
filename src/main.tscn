@@ -1,6 +1,6 @@
-[gd_scene load_steps=2 format=3 uid="uid://orbitgame_main"]
+[gd_scene format=3 uid="uid://bf72wax63ursp"]
 
-[ext_resource type="Script" path="res://src/game_root.gd" id="1"]
+[ext_resource type="Script" uid="uid://djjmbuaeooc7p" path="res://src/game_root.gd" id="1"]
 
-[node name="Main" type="Node3D"]
+[node name="Main" type="Node3D" unique_id=820868966]
 script = ExtResource("1")

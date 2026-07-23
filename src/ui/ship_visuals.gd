@@ -31,6 +31,10 @@ var retrograde_marker: Node3D
 
 var _ship_root: Node3D
 var _flame: MeshInstance3D
+## Rest Z of the flame node and half its cone length (ship-local), captured so
+## the throttle-scaled cone can keep its wide base pinned to the nozzle.
+var _flame_rest_z := 0.0
+var _flame_half_len := 0.0
 var _side_marker: Node3D  # posture stand-in, stays at origin = ship render position
 var _station_marker: Node3D
 var _station_orbit_marker: Node3D
@@ -40,6 +44,9 @@ var _objective: Objective
 func build(level: LevelDef, ship_root: Node3D, flame: MeshInstance3D) -> void:
 	_ship_root = ship_root
 	_flame = flame
+	_flame_rest_z = flame.position.z
+	var flame_cone := flame.mesh as CylinderMesh
+	_flame_half_len = flame_cone.height * 0.5 if flame_cone != null else 0.0
 	_objective = level.objective
 
 	star_dust = StarDust.new()
@@ -66,7 +73,15 @@ func sync(ship: ShipSim, ship_abs: DVec3, t: float, side_distance: float) -> voi
 	var thrusting := ship.throttle > 0.0 and ship.prop_mass > 0.0
 	_flame.visible = thrusting
 	if thrusting:
-		_flame.scale = Vector3(1.0, 1.0, ship.throttle * randf_range(0.85, 1.15))
+		# Scale the cone's LENGTH (local Y = the height axis, which maps to +Z),
+		# not a cross-section axis — scaling Z would squash the cone flat. The node
+		# scales about its centre, so shift Z to keep the wide base pinned to the
+		# nozzle; the flame then retracts from the tail as throttle drops.
+		var s := ship.throttle * randf_range(0.85, 1.15)
+		_flame.scale = Vector3(1.0, s, 1.0)
+		var pos := _flame.position
+		pos.z = _flame_rest_z + _flame_half_len * (s - 1.0)
+		_flame.position = pos
 
 	if _station_marker != null:
 		var st := (_objective as RendezvousObjective).station_orbit.state_at_time(t)

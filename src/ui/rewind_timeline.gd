@@ -7,11 +7,11 @@ extends Control
 ## moment (it slides during the reverse-sweep). Pure display - game_root feeds
 ## it state each frame and calls queue_redraw.
 
-const LINE := Color(0.3, 0.65, 0.38)
-const ANCHOR := Color(0.45, 1.0, 0.55)
-const SELECTED := Color(1.0, 0.85, 0.3)
-const LANDMARK := Color(0.42, 0.62, 0.82)
-const LABEL := Color(0.86, 0.84, 0.72)
+const LINE := Palette.REWIND_LINE
+const ANCHOR := Palette.REWIND_ANCHOR
+const SELECTED := Palette.REWIND_SELECTED
+const LANDMARK := Palette.REWIND_LANDMARK
+const LABEL := Palette.REWIND_LABEL
 
 var font: Font
 var t_start := 0.0

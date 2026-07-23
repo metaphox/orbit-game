@@ -18,13 +18,13 @@ const TRAJ_REFRESH := 0.25
 
 # Orbit marks: apoapsis/periapsis/nodes/etc, orbit-view only - meaningless at
 # chase-cam range where the whole orbit shape isn't visible anyway.
-const AP_COLOR := Color(0.4, 0.75, 1.0)
-const PE_COLOR := Color(1.0, 0.85, 0.3)
-const AN_COLOR := Color(0.85, 0.4, 1.0)
-const DN_COLOR := Color(0.55, 0.3, 0.75)
-const IMPACT_COLOR := Color(1.0, 0.2, 0.15)
-const ENCOUNTER_COLOR := Color(1.0, 1.0, 1.0)
-const CLOSEST_APPROACH_COLOR := Color(1.0, 0.3, 0.6)
+const AP_COLOR := Palette.MARK_AP
+const PE_COLOR := Palette.MARK_PE
+const AN_COLOR := Palette.MARK_AN
+const DN_COLOR := Palette.MARK_DN
+const IMPACT_COLOR := Palette.MARK_IMPACT
+const ENCOUNTER_COLOR := Palette.MARK_ENCOUNTER
+const CLOSEST_APPROACH_COLOR := Palette.MARK_CLOSEST
 
 var _objective: Objective
 var _draw_limit := 4.0e5

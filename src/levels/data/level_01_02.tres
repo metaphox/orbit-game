@@ -1,8 +1,8 @@
-[gd_resource type="Resource" script_class="LevelDef" format=3]
+[gd_resource type="Resource" script_class="LevelDef" format=3 uid="uid://blf8cybesweyb"]
 
-[ext_resource type="Script" path="res://src/sim/body_def.gd" id="1_pjyq6"]
-[ext_resource type="Script" path="res://src/objectives/rendezvous.gd" id="2_q2ajs"]
-[ext_resource type="Script" path="res://src/levels/level_def.gd" id="3_n0yhj"]
+[ext_resource type="Script" uid="uid://btfywwyuq4a4v" path="res://src/sim/body_def.gd" id="1_pjyq6"]
+[ext_resource type="Script" uid="uid://bww6g0xudgbyl" path="res://src/objectives/rendezvous.gd" id="2_q2ajs"]
+[ext_resource type="Script" uid="uid://coruw2kalqajx" path="res://src/levels/level_def.gd" id="3_n0yhj"]
 
 [sub_resource type="Resource" id="Resource_pbgc6"]
 script = ExtResource("1_pjyq6")

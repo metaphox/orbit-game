@@ -28,6 +28,50 @@ const LIVE_DK := Color("0e2e1d")     # green button drop-shadow / fill-dark
 const INTENT_DK := Color("2e2100")   # amber drop-shadow / fill-dark
 const WARNING_DK := Color("330d08")  # red drop-shadow / fill-dark
 
+## HUD surface fills — translucent tints laid over the live 3D flight view.
+## Opacity is baked in, so each surface's whole tone lives in one place.
+const PANEL_BG := Color(0.02, 0.035, 0.024, 0.96)    # solid card: win/fail banner, F1 overlay, flash
+const PANEL_BG_SOFT := Color(0.02, 0.035, 0.024, 0.6)  # translucent chip (level title)
+const BAR_BG := Color(0.016, 0.027, 0.02, 0.92)      # top + bottom telemetry bars
+const CONSOLE_BG := Color(0.02, 0.05, 0.036, 0.6)    # bottom toolbar backdrop
+const MAP_BG := Color(0.03, 0.22, 0.12, 0.55)        # minimap panel backdrop
+const SCRIM := Color(0.0, 0.0, 0.0, 0.45)            # modal dim (pause)
+
+## Menu / screen palette (pre-revamp menus: *_screen.gd, pause_menu, level_select).
+## A softer green family, distinct from the HUD's LIVE/INTENT — preserved as-is so
+## the menus don't shift before the revamp unifies them onto the core tokens.
+const MENU_GREEN := Color("73ff8c")           # primary menu text
+const MENU_GREEN_DIM := Color("4da362")       # secondary menu text
+const MENU_RED := Color("ff6b5c")             # error / destructive
+const MENU_AMBER := Color("ffcc66")           # amber accent
+const MENU_HIGHLIGHT := Color("fff59d")       # selected item / highlight
+const MENU_GOLD := Color("ffd94d")            # medal gold
+const MENU_LOCKED := Color("555555")          # locked / unavailable item
+const MENU_BG := Color(0.008, 0.008, 0.016)   # screen backdrop
+const PAUSE_BG := Color(0.0, 0.02, 0.0, 0.72)  # pause overlay scrim
+
+## Rewind-timeline scrubber (rewind_timeline.gd).
+const REWIND_LINE := Color(0.3, 0.65, 0.38)
+const REWIND_ANCHOR := Color(0.45, 1.0, 0.55)
+const REWIND_SELECTED := Color(1.0, 0.85, 0.3)
+const REWIND_LANDMARK := Color(0.42, 0.62, 0.82)
+const REWIND_LABEL := Color(0.86, 0.84, 0.72)
+
+## Orbit marks (maneuver_visuals.gd): apoapsis / periapsis / nodes / impact / etc.
+const MARK_AP := Color(0.4, 0.75, 1.0)
+const MARK_PE := Color(1.0, 0.85, 0.3)
+const MARK_AN := Color(0.85, 0.4, 1.0)
+const MARK_DN := Color(0.55, 0.3, 0.75)
+const MARK_IMPACT := Color(1.0, 0.2, 0.15)
+const MARK_ENCOUNTER := Color(1.0, 1.0, 1.0)
+const MARK_CLOSEST := Color(1.0, 0.3, 0.6)
+
+
+## Convert a palette colour to a BBCode/HTML hex string ("#rrggbb").
+static func hex(c: Color) -> String:
+	return "#" + c.to_html(false)
+
+
 ## Per-body fill tints (UI-DESIGN.md → Celestial body tints). Bodies render as
 ## a dark, faintly-tinted disc (no bright outline) so the tint alone identifies
 ## which world you're looking at. Keyed by BodyDef.name, upper-cased.

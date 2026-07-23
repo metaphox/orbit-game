@@ -1,8 +1,8 @@
-[gd_resource type="Resource" script_class="LevelDef" format=3]
+[gd_resource type="Resource" script_class="LevelDef" format=3 uid="uid://dl5ky7gfgeg7h"]
 
-[ext_resource type="Script" path="res://src/sim/body_def.gd" id="1_tukx0"]
-[ext_resource type="Script" path="res://src/objectives/airless_landing.gd" id="2_20mo1"]
-[ext_resource type="Script" path="res://src/levels/level_def.gd" id="3_tgk2x"]
+[ext_resource type="Script" uid="uid://btfywwyuq4a4v" path="res://src/sim/body_def.gd" id="1_tukx0"]
+[ext_resource type="Script" uid="uid://denug2i50dv88" path="res://src/objectives/airless_landing.gd" id="2_20mo1"]
+[ext_resource type="Script" uid="uid://coruw2kalqajx" path="res://src/levels/level_def.gd" id="3_tgk2x"]
 
 [sub_resource type="Resource" id="Resource_4htxi"]
 script = ExtResource("1_tukx0")

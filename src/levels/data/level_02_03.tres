@@ -1,8 +1,8 @@
-[gd_resource type="Resource" script_class="LevelDef" format=3]
+[gd_resource type="Resource" script_class="LevelDef" format=3 uid="uid://rldi34l2hbiu"]
 
-[ext_resource type="Script" path="res://src/sim/body_def.gd" id="1_defok"]
-[ext_resource type="Script" path="res://src/objectives/entry_corridor.gd" id="2_oihp3"]
-[ext_resource type="Script" path="res://src/levels/level_def.gd" id="3_qiben"]
+[ext_resource type="Script" uid="uid://btfywwyuq4a4v" path="res://src/sim/body_def.gd" id="1_defok"]
+[ext_resource type="Script" uid="uid://dmjhahevdoeik" path="res://src/objectives/entry_corridor.gd" id="2_oihp3"]
+[ext_resource type="Script" uid="uid://coruw2kalqajx" path="res://src/levels/level_def.gd" id="3_qiben"]
 
 [sub_resource type="Resource" id="Resource_moxm6"]
 script = ExtResource("1_defok")

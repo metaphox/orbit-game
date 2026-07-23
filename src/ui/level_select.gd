@@ -8,12 +8,6 @@ extends CanvasLayer
 signal level_chosen(index: int)
 signal back_pressed
 
-const GREEN := "#73ff8c"
-const DIM_GREEN := "#4da362"
-const GOLD := "#ffd94d"
-const LOCKED := "#555555"
-const HIGHLIGHT := "#fff59d"
-
 var _text: RichTextLabel
 var _order: Array[int]
 var _profile: Profile
@@ -26,7 +20,7 @@ func build(profile: Profile) -> void:
 	_cursor = _first_unlocked_pos()
 
 	var bg := ColorRect.new()
-	bg.color = Color(0.008, 0.008, 0.016)
+	bg.color = Palette.MENU_BG
 	add_child(bg)
 	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
@@ -36,7 +30,7 @@ func build(profile: Profile) -> void:
 	var title := Label.new()
 	title.add_theme_font_override("font", font)
 	title.add_theme_font_size_override("font_size", 30)
-	title.add_theme_color_override("font_color", Color(GREEN))
+	title.add_theme_color_override("font_color", Palette.MENU_GREEN)
 	title.text = "■ ORBIT — MISSION SELECT ■"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	add_child(title)
@@ -45,7 +39,7 @@ func build(profile: Profile) -> void:
 	var pilot := Label.new()
 	pilot.add_theme_font_override("font", font)
 	pilot.add_theme_font_size_override("font_size", 15)
-	pilot.add_theme_color_override("font_color", Color(DIM_GREEN))
+	pilot.add_theme_color_override("font_color", Palette.MENU_GREEN_DIM)
 	pilot.text = "PILOT: %s" % profile.profile_name
 	pilot.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	add_child(pilot)
@@ -82,11 +76,16 @@ func _is_selectable(index: int) -> bool:
 
 
 func _refresh() -> void:
+	var green := Palette.hex(Palette.MENU_GREEN)
+	var dim := Palette.hex(Palette.MENU_GREEN_DIM)
+	var gold := Palette.hex(Palette.MENU_GOLD)
+	var locked := Palette.hex(Palette.MENU_LOCKED)
+	var highlight := Palette.hex(Palette.MENU_HIGHLIGHT)
 	var lines: Array[String] = []
 	var pos := 0  # 0-based; matches _order index and the number-key mapping
 	for act in Campaign.acts():
 		lines.append("")
-		lines.append("[color=%s]%s[/color]" % [DIM_GREEN, act["name"]])
+		lines.append("[color=%s]%s[/color]" % [dim, act["name"]])
 		for index: int in act["indices"]:
 			var mission_title: String = Campaign.title(index)
 			var selected := pos == _cursor
@@ -94,22 +93,22 @@ func _refresh() -> void:
 			var unlocked := _profile.is_unlocked(index)
 			if unlocked or Settings.debug_mode:
 				var medal := _profile.medal_for(index)
-				var medal_tag := "  [color=%s][%s][/color]" % [GOLD, medal] if medal != "" else ""
-				var debug_tag := "  [color=%s][DEBUG][/color]" % GOLD if not unlocked else ""
-				var num_color := HIGHLIGHT if selected else GREEN
+				var medal_tag := "  [color=%s][%s][/color]" % [gold, medal] if medal != "" else ""
+				var debug_tag := "  [color=%s][DEBUG][/color]" % gold if not unlocked else ""
+				var num_color := highlight if selected else green
 				var title_text := (
-					"[color=%s]%s[/color]" % [HIGHLIGHT, mission_title] if selected
+					"[color=%s]%s[/color]" % [highlight, mission_title] if selected
 					else mission_title)
 				lines.append("%s[color=%s][%d][/color] %s%s%s" % [
 					marker, num_color, pos + 1, title_text, medal_tag, debug_tag])
 			else:
-				lines.append("%s[color=%s][ ] --- LOCKED ---[/color]" % [marker, LOCKED])
+				lines.append("%s[color=%s][ ] --- LOCKED ---[/color]" % [marker, locked])
 			pos += 1
 	lines.append("")
 	if Settings.debug_mode:
-		lines.append("[color=%s][DEBUG MODE — ALL LEVELS UNLOCKED][/color]" % GOLD)
+		lines.append("[color=%s][DEBUG MODE — ALL LEVELS UNLOCKED][/color]" % gold)
 	lines.append("[color=%s]↑↓ SELECT  ENTER LAUNCH  OR PRESS NUMBER   [ESC] TITLE SCREEN[/color]"
-		% DIM_GREEN)
+		% dim)
 	_text.text = "\n".join(lines)
 
 

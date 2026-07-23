@@ -10,10 +10,6 @@ signal save_pressed
 signal restart_pressed
 signal quit_pressed
 
-const GREEN := "#73ff8c"
-const DIM_GREEN := "#4da362"
-const HIGHLIGHT := "#fff59d"
-
 var _text: RichTextLabel
 var _items: Array[String] = ["RESUME", "SAVE PROGRESS", "RESTART MISSION", "QUIT TO MISSION SELECT"]
 var _cursor := 0
@@ -22,7 +18,7 @@ var _saved_flash := false
 
 func build() -> void:
 	var bg := ColorRect.new()
-	bg.color = Color(0.0, 0.02, 0.0, 0.72)
+	bg.color = Palette.PAUSE_BG
 	add_child(bg)
 	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
@@ -32,7 +28,7 @@ func build() -> void:
 	var title := Label.new()
 	title.add_theme_font_override("font", font)
 	title.add_theme_font_size_override("font_size", 32)
-	title.add_theme_color_override("font_color", Color(GREEN))
+	title.add_theme_color_override("font_color", Palette.MENU_GREEN)
 	title.text = "■ PAUSED ■"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	add_child(title)
@@ -53,7 +49,7 @@ func build() -> void:
 	var help := Label.new()
 	help.add_theme_font_override("font", font)
 	help.add_theme_font_size_override("font_size", 13)
-	help.add_theme_color_override("font_color", Color(DIM_GREEN))
+	help.add_theme_color_override("font_color", Palette.MENU_GREEN_DIM)
 	help.text = "↑↓ SELECT   ENTER CONFIRM   OR PRESS NUMBER   [ESC]/[SPACE]/[0] RESUME"
 	help.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	add_child(help)
@@ -68,16 +64,19 @@ func show_saved_confirmation() -> void:
 
 
 func _refresh() -> void:
+	var green := Palette.hex(Palette.MENU_GREEN)
+	var dim := Palette.hex(Palette.MENU_GREEN_DIM)
+	var highlight := Palette.hex(Palette.MENU_HIGHLIGHT)
 	var lines: Array[String] = []
 	for i in _items.size():
 		var selected := i == _cursor
-		var color := HIGHLIGHT if selected else GREEN
+		var color := highlight if selected else green
 		var marker := "▶ " if selected else "  "
 		lines.append("[color=%s]%s[%d] %s[/color]" % [color, marker, i + 1, _items[i]])
 	if _saved_flash:
 		lines.append("")
-		lines.append("[color=%s]✓ PROGRESS SAVED[/color]" % GREEN)
-		lines.append("[color=%s]  (rewind anchors are not saved)[/color]" % DIM_GREEN)
+		lines.append("[color=%s]✓ PROGRESS SAVED[/color]" % green)
+		lines.append("[color=%s]  (rewind anchors are not saved)[/color]" % dim)
 	_text.text = "\n".join(lines)
 
 

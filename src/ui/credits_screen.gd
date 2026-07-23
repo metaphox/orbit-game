@@ -3,13 +3,10 @@ extends CanvasLayer
 
 signal back_pressed
 
-const GREEN := "#73ff8c"
-const DIM_GREEN := "#4da362"
-
 
 func build() -> void:
 	var bg := ColorRect.new()
-	bg.color = Color(0.008, 0.008, 0.016)
+	bg.color = Palette.MENU_BG
 	add_child(bg)
 	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
@@ -19,7 +16,7 @@ func build() -> void:
 	var title := Label.new()
 	title.add_theme_font_override("font", font)
 	title.add_theme_font_size_override("font_size", 26)
-	title.add_theme_color_override("font_color", Color(GREEN))
+	title.add_theme_color_override("font_color", Palette.MENU_GREEN)
 	title.text = "■ CREDITS ■"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	add_child(title)
@@ -28,7 +25,7 @@ func build() -> void:
 	var body := Label.new()
 	body.add_theme_font_override("font", font)
 	body.add_theme_font_size_override("font_size", 18)
-	body.add_theme_color_override("font_color", Color(GREEN))
+	body.add_theme_color_override("font_color", Palette.MENU_GREEN)
 	body.add_theme_constant_override("line_spacing", 10)
 	body.text = "\n".join([
 		"ORBIT",
@@ -47,7 +44,7 @@ func build() -> void:
 	var help := Label.new()
 	help.add_theme_font_override("font", font)
 	help.add_theme_font_size_override("font_size", 14)
-	help.add_theme_color_override("font_color", Color(DIM_GREEN))
+	help.add_theme_color_override("font_color", Palette.MENU_GREEN_DIM)
 	help.text = "[ESC] BACK"
 	help.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	add_child(help)

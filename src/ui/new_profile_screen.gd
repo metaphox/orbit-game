@@ -7,11 +7,6 @@ extends CanvasLayer
 signal profile_created(profile_name: String, hardcore: bool)
 signal cancelled
 
-const GREEN := "#73ff8c"
-const DIM_GREEN := "#4da362"
-const RED := "#ff6b5c"
-const AMBER := "#ffcc66"
-
 var store: ProfileStore
 var _line_edit: LineEdit
 var _error_label: Label
@@ -24,7 +19,7 @@ func build(profile_store: ProfileStore) -> void:
 	store = profile_store
 
 	var bg := ColorRect.new()
-	bg.color = Color(0.008, 0.008, 0.016)
+	bg.color = Palette.MENU_BG
 	add_child(bg)
 	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
@@ -34,7 +29,7 @@ func build(profile_store: ProfileStore) -> void:
 	var title := Label.new()
 	title.add_theme_font_override("font", font)
 	title.add_theme_font_size_override("font_size", 26)
-	title.add_theme_color_override("font_color", Color(GREEN))
+	title.add_theme_color_override("font_color", Palette.MENU_GREEN)
 	title.text = "■ NEW PILOT ■"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	add_child(title)
@@ -43,7 +38,7 @@ func build(profile_store: ProfileStore) -> void:
 	var prompt := Label.new()
 	prompt.add_theme_font_override("font", font)
 	prompt.add_theme_font_size_override("font_size", 15)
-	prompt.add_theme_color_override("font_color", Color(DIM_GREEN))
+	prompt.add_theme_color_override("font_color", Palette.MENU_GREEN_DIM)
 	prompt.text = "ENTER CALLSIGN"
 	prompt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	add_child(prompt)
@@ -64,7 +59,7 @@ func build(profile_store: ProfileStore) -> void:
 	_error_label = Label.new()
 	_error_label.add_theme_font_override("font", font)
 	_error_label.add_theme_font_size_override("font_size", 14)
-	_error_label.add_theme_color_override("font_color", Color(RED))
+	_error_label.add_theme_color_override("font_color", Palette.MENU_RED)
 	_error_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	add_child(_error_label)
 	_error_label.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP, Control.PRESET_MODE_MINSIZE, 392)
@@ -73,7 +68,7 @@ func build(profile_store: ProfileStore) -> void:
 	_hardcore_check = CheckButton.new()
 	_hardcore_check.add_theme_font_override("font", font)
 	_hardcore_check.add_theme_font_size_override("font_size", 15)
-	_hardcore_check.add_theme_color_override("font_color", Color(AMBER))
+	_hardcore_check.add_theme_color_override("font_color", Palette.MENU_AMBER)
 	_hardcore_check.text = "HARDCORE — no rewind, no guidance (PERMANENT)"
 	_hardcore_check.focus_mode = Control.FOCUS_NONE  # keep typing focus on the name field
 	add_child(_hardcore_check)
@@ -87,7 +82,7 @@ func build(profile_store: ProfileStore) -> void:
 	var help := Label.new()
 	help.add_theme_font_override("font", font)
 	help.add_theme_font_size_override("font_size", 14)
-	help.add_theme_color_override("font_color", Color(DIM_GREEN))
+	help.add_theme_color_override("font_color", Palette.MENU_GREEN_DIM)
 	help.text = "[ENTER] CREATE   [ESC] CANCEL"
 	help.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	add_child(help)
@@ -107,7 +102,7 @@ func _attempt_create() -> void:
 	# Hardcore can never be changed later, so make the player confirm it once.
 	if hardcore and not _confirm_pending:
 		_confirm_pending = true
-		_error_label.add_theme_color_override("font_color", Color(AMBER))
+		_error_label.add_theme_color_override("font_color", Palette.MENU_AMBER)
 		_error_label.text = "⚠ HARDCORE IS PERMANENT — PRESS ENTER AGAIN TO CONFIRM"
 		return
 	profile_created.emit(_line_edit.text.strip_edges(), hardcore)
