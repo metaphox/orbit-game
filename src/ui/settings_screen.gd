@@ -15,7 +15,7 @@ func build(profile_store: ProfileStore) -> void:
 	store = profile_store
 
 	var bg := ColorRect.new()
-	bg.color = Palette.MENU_BG
+	bg.color = Palette.VOID
 	add_child(bg)
 	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
@@ -25,7 +25,7 @@ func build(profile_store: ProfileStore) -> void:
 	var title := Label.new()
 	title.add_theme_font_override("font", font)
 	title.add_theme_font_size_override("font_size", 26)
-	title.add_theme_color_override("font_color", Palette.MENU_GREEN)
+	title.add_theme_color_override("font_color", Palette.LIVE)
 	title.text = "■ SETTINGS ■"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	add_child(title)
@@ -50,8 +50,8 @@ func build(profile_store: ProfileStore) -> void:
 
 func _refresh() -> void:
 	var state := "ON" if Settings.effects_enabled else "OFF"
-	var green := Palette.hex(Palette.MENU_GREEN)
-	var dim := Palette.hex(Palette.MENU_GREEN_DIM)
+	var green := Palette.hex(Palette.LIVE)
+	var dim := Palette.hex(Palette.LIVE_DIM)
 	var lines := [
 		"[color=%s][1] SCREEN EFFECTS: %s[/color]" % [green, state],
 		"[color=%s]    (film grade + CRT scanlines)[/color]" % dim,

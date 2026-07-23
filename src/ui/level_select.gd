@@ -20,7 +20,7 @@ func build(profile: Profile) -> void:
 	_cursor = _first_unlocked_pos()
 
 	var bg := ColorRect.new()
-	bg.color = Palette.MENU_BG
+	bg.color = Palette.VOID
 	add_child(bg)
 	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
@@ -30,7 +30,7 @@ func build(profile: Profile) -> void:
 	var title := Label.new()
 	title.add_theme_font_override("font", font)
 	title.add_theme_font_size_override("font_size", 30)
-	title.add_theme_color_override("font_color", Palette.MENU_GREEN)
+	title.add_theme_color_override("font_color", Palette.LIVE)
 	title.text = "■ ORBIT — MISSION SELECT ■"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	add_child(title)
@@ -39,7 +39,7 @@ func build(profile: Profile) -> void:
 	var pilot := Label.new()
 	pilot.add_theme_font_override("font", font)
 	pilot.add_theme_font_size_override("font_size", 15)
-	pilot.add_theme_color_override("font_color", Palette.MENU_GREEN_DIM)
+	pilot.add_theme_color_override("font_color", Palette.LIVE_DIM)
 	pilot.text = "PILOT: %s" % profile.profile_name
 	pilot.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	add_child(pilot)
@@ -76,11 +76,11 @@ func _is_selectable(index: int) -> bool:
 
 
 func _refresh() -> void:
-	var green := Palette.hex(Palette.MENU_GREEN)
-	var dim := Palette.hex(Palette.MENU_GREEN_DIM)
-	var gold := Palette.hex(Palette.MENU_GOLD)
-	var locked := Palette.hex(Palette.MENU_LOCKED)
-	var highlight := Palette.hex(Palette.MENU_HIGHLIGHT)
+	var green := Palette.hex(Palette.LIVE)
+	var dim := Palette.hex(Palette.LIVE_DIM)
+	var gold := Palette.hex(Palette.MEDAL_GOLD)
+	var locked := Palette.hex(Palette.DISABLED)
+	var highlight := Palette.hex(Palette.INTENT)
 	var lines: Array[String] = []
 	var pos := 0  # 0-based; matches _order index and the number-key mapping
 	for act in Campaign.acts():

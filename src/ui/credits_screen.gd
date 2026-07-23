@@ -6,7 +6,7 @@ signal back_pressed
 
 func build() -> void:
 	var bg := ColorRect.new()
-	bg.color = Palette.MENU_BG
+	bg.color = Palette.VOID
 	add_child(bg)
 	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
@@ -16,7 +16,7 @@ func build() -> void:
 	var title := Label.new()
 	title.add_theme_font_override("font", font)
 	title.add_theme_font_size_override("font_size", 26)
-	title.add_theme_color_override("font_color", Palette.MENU_GREEN)
+	title.add_theme_color_override("font_color", Palette.LIVE)
 	title.text = "■ CREDITS ■"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	add_child(title)
@@ -25,7 +25,7 @@ func build() -> void:
 	var body := Label.new()
 	body.add_theme_font_override("font", font)
 	body.add_theme_font_size_override("font_size", 18)
-	body.add_theme_color_override("font_color", Palette.MENU_GREEN)
+	body.add_theme_color_override("font_color", Palette.LIVE)
 	body.add_theme_constant_override("line_spacing", 10)
 	body.text = "\n".join([
 		"ORBIT",
@@ -44,7 +44,7 @@ func build() -> void:
 	var help := Label.new()
 	help.add_theme_font_override("font", font)
 	help.add_theme_font_size_override("font_size", 14)
-	help.add_theme_color_override("font_color", Palette.MENU_GREEN_DIM)
+	help.add_theme_color_override("font_color", Palette.LIVE_DIM)
 	help.text = "[ESC] BACK"
 	help.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	add_child(help)

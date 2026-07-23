@@ -28,6 +28,27 @@ var atmosphere_glow_strength := 0.76
 var traj_far_color := Color(1.0, 0.55, 0.12)
 var traj_match_color := Color(0.35, 1.0, 0.45)
 
+# Target overlays
+var ring_color := Color(0.5, 0.85, 0.6)        # dashed target-orbit ring (green)
+var corridor_color := Color(1.0, 0.72, 0.24)   # entry-corridor gate band (amber)
+
+# Maneuver planning overlays
+var node_ghost_color := Color(0.45, 0.85, 1.0)  # predicted post-burn conic + node marker (cyan)
+var mark_ap := Color(0.4, 0.75, 1.0)
+var mark_pe := Color(1.0, 0.85, 0.3)
+var mark_an := Color(0.85, 0.4, 1.0)
+var mark_dn := Color(0.55, 0.3, 0.75)
+var mark_impact := Color(1.0, 0.2, 0.15)
+var mark_encounter := Color(1.0, 1.0, 1.0)
+var mark_closest := Color(1.0, 0.3, 0.6)
+
+# Ship markers
+var prograde_color := Color(0.3, 1.0, 0.4)
+var retrograde_color := Color(1.0, 0.35, 0.25)
+var posture_hull_color := Color(0.92, 0.9, 0.86)
+var posture_nose_color := Color(0.95, 0.45, 0.1)
+var posture_wing_color := Color(0.5, 0.85, 1.0)
+
 
 static func default() -> RenderTheme:
 	return RenderTheme.new()

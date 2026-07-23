@@ -22,6 +22,9 @@ var star_dust: StarDust  # exposed so game_root can freeze it when the sim pause
 ## trajectory line and the maneuver-node preview ghost. The target ring stays.
 var guidance_enabled := true
 var _draw_limit := 4.0e5
+var _sun_flare: SunFlare
+## Bounding radius of the ship at the render origin, for eclipsing the sun flare.
+const SHIP_OCCLUDE_RADIUS := 2.5
 
 
 func build(level: LevelDef, theme: RenderTheme = null) -> void:
@@ -52,6 +55,15 @@ func build(level: LevelDef, theme: RenderTheme = null) -> void:
 	add_child(_body_renderer)
 	_body_renderer.build(level, _theme)
 
+	if _body_renderer.has_sun:
+		sky_mat.set_shader_parameter("sun_direction", _body_renderer.sun_dir)
+		sky_mat.set_shader_parameter("sun_wash", 1.0)
+		var flare_layer := CanvasLayer.new()  # over the 3D view, under the HUD
+		flare_layer.layer = 0
+		add_child(flare_layer)
+		_sun_flare = SunFlare.new()
+		flare_layer.add_child(_sun_flare)
+
 	var rig := preload("res://src/ui/ship_camera_rig.tscn").instantiate()
 	add_child(rig)
 
@@ -64,11 +76,11 @@ func build(level: LevelDef, theme: RenderTheme = null) -> void:
 
 	_maneuver = ManeuverVisuals.new()
 	add_child(_maneuver)
-	_maneuver.build(level)
+	_maneuver.build(level, _theme)
 
 	_ship_visuals = ShipVisuals.new()
 	add_child(_ship_visuals)
-	_ship_visuals.build(level, rig.get_node("Ship"), rig.get_node("Ship/Flame"))
+	_ship_visuals.build(level, rig.get_node("Ship"), rig.get_node("Ship/Flame"), _theme)
 	star_dust = _ship_visuals.star_dust
 
 	_camera_rig.bind(rig.get_node("ChaseCamera"), rig.get_node("SideCamera"))
@@ -85,6 +97,40 @@ func sync(ship: ShipSim, delta: float) -> void:
 	# after BodyRenderer.sync has refreshed max_body_dist for this frame.
 	var scene_reach := maxf(_body_renderer.max_body_dist, _draw_limit)
 	_camera_rig.update(ship.attitude, scene_reach)
+
+	if _sun_flare != null:
+		_update_sun_flare()
+
+
+## Screen-space lens flare: project the sun to screen and set an intensity, unless
+## it's behind the camera, off in the orbit view, or eclipsed by the root body.
+func _update_sun_flare() -> void:
+	var cam := _camera_rig.chase_camera
+	if not _body_renderer.sun_visible or cam == null or not cam.is_current():
+		_sun_flare.set_flare(Vector2.ZERO, 0.0)
+		return
+	var sun_pos := _body_renderer.sun_render_pos
+	var cam_pos := cam.global_position
+	var to_sun := (sun_pos - cam_pos).normalized()
+	# Eclipsed by the root body (Earth) or by the ship (at the render origin)?
+	# The sun disc itself is depth-occluded by both, so the flare must vanish too.
+	if cam.is_position_behind(sun_pos) \
+			or _ray_hits_sphere(cam_pos, to_sun, _body_renderer.root_render_pos, _body_renderer.root_radius) \
+			or _ray_hits_sphere(cam_pos, to_sun, Vector3.ZERO, SHIP_OCCLUDE_RADIUS):
+		_sun_flare.set_flare(Vector2.ZERO, 0.0)
+		return
+	var screen := cam.unproject_position(sun_pos)
+	var vp := get_viewport().get_visible_rect().size
+	var centred := 1.0 - clampf((screen - vp * 0.5).length() / maxf(vp.length() * 0.5, 1.0), 0.0, 1.0)
+	_sun_flare.set_flare(screen, 0.4 + 0.6 * centred)
+
+
+static func _ray_hits_sphere(origin: Vector3, dir: Vector3, centre: Vector3, radius: float) -> bool:
+	var oc := origin - centre
+	var b := oc.dot(dir)
+	var c := oc.dot(oc) - radius * radius
+	var disc := b * b - c
+	return disc >= 0.0 and -b - sqrt(disc) > 0.0
 
 
 func mark_traj_dirty() -> void:

@@ -16,16 +16,7 @@ const SIDE_MARKER_LAYER := 8  # markers only the orbit (side) camera can see
 # frame in TrajectoryRenderer so it stays glued to the ship.
 const TRAJ_REFRESH := 0.25
 
-# Orbit marks: apoapsis/periapsis/nodes/etc, orbit-view only - meaningless at
-# chase-cam range where the whole orbit shape isn't visible anyway.
-const AP_COLOR := Palette.MARK_AP
-const PE_COLOR := Palette.MARK_PE
-const AN_COLOR := Palette.MARK_AN
-const DN_COLOR := Palette.MARK_DN
-const IMPACT_COLOR := Palette.MARK_IMPACT
-const ENCOUNTER_COLOR := Palette.MARK_ENCOUNTER
-const CLOSEST_APPROACH_COLOR := Palette.MARK_CLOSEST
-
+var _theme: RenderTheme
 var _objective: Objective
 var _draw_limit := 4.0e5
 var _level: LevelDef
@@ -56,7 +47,8 @@ var _encounter_horizon := -INF
 var _encounter_entry_t := NAN
 
 
-func build(level: LevelDef) -> void:
+func build(level: LevelDef, theme: RenderTheme = null) -> void:
+	_theme = theme if theme != null else RenderTheme.default()
 	_objective = level.objective
 	_draw_limit = level.draw_limit
 	_level = level
@@ -100,9 +92,9 @@ func sync(ship: ShipSim, delta: float, side_distance: float, guidance_enabled: b
 func _build_node_visuals() -> void:
 	var ghost_mat := StandardMaterial3D.new()
 	ghost_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	ghost_mat.albedo_color = Color(0.45, 0.85, 1.0)
+	ghost_mat.albedo_color = _theme.node_ghost_color
 	ghost_mat.emission_enabled = true
-	ghost_mat.emission = Color(0.45, 0.85, 1.0)
+	ghost_mat.emission = _theme.node_ghost_color
 	ghost_mat.emission_energy_multiplier = 1.8
 
 	_node_mesh = ImmediateMesh.new()
@@ -123,7 +115,7 @@ func _build_node_visuals() -> void:
 	dot.height = 2.0
 	var marker_mat := StandardMaterial3D.new()
 	marker_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	marker_mat.albedo_color = Color(0.45, 0.85, 1.0)
+	marker_mat.albedo_color = _theme.node_ghost_color
 	dot.material = marker_mat
 	_node_marker.mesh = dot
 	_node_marker.layers = 1 | SIDE_MARKER_LAYER
@@ -136,13 +128,13 @@ func _build_node_visuals() -> void:
 ## _update_orbit_marks. Built once here and toggled visible/hidden rather than
 ## recreated, since most of them don't apply to every level.
 func _build_orbit_marks() -> void:
-	_ap_marker = _make_orbit_mark(AP_COLOR)
-	_pe_marker = _make_orbit_mark(PE_COLOR)
-	_an_marker = _make_orbit_mark(AN_COLOR)
-	_dn_marker = _make_orbit_mark(DN_COLOR)
-	_impact_marker = _make_orbit_mark(IMPACT_COLOR)
-	_encounter_marker = _make_orbit_mark(ENCOUNTER_COLOR)
-	_closest_approach_marker = _make_orbit_mark(CLOSEST_APPROACH_COLOR)
+	_ap_marker = _make_orbit_mark(_theme.mark_ap)
+	_pe_marker = _make_orbit_mark(_theme.mark_pe)
+	_an_marker = _make_orbit_mark(_theme.mark_an)
+	_dn_marker = _make_orbit_mark(_theme.mark_dn)
+	_impact_marker = _make_orbit_mark(_theme.mark_impact)
+	_encounter_marker = _make_orbit_mark(_theme.mark_encounter)
+	_closest_approach_marker = _make_orbit_mark(_theme.mark_closest)
 
 
 func _make_orbit_mark(color: Color) -> MeshInstance3D:

@@ -26,6 +26,23 @@ var _bodies: Array[BodyDef] = []
 var _meshes: Array[MeshInstance3D] = []
 var _rotation_rates: Array[float] = []
 
+## Decorative Sun / Moon (see _build_ambient): visual-only bodies added so the sky
+## isn't empty in levels whose system lacks them. Chase-view only, always proxied.
+var _ambient_meshes: Array[MeshInstance3D] = []
+var _ambient_orbit: Array = []            # BodyDef (orbiting) or null (fixed position)
+var _ambient_fixed: Array[DVec3] = []     # used when the paired _ambient_orbit is null
+var _ambient_rates: Array[float] = []
+
+## Ambient-Sun state read by FlightView to drive the sky wash-out + lens flare.
+var has_sun := false
+var sun_dir := Vector3.ZERO        # unit world direction toward the sun (render space)
+var sun_render_pos := Vector3.ZERO # sun mesh's current (proxied) render position
+var sun_visible := false           # false in the orbit view / when the sun mesh is hidden
+var _sun_mesh: MeshInstance3D
+## Root body's render position + radius, so FlightView can eclipse the sun flare.
+var root_render_pos := Vector3.ZERO
+var root_radius := 0.0
+
 
 func build(level: LevelDef, theme: RenderTheme) -> void:
 	_theme = theme
@@ -46,6 +63,8 @@ func build(level: LevelDef, theme: RenderTheme) -> void:
 		if kind == BODY_EARTH:
 			mesh_instance.add_child(_make_atmosphere(body))
 
+	_build_ambient(level)
+
 
 ## Reposition/scale/rotate every body for this frame. `side_active` selects the
 ## orbit view (true positions) vs the chase view (far-body proxy). Updates
@@ -63,6 +82,84 @@ func sync(t: float, ship_abs: DVec3, side_active: bool) -> void:
 		_meshes[i].position = rel.scaled(body_scale).to_vector3()
 		_meshes[i].scale = Vector3.ONE * body_scale
 		_meshes[i].rotation.y = fposmod(t * _rotation_rates[i], TAU)
+
+	if _meshes.size() > 0:
+		root_render_pos = _meshes[0].position
+		root_radius = _bodies[0].radius * _meshes[0].scale.x
+
+	# Decorative Sun / Moon: chase view only (hidden in the schematic orbit view),
+	# always proxied to the chase far plane, and left out of max_body_dist so they
+	# never blow up the orbit-view far plane.
+	for i in _ambient_meshes.size():
+		if side_active:
+			_ambient_meshes[i].visible = false
+			continue
+		_ambient_meshes[i].visible = true
+		var world: DVec3 = _ambient_orbit[i].position_at(t) if _ambient_orbit[i] != null else _ambient_fixed[i]
+		var rel := world.sub(ship_abs)
+		var dist := rel.length()
+		var body_scale := CHASE_BODY_CAP / dist if dist > CHASE_BODY_CAP else 1.0
+		_ambient_meshes[i].position = rel.scaled(body_scale).to_vector3()
+		_ambient_meshes[i].scale = Vector3.ONE * body_scale
+		_ambient_meshes[i].rotation.y = fposmod(t * _ambient_rates[i], TAU)
+
+	if _sun_mesh != null:
+		sun_render_pos = _sun_mesh.position
+		sun_visible = _sun_mesh.visible
+
+
+## Decorative Sun / Moon for immersion. A level's system only defines the bodies
+## it needs (an Earth-orbit trainer has just Earth), which leaves a disorientingly
+## empty sky. This adds a Sun (unless we're already orbiting one) and, for
+## Earth-centric systems without one, the Moon — visual only, no gravity/SOI. The
+## Sun sits at a fixed point in the sunlight's direction so it matches the shading;
+## the Moon rides its real Earth orbit.
+func _build_ambient(level: LevelDef) -> void:
+	var root := level.body.name.to_upper()
+
+	if root != "SOL" and root != "SUN":
+		var sun := BodyDef.new()
+		sun.name = "SOL"
+		sun.radius = 4.0e5
+		sun.color = Color(0.95, 0.75, 0.3)
+		var toward := (Basis.from_euler(_theme.sun_rotation) * Vector3(0.0, 0.0, 1.0)).normalized()
+		# ~1.2e7 m puts the 4e5 m disc at ~1.9°, larger-than-life so it dominates
+		# the sky; the high emission then blooms it into a blinding star.
+		var pos := DVec3.new(toward.x, toward.y, toward.z).scaled(1.2e7)
+		_sun_mesh = _add_ambient(sun, null, pos, 8.0)
+		has_sun = true
+		sun_dir = toward
+
+	if root == "EARTH" and not _level_has_moon(level):
+		var moon := BodyDef.new()
+		moon.name = "MOON"
+		moon.radius = 80000.0  # ~1.2° — larger than life so it reads clearly
+		moon.mu = 944000000.0
+		moon.color = Color(0.62, 0.6, 0.58)
+		moon.parent = level.body
+		moon.orbit_radius = 3844000.0
+		moon.orbit_phase_deg = 114.59155902616465
+		_add_ambient(moon, moon, DVec3.new())
+
+
+func _level_has_moon(level: LevelDef) -> bool:
+	for m in level.moons:
+		if m.name.to_upper() == "MOON":
+			return true
+	return false
+
+
+func _add_ambient(def: BodyDef, orbit: BodyDef, fixed_pos: DVec3, emission := 1.0) -> MeshInstance3D:
+	var kind := _body_kind(def.name)
+	var mesh := MeshInstance3D.new()
+	mesh.mesh = _make_faceted_sphere(def.radius, 30, 16)
+	mesh.material_override = _make_body_material(def, kind, emission)
+	add_child(mesh)
+	_ambient_meshes.append(mesh)
+	_ambient_orbit.append(orbit)
+	_ambient_fixed.append(fixed_pos)
+	_ambient_rates.append(_rotation_rate_for(kind))
+	return mesh
 
 
 func _make_atmosphere(body: BodyDef) -> MeshInstance3D:
@@ -112,12 +209,13 @@ static func _rotation_rate_for(kind: int) -> float:
 			return 0.0
 
 
-func _make_body_material(body: BodyDef, kind: int) -> ShaderMaterial:
+func _make_body_material(body: BodyDef, kind: int, emission_strength := 1.0) -> ShaderMaterial:
 	var material := ShaderMaterial.new()
 	material.shader = _theme.body_shader
 	material.set_shader_parameter("body_kind", kind)
 	material.set_shader_parameter("base_color", body.color)
 	material.set_shader_parameter("seed", float(absi(body.name.hash() % 2048)) / 173.0)
+	material.set_shader_parameter("emission_strength", emission_strength)
 	if kind == BODY_EARTH:
 		material.set_shader_parameter("earth_map", _theme.earth_map)
 	return material

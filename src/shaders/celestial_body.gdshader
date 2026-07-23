@@ -7,6 +7,9 @@ render_mode diffuse_burley, specular_schlick_ggx;
 uniform int body_kind = 0; // 0 generic, 1 Earth, 2 Moon, 3 Sun, 4 Mars
 uniform vec4 base_color : source_color = vec4(0.5, 0.5, 0.5, 1.0);
 uniform float seed = 0.0;
+// Multiplies the body's emission. 1.0 for gameplay bodies; the decorative
+// immersion Sun cranks this so it reads as a blinding, heavily-blooming star.
+uniform float emission_strength = 1.0;
 uniform sampler2D earth_map : source_color, filter_nearest_mipmap, repeat_enable;
 
 varying vec3 object_direction;
@@ -150,5 +153,5 @@ void fragment() {
 	ALBEDO = final_color;
 	ROUGHNESS = roughness;
 	METALLIC = 0.02;
-	EMISSION = emission;
+	EMISSION = emission * emission_strength;
 }

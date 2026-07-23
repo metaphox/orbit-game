@@ -28,7 +28,7 @@ func build() -> void:
 	var title := Label.new()
 	title.add_theme_font_override("font", font)
 	title.add_theme_font_size_override("font_size", 32)
-	title.add_theme_color_override("font_color", Palette.MENU_GREEN)
+	title.add_theme_color_override("font_color", Palette.LIVE)
 	title.text = "■ PAUSED ■"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	add_child(title)
@@ -49,7 +49,7 @@ func build() -> void:
 	var help := Label.new()
 	help.add_theme_font_override("font", font)
 	help.add_theme_font_size_override("font_size", 13)
-	help.add_theme_color_override("font_color", Palette.MENU_GREEN_DIM)
+	help.add_theme_color_override("font_color", Palette.LIVE_DIM)
 	help.text = "↑↓ SELECT   ENTER CONFIRM   OR PRESS NUMBER   [ESC]/[SPACE]/[0] RESUME"
 	help.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	add_child(help)
@@ -64,9 +64,9 @@ func show_saved_confirmation() -> void:
 
 
 func _refresh() -> void:
-	var green := Palette.hex(Palette.MENU_GREEN)
-	var dim := Palette.hex(Palette.MENU_GREEN_DIM)
-	var highlight := Palette.hex(Palette.MENU_HIGHLIGHT)
+	var green := Palette.hex(Palette.LIVE)
+	var dim := Palette.hex(Palette.LIVE_DIM)
+	var highlight := Palette.hex(Palette.INTENT)
 	var lines: Array[String] = []
 	for i in _items.size():
 		var selected := i == _cursor

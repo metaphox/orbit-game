@@ -39,9 +39,11 @@ var _side_marker: Node3D  # posture stand-in, stays at origin = ship render posi
 var _station_marker: Node3D
 var _station_orbit_marker: Node3D
 var _objective: Objective
+var _theme: RenderTheme
 
 
-func build(level: LevelDef, ship_root: Node3D, flame: MeshInstance3D) -> void:
+func build(level: LevelDef, ship_root: Node3D, flame: MeshInstance3D, theme: RenderTheme = null) -> void:
+	_theme = theme if theme != null else RenderTheme.default()
 	_ship_root = ship_root
 	_flame = flame
 	_flame_rest_z = flame.position.z
@@ -56,8 +58,8 @@ func build(level: LevelDef, ship_root: Node3D, flame: MeshInstance3D) -> void:
 	_side_marker = _build_posture_marker()
 	add_child(_side_marker)
 
-	prograde_marker = _make_marker(Color(0.3, 1.0, 0.4))
-	retrograde_marker = _make_marker(Color(1.0, 0.35, 0.25))
+	prograde_marker = _make_marker(_theme.prograde_color)
+	retrograde_marker = _make_marker(_theme.retrograde_color)
 
 	_build_station_markers()
 
@@ -120,7 +122,7 @@ func _build_posture_marker() -> Node3D:
 	capsule.height = 2.2
 	var hull_mat := StandardMaterial3D.new()
 	hull_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	hull_mat.albedo_color = Color(0.92, 0.9, 0.86)
+	hull_mat.albedo_color = _theme.posture_hull_color
 	capsule.material = hull_mat
 	hull.mesh = capsule
 	hull.rotation.x = -PI / 2  # capsule axis (+Y) -> forward (-Z)
@@ -134,7 +136,7 @@ func _build_posture_marker() -> Node3D:
 	cone.height = 0.9
 	var nose_mat := StandardMaterial3D.new()
 	nose_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	nose_mat.albedo_color = Color(0.95, 0.45, 0.1)
+	nose_mat.albedo_color = _theme.posture_nose_color
 	cone.material = nose_mat
 	nose.mesh = cone
 	nose.rotation.x = -PI / 2
@@ -147,7 +149,7 @@ func _build_posture_marker() -> Node3D:
 	wing_mesh.size = Vector3(1.7, 0.1, 0.5)
 	var wing_mat := StandardMaterial3D.new()
 	wing_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	wing_mat.albedo_color = Color(0.5, 0.85, 1.0)
+	wing_mat.albedo_color = _theme.posture_wing_color
 	wing_mesh.material = wing_mat
 	wing.mesh = wing_mesh
 	wing.position = Vector3(0, 0, 0.2)

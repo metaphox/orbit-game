@@ -94,10 +94,10 @@ func build(level: LevelDef, theme: RenderTheme) -> void:
 		dash_mesh.surface_end()
 		var dash_mat := StandardMaterial3D.new()
 		dash_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-		dash_mat.albedo_color = Color(0.5, 0.85, 0.6, 0.55)
+		dash_mat.albedo_color = Color(_theme.ring_color, 0.55)
 		dash_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 		dash_mat.emission_enabled = true
-		dash_mat.emission = Color(0.5, 0.85, 0.6)
+		dash_mat.emission = _theme.ring_color
 		dash_mat.emission_energy_multiplier = 1.2
 		_target_instance.mesh = dash_mesh
 		_target_instance.material_override = dash_mat
@@ -127,7 +127,7 @@ func _build_corridor_band(radius: float, tol: float) -> ImmediateMesh:
 	fill_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	fill_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	fill_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
-	fill_mat.albedo_color = Color(1.0, 0.72, 0.24, 0.16)
+	fill_mat.albedo_color = Color(_theme.corridor_color, 0.16)
 	mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP, fill_mat)
 	for i in seg + 1:
 		var ang := TAU * i / seg
@@ -138,9 +138,9 @@ func _build_corridor_band(radius: float, tol: float) -> ImmediateMesh:
 	var edge_mat := StandardMaterial3D.new()
 	edge_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	edge_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	edge_mat.albedo_color = Color(1.0, 0.72, 0.24, 0.9)
+	edge_mat.albedo_color = Color(_theme.corridor_color, 0.9)
 	edge_mat.emission_enabled = true
-	edge_mat.emission = Color(1.0, 0.72, 0.24)
+	edge_mat.emission = _theme.corridor_color
 	edge_mat.emission_energy_multiplier = 1.5
 	for edge_radius in [inner, outer]:
 		mesh.surface_begin(Mesh.PRIMITIVE_LINE_STRIP, edge_mat)

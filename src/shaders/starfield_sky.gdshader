@@ -16,6 +16,11 @@ uniform float warm_bias : hint_range(-1.0, 1.0) = 0.0;
 uniform vec3 tint_low : source_color = vec3(0.02, 0.015, 0.05);
 uniform vec3 tint_high : source_color = vec3(0.005, 0.01, 0.03);
 
+// Sun wash-out: near the sun direction the sky reads bright and hazy and the
+// stars vanish, like looking sunward from orbit. sun_wash 0 disables it.
+uniform vec3 sun_direction = vec3(0.0, 0.0, 0.0);
+uniform float sun_wash : hint_range(0.0, 2.0) = 0.0;
+
 float hash13(vec3 p3) {
 	p3 = fract(p3 * 0.1031);
 	p3 += dot(p3, p3.yzx + 33.33);
@@ -65,6 +70,16 @@ void sky() {
 				col += star_color(u, color_saturation) * s * mag * star_brightness;
 			}
 		}
+	}
+
+	if (sun_wash > 0.0 && length(sun_direction) > 0.5) {
+		float sd = clamp(dot(dir, normalize(sun_direction)), 0.0, 1.0);
+		float haze = pow(sd, 22.0);   // broad, soft brightening toward the sun
+		float core = pow(sd, 240.0);  // tight lift right around the disc
+		float star_fade = clamp(pow(sd, 55.0) * 3.0, 0.0, 1.0);  // wipe stars near the sun
+		col *= (1.0 - star_fade);
+		col += vec3(0.42, 0.5, 0.62) * haze * 0.6 * sun_wash;   // hazy blue-white
+		col += vec3(1.0, 0.96, 0.88) * core * sun_wash;          // bright near the disc
 	}
 	COLOR = col;
 }
