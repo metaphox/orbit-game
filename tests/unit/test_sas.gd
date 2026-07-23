@@ -46,13 +46,32 @@ func test_sas_converges_on_retrograde_hold() -> void:
 	var ship: ShipSim = game.ship
 	game._toggle_sas(ShipSim.SasMode.RETROGRADE)
 	assert_eq(ship.sas_mode, ShipSim.SasMode.RETROGRADE, "hold engaged")
-	# nose starts prograde: 180 degrees to swing at 0.6 rad/s -> ~5.3 s
-	simulate(game, 400, 1.0 / 60.0)
+	# Nose starts prograde: ~5.3 s to swing 180 deg, then it settles onto (and
+	# tracks) the orbit-swept retrograde; give it the full acquire + settle.
+	simulate(game, 600, 1.0 / 60.0)
 	var aligned := ship.forward_dir().dot(ship.v.normalized())
 	assert_lt(aligned, -0.999, "nose settled on retrograde")
 	# toggling the same mode disengages
 	game._toggle_sas(ShipSim.SasMode.RETROGRADE)
 	assert_eq(ship.sas_mode, ShipSim.SasMode.OFF, "toggle off")
+
+
+func test_sas_hold_goes_quiet_once_settled() -> void:
+	# A settled hold must track the (orbit-swept) prograde on momentum and only
+	# trim occasionally - not fire the RCS every frame (which would chatter and,
+	# once rotation costs propellant, waste it).
+	GameRootScript.level_index = 3
+	var game := _boot()
+	var ship: ShipSim = game.ship
+	game._toggle_sas(ShipSim.SasMode.PROGRADE)
+	simulate(game, 300, 1.0 / 60.0)  # acquire + spin up to match prograde's sweep
+	var fired := 0
+	for i in 300:
+		simulate(game, 1, 1.0 / 60.0)
+		if ship.rcs_command.length() > 1e-6:
+			fired += 1
+	assert_lt(fired, 90, "settled hold fires only occasional trims, not every frame")
+	assert_gt(ship.forward_dir().dot(ship.v.normalized()), 0.999, "and stays locked on prograde")
 
 
 func _key(keycode: Key) -> InputEventKey:

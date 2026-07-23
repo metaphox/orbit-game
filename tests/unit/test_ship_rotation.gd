@@ -44,12 +44,15 @@ func test_kill_rotation_brakes_a_tumble_to_rest() -> void:
 
 
 func test_sas_hold_settles_on_target_without_ringing() -> void:
+	# NORMAL points at the orbit normal, which is fixed during a coast (zero
+	# feed-forward), so this isolated hold should slew there and come to rest.
 	var ship := _ship()
-	ship.sas_mode = ShipSim.SasMode.RETROGRADE  # nose starts prograde: a 180 swing
+	ship.sas_mode = ShipSim.SasMode.NORMAL
+	var target := ship.sas_target_dir()
 	for i in 900:
 		ship.integrate_rotation(ship.sas_command(), DT)
-	assert_lt(ship.forward_dir().dot(ship.v.normalized()), -0.999, "nose arrives at retrograde")
-	assert_lt(ship.angular_velocity.length(), 0.02, "and it stops there, not oscillating")
+	assert_gt(ship.forward_dir().dot(target), 0.999, "nose arrives at the orbit normal")
+	assert_lt(ship.angular_velocity.length(), 0.02, "and it settles there, not ringing")
 
 
 func test_fuel_laden_ship_turns_more_sluggishly() -> void:

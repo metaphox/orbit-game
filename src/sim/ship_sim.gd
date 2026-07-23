@@ -21,6 +21,11 @@ const MAX_ANGULAR_VEL := Vector3(0.6, 0.6, 1.1)  # rad/s ceiling per axis
 const BASE_ANG_ACCEL := Vector3(0.5, 0.5, 1.0)   # rad/s^2 at initial_mass
 const ANG_ACCEL_MASS_CAP := 2.5                  # nimblest a drained tank gets
 const SAS_RATE_TAU := 0.2                         # s; how hard SAS chases its rate target
+## SAS holds within this pointing/rate band go silent and coast on momentum
+## rather than chattering endless micro-corrections (which, once rotation costs
+## propellant, would waste it). It re-fires only after drifting out of the band.
+const SAS_DEADBAND := 0.0087                      # rad (~0.5 deg) pointing tolerance
+const SAS_RATE_DEADBAND := 0.004                  # rad/s "rate matched" tolerance
 
 var body: BodyDef
 var elements: OrbitElements
@@ -157,28 +162,64 @@ func integrate_rotation(command: Vector3, delta: float) -> void:
 	rotate_local(angular_velocity * delta)
 
 
-## Torque command (per-axis [-1,1]) the active SAS hold wants this frame. Drives a
-## time-optimal slew: aim the nose at sas_target_dir() and arrive at zero rate
-## (no overshoot), damping residual spin — including roll — as it settles.
-## STABILITY simply brakes all rotation. Roll is otherwise left free.
+## World-frame angular velocity of the held direction, so a pointing hold can
+## MATCH it and then coast: a swept reference like prograde rotates with the
+## orbit, and in a momentum model tracking it costs nothing once matched.
+## Prograde/retrograde and radial rotate analytically under gravity; the orbit
+## normal is fixed during a coast, and a node/fixed target doesn't rotate.
+func sas_target_omega() -> Vector3:
+	match sas_mode:
+		SasMode.PROGRADE, SasMode.RETROGRADE:
+			var v2 := v.dot(v)
+			var rl := r.length()
+			if v2 < 1e-6 or rl < 1e-6:
+				return Vector3.ZERO
+			var grav := r.scaled(-body.mu / (rl * rl * rl))  # gravity accel (DVec3)
+			return v.cross(grav).scaled(1.0 / v2).to_vector3()
+		SasMode.RADIAL_OUT, SasMode.RADIAL_IN:
+			var r2 := r.dot(r)
+			if r2 < 1e-6:
+				return Vector3.ZERO
+			return r.cross(v).scaled(1.0 / r2).to_vector3()
+		_:
+			return Vector3.ZERO
+
+
+## Torque command (per-axis [-1,1]) the active SAS hold wants this frame. Slews
+## the nose onto sas_target_dir() time-optimally (no overshoot) while feeding the
+## target's own rotation forward, so once aligned the ship coasts on momentum and
+## goes silent inside the deadband — no chatter. STABILITY brakes all rotation.
+## Roll is left free in a pointing hold (it never affects where the nose points).
 func sas_command() -> Vector3:
 	if sas_mode == SasMode.STABILITY:
+		# Kill rotation: brake all spin, then idle once essentially stopped.
+		if angular_velocity.length() <= SAS_RATE_DEADBAND:
+			return Vector3.ZERO
 		return _rate_command(Vector3.ZERO)
+
 	var target := sas_target_dir().to_vector3()
 	var fwd := attitude * Vector3(0, 0, -1)
-	var angle := acos(clampf(fwd.dot(target), -1.0, 1.0))
-	var err_body := Vector3.ZERO
-	if angle > 1e-4:
-		var axis := fwd.cross(target)
-		if axis.length_squared() < 1e-12:  # anti-parallel: any perpendicular turns us around
-			axis = attitude.x
-		# error rotation vector (world) -> body frame (attitude is orthonormal: inverse = transpose)
-		err_body = attitude.transposed() * (axis.normalized() * angle)
-	var acc := max_angular_accel()
-	var desired := Vector3(
-		_time_optimal_rate(err_body.x, acc.x, MAX_ANGULAR_VEL.x),
-		_time_optimal_rate(err_body.y, acc.y, MAX_ANGULAR_VEL.y),
-		0.0)  # pointing modes hold no particular roll: just damp roll rate to zero
+
+	# Pointing error as a world-frame rotation vector (fwd -> target).
+	var cross := fwd.cross(target)
+	var angle := asin(clampf(cross.length(), 0.0, 1.0))
+	if fwd.dot(target) < 0.0:
+		angle = PI - angle
+	var err_axis := cross.normalized() if cross.length() > 1e-9 else attitude.x
+
+	# Desired body rate = feed-forward the target's spin + a time-optimal term
+	# that closes the pointing error and arrives at the matched rate (not zero).
+	var vmax := minf(MAX_ANGULAR_VEL.x, MAX_ANGULAR_VEL.y)
+	var acc := minf(max_angular_accel().x, max_angular_accel().y)
+	var correction := err_axis * _time_optimal_rate(angle, acc, vmax)
+	var desired := attitude.transposed() * (sas_target_omega() + correction)
+	desired.z = angular_velocity.z  # a pointing hold leaves roll free: never trim it
+
+	# Deadband: aligned AND rate-matched -> command nothing and coast. This ends
+	# the endless micro-corrections; SAS only re-fires to re-acquire after drift.
+	var rate_err := desired - angular_velocity
+	if angle < SAS_DEADBAND and Vector2(rate_err.x, rate_err.y).length() < SAS_RATE_DEADBAND:
+		return Vector3.ZERO
 	return _rate_command(desired)
 
 
