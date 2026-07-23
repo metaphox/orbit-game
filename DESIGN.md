@@ -2,7 +2,7 @@
 
 *KSP distilled to "burn fuel to change orbit," in a NASA-punk retro-futurist skin.*
 
-Status: agreed via grilling session, 2026-07-19; updated 2026-07-20 to match what was actually built through M9 and the post-ship feature rounds (pause/save, profiles, orbit marks, toolbar). This document is the shared understanding; change it before changing the game. Where implementation diverged from the original plan, that's called out explicitly with the reason — this is a record of decisions, not just a spec.
+Status: agreed via grilling session, 2026-07-19; updated 2026-07-20 to match what was actually built through M9 and the post-ship feature rounds (pause/save, profiles, orbit marks, toolbar); 2026-07-23 rotational inertia + RCS/camera feedback (§4.4). This document is the shared understanding; change it before changing the game. Where implementation diverged from the original plan, that's called out explicitly with the reason — this is a record of decisions, not just a spec.
 
 > **Writing code here?** Read [`AGENTS.md`](AGENTS.md) first — the contributor & agent guide covers the conventions this design depends on: architecture invariants (doubles, floating origin, on-rails determinism), the swappable-theme rule (no standalone colours in levels or UI — everything flows through `RenderTheme` / `Palette` / `UiTheme`), the design references (`ref/*.html`, `UI-DESIGN.md`), tech-debt discipline (`TECH_DEBTS.md`), and testing. `DESIGN.md` is *what* we build; `AGENTS.md` is *how*.
 
@@ -54,11 +54,14 @@ A level-based 3D orbital-mechanics game. Each level you fly a single spacecraft 
 
 Ship parameters: `dry_mass`, `prop_mass`, `thrust`, `isp`. Burning depletes propellant at `thrust / (isp · g₀)`; acceleration rises as the ship lightens. HUD shows propellant fraction **and** remaining Δv (Tsiolkovsky). No staging, ever — one ship per level keeps levels tunable.
 
-### 4.4 Attitude
+### 4.4 Attitude & rotational inertia
 
-- Rate-based rotation (finite turn rate — flying, not twitch-aiming), unchanged from plan.
-- **RCS/rotation-cost constraint is planned but not yet built.** The original plan called this the second difficulty axis ("constraints imposed": free rotation → RCS propellant cost on later levels). Rotation is free throughout the current 7-level testing roster, but that roster doesn't reach the point in the campaign where this constraint was meant to kick in — it's still intended for later levels once the campaign is built out toward the full 15–20 (§13), not cut. Still open: what "later" means precisely (which act/level introduces it), and whether it needs its own propellant budget or shares the main tank.
-- SAS-style hold modes (prograde/retrograde/normal/anti-normal/radial in/out) exist and are an **unlock**, gated per-level by `LevelDef.sas_enabled` (see §6).
+- **The ship has mass, and rotation is Newtonian (as shipped, 2026-07-23).** Rotation was originally rate-based — hold a key for a fixed turn rate, release and it stops dead. It now carries **real angular momentum**: attitude control applies angular *acceleration*, spin builds up over time, and — the point of the change — **releasing the controls does not stop the ship**; the spin persists until it is actively countered. The ship's **mass is felt directly**: available angular acceleration scales inversely with current mass (`initial_mass / mass()`), so a fuel-laden craft is sluggish and grows nimbler as the tank drains (capped so a near-dry ship never turns twitchy), and angular velocity is clamped to a per-axis ceiling (roll fastest). This makes attitude a flying skill with weight rather than twitch-aiming — a deepening of pillar 1, not a new subsystem — and it kept the "plausible, not pedantic" line: it's a single-rigid-body torque model with tuned constants, not a full inertia tensor.
+- **Kill-rotation brake + smart SAS keep it fair.** So the player is never forced to hand-null every tumble, a dedicated **kill-rotation** command (`C`, sitting by the WASDQE cluster) actively brakes all spin to zero; it reads `KILL ROT` on the HUD and lives as a SAS mode. The existing SAS hold modes (prograde/retrograde/etc.) became **time-optimal slew-and-stop controllers** — they slew the nose onto target and decelerate to arrive *without overshoot*, damping residual spin as they settle, rather than the old fixed-rate turn that stopped instantly. This is the deliberate answer to "how Newtonian": full momentum, but with a brake and smart holds, not a punishing hand-fly-everything model.
+- **The autopilot is exempt by design.** The analytic autopilot (Δv-par test harness and the debug flight director) steers by snapping attitude directly, bypassing the inertia model entirely — so every level's Δv par, which is measured empirically through that autopilot, is **provably unaffected** by the rotation change. Inertia is a player-side *feel* change only.
+- **Feedback that sells the mass.** The hull's modeled RCS nozzle clusters now emit small additive puffs at the physically-correct thrusters (torque = arm × jet-force) whenever the ship torques, on manual input *and* SAS/kill-rotation braking. The chase camera carries subtle racing-game cues — attitude lag (the ship leads the frame during a fast slew, camera catches up), a thrust-driven FOV widen and dolly-back, and angular-velocity sway — so acceleration and rotation are *felt*, deliberately toned down to match the NASA-punk restraint (§9).
+- **RCS/rotation-cost constraint is still planned, not yet built.** Rotation and the RCS puffs are currently **free** — no propellant is spent. The original plan's second difficulty axis (RCS propellant cost on later levels) is unchanged and still intended for the campaign build-out (§13): the inertia model added the *physical behavior*, not yet the *budget* that would turn it into a resource constraint. Still open: which act/level introduces the cost, and whether it draws its own tank or the main one.
+- SAS-style hold modes (prograde/retrograde/normal/anti-normal/radial in/out, plus kill-rotation) exist and are an **unlock**, gated per-level by `LevelDef.sas_enabled` (see §6).
 
 ## 5. Objectives — the win-condition vocabulary
 
@@ -86,13 +89,13 @@ Manual flying is the baseline; SAS hold modes and maneuver nodes are per-level u
 
 | Group | Keys | Action |
 |---|---|---|
-| Attitude | `W`/`S`, `A`/`D`, `Q`/`E` | pitch, yaw, roll |
+| Attitude | `W`/`S`, `A`/`D`, `Q`/`E` | pitch, yaw, roll (inertial — momentum persists, §4.4) |
 | Throttle | `Shift`/`Ctrl` (hold), `Z`, `X` | up/down, max, cut |
 | Time warp | `1`–`9`, `-`/`=` | jump to warp step, walk one step |
 | Pause | `Space` or `0` (quick toggle), `Esc` (opens the pause menu) | see §7 |
 | View | `Tab`, mouse-drag, wheel/trackpad | toggle chase↔orbit view, rotate, zoom (orbit view only) |
 | View reset | `R` | resets the active camera to its default framing *while flying or paused*; on the win/fail screen the same key instead restarts the mission, matching what's printed on screen there — a context-sensitive rebind, not two different keys |
-| SAS locks | `F` prograde, `B` retrograde, `N` normal, `G` anti-normal, `U`/`I` radial out/in, `T` off | auto-orient and hold; pressing the same lock again releases it |
+| SAS locks | `F` prograde, `B` retrograde, `N` normal, `G` anti-normal, `U`/`I` radial out/in, `C` kill-rotation, `T` off | auto-orient and hold (slew-and-stop, no overshoot); `C` brakes all spin; pressing the same lock again releases it |
 | Maneuver node | `Enter` add, `Backspace` delete, `[`/`]` time, `↑`/`↓` prograde, `←`/`→` normal, `O`/`P` radial, `V` hold-toward-node | Shift = coarse step |
 
 **Toolbar:** every keybind above except `1`–`9` (the warp indicator already covers those) is also a real clickable button — two rows, bottom-center of the HUD, visible in both the chase and orbit views since the HUD is a plain overlay not tied to either camera. A click constructs the same key event a physical press would and feeds it through the same input handler, so there's exactly one code path for "did the player do X," whether by keyboard or mouse. `Shift`/`Ctrl` buttons press-and-hold (`button_down`/`button_up`) rather than tap, matching the physical keys' held semantics.
@@ -150,8 +153,9 @@ BodyDef         name, mu, radius, soi_radius, parent, orbit (OrbitElements aroun
                 — position_at(t)/velocity_at(t) recurse through parent, so
                 nesting depth isn't hardcoded (the Sun/Earth/Mars case)
 
-ShipSim         body (current parent), elements, r, v, attitude, throttle,
-                dry_mass, prop_mass, thrust_max, isp, flight_state
+ShipSim         body (current parent), elements, r, v, attitude,
+                angular_velocity (body-local rad/s — momentum persists; §4.4),
+                throttle, dry_mass, prop_mass, thrust_max, isp, flight_state
                   (Coasting: elements valid | Burning: r,v integrated live),
                 sas_mode, node: ManeuverNode, revision (bumps on refit)
                 serialize()/apply_serialized() for the mid-mission save (§7)

@@ -100,9 +100,10 @@ support/comms/thermal. One ship per level, one continuous 3D space, one decision
   every objective type. The intended game is **15–20 levels**, with their Δv
   pars tuned by real playtesting (possibly a second Act 3 destination — Venus was
   floated).
-- **RCS / rotation‑cost.** The planned *second difficulty axis*: rotation is free
-  everywhere right now; later levels are meant to charge propellant for attitude
-  changes. Designed (`DESIGN.md` §4.4), not yet introduced.
+- **RCS / rotation‑cost.** The planned *second difficulty axis*: attitude now has
+  real rotational inertia (momentum persists; mass is felt — `DESIGN.md` §4.4), but
+  it is still **propellant‑free** — later levels are meant to charge propellant for
+  attitude changes. The physics shipped; the *budget* has not.
 - **Web export, audio, and narrative framing** — all deferred, none started.
 
 See [`DESIGN.md`](DESIGN.md) for the full design record (including *why*
