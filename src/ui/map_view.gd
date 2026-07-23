@@ -151,8 +151,14 @@ func sync(ship: ShipSim, t: float, delta: float) -> void:
 		# Scale up only if the true radius would be sub-visible at this zoom.
 		var true_r := _level.moons[i].radius * MAP_SCALE
 		_moon_markers[i].scale = Vector3.ONE * maxf(1.0, moon_min_r / true_r)
-		# The orbit-around-Earth track is only useful when zoomed out enough to
-		# take it in; inside the SOI it's just a line through the view.
+		# The track is a circle of the moon's orbital radius centered on the body
+		# it orbits — its PARENT, not the scene root. For a moon of the root body
+		# the parent sits at the origin (unchanged); for a moon of a planet that
+		# itself orbits the Sun, the track must ride the planet.
+		_moon_tracks[i].position = Frames.root_position(
+			_level.moons[i].parent, t).scaled(MAP_SCALE).to_vector3()
+		# Only useful when zoomed out enough to take it in; inside the SOI it's
+		# just a line through the view.
 		_moon_tracks[i].visible = os >= _level.moons[i].orbit.a * MAP_SCALE
 		_soi_rings[i].position = moon_pos
 	for obj in _tracked:

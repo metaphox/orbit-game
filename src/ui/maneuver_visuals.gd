@@ -295,6 +295,11 @@ func _rebuild_node_ghost(ship: ShipSim) -> void:
 		for p: DVec3 in arc_pts:
 			_preview_mesh.surface_add_vertex(p.to_vector3())
 		_preview_mesh.surface_end()
-		_preview_anchor = moon.position_at(entry)
+		# Anchor the moon-centric arc at the moon's position in the ship's own
+		# (parent) frame, matching the ship-relative posing every child here
+		# uses (sync subtracts ship.r). moon.parent == ship.body in this loop,
+		# so this is the moon relative to the frame the ship coasts in - the
+		# root-frame moon.position_at only lined up inside the root body's SOI.
+		_preview_anchor = Frames.position_relative_to(moon, ship.body, entry)
 		_preview_active = true
 		break

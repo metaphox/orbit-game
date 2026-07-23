@@ -60,15 +60,17 @@ func trajectory_closeness(ship: ShipSim) -> float:
 
 
 ## Signed angle from the ship to the target around the orbit normal (+Y);
-## positive = target is ahead. Uses the ship's absolute (root-frame)
-## position, not raw ship.r, so this stays correct even while the ship is
-## still inside a departure body's SOI (e.g. Earth, itself a child of the
-## Sun, on the way to Mars) — absolute_position recurses through parents
-## and reduces to plain ship.r whenever ship.body has no parent, so this
-## is exact for the single-parent Earth-Moon case too.
+## positive = target is ahead. Measured from the body the transfer actually
+## orbits — the target's parent, the shared center both bodies circle — so
+## the angle is meaningful at any nesting depth. For an Earth→Mars transfer
+## the shared center is the Sun (the root); for an Earth→Moon transfer it is
+## Earth. Reducing everything to the root instead would be wrong for a moon,
+## whose heliocentric position is dominated by its planet's, not its own.
 func _phase_angle(ship: ShipSim) -> float:
-	var ship_dir := ship.absolute_position(ship.last_time).normalized()
-	var target_dir := target.orbit.state_at_time(ship.last_time).r.normalized()
+	var t := ship.last_time
+	var center := target.parent
+	var ship_dir := Frames.point_relative_to(ship.absolute_position(t), center, t).normalized()
+	var target_dir := Frames.position_relative_to(target, center, t).normalized()
 	var c := clampf(ship_dir.dot(target_dir), -1.0, 1.0)
 	var ang := acos(c)
 	return ang if ship_dir.cross(target_dir).y > 0.0 else -ang
@@ -76,10 +78,12 @@ func _phase_angle(ship: ShipSim) -> float:
 
 ## Phase angle at which a Hohmann-style burn from the current radius
 ## arrives when the target does: PI minus how far the target moves during
-## the transfer. target.orbit.mu is always the shared parent's mu (the
-## body target.orbit was fit around), regardless of the ship's own frame.
+## the transfer. Radius, semi-major axis and mean motion are all taken about
+## the shared center (target's parent), so the transfer geometry is consistent
+## whatever frame the ship currently sits in.
 func _tli_lead_angle(ship: ShipSim) -> float:
-	var r0 := ship.absolute_position(ship.last_time).length()
+	var t := ship.last_time
+	var r0 := Frames.point_relative_to(ship.absolute_position(t), target.parent, t).length()
 	var a_transfer := (r0 + target.orbit.a) * 0.5
 	var transfer_time := PI * sqrt(pow(a_transfer, 3.0) / target.orbit.mu)
 	return PI - target.orbit.mean_motion() * transfer_time
