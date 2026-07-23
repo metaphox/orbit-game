@@ -101,7 +101,7 @@ func _ready() -> void:
 	add_child(hud)
 	hud.build(level)
 	hud.map_view = map_view  # minimap auto-fit / focus / marked points
-	hud.toolbar_key.connect(_on_toolbar_key)
+	hud.toolbar_command.connect(_on_toolbar_command)
 
 	flight_view.set_side_active(false)
 
@@ -109,32 +109,29 @@ func _ready() -> void:
 		_toggle_autopilot()
 
 
-## Toolbar buttons don't duplicate any input logic - they just construct
-## the same InputEventKey a real keypress would and call _unhandled_input
-## directly, the exact call every test in this project already makes.
-## SHIFT/CTRL are the one exception: _apply_flight_input reads the
-## throttle axis via Input.get_axis(), which - like is_physical_key_
-## pressed() before it - only reflects real OS-level key state, never a
-## synthetic event passed to _unhandled_input. Input.action_press()/
-## action_release() are Godot's actual mechanism for synthetic action
-## input, so the toolbar drives those directly instead.
-func _on_toolbar_key(keycode: int, pressed: bool) -> void:
-	if keycode == KEY_SHIFT:
+## Toolbar buttons emit a semantic ACTION, not a physical key, so a click does
+## exactly what that action's current binding does — no duplicated logic, and no
+## breakage when a key is rebound (CR-5). Throttle trim is polled via
+## Input.get_axis(), which only reflects real OS-level key state, so those two
+## drive the Input singleton directly; every other action is replayed by feeding
+## _unhandled_input the action's current primary key (so the existing key-based
+## handlers, including shift for coarse node steps, run unchanged).
+func _on_toolbar_command(action: String, pressed: bool) -> void:
+	if action == "throttle_increase" or action == "throttle_decrease":
 		if pressed:
-			Input.action_press("throttle_increase")
+			Input.action_press(action)
 		else:
-			Input.action_release("throttle_increase")
+			Input.action_release(action)
 		return
-	if keycode == KEY_CTRL:
-		if pressed:
-			Input.action_press("throttle_decrease")
-		else:
-			Input.action_release("throttle_decrease")
-		return
-	var event := InputEventKey.new()
-	event.physical_keycode = keycode as Key
-	event.pressed = pressed
-	_unhandled_input(event)
+	if not pressed:
+		return  # tap commands act on the press edge only
+	for e: InputEvent in InputMap.action_get_events(action):
+		var k := e as InputEventKey
+		if k != null:
+			var event := k.duplicate() as InputEventKey
+			event.pressed = true
+			_unhandled_input(event)
+			return
 
 
 ## Overrides the just-built fresh ship with a saved mid-mission state.

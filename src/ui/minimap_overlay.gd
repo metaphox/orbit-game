@@ -44,5 +44,5 @@ func _label(text: String, at: Vector2, color: Color) -> void:
 	var pos := at
 	pos.x = minf(pos.x, size.x - w - 2.0)
 	pos.y = clampf(pos.y, fs + 1.0, size.y - 2.0)
-	draw_string(font, pos + Vector2(1, 1), text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(0, 0, 0, 0.7))
+	draw_string(font, pos + Vector2(1, 1), text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Palette.LABEL_SHADOW)
 	draw_string(font, pos, text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, color)

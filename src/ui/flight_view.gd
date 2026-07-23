@@ -62,6 +62,7 @@ func build(level: LevelDef, theme: RenderTheme = null) -> void:
 		flare_layer.layer = 0
 		add_child(flare_layer)
 		_sun_flare = SunFlare.new()
+		_sun_flare.render_theme = _theme
 		flare_layer.add_child(_sun_flare)
 
 	var rig := preload("res://src/ui/ship_camera_rig.tscn").instantiate()

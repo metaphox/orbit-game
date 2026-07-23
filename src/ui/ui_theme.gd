@@ -149,7 +149,7 @@ static func style_button(b: Button, kind := "") -> void:
 	b.add_theme_font_override("font", DISPLAY_SEMI)
 	b.add_theme_font_size_override("font_size", 15)
 
-	var fill := Color(0, 0, 0, 0)
+	var fill := Palette.TRANSPARENT
 	var edge := Palette.INK
 	var fg := Palette.INK
 	var fg_hover := Palette.LIVE

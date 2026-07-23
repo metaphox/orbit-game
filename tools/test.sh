@@ -41,3 +41,6 @@ if [ -n "$S" ] && [ -n "$T" ]; then
 else
 	printf '\nTEST GUARD: could not parse Scripts/Passing counts; skipped the coverage check.\n'
 fi
+
+# 4) Theme-seam lint: no raw Color() literals in src/ui (CR-6 / AGENTS.md).
+sh "$(dirname "$0")/lint_ui_colors.sh" || fail "raw Color() literals in src/ui (see above)."

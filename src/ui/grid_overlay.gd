@@ -30,11 +30,11 @@ func _input(event: InputEvent) -> void:
 		_mode = (int(_mode) + 1) % Mode.size()
 		match _mode:
 			Mode.WHITE:
-				_canvas.line = Color(1.0, 1.0, 1.0)
+				_canvas.line = Palette.GRID_WHITE
 			Mode.BLACK:
-				_canvas.line = Color(0.0, 0.0, 0.0)
+				_canvas.line = Palette.GRID_BLACK
 			Mode.RED:
-				_canvas.line = Color(1.0, 0.23, 0.16)
+				_canvas.line = Palette.GRID_ALERT
 		_canvas.visible = _mode != Mode.OFF
 		_canvas.queue_redraw()
 		get_viewport().set_input_as_handled()
@@ -46,7 +46,7 @@ class _Canvas:
 	const CELL := 16.0
 	const MAJOR := 8  # brighter rule every N cells, for quick counting
 
-	var line := Color(1.0, 1.0, 1.0)
+	var line := Palette.GRID_WHITE
 
 	func _draw() -> void:
 		var minor := Color(line.r, line.g, line.b, 0.16)

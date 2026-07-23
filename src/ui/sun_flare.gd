@@ -5,6 +5,9 @@ extends Control
 ## additive. FlightView feeds it the sun's screen position + an intensity each
 ## frame (0 when the sun is off-screen, behind the camera, or eclipsed by a body).
 
+## Flare tints come from here (set by FlightView); default() for standalone use.
+var render_theme: RenderTheme = RenderTheme.default()
+
 var _screen := Vector2.ZERO
 var _intensity := 0.0
 var _glow: Texture2D
@@ -32,9 +35,9 @@ func _draw() -> void:
 	var centre := size * 0.5
 
 	# blooming core: a broad soft halo under a small blinding-white centre
-	_blob(_screen, 260.0 * (0.6 + 0.7 * i), Color(1.0, 0.95, 0.85, 0.55 * i))
-	_blob(_screen, 120.0, Color(1.0, 0.98, 0.9, 0.8 * i))
-	_blob(_screen, 46.0, Color(1.0, 1.0, 0.98, i))
+	_blob(_screen, 260.0 * (0.6 + 0.7 * i), Color(render_theme.flare_halo, 0.55 * i))
+	_blob(_screen, 120.0, Color(render_theme.flare_core, 0.8 * i))
+	_blob(_screen, 46.0, Color(render_theme.flare_center, i))
 
 	# starburst spikes: four long, the rest short
 	var n := 12
@@ -45,18 +48,15 @@ func _draw() -> void:
 		var length := (200.0 if long else 90.0) * (0.6 + 0.7 * i)
 		var width := 3.0 if long else 1.6
 		var a := (1.0 if long else 0.45) * 0.8 * i
-		draw_line(_screen, _screen + dir * length, Color(1.0, 0.98, 0.92, a), width, true)
+		draw_line(_screen, _screen + dir * length, Color(render_theme.flare_spike, a), width, true)
 
 	# lens ghosts along the sun→centre line (strongest when the sun is centred)
 	var axis := centre - _screen
 	var focus := clampf(1.0 - axis.length() / maxf(size.length() * 0.5, 1.0), 0.0, 1.0)
-	for g: Array in [
-			[-0.28, 30.0, Color(0.55, 0.38, 0.2)], [0.26, 46.0, Color(0.25, 0.42, 0.58)],
-			[0.5, 22.0, Color(0.55, 0.3, 0.42)], [0.78, 64.0, Color(0.2, 0.5, 0.45)],
-			[1.15, 34.0, Color(0.5, 0.46, 0.2)], [1.4, 18.0, Color(0.5, 0.3, 0.3)]]:
+	for g: Array in render_theme.flare_ghosts:
 		var pos: Vector2 = _screen + axis * float(g[0])
 		var col: Color = g[2]
-		_blob(pos, float(g[1]) * (0.6 + 0.5 * i), Color(col.r, col.g, col.b, 0.5 * i * focus))
+		_blob(pos, float(g[1]) * (0.6 + 0.5 * i), Color(col, 0.5 * i * focus))
 
 
 func _blob(at: Vector2, radius: float, col: Color) -> void:
@@ -70,7 +70,7 @@ static func _radial_texture() -> Texture2D:
 	var grad := Gradient.new()
 	grad.offsets = PackedFloat32Array([0.0, 0.35, 1.0])
 	grad.colors = PackedColorArray([
-		Color(1, 1, 1, 1), Color(1, 1, 1, 0.28), Color(1, 1, 1, 0)])
+		Color(1, 1, 1, 1), Color(1, 1, 1, 0.28), Color(1, 1, 1, 0)])  # lint-ok: generic white glow ramp, tinted per-draw
 	var tex := GradientTexture2D.new()
 	tex.gradient = grad
 	tex.fill = GradientTexture2D.FILL_RADIAL

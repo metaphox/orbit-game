@@ -8,7 +8,7 @@ var frac := 0.0
 var segments := 10
 var fill := Palette.LIVE
 var empty := Palette.LIVE_DK
-var border := Color(0, 0, 0, 0)  # transparent = no outline (warp graph)
+var border := Palette.TRANSPARENT  # no outline (warp graph)
 var stepped := false             # variable segment heights (warp graph)
 
 

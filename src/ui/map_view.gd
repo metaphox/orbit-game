@@ -334,7 +334,7 @@ func _build_ship_glyph() -> Node3D:
 	cone.top_radius = 0.0
 	cone.bottom_radius = 0.30
 	cone.height = 0.7
-	cone.material = _marker_material(Color(0.85, 1.0, 0.92))  # bright tip = "this way is forward"
+	cone.material = _marker_material(Palette.MAP_NOSE)  # bright tip = "this way is forward"
 	nose.mesh = cone
 	nose.rotation.x = -PI / 2  # cone tip (+Y) -> forward (-Z)
 	nose.position = Vector3(0, 0, -0.95)
