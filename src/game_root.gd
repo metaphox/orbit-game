@@ -462,15 +462,27 @@ func _apply_flight_input(delta: float) -> void:
 		Input.get_axis("pitch_down", "pitch_up"),  # W noses down, S noses up (KSP convention)
 		Input.get_axis("yaw_right", "yaw_left"),
 		Input.get_axis("roll_right", "roll_left"))
-	var command: Vector3
-	if rot != Vector3.ZERO:
-		command = rot
-		ship.sas_mode = ShipSim.SasMode.OFF  # manual stick overrides the hold
-	elif ship.sas_mode != ShipSim.SasMode.OFF:
-		command = ship.sas_command()
+	if rot != Vector3.ZERO and warp_index > 0:
+		warp_index = 0  # maneuvering drops warp, just like throttle does (below)
+
+	if warp_index > 0:
+		# Rotation is a 1x activity. Under warp the orbit sweeps faster than any
+		# real-time slew can track, so SAS snaps its hold and stays locked (like the
+		# autopilot), while a free spin freezes and resumes when warp drops to 1x.
+		if ship.sas_mode != ShipSim.SasMode.OFF:
+			ship.attitude = OrbitalManeuvers.look_along(ship.sas_target_dir())
+			ship.angular_velocity = Vector3.ZERO
+		ship.rcs_command = Vector3.ZERO  # no puffs / camera sway under warp
 	else:
-		command = Vector3.ZERO  # free drift: angular momentum persists until countered
-	ship.integrate_rotation(command, delta)
+		var command: Vector3
+		if rot != Vector3.ZERO:
+			command = rot
+			ship.sas_mode = ShipSim.SasMode.OFF  # manual stick overrides the hold
+		elif ship.sas_mode != ShipSim.SasMode.OFF:
+			command = ship.sas_command()
+		else:
+			command = Vector3.ZERO  # free drift: angular momentum persists until countered
+		ship.integrate_rotation(command, delta)
 
 	var throttle_input := Input.get_axis("throttle_decrease", "throttle_increase")
 	if throttle_input != 0.0:
