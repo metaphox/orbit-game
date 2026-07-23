@@ -208,9 +208,12 @@ func _adaptive_loop_points(el: OrbitElements, nu_ship: float) -> Array[DVec3]:
 		offsets.append(off)
 		off += step
 		step = minf(step * TRAJ_STEP_GROWTH, TRAJ_COARSE_STEP)
+	# Position-only sampler: the perifocal basis is invariant along the orbit,
+	# so compute it once for the whole loop instead of per point (PF-2).
+	var s := el.make_position_sampler()
 	var pts: Array[DVec3] = []
 	for i in range(offsets.size() - 1, 0, -1):
-		pts.append(el.state_at_true_anomaly(nu_ship - offsets[i]).r)
+		pts.append(OrbitElements.sample_position(s, nu_ship - offsets[i]))
 	for i in offsets.size():
-		pts.append(el.state_at_true_anomaly(nu_ship + offsets[i]).r)
+		pts.append(OrbitElements.sample_position(s, nu_ship + offsets[i]))
 	return pts

@@ -243,10 +243,11 @@ func specific_energy() -> float:
 ## r_max produce a closed loop; otherwise the arc is clipped at r_max
 ## (or just inside the asymptotes for unbounded hyperbolas).
 func sample_positions(count: int, r_max := INF) -> Array[DVec3]:
+	var s := make_position_sampler()
 	var pts: Array[DVec3] = []
 	if is_elliptic() and radius_apoapsis() <= r_max:
 		for i in count:
-			pts.append(state_at_true_anomaly(TAU * i / count).r)
+			pts.append(sample_position(s, TAU * i / count))
 		return pts
 	var nu_limit: float
 	if r_max == INF:
@@ -255,8 +256,28 @@ func sample_positions(count: int, r_max := INF) -> Array[DVec3]:
 		nu_limit = true_anomaly_at_radius(r_max)
 	for i in count:
 		var nu := lerpf(-nu_limit, nu_limit, float(i) / float(count - 1))
-		pts.append(state_at_true_anomaly(nu).r)
+		pts.append(sample_position(s, nu))
 	return pts
+
+
+## A reusable position-only sampler for this orbit: [p, e, p_hat, q_hat]. The
+## perifocal basis and semi-latus rectum are invariant along the orbit, so a
+## batch caller computes them once here and feeds each true anomaly through
+## sample_position() - no per-point basis rebuild, velocity, or StateRV (PF-2).
+func make_position_sampler() -> Array:
+	var basis := _perifocal_basis()
+	return [semi_latus_rectum(), e, basis[0], basis[1]]
+
+
+## Position at true anomaly `nu` from a make_position_sampler() array. Matches
+## state_at_true_anomaly(nu).r exactly, but allocates only the returned DVec3.
+static func sample_position(sampler: Array, nu: float) -> DVec3:
+	var p: float = sampler[0]
+	var ecc: float = sampler[1]
+	var p_hat: DVec3 = sampler[2]
+	var q_hat: DVec3 = sampler[3]
+	var r_len := p / (1.0 + ecc * cos(nu))
+	return p_hat.scaled(r_len * cos(nu)).add(q_hat.scaled(r_len * sin(nu)))
 
 
 ## Unit vectors toward periapsis (P) and 90 degrees ahead in-plane (Q).
