@@ -286,6 +286,13 @@ func _unhandled_input(event: InputEvent) -> void:
 	var key := event as InputEventKey
 	if key == null or not key.pressed or key.echo:
 		return
+	# The pause menu is modal: while it's open it owns the keyboard, so nothing
+	# leaks through to the sim (e.g. debug-mode J toggling the autopilot). Only the
+	# resume/close toggles get through; the menu handles its own navigation.
+	if _pause_menu != null:
+		if key.is_action_pressed("pause_menu") or key.is_action_pressed("quick_pause"):
+			_close_pause_menu()
+		return
 	if phase == Phase.REWINDING:
 		_handle_rewind_keys(key)
 		return

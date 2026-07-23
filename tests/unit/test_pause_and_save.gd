@@ -7,6 +7,8 @@ const GameRootScript := preload("res://src/game_root.gd")
 
 func after_each() -> void:
 	GameRootScript.level_index = 0
+	Settings.debug_mode = false
+	Settings.set_value(Settings.MENU_HINTS, false)
 
 
 func _boot() -> Node:
@@ -71,6 +73,23 @@ func test_escape_promotes_quick_pause_to_full_menu() -> void:
 	assert_not_null(game._pause_menu, "escape opens the menu even from a quick-pause")
 
 
+func test_open_pause_menu_swallows_gameplay_keys() -> void:
+	Settings.debug_mode = true  # so autopilot_toggle (J) is live
+	var game := _boot()
+	game._unhandled_input(_key(KEY_ESCAPE))  # open the pause menu
+	assert_not_null(game._pause_menu, "pause menu is open")
+	assert_null(game.director, "autopilot not engaged yet")
+
+	game._unhandled_input(_key(KEY_J))  # debug autopilot toggle - must NOT pass through
+	assert_null(game.director, "J does not reach the game while the menu is open")
+	assert_not_null(game._pause_menu, "and the menu stays open")
+
+	game._unhandled_input(_key(KEY_ESCAPE))  # resume/close still works
+	assert_null(game._pause_menu, "escape still closes the menu")
+	assert_eq(game.phase, game.Phase.FLYING, "and resumes flight")
+	Settings.debug_mode = false
+
+
 func test_escape_after_win_still_exits_directly() -> void:
 	var game := _boot()
 	game.phase = game.Phase.WON
@@ -79,6 +98,19 @@ func test_escape_after_win_still_exits_directly() -> void:
 	game._unhandled_input(_key(KEY_ESCAPE))
 	assert_true(exited[0], "no pause concept once the mission has ended")
 	assert_null(game._pause_menu)
+
+
+func test_pause_menu_f1_toggles_key_hints() -> void:
+	var game := _boot()
+	game._open_pause_menu()
+	assert_false(Settings.menu_hints_on(), "hints hidden by default")
+	assert_true(game._pause_menu._layout.footer_label.text.contains("[F1] KEYS"),
+		"collapsed footer shows the F1 affordance")
+
+	game._pause_menu._unhandled_input(_key(KEY_F1))
+	assert_true(Settings.menu_hints_on(), "F1 shows the hints")
+	assert_true(game._pause_menu._layout.footer_label.text.contains("SELECT"),
+		"and the movement hints now show in the footer")
 
 
 func test_pause_menu_buttons_emit_expected_signals() -> void:

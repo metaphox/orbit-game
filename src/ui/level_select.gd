@@ -1,9 +1,11 @@
 class_name LevelSelect
 extends CanvasLayer
-## Mission-select menu: acts and levels with lock/medal state. Press the
-## number shown next to a mission to fly it, or navigate with Up/Down +
-## Enter (locked missions are skipped). Placeholder styling shared with
-## the HUD's green-on-black look; the CRT shader pass arrives in M7.
+## Mission-select menu: acts and levels with lock/medal state. Up/Down (also
+## W/S or K/J) move between missions (locked ones skipped); Left/Right (also
+## A/D or H/L) jump between acts; Enter launches the highlighted mission. Key
+## hints are hidden by default; F1 toggles them (Settings.menu_hints).
+## Chrome is scene-owned via the shared MenuTextLayout; the mission list is
+## BBCode built here from Palette colours.
 
 signal level_chosen(index: int)
 signal back_pressed
@@ -64,20 +66,21 @@ func _refresh() -> void:
 				var medal := _profile.medal_for(index)
 				var medal_tag := "  [color=%s][%s][/color]" % [gold, medal] if medal != "" else ""
 				var debug_tag := "  [color=%s][DEBUG][/color]" % gold if not unlocked else ""
-				var num_color := highlight if selected else green
-				var title_text := (
-					"[color=%s]%s[/color]" % [highlight, mission_title] if selected
-					else mission_title)
-				lines.append("%s[color=%s][%d][/color] %s%s%s" % [
-					marker, num_color, pos + 1, title_text, medal_tag, debug_tag])
+				var title_color := highlight if selected else green
+				lines.append("%s[color=%s]%s[/color]%s%s" % [
+					marker, title_color, mission_title, medal_tag, debug_tag])
 			else:
-				lines.append("%s[color=%s][ ] --- LOCKED ---[/color]" % [marker, locked])
+				lines.append("%s[color=%s]--- LOCKED ---[/color]" % [marker, locked])
 			pos += 1
 	lines.append("")
 	if Settings.debug_mode:
 		lines.append("[color=%s][DEBUG MODE — ALL LEVELS UNLOCKED][/color]" % gold)
-	lines.append("[color=%s]↑↓ SELECT  ENTER LAUNCH  OR PRESS NUMBER   [ESC] TITLE SCREEN[/color]"
-		% dim)
+	if Settings.menu_hints_on():
+		lines.append(
+			"[color=%s]↑↓ / W S / K J  MISSION     ← → / A D / H L  ACT     ENTER  LAUNCH     [ESC]  TITLE     [F1]  HIDE[/color]"
+			% dim)
+	else:
+		lines.append("[color=%s][F1] KEYS     [ESC] TITLE[/color]" % dim)
 	_text.text = "\n".join(lines)
 
 
@@ -92,6 +95,42 @@ func _move_cursor(delta: int) -> void:
 			_cursor = i
 			_refresh()
 			return
+
+
+## Boundaries [start, end) of each act within _order — act order equals play
+## order, so the flat _order is the acts' indices concatenated.
+func _act_bounds() -> Array:
+	var bounds: Array = []
+	var start := 0
+	for act: Dictionary in Campaign.acts():
+		var count: int = act["indices"].size()
+		bounds.append([start, start + count])
+		start += count
+	return bounds
+
+
+func _current_act(bounds: Array) -> int:
+	for a: int in bounds.size():
+		if _cursor >= bounds[a][0] and _cursor < bounds[a][1]:
+			return a
+	return 0
+
+
+## Jump the cursor to the first selectable mission of the previous/next act,
+## skipping acts whose missions are all locked. No-op with a single act.
+func _move_act(delta: int) -> void:
+	var bounds := _act_bounds()
+	var n := bounds.size()
+	if n <= 1:
+		return
+	var a := _current_act(bounds)
+	for _step: int in n:
+		a = wrapi(a + delta, 0, n)
+		for pos: int in range(bounds[a][0], bounds[a][1]):
+			if _is_selectable(_order[pos]):
+				_cursor = pos
+				_refresh()
+				return
 
 
 func _select_and_activate(pos: int) -> void:
@@ -111,12 +150,16 @@ func _unhandled_input(event: InputEvent) -> void:
 	match key.physical_keycode:
 		KEY_ESCAPE:
 			back_pressed.emit()
-		KEY_UP:
+		KEY_UP, KEY_W, KEY_K:
 			_move_cursor(-1)
-		KEY_DOWN:
+		KEY_DOWN, KEY_S, KEY_J:
 			_move_cursor(1)
+		KEY_LEFT, KEY_A, KEY_H:
+			_move_act(-1)
+		KEY_RIGHT, KEY_D, KEY_L:
+			_move_act(1)
 		KEY_ENTER, KEY_KP_ENTER:
 			_select_and_activate(_cursor)
-		_:
-			if key.physical_keycode >= KEY_1 and key.physical_keycode <= KEY_9:
-				_select_and_activate(key.physical_keycode - KEY_1)
+		KEY_F1:
+			Settings.toggle_menu_hints()
+			_refresh()

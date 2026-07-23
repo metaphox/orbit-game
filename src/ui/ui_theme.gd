@@ -1,10 +1,15 @@
 @tool
 class_name UiTheme
 extends RefCounted
-## Central UI fonts + style helpers for the "ORBITAL OS" look (ref/design-ref.html).
-## The single source of truth for menu/HUD chrome, replacing per-screen
-## SystemFont.new() and duplicated colour constants (TECH_DEBTS.md TD-1).
-## Colours come from Palette; this owns fonts and the shared widget styles.
+## Builds the one Godot Theme for the "ORBITAL OS" look (ref/design-ref.html):
+## `populate(theme)` fills a Theme with the bundled fonts and ~40 type-variation
+## tokens (titles, HUD values, panels, chips, separators, buttons), every colour
+## sourced from Palette (and Palette itself mirrored under the "Palette" theme
+## type for the inspector). `generated_ui_theme.tres` is that Theme — its script
+## just calls populate() — and every menu/HUD scene inherits it, styling nodes
+## purely via `theme_type_variation` (no per-node colour overrides). This is the
+## single source of truth for menu/HUD chrome (TECH_DEBTS.md TD-1); the old
+## per-screen SystemFont.new() + duplicated colour constants are gone.
 
 const DISPLAY := preload("res://assets/fonts/ChakraPetch-Bold.ttf")       # loud headings
 const DISPLAY_SEMI := preload("res://assets/fonts/ChakraPetch-SemiBold.ttf")

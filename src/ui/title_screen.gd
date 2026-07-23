@@ -2,7 +2,8 @@ class_name TitleScreen
 extends CanvasLayer
 ## The splash screen: game title plus the main menu. CONTINUE is disabled
 ## when no profile has ever been active; NEW is disabled once all profile
-## slots are full. Navigable by number key or by Up/Down + Enter.
+## slots are full. Navigate with Up/Down (also W/S or K/J) + Enter. Key hints
+## are hidden by default; F1 toggles them (Settings.menu_hints).
 ## Styled with the shared ORBITAL-OS system (UiTheme + Palette).
 
 signal continue_pressed
@@ -16,6 +17,7 @@ var _text: RichTextLabel
 var _items: Array = []  # [label: String, enabled: bool]
 var _cursor := 0
 var _layout: TitleScreenLayout
+var _slots_base := ""
 
 
 func build(store: ProfileStore) -> void:
@@ -39,12 +41,20 @@ func build(store: ProfileStore) -> void:
 	_text = _layout.menu_text
 	_layout.warning_label.text = "⚠ %s" % store.load_warning if store.load_warning != "" else ""
 	_layout.warning_label.visible = store.load_warning != ""
-	_layout.slots_label.text = "%d / %d PROFILE SLOTS   ·   ↑↓ SELECT   ·   ENTER CONFIRM" % [
-		store.profiles.size(), ProfileStore.MAX_PROFILES]
+	_slots_base = "%d / %d PROFILE SLOTS" % [store.profiles.size(), ProfileStore.MAX_PROFILES]
+	_apply_slots_label()
 
 	_refresh()
 	if Settings.effects_enabled:
 		add_child(ScreenGrade.new())
+
+
+## The bottom status line: profile-slot count plus, when hints are on (F1),
+## the navigation keys. Collapsed to a small "[F1] KEYS" affordance by default.
+func _apply_slots_label() -> void:
+	var hint := "↑↓ / W S / K J  SELECT   ·   ENTER CONFIRM   ·   [F1] HIDE" \
+		if Settings.menu_hints_on() else "[F1] KEYS"
+	_layout.slots_label.text = "%s   ·   %s" % [_slots_base, hint]
 
 
 func _first_enabled() -> int:
@@ -68,7 +78,7 @@ func _refresh() -> void:
 		else:
 			color = Palette.DISABLED
 		var marker := "▶ " if selected else "  "
-		lines.append("[color=%s]%s[%d]  %s[/color]" % [Palette.hex(color), marker, i + 1, label])
+		lines.append("[color=%s]%s%s[/color]" % [Palette.hex(color), marker, label])
 	_text.text = "\n".join(lines)
 
 
@@ -107,11 +117,12 @@ func _unhandled_input(event: InputEvent) -> void:
 	if key == null or not key.pressed or key.echo:
 		return
 	match key.physical_keycode:
-		KEY_UP:
+		KEY_UP, KEY_W, KEY_K:
 			_move_cursor(-1)
-		KEY_DOWN:
+		KEY_DOWN, KEY_S, KEY_J:
 			_move_cursor(1)
 		KEY_ENTER, KEY_KP_ENTER:
 			_select_and_activate(_cursor)
-		KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6:
-			_select_and_activate(key.physical_keycode - KEY_1)
+		KEY_F1:
+			Settings.toggle_menu_hints()
+			_apply_slots_label()

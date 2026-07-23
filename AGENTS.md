@@ -58,7 +58,9 @@ exactly one of these, by meaning:
 |---|---|---|
 | **`RenderTheme`** | The 3D flight view's look — env/sky, body surface colours, trajectory, target ring, corridor, node ghost, orbit marks, ship markers. | `src/ui/render_theme.gd` |
 | **`Palette`** | Semantic UI colours — *one meaning per colour* (green = live/own, amber = planned intent, cyan = target, red = danger), plus ORBITAL-OS chrome tokens. | `src/ui/palette.gd` |
-| **`UiTheme`** | Fonts (Chakra Petch / IBM Plex Mono) and shared widget styles (panels, chips, meters). Colours come *from* `Palette`. | `src/ui/ui_theme.gd` |
+| **`UiTheme`** | Builds **one Godot `Theme`** for all menu/HUD chrome — fonts (Chakra Petch / IBM Plex Mono) and ~40 `theme_type_variation` tokens (titles, HUD values, panels, chips, separators, buttons). Every colour is sourced *from* `Palette`. | `src/ui/ui_theme.gd` |
+
+The generated Theme is `src/ui/generated_ui_theme.tres` — a script-only `Theme` whose `_init()` runs `UiTheme.populate(self)`, so it's **rebuilt from `Palette` on every load** (nothing is baked into the `.tres`, so it can't drift). `UiTheme.shared()` returns that same cached instance for code/tests.
 
 Consequences to respect:
 
@@ -70,6 +72,24 @@ Consequences to respect:
   per screen — pull from `Palette` (use `Palette.hex()` for BBCode). The 3D
   renderers read from the `RenderTheme` threaded into their `build(...)` (optional
   param, defaults to `RenderTheme.default()` so tests stay simple).
+- **Scene-first UI (post–UI-revamp).** Menu/HUD chrome is authored in `.tscn`
+  layouts, not built imperatively. A layout scene (`*_layout.tscn`, root
+  `class_name *Layout`) applies the generated Theme at its root and styles nodes
+  **only** via `theme_type_variation` — never per-node `theme_override_colors` and
+  never inline `Color(...)`. A paired behaviour script (`extends CanvasLayer`, or
+  `Hud`) instantiates the layout, reaches its `%UniqueName` nodes, and owns
+  data-binding/input/signals. Typed component scenes (`TopTelemetryBar`,
+  `MinimapObjectiveRail`, `GuidanceWarpRail`, `PropellantFlightStrip`,
+  `FlightToolbar`, `HudOverlays`) expose `configure()`/`refresh()` and are composed
+  by `hud_layout.tscn`. Any colour a scene needs at runtime (a `ColorRect` fill) is
+  set in the layout script from `Palette`, not baked into the `.tscn`. Several of
+  these scripts are `@tool` so they preview in the editor — keep editor-only code
+  (save hooks, placeholder builds) guarded by `Engine.is_editor_hint()`.
+- **Lint scope.** `tools/lint_ui_colors.sh` (in `tools/test.sh`) enforces the
+  no-raw-`Color()` rule on `src/ui/*.gd` only; it does **not** scan `.tscn`. Keep
+  scene *chrome* colour-clean by construction (type variations). The remaining raw
+  `Color(...)` in scenes are 3D **materials** (`station_model.tscn` — a TD-3
+  exception — and `map_view_layout.tscn`), not chrome.
 - **Adding a new coloured surface?** Add a named field to the right seam and read it
   — never inline the literal at the call site. Intentional exceptions (chase fill
   light, star-dust tint, the shared station `.tscn`) are documented in TD-3; don't
@@ -83,7 +103,8 @@ spec:
 - `ref/design-ref.html` — the "ORBITAL OS" system: menus, panels, typography,
   chrome tokens. `Palette` + `UiTheme` implement this.
 - `ref/hud-ref.html` — the in-flight HUD layout (top telemetry bar, rails, bottom
-  strip, attitude director). `src/ui/hud.gd` is built to it.
+  strip, attitude director). Realised as `hud_layout.tscn` + the typed component
+  scenes above; `src/ui/hud.gd` is a thin coordinator (`build`/`refresh` fan-out).
 - `UI-DESIGN.md` — the written companion to the palette semantics; keep it and
   `Palette` in lockstep.
 

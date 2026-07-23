@@ -283,7 +283,7 @@ func test_title_screen_arrow_navigation_skips_disabled_items() -> void:
 	assert_true(quit_signaled[0], "Enter on the highlighted item activates it")
 
 
-func test_title_screen_number_key_still_works_and_moves_cursor() -> void:
+func test_title_screen_activation_moves_cursor() -> void:
 	var store := ProfileStore.load_or_new(SAVE_TEST_PATH)
 	store.create_profile("Ada")  # now CONTINUE is enabled
 	var screen := TitleScreen.new()
@@ -292,9 +292,90 @@ func test_title_screen_number_key_still_works_and_moves_cursor() -> void:
 
 	var settings_signaled := [false]
 	screen.settings_pressed.connect(func(): settings_signaled[0] = true)
-	screen._select_and_activate(3)  # [4] SETTINGS
+	screen._select_and_activate(3)  # index 3 = SETTINGS
 	assert_true(settings_signaled[0], "direct activation still works")
 	assert_eq(screen._cursor, 3, "activating an item also moves the cursor there")
+
+
+func _key(keycode: Key) -> InputEventKey:
+	var event := InputEventKey.new()
+	event.physical_keycode = keycode
+	event.pressed = true
+	return event
+
+
+func test_menu_navigation_keys_move_the_cursor_and_numbers_do_not() -> void:
+	var store := ProfileStore.load_or_new(SAVE_TEST_PATH)
+	store.create_profile("Ada")  # CONTINUE enabled -> cursor starts at 0
+	var screen := TitleScreen.new()
+	add_child_autofree(screen)
+	screen.build(store)
+	assert_eq(screen._cursor, 0, "starts on CONTINUE")
+
+	for down_key: Key in [KEY_DOWN, KEY_S, KEY_J]:
+		screen._cursor = 0
+		screen._unhandled_input(_key(down_key))
+		assert_eq(screen._cursor, 1, "%s moves the cursor down" % OS.get_keycode_string(down_key))
+	for up_key: Key in [KEY_UP, KEY_W, KEY_K]:
+		screen._cursor = 1
+		screen._unhandled_input(_key(up_key))
+		assert_eq(screen._cursor, 0, "%s moves the cursor up" % OS.get_keycode_string(up_key))
+
+	# Number keys no longer select or move anything.
+	screen._cursor = 2
+	for number: Key in [KEY_1, KEY_3, KEY_5]:
+		screen._unhandled_input(_key(number))
+		assert_eq(screen._cursor, 2, "number keys no longer move the menu cursor")
+
+
+func test_menu_hints_hidden_by_default_and_f1_toggles_them() -> void:
+	assert_false(Settings.menu_hints_on(), "menu key hints are hidden by default")
+	var screen := LevelSelect.new()
+	add_child_autofree(screen)
+	screen.build(Profile.new())
+	assert_true(screen._text.text.contains("[F1] KEYS"), "collapsed footer shows the F1 affordance")
+	assert_false(screen._text.text.contains("HIDE"), "the movement hints are hidden by default")
+
+	screen._unhandled_input(_key(KEY_F1))
+	assert_true(Settings.menu_hints_on(), "F1 turns the hints on")
+	assert_true(screen._text.text.contains("HIDE"), "and the full movement hints now show")
+
+	screen._unhandled_input(_key(KEY_F1))
+	assert_false(Settings.menu_hints_on(), "F1 again hides them")
+
+
+func test_level_select_act_navigation_jumps_between_acts() -> void:
+	Settings.debug_mode = true  # unlock everything so every act has a selectable mission
+	var screen := LevelSelect.new()
+	add_child_autofree(screen)
+	screen.build(Profile.new())
+
+	var bounds := screen._act_bounds()
+	assert_gt(bounds.size(), 1, "the campaign has multiple acts to move between")
+	assert_eq(screen._cursor, 0, "starts on the first mission of act 0")
+
+	screen._unhandled_input(_key(KEY_RIGHT))  # next act
+	assert_eq(screen._cursor, bounds[1][0], "Right jumps to the first mission of the next act")
+	screen._unhandled_input(_key(KEY_H))      # vim-left: previous act
+	assert_eq(screen._cursor, bounds[0][0], "H jumps back to the first mission of the previous act")
+
+
+func test_load_profile_arrow_navigation_and_enter_loads() -> void:
+	var store := ProfileStore.load_or_new(SAVE_TEST_PATH)
+	store.create_profile("Ada")
+	store.create_profile("Bo")
+	var screen := LoadProfileScreen.new()
+	add_child_autofree(screen)
+	screen.build(store)
+	assert_eq(screen._cursor, 0, "starts on the first profile")
+
+	screen._unhandled_input(_key(KEY_J))  # vim-down
+	assert_eq(screen._cursor, 1, "J moves to the second profile")
+
+	var chosen := [""]
+	screen.profile_chosen.connect(func(chosen_name): chosen[0] = chosen_name)
+	screen._unhandled_input(_key(KEY_ENTER))
+	assert_eq(chosen[0], "Bo", "Enter loads the highlighted profile")
 
 
 func test_level_select_arrow_navigation_skips_locked_missions() -> void:

@@ -6,7 +6,7 @@ This document grows one instrument at a time. Each section is the source of trut
 
 ## Palette (semantic — one meaning per colour)
 
-Defined in code as `Palette` (`src/ui/palette.gd`); keep the two in lockstep.
+Defined in code as `Palette` (`src/ui/palette.gd`); keep the two in lockstep. Menu/HUD scenes don't reference these hexes directly — `UiTheme` mirrors `Palette` into the one generated Godot `Theme` (`generated_ui_theme.tres`), and scenes style nodes via `theme_type_variation` (see AGENTS.md §3). Change a colour in `Palette` and this table; every scene follows.
 
 | Role | Colour | Hex | Used for |
 |---|---|---|---|

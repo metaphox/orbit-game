@@ -10,11 +10,17 @@ extends RefCounted
 ## come for free. All values must be JSON-safe (bool/number/string/array/dict).
 const DEFAULTS := {
 	"effects_enabled": true,   # CRT film grade / scanlines toggle
+	"menu_hints": false,       # show the up/down/act key hints in menus (F1 toggles)
 	"key_bindings": {},        # action -> Array of serialized InputEvents (TD-4)
 	"volume_master": 0.8,      # 0..1, wired when audio lands
 	"volume_music": 0.7,
 	"volume_sfx": 0.9,
 }
+
+## Menus hide their navigation key hints by default (most players don't need
+## them); F1 toggles them in any modal menu. Kept here so every screen reads one
+## shared, persisted flag.
+const MENU_HINTS := "menu_hints"
 
 static var _values: Dictionary = DEFAULTS.duplicate(true)
 
@@ -44,6 +50,14 @@ static func set_value(key: String, value: Variant) -> void:
 
 static func get_bool(key: String) -> bool:
 	return bool(get_value(key))
+
+
+static func menu_hints_on() -> bool:
+	return get_bool(MENU_HINTS)
+
+
+static func toggle_menu_hints() -> void:
+	set_value(MENU_HINTS, not menu_hints_on())
 
 
 static func get_float(key: String) -> float:

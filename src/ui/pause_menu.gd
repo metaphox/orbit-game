@@ -2,8 +2,10 @@ class_name PauseMenu
 extends CanvasLayer
 ## In-flight pause overlay: Resume / Save Progress / Restart / Quit to
 ## mission select. Semi-transparent backdrop (unlike the other full-screen
-## menus) so the frozen flight is still visible behind it. Navigable by
-## number key or Up/Down + Enter, matching the title/mission-select menus.
+## menus) so the frozen flight is still visible behind it. Navigate with
+## Up/Down (also W/S or K/J) + Enter, matching the title/mission-select menus.
+## Key hints are hidden by default; F1 toggles them (and is swallowed here so it
+## doesn't also open the in-flight HUD keybind overlay behind the menu).
 
 signal resume_pressed
 signal save_pressed
@@ -20,11 +22,19 @@ var _layout: MenuTextLayout
 func build() -> void:
 	_layout = preload("res://src/ui/menu_text_layout.tscn").instantiate()
 	add_child(_layout)
-	_layout.configure("■ PAUSED ■", "",
-		"↑↓ SELECT   ENTER CONFIRM   OR PRESS NUMBER   [ESC]/[SPACE]/[0] RESUME", true)
+	_layout.configure("■ PAUSED ■", "", "", true)
 	_text = _layout.content
+	_apply_footer()
 
 	_refresh()
+
+
+## Footer: the resume keys always show; the up/down nav hints only when F1 is on.
+func _apply_footer() -> void:
+	var nav := "↑↓ / W S / K J  SELECT   ENTER CONFIRM   [F1] HIDE   " \
+		if Settings.menu_hints_on() else "[F1] KEYS   "
+	_layout.footer_label.text = nav + "[ESC]/[SPACE]/[0] RESUME"
+	_layout.footer_label.visible = true
 
 
 func show_saved_confirmation() -> void:
@@ -41,7 +51,7 @@ func _refresh() -> void:
 		var selected := i == _cursor
 		var color := highlight if selected else green
 		var marker := "▶ " if selected else "  "
-		lines.append("[color=%s]%s[%d] %s[/color]" % [color, marker, i + 1, _items[i]])
+		lines.append("[color=%s]%s%s[/color]" % [color, marker, _items[i]])
 	if _saved_flash:
 		lines.append("")
 		lines.append("[color=%s]✓ PROGRESS SAVED[/color]" % green)
@@ -76,11 +86,13 @@ func _unhandled_input(event: InputEvent) -> void:
 	if key == null or not key.pressed or key.echo:
 		return
 	match key.physical_keycode:
-		KEY_UP:
+		KEY_UP, KEY_W, KEY_K:
 			_move_cursor(-1)
-		KEY_DOWN:
+		KEY_DOWN, KEY_S, KEY_J:
 			_move_cursor(1)
 		KEY_ENTER, KEY_KP_ENTER:
 			_activate(_cursor)
-		KEY_1, KEY_2, KEY_3, KEY_4:
-			_activate(key.physical_keycode - KEY_1)
+		KEY_F1:
+			Settings.toggle_menu_hints()
+			_apply_footer()
+			get_viewport().set_input_as_handled()
