@@ -22,7 +22,7 @@ func _draw() -> void:
 	if vp_size.x <= 0.0 or vp_size.y <= 0.0:
 		return
 	var to_panel := size / vp_size  # SubViewport px -> this control's px
-	for pt in points:
+	for pt: Dictionary in points:
 		var world: Vector3 = pt["pos"]
 		if cam.is_position_behind(world):
 			continue

@@ -16,6 +16,10 @@ truth for *what* we build** — change the design doc before changing behaviour.
   *why*, not *what*. Match the surrounding file's idiom, naming, and comment density.
 - **Keep the suite green.** `./tools/test.sh` must pass, and its coverage guard
   (`tests/.test-baseline`) must not drop. Prefer headless-testable designs.
+- **Zero GDScript warnings.** The project is warning-clean; keep it that way (§7).
+  Godot prints warnings on every script load, so a run with `--debug` or the editor
+  surfaces them. Check before handing off:
+  `godot --headless --debug --import 2>&1 | grep WARNING` must print nothing.
 
 ## 1. What the game is (one paragraph)
 
@@ -97,3 +101,33 @@ before assuming a subsystem is finished, and add a row when you defer something.
 - Favour logic that can be exercised without a live window or input simulation
   (this is why maneuver-node editing is keyboard-event-driven and profiles/saves
   round-trip through disk in tests). New systems should follow suit.
+
+## 7. GDScript style — statically typed, warning-free
+
+Godot's type-safety warnings are all treated as defects (§0). Write **fully
+statically typed** code so none fire; the common cases that bite:
+
+- **Type every declaration.** Function params, return types, and `var`s carry a
+  static type (annotate, or use `:=` so it's inferred). An untyped param/var is a
+  warning, not a shortcut.
+- **Typed loop variables:** `for body: BodyDef in level.moons:` and
+  `for i: int in count:` — never a bare `for x in …`. Same for dictionary keys
+  (`for key: String in DEFAULTS:`).
+- **Typed lambdas, params *and* return:** `func(s: ShipSim) -> DVec3: return s.v`.
+  The autopilot (`src/autopilot/flight_director.gd`) is the reference — its phase
+  closures type both sides. `.call()` returns Variant; assigning it to a typed
+  target is fine (Godot inserts the runtime check).
+- **Enum from int needs a cast:** assigning an integer expression to an enum-typed
+  target warns — cast it: `_mode = ((int(_mode) + 1) % Mode.size()) as Mode`,
+  `e.physical_keycode = keycode as Key`.
+- **Unused params/vars:** prefix with `_` (`func _build_right_rail(_level: LevelDef)`)
+  or delete them. Only prefix what's genuinely unused — don't blanket-underscore.
+- **Don't shadow built-ins or outer scope:** no local named `wrap`, `min`, `max`,
+  etc. (shadows a global function), and a lambda param must not reuse an enclosing
+  param's name.
+- **Intentional integer division** (e.g. `HH:MM:SS` from seconds) is annotated
+  `@warning_ignore("integer_division")` on the statement, not left to warn.
+
+To type a reference to the mission root across files, `src/game_root.gd` is
+`class_name GameRoot` (its members — `ship`, `level`, `sim_time`, `warp_index`,
+`WARP_STEPS` — are themselves typed, so `game: GameRoot` accesses stay safe).

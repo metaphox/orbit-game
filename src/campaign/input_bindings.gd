@@ -61,5 +61,5 @@ static func primary_key_label(action: String) -> String:
 
 static func _key_event(physical_keycode: int) -> InputEventKey:
 	var e := InputEventKey.new()
-	e.physical_keycode = physical_keycode
+	e.physical_keycode = physical_keycode as Key
 	return e

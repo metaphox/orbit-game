@@ -185,7 +185,7 @@ func focus_point(ship: ShipSim, t: float) -> Vector3:
 ## Orthographic size (render units) that frames the ship's current orbit and,
 ## when the ship is at the root body, its target - so AUTO zoom fills the panel
 ## instead of leaving dead margin. Measured from the current parent centre.
-func auto_extent(ship: ShipSim, t: float) -> float:
+func auto_extent(ship: ShipSim, _t: float) -> float:
 	var el := ship.current_elements()
 	var r_max := minf(_level.draw_limit, ship.body.soi_radius * 1.15)
 	var reach := ship.r.length()

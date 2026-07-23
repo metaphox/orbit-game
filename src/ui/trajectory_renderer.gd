@@ -161,7 +161,7 @@ func _build_corridor_band(radius: float, tol: float) -> ImmediateMesh:
 	edge_mat.emission_enabled = true
 	edge_mat.emission = _theme.corridor_color
 	edge_mat.emission_energy_multiplier = 1.5
-	for edge_radius in [inner, outer]:
+	for edge_radius: float in [inner, outer]:
 		mesh.surface_begin(Mesh.PRIMITIVE_LINE_STRIP, edge_mat)
 		for i in seg + 1:
 			var ang := TAU * i / seg

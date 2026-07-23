@@ -1,3 +1,4 @@
+class_name GameRoot
 extends Node3D
 ## A single flyable mission: sim clock, event-aware warp, input, win/fail
 ## state, view toggle. Self-contained and directly loadable (every headless

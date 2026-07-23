@@ -346,7 +346,7 @@ func _build_title_chip(bar: Control, level: LevelDef) -> void:
 
 # ══════════════════════════════════════════════════ LEFT RAIL ══
 
-func _build_left_rail(level: LevelDef) -> void:
+func _build_left_rail(_level: LevelDef) -> void:
 	var rail := VBoxContainer.new()
 	rail.add_theme_constant_override("separation", 12)
 	rail.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -390,7 +390,7 @@ func _build_left_rail(level: LevelDef) -> void:
 
 # ══════════════════════════════════════════════════ RIGHT RAIL ══
 
-func _build_right_rail(level: LevelDef) -> void:
+func _build_right_rail(_level: LevelDef) -> void:
 	var rail := VBoxContainer.new()
 	rail.add_theme_constant_override("separation", 12)
 	rail.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -806,7 +806,7 @@ func _build_rewind_widgets() -> void:
 	_rewind_label.add_theme_color_override("font_color", AMBER)
 	_rewind_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_rewind_label.visible = false
-	var wrap := PanelContainer.new()
+	var wrap_panel := PanelContainer.new()
 	var box := StyleBoxFlat.new()
 	box.bg_color = Palette.INTENT_DK
 	box.set_border_width_all(1)
@@ -815,14 +815,14 @@ func _build_rewind_widgets() -> void:
 	box.set_content_margin(SIDE_RIGHT, 16)
 	box.set_content_margin(SIDE_TOP, 7)
 	box.set_content_margin(SIDE_BOTTOM, 7)
-	wrap.add_theme_stylebox_override("panel", box)
-	wrap.add_child(_rewind_label)
-	# keep the wrap visibility tied to the label so an empty line hides the chip
-	_rewind_label.visibility_changed.connect(func() -> void: wrap.visible = _rewind_label.visible)
-	wrap.visible = false
-	add_child(wrap)
-	wrap.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP, Control.PRESET_MODE_MINSIZE, 58)
-	wrap.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	wrap_panel.add_theme_stylebox_override("panel", box)
+	wrap_panel.add_child(_rewind_label)
+	# keep the chip visibility tied to the label so an empty line hides the chip
+	_rewind_label.visibility_changed.connect(func() -> void: wrap_panel.visible = _rewind_label.visible)
+	wrap_panel.visible = false
+	add_child(wrap_panel)
+	wrap_panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP, Control.PRESET_MODE_MINSIZE, 58)
+	wrap_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
 
 	_rewind_timeline = RewindTimeline.new()
 	_rewind_timeline.font = _font

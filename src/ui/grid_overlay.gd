@@ -27,7 +27,7 @@ func _input(event: InputEvent) -> void:
 		return
 	var k := event as InputEventKey
 	if k != null and k.pressed and not k.echo and k.unicode == 0x23:  # '#'
-		_mode = (int(_mode) + 1) % Mode.size()
+		_mode = ((int(_mode) + 1) % Mode.size()) as Mode
 		match _mode:
 			Mode.WHITE:
 				_canvas.line = Palette.GRID_WHITE

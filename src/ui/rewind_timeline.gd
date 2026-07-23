@@ -32,7 +32,7 @@ func _draw() -> void:
 
 	draw_line(Vector2(x0, y), Vector2(x1, y), LINE, 2.0)
 
-	for lm in landmarks:
+	for lm: Dictionary in landmarks:
 		var lx := _x(lm["sim_time"], x0, x1, span)
 		var d := 4.0
 		draw_colored_polygon(PackedVector2Array([
@@ -68,4 +68,5 @@ func _centered(text: String, cx: float, baseline_y: float, color: Color, fs: int
 
 func _clock(t: float) -> String:
 	var s := int(t)
+	@warning_ignore("integer_division")  # HH:MM:SS wants the floored quotient
 	return "%02d:%02d:%02d" % [s / 3600, (s / 60) % 60, s % 60]

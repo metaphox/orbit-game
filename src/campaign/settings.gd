@@ -58,7 +58,7 @@ static func to_dict() -> Dictionary:
 
 ## Load prefs, keeping only known keys (ignores stale/unknown ones).
 static func from_dict(data: Dictionary) -> void:
-	for key in DEFAULTS:
+	for key: String in DEFAULTS:
 		if data.has(key):
 			_values[key] = data[key]
 	effects_enabled = bool(_values.get("effects_enabled", true))
