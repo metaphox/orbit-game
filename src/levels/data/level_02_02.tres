@@ -9,7 +9,6 @@ script = ExtResource("1_tukx0")
 name = "EARTH"
 mu = 76760000000.0
 radius = 63710.0
-color = Color(0.16, 0.3, 0.48, 1)
 
 [sub_resource type="Resource" id="Resource_j5uuj"]
 script = ExtResource("1_tukx0")
@@ -18,7 +17,6 @@ mu = 944000000.0
 radius = 17374.0
 soi_radius = 660000.0
 parent = SubResource("Resource_4htxi")
-color = Color(0.62, 0.6, 0.58, 1)
 orbit_radius = 3844000.0
 orbit_phase_deg = 114.59155902616465
 

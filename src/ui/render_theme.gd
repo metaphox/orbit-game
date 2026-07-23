@@ -20,6 +20,15 @@ var sky_shader: Shader = preload("res://src/shaders/starfield_sky.gdshader")
 # Bodies
 var body_shader: Shader = preload("res://src/shaders/celestial_body.gdshader")
 var earth_map: Texture2D = preload("res://assets/textures/earth_abstract.svg")
+# Surface base colour per body kind — the canonical palette shared by every level
+# and the decorative Sun/Moon. Generic (unknown-kind) bodies keep their own .tres
+# `color`. Keyed by BodyRenderer.BODY_* to keep those constants in one place.
+var body_colors := {
+	BodyRenderer.BODY_EARTH: Color(0.16, 0.3, 0.48),
+	BodyRenderer.BODY_MOON: Color(0.62, 0.6, 0.58),
+	BodyRenderer.BODY_SUN: Color(0.95, 0.75, 0.3),
+	BodyRenderer.BODY_MARS: Color(0.72, 0.36, 0.22),
+}
 var atmosphere_shader: Shader = preload("res://src/shaders/atmosphere.gdshader")
 var atmosphere_glow_color := Color(0.10, 0.66, 0.88)
 var atmosphere_glow_strength := 0.76

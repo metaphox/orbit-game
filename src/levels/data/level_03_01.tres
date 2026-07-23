@@ -9,7 +9,6 @@ script = ExtResource("1_71mek")
 name = "SOL"
 mu = 54800000000000.0
 radius = 400000.0
-color = Color(0.95, 0.75, 0.3, 1)
 
 [sub_resource type="Resource" id="Resource_5evap"]
 script = ExtResource("1_71mek")
@@ -18,7 +17,6 @@ mu = 76760000000.0
 radius = 63710.0
 soi_radius = 9240000.0
 parent = SubResource("Resource_ynib7")
-color = Color(0.16, 0.3, 0.48, 1)
 orbit_radius = 40000000.0
 
 [sub_resource type="Resource" id="Resource_sft2l"]
@@ -28,7 +26,6 @@ mu = 8210000000.0
 radius = 33900.0
 soi_radius = 3000000.0
 parent = SubResource("Resource_ynib7")
-color = Color(0.72, 0.36, 0.22, 1)
 orbit_radius = 60000000.0
 orbit_phase_deg = 43.76
 

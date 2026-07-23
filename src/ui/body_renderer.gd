@@ -121,7 +121,6 @@ func _build_ambient(level: LevelDef) -> void:
 		var sun := BodyDef.new()
 		sun.name = "SOL"
 		sun.radius = 4.0e5
-		sun.color = Color(0.95, 0.75, 0.3)
 		var toward := (Basis.from_euler(_theme.sun_rotation) * Vector3(0.0, 0.0, 1.0)).normalized()
 		# ~1.2e7 m puts the 4e5 m disc at ~1.9°, larger-than-life so it dominates
 		# the sky; the high emission then blooms it into a blinding star.
@@ -135,7 +134,6 @@ func _build_ambient(level: LevelDef) -> void:
 		moon.name = "MOON"
 		moon.radius = 80000.0  # ~1.2° — larger than life so it reads clearly
 		moon.mu = 944000000.0
-		moon.color = Color(0.62, 0.6, 0.58)
 		moon.parent = level.body
 		moon.orbit_radius = 3844000.0
 		moon.orbit_phase_deg = 114.59155902616465
@@ -213,7 +211,7 @@ func _make_body_material(body: BodyDef, kind: int, emission_strength := 1.0) -> 
 	var material := ShaderMaterial.new()
 	material.shader = _theme.body_shader
 	material.set_shader_parameter("body_kind", kind)
-	material.set_shader_parameter("base_color", body.color)
+	material.set_shader_parameter("base_color", _theme.body_colors.get(kind, body.color))
 	material.set_shader_parameter("seed", float(absi(body.name.hash() % 2048)) / 173.0)
 	material.set_shader_parameter("emission_strength", emission_strength)
 	if kind == BODY_EARTH:
