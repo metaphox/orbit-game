@@ -32,6 +32,13 @@ var _ambient_meshes: Array[MeshInstance3D] = []
 var _ambient_orbit: Array = []            # BodyDef (orbiting) or null (fixed position)
 var _ambient_fixed: Array[DVec3] = []     # used when the paired _ambient_orbit is null
 var _ambient_rates: Array[float] = []
+var _ambient_kinds: Array[int] = []       # BODY_* per ambient body (for invariants/tests)
+## True for a body that follows the ship at a fixed direction/distance (the
+## decorative Sun), rather than sitting at an absolute point. Such a body models
+## an infinitely-distant light: it must stay in the sunlight direction from the
+## ship so it lines up with the directional light and the sky's sun-wash, instead
+## of parallax-shifting off them once the ship is far from the root origin.
+var _ambient_ship_relative: Array[bool] = []
 
 ## Ambient-Sun state read by FlightView to drive the sky wash-out + lens flare.
 var has_sun := false
@@ -95,8 +102,15 @@ func sync(t: float, ship_abs: DVec3, side_active: bool) -> void:
 			_ambient_meshes[i].visible = false
 			continue
 		_ambient_meshes[i].visible = true
-		var world: DVec3 = _ambient_orbit[i].position_at(t) if _ambient_orbit[i] != null else _ambient_fixed[i]
-		var rel := world.sub(ship_abs)
+		# A ship-relative body (the Sun) keeps a fixed offset from the ship so it
+		# stays in the light direction; others sit at an absolute point/orbit.
+		var rel: DVec3
+		if _ambient_ship_relative[i]:
+			rel = _ambient_fixed[i]
+		elif _ambient_orbit[i] != null:
+			rel = _ambient_orbit[i].position_at(t).sub(ship_abs)
+		else:
+			rel = _ambient_fixed[i].sub(ship_abs)
 		var dist := rel.length()
 		var body_scale := CHASE_BODY_CAP / dist if dist > CHASE_BODY_CAP else 1.0
 		_ambient_meshes[i].position = rel.scaled(body_scale).to_vector3()
@@ -124,8 +138,11 @@ func _build_ambient(level: LevelDef) -> void:
 		var toward := (Basis.from_euler(_theme.sun_rotation) * Vector3(0.0, 0.0, 1.0)).normalized()
 		# ~1.2e7 m puts the 4e5 m disc at ~1.9°, larger-than-life so it dominates
 		# the sky; the high emission then blooms it into a blinding star.
+		# Ship-relative: the "position" is a fixed offset in the sunlight direction,
+		# so the disc always sits where the light comes from (no parallax vs the sky
+		# wash once the ship is millions of units from the root, e.g. at the Moon).
 		var pos := DVec3.new(toward.x, toward.y, toward.z).scaled(1.2e7)
-		_sun_mesh = _add_ambient(sun, null, pos, 8.0)
+		_sun_mesh = _add_ambient(sun, null, pos, 8.0, true)
 		has_sun = true
 		sun_dir = toward
 
@@ -147,7 +164,8 @@ func _level_has_moon(level: LevelDef) -> bool:
 	return false
 
 
-func _add_ambient(def: BodyDef, orbit: BodyDef, fixed_pos: DVec3, emission := 1.0) -> MeshInstance3D:
+func _add_ambient(def: BodyDef, orbit: BodyDef, fixed_pos: DVec3, emission := 1.0,
+		ship_relative := false) -> MeshInstance3D:
 	var kind := _body_kind(def.name)
 	var mesh := MeshInstance3D.new()
 	mesh.mesh = _make_faceted_sphere(def.radius, 30, 16)
@@ -157,6 +175,8 @@ func _add_ambient(def: BodyDef, orbit: BodyDef, fixed_pos: DVec3, emission := 1.
 	_ambient_orbit.append(orbit)
 	_ambient_fixed.append(fixed_pos)
 	_ambient_rates.append(_rotation_rate_for(kind))
+	_ambient_ship_relative.append(ship_relative)
+	_ambient_kinds.append(kind)
 	return mesh
 
 
