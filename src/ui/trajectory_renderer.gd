@@ -25,6 +25,12 @@ var _traj_instance: MeshInstance3D
 var _traj_material: StandardMaterial3D
 var _target_instance: MeshInstance3D
 
+# The conic geometry is a pure function of (elements revision, ship anomaly);
+# these track what the current mesh was built for so an unchanged frame - a
+# frozen phase, or a settled rewind scrub - skips the resample entirely.
+var _cached_revision := -1
+var _cached_time := INF
+
 
 func build(level: LevelDef, theme: RenderTheme) -> void:
 	_theme = theme
@@ -108,10 +114,23 @@ func build(level: LevelDef, theme: RenderTheme) -> void:
 ## stays glued to the ship (first vertex exactly on the ship). `guidance_enabled`
 ## false (hardcore) hides the prediction line; the target ring always stays.
 func sync(ship: ShipSim, ship_abs: DVec3, t: float, guidance_enabled: bool) -> void:
+	# Cheap every frame: keep the line glued to the ship and the ring on its body.
 	_traj_instance.position = ship.r.neg().to_vector3()  # current parent
 	_target_instance.position = _ring_body.position_at(t).sub(ship_abs).to_vector3()
-	_rebuild_line(ship)
 	_traj_instance.visible = guidance_enabled
+	# Hardcore hides the line outright - never pay the sampling + mesh-upload cost
+	# for geometry no one can see.
+	if not guidance_enabled:
+		return
+	# The conic only changes when the elements are refit (ship.revision) or the
+	# ship walks along it (ship.last_time drives the ship-centered density). When
+	# a phase is frozen (PAUSED/FAILED, or a settled rewind scrub) both hold, so
+	# skip the rebuild - camera orbiting doesn't change this ship-relative line.
+	if ship.revision == _cached_revision and ship.last_time == _cached_time:
+		return
+	_cached_revision = ship.revision
+	_cached_time = ship.last_time
+	_rebuild_line(ship)
 
 
 ## The entry-corridor gate: a faint filled amber annulus between the periapsis
@@ -189,9 +208,12 @@ func _adaptive_loop_points(el: OrbitElements, nu_ship: float) -> Array[DVec3]:
 		offsets.append(off)
 		off += step
 		step = minf(step * TRAJ_STEP_GROWTH, TRAJ_COARSE_STEP)
+	# Position-only sampler: the perifocal basis is invariant along the orbit,
+	# so compute it once for the whole loop instead of per point (PF-2).
+	var s := el.make_position_sampler()
 	var pts: Array[DVec3] = []
 	for i in range(offsets.size() - 1, 0, -1):
-		pts.append(el.state_at_true_anomaly(nu_ship - offsets[i]).r)
+		pts.append(OrbitElements.sample_position(s, nu_ship - offsets[i]))
 	for i in offsets.size():
-		pts.append(el.state_at_true_anomaly(nu_ship + offsets[i]).r)
+		pts.append(OrbitElements.sample_position(s, nu_ship + offsets[i]))
 	return pts

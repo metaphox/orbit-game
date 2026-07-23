@@ -80,7 +80,12 @@ func sync(ship: ShipSim, delta: float, side_distance: float, guidance_enabled: b
 	_traj_timer -= delta
 	if _traj_timer <= 0.0:
 		_traj_timer = TRAJ_REFRESH
-		_rebuild_node_ghost(ship)
+		# The node ghost + its child-SOI encounter scan is a predictive aid, and
+		# the scan is the pricey part (see _encounter_entry_time). Skip the whole
+		# rebuild in hardcore, where it's hidden anyway; the orbit marks (ap/pe/
+		# nodes/impact) are informational and still update.
+		if guidance_enabled:
+			_rebuild_node_ghost(ship)
 		_update_orbit_marks(ship, ship.current_elements(), side_distance)
 
 	if not guidance_enabled:  # hardcore: no node ghost / preview
@@ -295,6 +300,11 @@ func _rebuild_node_ghost(ship: ShipSim) -> void:
 		for p: DVec3 in arc_pts:
 			_preview_mesh.surface_add_vertex(p.to_vector3())
 		_preview_mesh.surface_end()
-		_preview_anchor = moon.position_at(entry)
+		# Anchor the moon-centric arc at the moon's position in the ship's own
+		# (parent) frame, matching the ship-relative posing every child here
+		# uses (sync subtracts ship.r). moon.parent == ship.body in this loop,
+		# so this is the moon relative to the frame the ship coasts in - the
+		# root-frame moon.position_at only lined up inside the root body's SOI.
+		_preview_anchor = Frames.position_relative_to(moon, ship.body, entry)
 		_preview_active = true
 		break

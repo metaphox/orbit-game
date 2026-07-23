@@ -50,6 +50,17 @@ const REWIND_SELECTED := Color(1.0, 0.85, 0.3)
 const REWIND_LANDMARK := Color(0.42, 0.62, 0.82)
 const REWIND_LABEL := Color(0.86, 0.84, 0.72)
 
+## Utility / miscellaneous UI tokens (kept here so nothing outside this file and
+## render_theme.gd holds a raw Color literal — see tools/lint_ui_colors.sh).
+const TRANSPARENT := Color(0, 0, 0, 0)          # "no fill / no outline" sentinel
+const LABEL_SHADOW := Color(0, 0, 0, 0.7)       # 1px drop shadow behind map labels
+const MAP_NOSE := Color(0.85, 1.0, 0.92)        # minimap ship glyph nose tip ("forward")
+
+## Debug design-grid overlay (grid_overlay.gd; dev-only, cycled by '#').
+const GRID_WHITE := Color(1.0, 1.0, 1.0)
+const GRID_BLACK := Color(0.0, 0.0, 0.0)
+const GRID_ALERT := Color(1.0, 0.23, 0.16)
+
 
 ## Convert a palette colour to a BBCode/HTML hex string ("#rrggbb").
 static func hex(c: Color) -> String:

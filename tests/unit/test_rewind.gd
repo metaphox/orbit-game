@@ -143,6 +143,39 @@ func test_rewind_cancel_costs_nothing_and_returns_to_now() -> void:
 	assert_almost_eq(game.sim_time, now, 0.001, "returned to the present")
 
 
+func test_rewind_cancel_during_a_burn_preserves_the_burn() -> void:
+	# CR-1: opening then cancelling the scrubber mid-burn must return to "now"
+	# unchanged and free - throttle and flight state included (DESIGN §14.1-2).
+	var game := _boot()
+	var budget: int = game.level.rewind_budget
+	game.ship.throttle = 1.0
+	simulate(game, 6, 1.0 / 60.0)  # still burning: throttle stays on
+	assert_eq(game.ship.flight_state, ShipSim.FlightState.BURNING, "mid-burn")
+
+	var now: float = game.sim_time
+	var prop: float = game.ship.prop_mass
+	var r0 := DVec3.new(game.ship.r.x, game.ship.r.y, game.ship.r.z)
+	var v0 := DVec3.new(game.ship.v.x, game.ship.v.y, game.ship.v.z)
+	var anchors_before: int = game.rewind.anchors.size()
+
+	game._enter_rewind()
+	game._handle_rewind_keys(_key(KEY_LEFT))    # look at the launch anchor
+	game._handle_rewind_keys(_key(KEY_ESCAPE))  # CANCEL
+
+	assert_eq(game.phase, game.Phase.FLYING)
+	assert_eq(game.rewind.charges, budget, "cancelling is free")
+	assert_almost_eq(game.sim_time, now, 0.001, "returned to the present")
+	assert_almost_eq(game.ship.prop_mass, prop, 1e-6, "propellant unchanged")
+	assert_almost_eq(game.ship.throttle, 1.0, 1e-9, "throttle restored, burn not cut")
+	assert_eq(game.ship.flight_state, ShipSim.FlightState.BURNING, "still burning")
+	assert_dvec_close(game.ship.r, r0, 1e-9, "position restored")
+	assert_dvec_close(game.ship.v, v0, 1e-9, "velocity restored")
+
+	# The resumed burn must not be re-recorded as a fresh anchor.
+	simulate(game, 2, 1.0 / 60.0)
+	assert_eq(game.rewind.anchors.size(), anchors_before, "no spurious burn anchor")
+
+
 func test_resume_is_blocked_at_zero_charges() -> void:
 	var game := _boot()
 	game.rewind.charges = 0

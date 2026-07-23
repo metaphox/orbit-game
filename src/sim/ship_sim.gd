@@ -338,14 +338,18 @@ func serialize() -> Dictionary:
 		"angular_velocity": [angular_velocity.x, angular_velocity.y, angular_velocity.z],
 		"prop_mass": prop_mass,
 		"sas_mode": sas_mode,
+		"throttle": throttle,
+		"flight_state": flight_state,
 		"node": node_payload,
 	}
 
 
-## Restores state from serialize()'s output at the given sim time. Always
-## lands COASTING (elements refit fresh from r,v) with throttle zeroed -
-## resuming mid-burn-substep isn't meaningful across a save boundary.
-func apply_serialized(data: Dictionary, at_time: float) -> void:
+## Restores state from serialize()'s output at the given sim time. A persisted
+## save (live == false) lands COASTING with throttle zeroed - resuming a
+## mid-burn substep across a save boundary isn't meaningful. A live in-session
+## snapshot (live == true) restores throttle and flight state verbatim, so
+## cancelling rewind returns to "now" unchanged and burns stay atomic.
+func apply_serialized(data: Dictionary, at_time: float, live := false) -> void:
 	body = _find_body(data.get("body_name", body.name))
 	var rv: Array = data.get("r", [r.x, r.y, r.z])
 	r = DVec3.new(rv[0], rv[1], rv[2])
@@ -357,9 +361,11 @@ func apply_serialized(data: Dictionary, at_time: float) -> void:
 	rcs_command = Vector3.ZERO
 	prop_mass = data.get("prop_mass", prop_mass)
 	sas_mode = data.get("sas_mode", SasMode.OFF) as SasMode
-	throttle = 0.0
+	throttle = float(data.get("throttle", 0.0)) if live else 0.0
 	last_time = at_time
 	_refit_elements(at_time)
+	if live:
+		flight_state = data.get("flight_state", FlightState.COASTING) as FlightState
 
 	var node_data: Variant = data.get("node")
 	if node_data != null:

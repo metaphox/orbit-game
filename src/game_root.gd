@@ -101,7 +101,7 @@ func _ready() -> void:
 	add_child(hud)
 	hud.build(level)
 	hud.map_view = map_view  # minimap auto-fit / focus / marked points
-	hud.toolbar_key.connect(_on_toolbar_key)
+	hud.toolbar_command.connect(_on_toolbar_command)
 
 	flight_view.set_side_active(false)
 
@@ -109,32 +109,29 @@ func _ready() -> void:
 		_toggle_autopilot()
 
 
-## Toolbar buttons don't duplicate any input logic - they just construct
-## the same InputEventKey a real keypress would and call _unhandled_input
-## directly, the exact call every test in this project already makes.
-## SHIFT/CTRL are the one exception: _apply_flight_input reads the
-## throttle axis via Input.get_axis(), which - like is_physical_key_
-## pressed() before it - only reflects real OS-level key state, never a
-## synthetic event passed to _unhandled_input. Input.action_press()/
-## action_release() are Godot's actual mechanism for synthetic action
-## input, so the toolbar drives those directly instead.
-func _on_toolbar_key(keycode: int, pressed: bool) -> void:
-	if keycode == KEY_SHIFT:
+## Toolbar buttons emit a semantic ACTION, not a physical key, so a click does
+## exactly what that action's current binding does — no duplicated logic, and no
+## breakage when a key is rebound (CR-5). Throttle trim is polled via
+## Input.get_axis(), which only reflects real OS-level key state, so those two
+## drive the Input singleton directly; every other action is replayed by feeding
+## _unhandled_input the action's current primary key (so the existing key-based
+## handlers, including shift for coarse node steps, run unchanged).
+func _on_toolbar_command(action: String, pressed: bool) -> void:
+	if action == "throttle_increase" or action == "throttle_decrease":
 		if pressed:
-			Input.action_press("throttle_increase")
+			Input.action_press(action)
 		else:
-			Input.action_release("throttle_increase")
+			Input.action_release(action)
 		return
-	if keycode == KEY_CTRL:
-		if pressed:
-			Input.action_press("throttle_decrease")
-		else:
-			Input.action_release("throttle_decrease")
-		return
-	var event := InputEventKey.new()
-	event.physical_keycode = keycode as Key
-	event.pressed = pressed
-	_unhandled_input(event)
+	if not pressed:
+		return  # tap commands act on the press edge only
+	for e: InputEvent in InputMap.action_get_events(action):
+		var k := e as InputEventKey
+		if k != null:
+			var event := k.duplicate() as InputEventKey
+			event.pressed = true
+			_unhandled_input(event)
+			return
 
 
 ## Overrides the just-built fresh ship with a saved mid-mission state.
@@ -223,9 +220,15 @@ func _process(delta: float) -> void:
 	else:
 		hud.set_rewind_line("")
 		hud.hide_rewind_timeline()
+	# The camera always syncs so the view stays draggable even while frozen.
 	flight_view.sync(ship, delta)
-	map_view.sync(ship, sim_time, delta)
-	hud.refresh(ship, level, sim_time, WARP_STEPS[warp_index])
+	# PF-4: while genuinely frozen (paused, or a settled failure) the ship state
+	# and clock don't change, so the per-frame telemetry reformat + minimap
+	# rebuild produce identical output - skip them. WON keeps coasting and
+	# REWINDING animates the sweep, so both still refresh.
+	if phase != Phase.PAUSED and phase != Phase.FAILED:
+		map_view.sync(ship, sim_time, delta)
+		hud.refresh(ship, level, sim_time, WARP_STEPS[warp_index])
 	# star dust runs its own clock independent of sim_time, so it needs an
 	# explicit freeze whenever the sim itself isn't advancing. WON now keeps
 	# coasting (§14.3), so only the genuinely-frozen phases freeze the dust.
@@ -488,8 +491,8 @@ func _check_end_conditions() -> void:
 				_fail("TOUCHDOWN TOO HARD")
 			_:
 				_fail("%s SURFACE IMPACT" % ship.body.name)
-	elif (level.fail_radius > 0.0 and ship.body.parent == null
-			and ship.r.length() > level.fail_radius):
+	elif (level.fail_radius > 0.0
+			and ship.absolute_position(sim_time).length() > level.fail_radius):
 		_fail("MISSION ENVELOPE EXCEEDED")
 	elif level.objective.is_met(ship):
 		_win()
@@ -513,11 +516,13 @@ func _enter_rewind() -> void:
 		return
 	if rewind.anchors.is_empty():
 		return
-	ship.throttle = 0.0
-	hud.center_label.visible = false  # clear a fail banner if we came from FAILED
+	# Snapshot the live state (incl. throttle/flight_state) BEFORE cutting
+	# throttle, so CANCEL restores an in-progress burn instead of a coast.
 	_rewind_return = {
 		"state": ship.serialize(), "sim_time": sim_time,
 		"warp_index": warp_index, "phase": phase}
+	ship.throttle = 0.0
+	hud.center_label.visible = false  # clear a fail banner if we came from FAILED
 	phase = Phase.REWINDING
 	_rewind_cursor = rewind.anchors.size() - 1
 	_show_anchor(_rewind_cursor, true)
@@ -605,10 +610,12 @@ func _rewind_resume() -> void:
 
 
 func _restore_live(state: Dictionary, at_time: float, warp: int) -> void:
-	ship.apply_serialized(state, at_time)
+	ship.apply_serialized(state, at_time, true)
 	sim_time = at_time
 	warp_index = warp
-	_was_burning = false
+	# Match the rising-edge burn detector to the restored throttle so a live
+	# burn isn't re-recorded as a fresh anchor on the resumed frame.
+	_was_burning = float(state.get("throttle", 0.0)) > 0.0
 	_sweep_left = 0.0
 	_event_revision = -1
 	flight_view.mark_traj_dirty()
@@ -617,14 +624,18 @@ func _restore_live(state: Dictionary, at_time: float, warp: int) -> void:
 func _refresh_rewind_hud() -> void:
 	var a: Dictionary = rewind.anchors[_rewind_cursor]
 	var charged: bool = float(_rewind_return["sim_time"]) - float(a["sim_time"]) > 1e-6
+	var confirm_key := InputBindings.primary_key_label("rewind_confirm")
 	var resume_text: String
 	if not charged:
-		resume_text = "[ENTER] RESUME (FREE)"
+		resume_text = "[%s] RESUME (FREE)" % confirm_key
 	elif rewind.has_charges():
-		resume_text = "[ENTER] RESUME HERE — USES 1 OF %d" % rewind.charges
+		resume_text = "[%s] RESUME HERE — USES 1 OF %d" % [confirm_key, rewind.charges]
 	else:
 		resume_text = "— NO REWINDS LEFT —"
-	hud.set_rewind_line("←/→ (or A/D) STEP ANCHOR    %s    [ESC] CANCEL" % resume_text)
+	hud.set_rewind_line("%s/%s STEP ANCHOR    %s    [%s] CANCEL" % [
+		InputBindings.primary_key_label("rewind_prev"),
+		InputBindings.primary_key_label("rewind_next"),
+		resume_text, InputBindings.primary_key_label("rewind_cancel")])
 	hud.update_rewind_timeline(
 		rewind.anchors[0]["sim_time"], float(_rewind_return["sim_time"]), sim_time,
 		_rewind_cursor, rewind.anchors, rewind.landmarks)

@@ -5,10 +5,10 @@ extends CanvasLayer
 ## attitude director, and every non-flying state (win/fail/pause/flash/keys)
 ## styled from the shared Palette/UiTheme — one colour source (TD-1).
 
-## Emitted by toolbar buttons; game_root routes this straight into its own
-## _unhandled_input as a synthetic InputEventKey, so a click does exactly what
-## the real key does with zero duplicated logic.
-signal toolbar_key(keycode: int, pressed: bool)
+## Emitted by toolbar buttons as a semantic ACTION name (not a physical key), so
+## a click dispatches the same command a rebound key would and never drifts when
+## a binding changes (CR-5). game_root replays the action's current binding.
+signal toolbar_command(action: String, pressed: bool)
 
 const GREEN := Palette.LIVE
 const AMBER := Palette.INTENT
@@ -20,15 +20,35 @@ const DIMC := Palette.DIM
 # Display-only mirror of game_root.WARP_STEPS, used to fill the warp bar-graph.
 const WARP_STEPS := [1, 5, 10, 25, 50, 100, 200, 500, 1000]
 
-# Bottom-strip clickable chips [label, physical keycode, holdable]: the ref's
-# compact SAS / WARP / NODE quick-access row. The full keybind reference lives in
-# the F1 overlay (text); power controls stay keyboard, matching the mock.
+# Bottom-strip command groups (DESIGN §6: every binding except warp 1-9 is
+# clickable). Each entry names an ACTION; the button label is derived live from
+# that action's current binding, so rebinding is reflected and the click always
+# dispatches the action, never a stale key. Flags: "hold" = press-and-hold
+# (throttle trim); "cap" = capability the level must grant ("sas"/"nodes") for
+# the button to appear. SAS toggles' pressed state mirrors ship.sas_mode via
+# SAS_MODES below.
 const STRIP_GROUPS := [
+	["VIEW", [{"action": "toggle_side_camera"}, {"action": "reset_or_restart"}]],
+	["THROTTLE", [
+		{"action": "throttle_full"}, {"action": "throttle_cut"},
+		{"action": "throttle_increase", "hold": true},
+		{"action": "throttle_decrease", "hold": true}]],
+	["WARP", [{"action": "warp_increase"}, {"action": "warp_decrease"}]],
 	["SAS", [
-		["F", KEY_F, false], ["B", KEY_B, false], ["N", KEY_N, false],
-		["G", KEY_G, false], ["T", KEY_T, false], ["C", KEY_C, false]]],
-	["WARP", [["+", KEY_EQUAL, false], ["-", KEY_MINUS, false]]],
-	["NODE", [["ENTER", KEY_ENTER, false], ["BKSP", KEY_BACKSPACE, false]]],
+		{"action": "sas_prograde", "cap": "sas"}, {"action": "sas_retrograde", "cap": "sas"},
+		{"action": "sas_normal", "cap": "sas"}, {"action": "sas_antinormal", "cap": "sas"},
+		{"action": "sas_radial_out", "cap": "sas"}, {"action": "sas_radial_in", "cap": "sas"},
+		{"action": "kill_rotation", "cap": "sas"}, {"action": "sas_off", "cap": "sas"},
+		{"action": "sas_node_hold", "cap": "nodes"}]],
+	["NODE", [
+		{"action": "node_create", "cap": "nodes"}, {"action": "node_delete", "cap": "nodes"},
+		{"action": "node_time_earlier", "cap": "nodes"}, {"action": "node_time_later", "cap": "nodes"},
+		{"action": "node_prograde_increase", "cap": "nodes"},
+		{"action": "node_prograde_decrease", "cap": "nodes"},
+		{"action": "node_normal_increase", "cap": "nodes"},
+		{"action": "node_normal_decrease", "cap": "nodes"},
+		{"action": "node_radial_increase", "cap": "nodes"},
+		{"action": "node_radial_decrease", "cap": "nodes"}]],
 ]
 
 # --- fields read by game_root / tests (contract; keep the names) ---
@@ -87,7 +107,21 @@ var _rewind_label: Label
 var _rewind_timeline: RewindTimeline
 
 # --- toolbar ---
+## action name -> Array[Button] (one action can have several buttons over time).
 var _toolbar_buttons: Dictionary = {}
+## SAS toggle actions -> the ShipSim.SasMode they engage; drives the pressed
+## (lit) state of their toolbar buttons in _sync_toolbar_state.
+var _sas_modes := {
+	"sas_prograde": ShipSim.SasMode.PROGRADE,
+	"sas_retrograde": ShipSim.SasMode.RETROGRADE,
+	"sas_normal": ShipSim.SasMode.NORMAL,
+	"sas_antinormal": ShipSim.SasMode.ANTI_NORMAL,
+	"sas_radial_out": ShipSim.SasMode.RADIAL_OUT,
+	"sas_radial_in": ShipSim.SasMode.RADIAL_IN,
+	"kill_rotation": ShipSim.SasMode.STABILITY,
+	"sas_off": ShipSim.SasMode.OFF,
+	"sas_node_hold": ShipSim.SasMode.NODE,
+}
 
 # --- minimap ---
 var _font: Font
@@ -475,7 +509,7 @@ func _build_bottom_strip(level: LevelDef) -> void:
 	row.add_child(spacer)
 
 	# clickable controls console (the toolbar), restyled
-	row.add_child(_build_toolbar())
+	row.add_child(_build_toolbar(level))
 
 
 var _last_pct: Label
@@ -638,7 +672,11 @@ func show_win(level: LevelDef, dv_used: float, has_next: bool, clean := false) -
 	if clean:
 		body += "   ◇ CLEAN"
 	_banner_body.text = body
-	_banner_prompt.text = "[R] FLY AGAIN" + ("     [N] NEXT MISSION" if has_next else "")
+	var restart_key := InputBindings.primary_key_label("reset_or_restart")
+	# "Next mission" currently piggybacks on the sas_normal action's key.
+	var next_key := InputBindings.primary_key_label("sas_normal")
+	_banner_prompt.text = "[%s] FLY AGAIN" % restart_key + (
+		"     [%s] NEXT MISSION" % next_key if has_next else "")
 	center_label.visible = true
 
 
@@ -647,9 +685,10 @@ func show_fail(reason: String, rewinds_left := 0) -> void:
 	_banner_title.text = reason
 	_banner_title.add_theme_color_override("font_color", RED)
 	_banner_body.text = ""
-	var prompt := "[R] RESTART"
+	var prompt := "[%s] RESTART" % InputBindings.primary_key_label("reset_or_restart")
 	if rewinds_left > 0:
-		prompt = "[Z] REWIND — %d LEFT     %s" % [rewinds_left, prompt]
+		prompt = "[%s] REWIND — %d LEFT     %s" % [
+			InputBindings.primary_key_label("rewind_open"), rewinds_left, prompt]
 	_banner_prompt.text = prompt
 	center_label.visible = true
 
@@ -893,7 +932,7 @@ func _minimap_button(text: String, width: float, kind: String, on_press: Callabl
 		b.add_theme_color_override("font_color", Palette.VOID)
 		b.add_theme_color_override("font_hover_color", Palette.VOID)
 	else:
-		sb.bg_color = Color(0, 0, 0, 0)
+		sb.bg_color = Palette.TRANSPARENT
 		sb.set_border_width_all(1)
 		sb.border_color = Palette.HAIRLINE
 		b.add_theme_color_override("font_color", BONE)
@@ -929,10 +968,12 @@ func set_minimap_visible(shown: bool) -> void:
 
 # ══════════════════════════════════════════════════ TOOLBAR ══
 
-## Real clickable buttons for every non-warp keybind, restyled as ORBITAL-OS
-## chips. Clicking one taps (or holds, for SHIFT/CTRL throttle) the matching
-## physical key via toolbar_key — the whole integration surface (see the signal).
-func _build_toolbar() -> Control:
+## Real clickable buttons for every non-warp keybind (DESIGN §6), restyled as
+## ORBITAL-OS chips. Each click emits the button's ACTION via toolbar_command;
+## game_root replays that action's current binding, so buttons never break under
+## rebinding. Groups whose capability the level doesn't grant are omitted, and
+## the whole set wraps across rows (HFlowContainer) to fit the 1280px floor.
+func _build_toolbar(level: LevelDef) -> Control:
 	var console := PanelContainer.new()
 	console.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	console.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -942,18 +983,34 @@ func _build_toolbar() -> Control:
 	style.border_color = Palette.HAIRLINE
 	style.set_content_margin_all(6)
 	console.add_theme_stylebox_override("panel", style)
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 12)
+	var row := HFlowContainer.new()
+	row.add_theme_constant_override("h_separation", 12)
+	row.add_theme_constant_override("v_separation", 4)
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	console.add_child(row)
 	for group: Array in STRIP_GROUPS:
-		row.add_child(_make_toolbar_group(group[0], group[1]))
+		var g := _make_toolbar_group(group[0], group[1], level)
+		if g != null:
+			row.add_child(g)
 	row.add_child(_make_keys_chip())
 	return console
 
 
-## Inline group: a tiny amber label then its chip buttons, on one row (ref idiom).
-func _make_toolbar_group(title: String, entries: Array) -> Control:
+## Whether a level grants this entry's capability (nodes/SAS), or it needs none.
+func _cmd_available(entry: Dictionary, level: LevelDef) -> bool:
+	match entry.get("cap", ""):
+		"sas": return level.sas_enabled
+		"nodes": return level.nodes_enabled
+		_: return true
+
+
+## Inline group: a tiny amber label then its chip buttons. Returns null (with no
+## nodes created) when the level grants none of the group's commands, so the
+## group vanishes entirely rather than showing an empty heading.
+func _make_toolbar_group(title: String, entries: Array, level: LevelDef) -> Control:
+	var available: Array = entries.filter(func(e: Dictionary) -> bool: return _cmd_available(e, level))
+	if available.is_empty():
+		return null
 	var group := HBoxContainer.new()
 	group.add_theme_constant_override("separation", 3)
 	group.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -963,8 +1020,8 @@ func _make_toolbar_group(title: String, entries: Array) -> Control:
 	heading.add_theme_font_size_override("font_size", 9)
 	heading.add_theme_color_override("font_color", AMBER)
 	group.add_child(heading)
-	for entry: Array in entries:
-		group.add_child(_make_toolbar_button(entry[0], entry[1], entry[2]))
+	for entry: Dictionary in available:
+		group.add_child(_make_toolbar_button(entry))
 	return group
 
 
@@ -977,7 +1034,7 @@ func _make_keys_chip() -> Button:
 	b.add_theme_font_override("font", UiTheme.MONO_SEMI)
 	b.add_theme_font_size_override("font_size", 11)
 	var sb := StyleBoxFlat.new()
-	sb.bg_color = Color(0, 0, 0, 0)
+	sb.bg_color = Palette.TRANSPARENT
 	sb.set_border_width_all(1)
 	sb.border_color = Palette.DIM
 	sb.set_content_margin(SIDE_LEFT, 8)
@@ -994,32 +1051,34 @@ func _make_keys_chip() -> Button:
 	return b
 
 
-func _make_toolbar_button(label: String, keycode: int, holdable: bool) -> Button:
+func _make_toolbar_button(entry: Dictionary) -> Button:
+	var action: String = entry["action"]
 	var button := Button.new()
-	button.text = label
+	button.text = InputBindings.primary_key_label(action)
+	button.tooltip_text = action
 	button.custom_minimum_size = Vector2(0, 22)
 	button.add_theme_font_override("font", UiTheme.MONO_SEMI)
 	button.add_theme_font_size_override("font_size", 11)
 	button.focus_mode = Control.FOCUS_NONE
-	if keycode in [KEY_F, KEY_B, KEY_N, KEY_G, KEY_U, KEY_I, KEY_T, KEY_V]:
+	if _sas_modes.has(action):  # SAS holds are toggles; their lit state = ship.sas_mode
 		button.toggle_mode = true
 	_style_toolbar_button(button)
-	if not _toolbar_buttons.has(keycode):
-		_toolbar_buttons[keycode] = []
-	(_toolbar_buttons[keycode] as Array).append(button)
-	if holdable:
-		button.button_down.connect(func() -> void: toolbar_key.emit(keycode, true))
-		button.button_up.connect(func() -> void: toolbar_key.emit(keycode, false))
+	if not _toolbar_buttons.has(action):
+		_toolbar_buttons[action] = []
+	(_toolbar_buttons[action] as Array).append(button)
+	if entry.get("hold", false):
+		button.button_down.connect(func() -> void: toolbar_command.emit(action, true))
+		button.button_up.connect(func() -> void: toolbar_command.emit(action, false))
 	else:
 		button.pressed.connect(func() -> void:
-			toolbar_key.emit(keycode, true)
-			toolbar_key.emit(keycode, false))
+			toolbar_command.emit(action, true)
+			toolbar_command.emit(action, false))
 	return button
 
 
 func _style_toolbar_button(button: Button) -> void:
 	var normal := StyleBoxFlat.new()
-	normal.bg_color = Color(0, 0, 0, 0)
+	normal.bg_color = Palette.TRANSPARENT
 	normal.set_border_width_all(1)
 	normal.border_color = Palette.HAIRLINE
 	normal.set_content_margin(SIDE_LEFT, 6)
@@ -1044,15 +1103,9 @@ func _style_toolbar_button(button: Button) -> void:
 
 
 func _sync_toolbar_state(ship: ShipSim) -> void:
-	var active_modes := {
-		KEY_F: ShipSim.SasMode.PROGRADE, KEY_B: ShipSim.SasMode.RETROGRADE,
-		KEY_N: ShipSim.SasMode.NORMAL, KEY_G: ShipSim.SasMode.ANTI_NORMAL,
-		KEY_U: ShipSim.SasMode.RADIAL_OUT, KEY_I: ShipSim.SasMode.RADIAL_IN,
-		KEY_T: ShipSim.SasMode.OFF, KEY_V: ShipSim.SasMode.NODE,
-	}
-	for keycode: int in active_modes:
-		var active: bool = ship.sas_mode == active_modes[keycode]
-		for button: Button in _toolbar_buttons.get(keycode, []):
+	for action: String in _sas_modes:
+		var active: bool = ship.sas_mode == _sas_modes[action]
+		for button: Button in _toolbar_buttons.get(action, []):
 			button.set_pressed_no_signal(active)
 
 

@@ -25,7 +25,7 @@ func build() -> void:
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
-	mat.albedo_color = Color(0.65, 0.8, 1.0, 0.16)
+	mat.albedo_color = Color(0.65, 0.8, 1.0, 0.16)  # lint-ok: star-dust tint, TD-3 documented exception
 	streak.material = mat
 	draw_pass_1 = streak
 

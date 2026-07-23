@@ -55,7 +55,7 @@ func bind(chase: Camera3D, side: Camera3D) -> void:
 	chase_camera = chase
 	side_camera = side
 	var chase_fill := OmniLight3D.new()
-	chase_fill.light_color = Color(0.78, 0.86, 0.92)
+	chase_fill.light_color = Color(0.78, 0.86, 0.92)  # lint-ok: chase-cam fill light, TD-3 documented exception
 	chase_fill.light_energy = 2.1
 	chase_fill.omni_range = 22.0
 	chase_fill.shadow_enabled = false

@@ -19,7 +19,7 @@ A level-based 3D orbital-mechanics game. Each level you fly a single spacecraft 
 1. **The burn is the game.** Choosing when, in which direction, and for how long to burn is every puzzle's core. Nothing that dilutes this (rocket building, life support, docking minigames) gets in.
 2. **Plausible, not pedantic.** Real orbital mechanics — Kepler orbits, patched conics, the rocket equation — with constants tuned for pacing. If a physicist squints, it should hold up in shape, not in SI units.
 3. **Failure is information.** Free instant retries, deterministic physics, readable trajectory feedback. The player should always understand *why* an attempt failed.
-4. **Two coherent halves of one fiction.** Flight/orbit views = NASA-punk hardware (starfield, film grain, modeled ship). Instrument surfaces — the minimap and the ship's status hologram — = vector-CRT mission computer (scanlines, phosphor glow, barrel curve). This held up through implementation even though the original "flight view vs. full-screen map view" split (§8) didn't — the CRT treatment moved to specific *instruments* rather than an alternate full-screen mode.
+4. **Two coherent halves of one fiction.** Flight/orbit views = NASA-punk hardware (starfield, film grain, modeled ship). Instrument surfaces — chiefly the minimap — = vector-CRT mission computer (scanlines, phosphor glow, barrel curve). This held up through implementation even though the original "flight view vs. full-screen map view" split (§8) didn't — the CRT treatment moved to specific *instruments* rather than an alternate full-screen mode. (A diegetic ship-status hologram was planned as a second CRT instrument but was **removed** once the screen HUD became the primary readout — see §9.)
 
 ## 3. Platform & tech
 
@@ -29,7 +29,7 @@ A level-based 3D orbital-mechanics game. Each level you fly a single spacecraft 
 | Language | GDScript | 64-bit floats, fastest iteration, keeps web export open later |
 | v1 platforms | macOS, Windows, Linux desktop | Mobile explicitly out of scope (touch UX redesign). All three actually export clean via `tools/export.sh` against the official 4.7.1 templates — verified, not just planned |
 | Physics | Hand-rolled; engine physics unused for orbits | Orbital scales/timesteps rule out engine rigid bodies |
-| Window | Windowed (borderless) fullscreen by default, 1024×768 floor | Enforced two ways: project display settings and a direct `DisplayServer` call, so the floor holds even if the project setting doesn't apply on some platform |
+| Window | Windowed (borderless) fullscreen by default, 1280×720 floor | Enforced by a direct `DisplayServer.window_set_min_size` call in `campaign_root.gd` (Godot 4 exposes no project-level min-size setting). The UI and `UiScale` are tuned against this floor. |
 
 **Precision strategy:** all orbital math in GDScript doubles, in per-SOI local coordinate frames (positions relative to the current parent body). Rendering uses a floating/scaled origin — the ship renders at exactly `(0,0,0)` and the world shifts around it — because float32 GPU precision does not survive interplanetary distances. This paid off directly: the orbit-view camera "follows the ship" (§8) simply by orbiting/looking at the render origin, no ship-tracking logic needed.
 
@@ -98,7 +98,7 @@ Manual flying is the baseline; SAS hold modes and maneuver nodes are per-level u
 | SAS locks | `F` prograde, `B` retrograde, `N` normal, `G` anti-normal, `U`/`I` radial out/in, `C` kill-rotation, `T` off | auto-orient and hold (slew-and-stop, no overshoot); `C` brakes all spin; pressing the same lock again releases it |
 | Maneuver node | `Enter` add, `Backspace` delete, `[`/`]` time, `↑`/`↓` prograde, `←`/`→` normal, `O`/`P` radial, `V` hold-toward-node | Shift = coarse step |
 
-**Toolbar:** every keybind above except `1`–`9` (the warp indicator already covers those) is also a real clickable button — two rows, bottom-center of the HUD, visible in both the chase and orbit views since the HUD is a plain overlay not tied to either camera. A click constructs the same key event a physical press would and feeds it through the same input handler, so there's exactly one code path for "did the player do X," whether by keyboard or mouse. `Shift`/`Ctrl` buttons press-and-hold (`button_down`/`button_up`) rather than tap, matching the physical keys' held semantics.
+**Toolbar:** every keybind above except `1`–`9` (the warp indicator already covers those) is also a real clickable button — grouped VIEW / THROTTLE / WARP / SAS / NODE and wrapped across rows, bottom-center of the HUD, visible in both the chase and orbit views since the HUD is a plain overlay not tied to either camera. A click emits the button's **semantic action**, and `game_root` replays that action's *current* binding through the same input handler — so there's exactly one code path for "did the player do X" (keyboard or mouse), and a rebound key keeps its button working (the button label follows the binding). Buttons for capabilities the level hasn't unlocked (SAS, maneuver nodes — §6 `LevelDef` flags) are omitted. The throttle-trim buttons press-and-hold (`button_down`/`button_up`) rather than tap, matching their held semantics.
 
 ## 7. Profiles, save/resume, and pause
 
@@ -120,7 +120,7 @@ None of this section existed in the original design — it was added in full aft
 - **Orbit view** (`Tab`): *also* a real 3D camera, not a flat schematic — it orbits and looks at the ship (which, thanks to the floating origin, is always exactly at the render origin, so "track the ship" needed no ship-tracking code at all), zoomable by mouse wheel or trackpad gesture (two-finger scroll and pinch). This is where the orbit actually reads as a shape: the glowing trajectory line, the dashed target ring, and every orbit mark below live here.
 - **Minimap**: a small always-visible picture-in-picture schematic, top-right corner, in both of the views above. This is the part that actually survived from the original "map view" concept — just demoted from a full alternate screen to a persistent corner instrument.
 
-The reasoning for the pivot: a flat 2D schematic map view never got built past a placeholder before the question came up directly of "let the camera zoom out into the same 3D world instead of cutting to a different screen" — and once the floating-origin trick made "camera follows the ship" nearly free, there was no real cost to keeping everything in one continuous 3D space. The vector-CRT aesthetic that was meant for the map view moved onto the instruments that still read as physical mission-computer screens: the minimap and the ship's status hologram (§9).
+The reasoning for the pivot: a flat 2D schematic map view never got built past a placeholder before the question came up directly of "let the camera zoom out into the same 3D world instead of cutting to a different screen" — and once the floating-origin trick made "camera follows the ship" nearly free, there was no real cost to keeping everything in one continuous 3D space. The vector-CRT aesthetic that was meant for the map view moved onto the instrument that still reads as a physical mission-computer screen: the minimap. (A ship status hologram was planned as a second such instrument but later removed — §9.)
 
 **Orbit marks** (in-world, orbit-view only — meaningless at chase-cam range where the whole orbit shape isn't visible anyway): small colored dots on the current trajectory —
 
@@ -134,12 +134,12 @@ The reasoning for the pivot: a flat 2D schematic map view never got built past a
 
 **Ship posture marker.** The orbit-view ship marker was originally a plain sphere — pure location, no orientation. It's now a small directional shape (hull, nose cone, an off-axis wing so roll reads too, not just pitch/yaw) whose basis follows `ship.attitude` every frame, scaled to keep a constant *angular* size regardless of zoom (matching how the trajectory line itself stays legible at any distance).
 
-**HUD instruments (chase and orbit view alike, since HUD isn't tied to either camera):** status/objective/engine text blocks, the minimap, a time-warp readout under it, the ship's status hologram (billboarded 3D panel floating beside the hull: acceleration dial, propellant ring, Δv), and the toolbar (§6).
+**HUD instruments (chase and orbit view alike, since HUD isn't tied to either camera):** status/objective/engine text blocks, the minimap, a time-warp readout under it, and the toolbar (§6). *(A ship-status hologram — a billboarded 3D panel beside the hull with an acceleration dial, propellant ring, and Δv — was planned here but **removed**; that telemetry lives in the screen HUD text blocks instead. `ShipVisuals` records the removal.)*
 
 ## 9. Aesthetic — NASA-punk + vector CRT
 
 - **World (chase + orbit views):** Apollo/Skylab hardware language on the ship — off-white hull, orange nose accent — against a procedural starfield sky (hashed voxel grid, no texture assets) and a whole-screen film grade (grain, vignette, warm tint) that reads as aged hardware footage, not a modern render. Planets get a cheap rim/fresnel glow for an atmosphere hint.
-- **Instrument screens (minimap, status hologram):** green/amber monochrome phosphor CRT — scanlines, glow, slight barrel distortion, faint flicker — rendered as a post-process inside each instrument's own `SubViewport`, so it composites into that instrument specifically rather than the whole screen.
+- **Instrument screens (the minimap; the status hologram was removed):** green/amber monochrome phosphor CRT — scanlines, glow, slight barrel distortion, faint flicker — rendered as a post-process inside the instrument's own `SubViewport`, so it composites into that instrument specifically rather than the whole screen.
 - **Settings toggle:** the whole effects layer (film grade + CRT) can be switched off from Settings (§7) — a straightforward accessibility/preference option once it existed as a distinct visual layer.
 - **Audio:** still fully deferred, unchanged from the original plan. Analog-synth palette, radio-filtered voice blips, tape-machine UI sounds remain the intent whenever it gets built.
 
@@ -192,7 +192,7 @@ ProfileStore    up to 5 Profiles + last_active_name + Settings.effects_enabled,
 
 ## 11. Out of scope for v1
 
-Atmospheric flight/drag/heating · staging & rocket building · docking · n-body effects (Lagrange points, free returns) · mobile · sandbox mode (v2 candidate) · life support/comms/thermal · provable-unreachability "mission unrecoverable" detector (§5) · rebindable keys (the toolbar buttons and the keyboard are both hardcoded to the same layout; an `InputMap` migration would be the natural way in if this becomes a real ask).
+Atmospheric flight/drag/heating · staging & rocket building · docking · n-body effects (Lagrange points, free returns) · mobile · sandbox mode (v2 candidate) · life support/comms/thermal · provable-unreachability "mission unrecoverable" detector (§5) · an in-game key-rebinding **UI** (the `InputMap` mechanism and persisted rebinds already exist — gameplay uses actions and the toolbar dispatches actions, not fixed keys — so only the settings screen to edit them is deferred to the menu redesign).
 
 RCS/rotation-cost is *not* in this list — see §4.4, it's still planned, just not built yet.
 
@@ -217,7 +217,7 @@ Not settled scope decisions, just not done yet:
 
 Agreed via grilling session, 2026-07-21. Rewind is the continuous extension of pillar 3 ("failure is information — free instant retries"): instead of re-flying 40 minutes to Mars over one mistake, you rewind to before it. It is a **tool, not a scored mechanic** — but a *limited* one, so it has weight.
 
-**Why the architecture makes this cheap.** The universe is a pure function of `sim_time` (bodies on rails), coasting is closed-form and time-symmetric (`OrbitElements.state_at_time`), and `ShipSim.serialize()`/`apply_serialized()` already round-trip the complete dynamic state (it's the save system). Rewind is a small in-memory snapshot buffer over primitives that already exist and are tested. The only path-dependent part is powered flight (RK4 + mass loss), which is not reversible — handled by snapshotting per-frame *only while burning*.
+**Why the architecture makes this cheap.** The universe is a pure function of `sim_time` (bodies on rails), coasting is closed-form and time-symmetric (`OrbitElements.state_at_time`), and `ShipSim.serialize()`/`apply_serialized()` round-trip the dynamic state (it's the save system). A **persisted** save deliberately resumes COASTING (a mid-burn substep isn't meaningful across a save boundary); an in-session **live** snapshot (`apply_serialized(..., live = true)`) additionally restores throttle and flight state, so CANCEL returns to "now" unchanged and burns stay atomic (§14.1–14.2). Rewind is a small in-memory snapshot buffer over primitives that already exist and are tested. The only path-dependent part is powered flight (RK4 + mass loss), which is not reversible — handled by snapshotting per-frame *only while burning*.
 
 ### 14.1 The unit and its cost
 - You rewind to discrete **anchors**. Scrubbing the timeline to *look* is always free.

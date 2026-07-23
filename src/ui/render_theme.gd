@@ -51,6 +51,18 @@ var mark_impact := Color(1.0, 0.2, 0.15)
 var mark_encounter := Color(1.0, 1.0, 1.0)
 var mark_closest := Color(1.0, 0.3, 0.6)
 
+# Sun lens flare (sun_flare.gd) — decorative additive bloom + ghosts. Colors
+# live here so the flare's whole look is themeable in one place (TD-3 seam).
+var flare_halo := Color(1.0, 0.95, 0.85)     # broad soft outer halo
+var flare_core := Color(1.0, 0.98, 0.9)      # inner bloom
+var flare_center := Color(1.0, 1.0, 0.98)    # blinding-white centre
+var flare_spike := Color(1.0, 0.98, 0.92)    # starburst spikes
+## [offset along sun->centre axis, radius, tint] per lens ghost.
+var flare_ghosts: Array = [
+	[-0.28, 30.0, Color(0.55, 0.38, 0.2)], [0.26, 46.0, Color(0.25, 0.42, 0.58)],
+	[0.5, 22.0, Color(0.55, 0.3, 0.42)], [0.78, 64.0, Color(0.2, 0.5, 0.45)],
+	[1.15, 34.0, Color(0.5, 0.46, 0.2)], [1.4, 18.0, Color(0.5, 0.3, 0.3)]]
+
 # Ship markers
 var prograde_color := Color(0.3, 1.0, 0.4)
 var retrograde_color := Color(1.0, 0.35, 0.25)

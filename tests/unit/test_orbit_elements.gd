@@ -265,3 +265,24 @@ func test_xz_plane_crossings_match_brute_force_scan() -> void:
 		var y_minus := el.state_at_true_anomaly(nu - 0.02).r.y
 		var y_plus := el.state_at_true_anomaly(nu + 0.02).r.y
 		assert_true(sign(y_minus) != sign(y_plus), "nu=%s brackets a real sign change" % nu)
+
+
+# PF-2: the position-only batch sampler must reproduce state_at_true_anomaly().r
+# exactly (it skips the per-point basis rebuild, velocity, and StateRV alloc).
+func test_position_sampler_matches_full_state() -> void:
+	var v_circ := circular_speed(MU_EARTH, R_LEO)
+	var cases := {
+		"elliptic inclined": StateRV.new(
+			DVec3.new(R_LEO, 1.0e6, -2.0e5), DVec3.new(-500.0, v_circ * 1.06, 900.0)),
+		"hyperbolic": StateRV.new(
+			DVec3.new(R_LEO, 0.0, 0.0), DVec3.new(300.0, v_circ * 1.5, 400.0)),
+	}
+	for label: String in cases:
+		var state: StateRV = cases[label]
+		var el := OrbitElements.from_state(state.r, state.v, MU_EARTH, 0.0)
+		var s := el.make_position_sampler()
+		for k in 24:
+			var nu := lerpf(-2.0, 2.0, k / 23.0)
+			assert_dvec_close(
+				OrbitElements.sample_position(s, nu), el.state_at_true_anomaly(nu).r,
+				1e-9, "%s: sampler position at nu=%s" % [label, nu])
