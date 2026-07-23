@@ -13,80 +13,24 @@ var _error_label: Label
 var _hardcore_check: CheckButton
 ## Hardcore is permanent, so a checked box requires a second ENTER to confirm.
 var _confirm_pending := false
+var _layout: NewProfileLayout
 
 
 func build(profile_store: ProfileStore) -> void:
 	store = profile_store
 
-	var bg := ColorRect.new()
-	bg.color = Palette.VOID
-	add_child(bg)
-	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-
-	var font := SystemFont.new()
-	font.font_names = PackedStringArray(["Menlo", "Monaco", "Consolas", "monospace"])
-
-	var title := Label.new()
-	title.add_theme_font_override("font", font)
-	title.add_theme_font_size_override("font_size", 26)
-	title.add_theme_color_override("font_color", Palette.LIVE)
-	title.text = "■ NEW PILOT ■"
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	add_child(title)
-	title.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP, Control.PRESET_MODE_MINSIZE, 90)
-
-	var prompt := Label.new()
-	prompt.add_theme_font_override("font", font)
-	prompt.add_theme_font_size_override("font_size", 15)
-	prompt.add_theme_color_override("font_color", Palette.LIVE_DIM)
-	prompt.text = "ENTER CALLSIGN"
-	prompt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	add_child(prompt)
-	prompt.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP, Control.PRESET_MODE_MINSIZE, 300)
-	prompt.grow_horizontal = Control.GROW_DIRECTION_BOTH
-
-	_line_edit = LineEdit.new()
+	_layout = preload("res://src/ui/new_profile_layout.tscn").instantiate()
+	add_child(_layout)
+	_line_edit = _layout.line_edit
 	_line_edit.max_length = ProfileStore.NAME_MAX_LENGTH
-	_line_edit.add_theme_font_override("font", font)
-	_line_edit.add_theme_font_size_override("font_size", 22)
-	_line_edit.custom_minimum_size = Vector2(320, 40)
-	_line_edit.alignment = HORIZONTAL_ALIGNMENT_CENTER
-	add_child(_line_edit)
-	_line_edit.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP, Control.PRESET_MODE_MINSIZE, 330)
-	_line_edit.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	_line_edit.text_submitted.connect(func(_t: String) -> void: _attempt_create())
 
-	_error_label = Label.new()
-	_error_label.add_theme_font_override("font", font)
-	_error_label.add_theme_font_size_override("font_size", 14)
-	_error_label.add_theme_color_override("font_color", Palette.WARNING)
-	_error_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	add_child(_error_label)
-	_error_label.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP, Control.PRESET_MODE_MINSIZE, 392)
-	_error_label.grow_horizontal = Control.GROW_DIRECTION_BOTH
-
-	_hardcore_check = CheckButton.new()
-	_hardcore_check.add_theme_font_override("font", font)
-	_hardcore_check.add_theme_font_size_override("font_size", 15)
-	_hardcore_check.add_theme_color_override("font_color", Palette.INTENT)
-	_hardcore_check.text = "HARDCORE — no rewind, no guidance (PERMANENT)"
-	_hardcore_check.focus_mode = Control.FOCUS_NONE  # keep typing focus on the name field
-	add_child(_hardcore_check)
-	_hardcore_check.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP, Control.PRESET_MODE_MINSIZE, 430)
-	_hardcore_check.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_error_label = _layout.error_label
+	_hardcore_check = _layout.hardcore_check
 	# Re-checking or un-checking resets the pending confirmation.
 	_hardcore_check.toggled.connect(func(_on: bool) -> void:
 		_confirm_pending = false
 		_error_label.text = "")
-
-	var help := Label.new()
-	help.add_theme_font_override("font", font)
-	help.add_theme_font_size_override("font_size", 14)
-	help.add_theme_color_override("font_color", Palette.LIVE_DIM)
-	help.text = "[ENTER] CREATE   [ESC] CANCEL"
-	help.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	add_child(help)
-	help.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM, Control.PRESET_MODE_MINSIZE, 60)
 
 	if Settings.effects_enabled:
 		add_child(ScreenGrade.new())

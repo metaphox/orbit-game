@@ -1,3 +1,4 @@
+@tool
 class_name HazardStripe
 extends Control
 ## Diagonal amber/void hazard bands — the bottom-strip end caps in the ORBITAL-OS

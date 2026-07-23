@@ -1,3 +1,4 @@
+@tool
 class_name AttitudeDirector
 extends Control
 ## The GUIDANCE panel's functional attitude director. The center crosshair is the
@@ -14,6 +15,13 @@ var prograde_dir := Vector2.ZERO # unit screen-space direction toward prograde
 var velocity_valid := false      # false when |v| ~ 0: marker hidden
 
 var _phase := 0.0
+
+
+func _ready() -> void:
+	if Engine.is_editor_hint():
+		velocity_valid = true
+		off_prograde = deg_to_rad(18.0)
+		prograde_dir = Vector2(0.55, -0.84)
 
 
 func set_attitude(ship: ShipSim) -> void:

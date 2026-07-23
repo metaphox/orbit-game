@@ -14,46 +14,15 @@ var _text: RichTextLabel
 var _items: Array[String] = ["RESUME", "SAVE PROGRESS", "RESTART MISSION", "QUIT TO MISSION SELECT"]
 var _cursor := 0
 var _saved_flash := false
+var _layout: MenuTextLayout
 
 
 func build() -> void:
-	var bg := ColorRect.new()
-	bg.color = Palette.PAUSE_BG
-	add_child(bg)
-	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-
-	var font := SystemFont.new()
-	font.font_names = PackedStringArray(["Menlo", "Monaco", "Consolas", "monospace"])
-
-	var title := Label.new()
-	title.add_theme_font_override("font", font)
-	title.add_theme_font_size_override("font_size", 32)
-	title.add_theme_color_override("font_color", Palette.LIVE)
-	title.text = "■ PAUSED ■"
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	add_child(title)
-	title.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP, Control.PRESET_MODE_MINSIZE, 130)
-
-	_text = RichTextLabel.new()
-	_text.bbcode_enabled = true
-	_text.fit_content = true
-	_text.scroll_active = false
-	_text.custom_minimum_size = Vector2(420, 10)
-	_text.add_theme_font_override("normal_font", font)
-	_text.add_theme_font_size_override("normal_font_size", 20)
-	add_child(_text)
-	_text.set_anchors_and_offsets_preset(Control.PRESET_CENTER, Control.PRESET_MODE_MINSIZE)
-	_text.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	_text.grow_vertical = Control.GROW_DIRECTION_BOTH
-
-	var help := Label.new()
-	help.add_theme_font_override("font", font)
-	help.add_theme_font_size_override("font_size", 13)
-	help.add_theme_color_override("font_color", Palette.LIVE_DIM)
-	help.text = "↑↓ SELECT   ENTER CONFIRM   OR PRESS NUMBER   [ESC]/[SPACE]/[0] RESUME"
-	help.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	add_child(help)
-	help.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM, Control.PRESET_MODE_MINSIZE, 70)
+	_layout = preload("res://src/ui/menu_text_layout.tscn").instantiate()
+	add_child(_layout)
+	_layout.configure("■ PAUSED ■", "",
+		"↑↓ SELECT   ENTER CONFIRM   OR PRESS NUMBER   [ESC]/[SPACE]/[0] RESUME", true)
+	_text = _layout.content
 
 	_refresh()
 

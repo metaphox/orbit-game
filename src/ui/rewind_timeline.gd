@@ -1,3 +1,4 @@
+@tool
 class_name RewindTimeline
 extends Control
 ## The rewind scrubber's visual timeline (DESIGN.md §14.2): a horizontal line
@@ -20,6 +21,19 @@ var playhead := 0.0
 var cursor := 0
 var anchors: Array = []    # [{ "sim_time": float, "label": String }]
 var landmarks: Array = []  # [{ "sim_time": float, "label": String }]
+
+
+func _ready() -> void:
+	if Engine.is_editor_hint():
+		font = UiTheme.MONO
+		t_now = 300.0
+		playhead = 180.0
+		cursor = 1
+		anchors = [
+			{"sim_time": 60.0, "label": "BURN 1"},
+			{"sim_time": 180.0, "label": "BURN 2"},
+		]
+		landmarks = [{"sim_time": 245.0, "label": "SOI"}]
 
 
 func _draw() -> void:

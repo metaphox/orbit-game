@@ -12,6 +12,7 @@ var _text: RichTextLabel
 var _order: Array[int]
 var _profile: Profile
 var _cursor := 0
+var _layout: MenuTextLayout
 
 
 func build(profile: Profile) -> void:
@@ -19,43 +20,11 @@ func build(profile: Profile) -> void:
 	_order = Campaign.order()
 	_cursor = _first_unlocked_pos()
 
-	var bg := ColorRect.new()
-	bg.color = Palette.VOID
-	add_child(bg)
-	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-
-	var font := SystemFont.new()
-	font.font_names = PackedStringArray(["Menlo", "Monaco", "Consolas", "monospace"])
-
-	var title := Label.new()
-	title.add_theme_font_override("font", font)
-	title.add_theme_font_size_override("font_size", 30)
-	title.add_theme_color_override("font_color", Palette.LIVE)
-	title.text = "■ ORBIT — MISSION SELECT ■"
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	add_child(title)
-	title.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP, Control.PRESET_MODE_MINSIZE, 48)
-
-	var pilot := Label.new()
-	pilot.add_theme_font_override("font", font)
-	pilot.add_theme_font_size_override("font_size", 15)
-	pilot.add_theme_color_override("font_color", Palette.LIVE_DIM)
-	pilot.text = "PILOT: %s" % profile.profile_name
-	pilot.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	add_child(pilot)
-	pilot.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP, Control.PRESET_MODE_MINSIZE, 84)
-
-	_text = RichTextLabel.new()
-	_text.bbcode_enabled = true
-	_text.fit_content = true
-	_text.scroll_active = false
+	_layout = preload("res://src/ui/menu_text_layout.tscn").instantiate()
+	add_child(_layout)
+	_layout.configure("■ ORBIT — MISSION SELECT ■", "PILOT: %s" % profile.profile_name, "")
+	_text = _layout.content
 	_text.custom_minimum_size = Vector2(620, 10)
-	_text.add_theme_font_override("normal_font", font)
-	_text.add_theme_font_size_override("normal_font_size", 19)
-	add_child(_text)
-	_text.set_anchors_and_offsets_preset(Control.PRESET_CENTER, Control.PRESET_MODE_MINSIZE)
-	_text.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	_text.grow_vertical = Control.GROW_DIRECTION_BOTH
 
 	_refresh()
 	if Settings.effects_enabled:

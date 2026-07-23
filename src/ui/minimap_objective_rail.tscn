@@ -1,0 +1,137 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://src/ui/minimap_objective_rail.gd" id="1_rail"]
+[ext_resource type="Theme" path="res://src/ui/generated_ui_theme.tres" id="2_theme"]
+[ext_resource type="Shader" path="res://src/shaders/minimap_panel.gdshader" id="3_map_shader"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_map"]
+shader = ExtResource("3_map_shader")
+
+[node name="MinimapObjectiveRail" type="VBoxContainer"]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 1
+anchors_preset = 0
+offset_left = 14.0
+offset_top = 58.0
+offset_right = 314.0
+mouse_filter = 2
+theme = ExtResource("2_theme")
+theme_override_constants/separation = 12
+script = ExtResource("1_rail")
+
+[node name="MapPanel" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"InstrumentPanel"
+
+[node name="Column" type="VBoxContainer" parent="MapPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Header" type="HBoxContainer" parent="MapPanel/Column"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Eyebrow" type="Label" parent="MapPanel/Column/Header"]
+layout_mode = 2
+theme_type_variation = &"Eyebrow"
+text = "ORBIT MAP"
+
+[node name="Spacer" type="Control" parent="MapPanel/Column/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="AutoButton" type="Button" parent="MapPanel/Column/Header"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(44, 22)
+layout_mode = 2
+focus_mode = 0
+theme_type_variation = &"ToolbarButton"
+text = "AUTO"
+
+[node name="ZoomInButton" type="Button" parent="MapPanel/Column/Header"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(24, 22)
+layout_mode = 2
+focus_mode = 0
+theme_type_variation = &"ToolbarButton"
+text = "+"
+
+[node name="ZoomOutButton" type="Button" parent="MapPanel/Column/Header"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(24, 22)
+layout_mode = 2
+focus_mode = 0
+theme_type_variation = &"ToolbarButton"
+text = "−"
+
+[node name="MinimapAspect" type="AspectRatioContainer" parent="MapPanel/Column"]
+custom_minimum_size = Vector2(280, 207)
+layout_mode = 2
+mouse_filter = 2
+ratio = 1.35
+
+[node name="MinimapRoot" type="Control" parent="MapPanel/Column/MinimapAspect"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+
+[node name="MapBackground" type="Panel" parent="MapPanel/Column/MinimapAspect/MinimapRoot"]
+unique_name_in_owner = true
+material = SubResource("ShaderMaterial_map")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"MapBackdrop"
+
+[node name="ViewportContainer" type="SubViewportContainer" parent="MapPanel/Column/MinimapAspect/MinimapRoot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+stretch = true
+
+[node name="MinimapViewport" type="SubViewport" parent="MapPanel/Column/MinimapAspect/MinimapRoot/ViewportContainer"]
+unique_name_in_owner = true
+transparent_bg = true
+render_target_update_mode = 4
+
+[node name="MinimapCamera" type="Camera3D" parent="MapPanel/Column/MinimapAspect/MinimapRoot/ViewportContainer/MinimapViewport"]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 0.42288542, 0.9061832, 0, -0.9061832, 0.42288542, 0, 900, 420)
+cull_mask = 2
+projection = 1
+size = 1000.0
+near = 1.0
+far = 6000.0
+
+[node name="ObjectivePanel" type="PanelContainer" parent="."]
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"ObjectivePanel"
+
+[node name="Column" type="VBoxContainer" parent="ObjectivePanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Eyebrow" type="Label" parent="ObjectivePanel/Column"]
+layout_mode = 2
+theme_type_variation = &"Eyebrow"
+text = "OBJECTIVE"
+
+[node name="ObjectiveLabel" type="Label" parent="ObjectivePanel/Column"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"MonoText"
+theme_override_font_sizes/font_size = 12
+theme_override_constants/line_spacing = 5
+text = "CIRCULARIZE AT R 80.0 KM ± 1.5\nAP Δ   -0.00   PE Δ   -0.00\nPAR 75 m/s"

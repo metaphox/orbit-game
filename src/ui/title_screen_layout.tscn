@@ -1,0 +1,150 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://src/ui/title_screen_layout.gd" id="1_layout"]
+[ext_resource type="Script" path="res://src/ui/hazard_stripe.gd" id="2_hazard"]
+[ext_resource type="Theme" path="res://src/ui/generated_ui_theme.tres" id="3_theme"]
+
+[node name="TitleScreenLayout" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme = ExtResource("3_theme")
+script = ExtResource("1_layout")
+
+[node name="Background" type="ColorRect" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="TopBar" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+grow_horizontal = 2
+theme_type_variation = &"MenuTopBar"
+
+[node name="Row" type="HBoxContainer" parent="TopBar"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Diamond" type="Control" parent="TopBar/Row"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(14, 14)
+layout_mode = 2
+
+[node name="SystemName" type="Label" parent="TopBar/Row"]
+layout_mode = 2
+theme_type_variation = &"MonoText"
+text = "ORBITAL OS"
+
+[node name="Version" type="Label" parent="TopBar/Row"]
+layout_mode = 2
+theme_type_variation = &"EyebrowIntent"
+text = "V2 · FLIGHT"
+
+[node name="Status" type="Label" parent="TopBar/Row"]
+layout_mode = 2
+size_flags_horizontal = 10
+theme_type_variation = &"HudValue"
+theme_override_font_sizes/font_size = 11
+text = "■ SYS NOMINAL"
+horizontal_alignment = 2
+
+[node name="Eyebrow" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -131.0
+offset_top = 178.0
+offset_right = 131.0
+offset_bottom = 205.0
+grow_horizontal = 2
+theme_type_variation = &"Eyebrow"
+text = "FLIGHT COMPUTER · MAIN MENU"
+horizontal_alignment = 1
+
+[node name="GameTitle" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 214.0
+offset_bottom = 286.0
+grow_horizontal = 2
+theme_type_variation = &"DisplayTitle"
+text = "LIMITED PROPELLANT"
+horizontal_alignment = 1
+
+[node name="Tagline" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 296.0
+offset_bottom = 322.0
+grow_horizontal = 2
+theme_type_variation = &"MenuTagline"
+text = "LP // BURN FUEL. CHANGE ORBIT. SOLVE LAMBERT'S PROBLEM."
+horizontal_alignment = 1
+
+[node name="HazardDivider" type="Control" parent="."]
+custom_minimum_size = Vector2(360, 6)
+layout_mode = 1
+anchors_preset = 10
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -180.0
+offset_top = 330.0
+offset_right = 180.0
+offset_bottom = 336.0
+grow_horizontal = 2
+script = ExtResource("2_hazard")
+
+[node name="WarningLabel" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 352.0
+offset_bottom = 376.0
+grow_horizontal = 2
+theme_type_variation = &"MenuWarning"
+horizontal_alignment = 1
+
+[node name="MenuText" type="RichTextLabel" parent="."]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(440, 10)
+layout_mode = 1
+anchors_preset = 10
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -220.0
+offset_top = 384.0
+offset_right = 220.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_type_variation = &"TitleMenuText"
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+
+[node name="SlotsLabel" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 12
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -62.0
+offset_bottom = -34.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_type_variation = &"MenuFooter"
+horizontal_alignment = 1

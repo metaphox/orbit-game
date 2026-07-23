@@ -7,39 +7,16 @@ signal cancelled
 
 var store: ProfileStore
 var _text: RichTextLabel
+var _layout: MenuTextLayout
 
 
 func build(profile_store: ProfileStore) -> void:
 	store = profile_store
 
-	var bg := ColorRect.new()
-	bg.color = Palette.VOID
-	add_child(bg)
-	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-
-	var font := SystemFont.new()
-	font.font_names = PackedStringArray(["Menlo", "Monaco", "Consolas", "monospace"])
-
-	var title := Label.new()
-	title.add_theme_font_override("font", font)
-	title.add_theme_font_size_override("font_size", 26)
-	title.add_theme_color_override("font_color", Palette.LIVE)
-	title.text = "■ LOAD PILOT ■"
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	add_child(title)
-	title.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP, Control.PRESET_MODE_MINSIZE, 90)
-
-	_text = RichTextLabel.new()
-	_text.bbcode_enabled = true
-	_text.fit_content = true
-	_text.scroll_active = false
-	_text.custom_minimum_size = Vector2(420, 10)
-	_text.add_theme_font_override("normal_font", font)
-	_text.add_theme_font_size_override("normal_font_size", 19)
-	add_child(_text)
-	_text.set_anchors_and_offsets_preset(Control.PRESET_CENTER, Control.PRESET_MODE_MINSIZE)
-	_text.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	_text.grow_vertical = Control.GROW_DIRECTION_BOTH
+	_layout = preload("res://src/ui/menu_text_layout.tscn").instantiate()
+	add_child(_layout)
+	_layout.configure("■ LOAD PILOT ■", "", "")
+	_text = _layout.content
 
 	_refresh()
 	if Settings.effects_enabled:
