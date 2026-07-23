@@ -4,6 +4,8 @@
 
 Status: agreed via grilling session, 2026-07-19; updated 2026-07-20 to match what was actually built through M9 and the post-ship feature rounds (pause/save, profiles, orbit marks, toolbar). This document is the shared understanding; change it before changing the game. Where implementation diverged from the original plan, that's called out explicitly with the reason — this is a record of decisions, not just a spec.
 
+> **Writing code here?** Read [`AGENTS.md`](AGENTS.md) first — the contributor & agent guide covers the conventions this design depends on: architecture invariants (doubles, floating origin, on-rails determinism), the swappable-theme rule (no standalone colours in levels or UI — everything flows through `RenderTheme` / `Palette` / `UiTheme`), the design references (`ref/*.html`, `UI-DESIGN.md`), tech-debt discipline (`TECH_DEBTS.md`), and testing. `DESIGN.md` is *what* we build; `AGENTS.md` is *how*.
+
 **The game is not finished.** The current 7-level roster is a testing/vertical-slice set, not the shipped campaign — 15–20 levels is still the goal. RCS/rotation-cost is still planned for later levels, not cut (§4.4). Both are open work, not settled scope decisions; see §13.
 
 ## 1. Pitch

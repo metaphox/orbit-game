@@ -16,6 +16,18 @@ const DEFAULT_SIDE_AZIMUTH := 0.6
 const DEFAULT_SIDE_ELEVATION := 0.5
 const DEFAULT_SIDE_DISTANCE := 3.0e5
 
+## Subtle racing-game acceleration cues on the CHASE camera (the side/orbit camera
+## is untouched). Attitude lag lets the ship lead the frame during a fast slew;
+## thrust widens FOV and eases the camera back; angular velocity sways it opposite
+## the turn, like head lag. All deliberately small (toned-down preference).
+const NEUTRAL_FOV := 75.0
+const THRUST_FOV_GAIN := 4.0   # extra degrees at full throttle
+const THRUST_DOLLY := 0.14     # extra chase distance fraction at full throttle
+const ATTITUDE_LAG := 9.0      # 1/s; higher = camera catches the ship's spin faster
+const FOV_LERP := 4.0          # 1/s; FOV easing rate
+const SWAY_GAIN := 0.5         # chase-space offset (m) per rad/s of spin
+const SWAY_LERP := 6.0         # 1/s; sway easing rate
+
 var chase_camera: Camera3D
 var side_camera: Camera3D
 var side_active := false  # which camera is current; drives the far-body proxy
@@ -27,6 +39,11 @@ var side_azimuth := DEFAULT_SIDE_AZIMUTH
 var side_elevation := DEFAULT_SIDE_ELEVATION
 var side_distance := DEFAULT_SIDE_DISTANCE
 var side_zoom_max := 1.6e6
+
+var _lagged_basis := Basis.IDENTITY
+var _cue_init := false
+var _fov := NEUTRAL_FOV
+var _sway := Vector3.ZERO
 
 
 ## Wire up the two cameras from the instanced rig scene and give the chase
@@ -68,6 +85,9 @@ func reset() -> void:
 	side_azimuth = DEFAULT_SIDE_AZIMUTH
 	side_elevation = DEFAULT_SIDE_ELEVATION
 	side_distance = DEFAULT_SIDE_DISTANCE
+	_cue_init = false
+	_fov = NEUTRAL_FOV
+	_sway = Vector3.ZERO
 
 
 func chase_drag(relative: Vector2) -> void:
@@ -94,14 +114,30 @@ func chase_zoom(factor: float) -> void:
 ## Position both cameras around the floating origin for this frame.
 ## `scene_reach` is the farthest thing (bodies or draw limit) that must stay
 ## inside the orbit camera's far plane from any rotation angle.
-func update(ship_attitude: Basis, scene_reach: float) -> void:
-	# chase camera: ship-relative orbit, offset by mouse drag
-	var chase_basis := ship_attitude \
+func update(ship: ShipSim, scene_reach: float, delta: float) -> void:
+	# Attitude lag: ease a stored basis toward the ship's real attitude so a fast
+	# slew shows the ship rotating within the frame before the camera catches up.
+	if not _cue_init:
+		_lagged_basis = ship.attitude
+		_cue_init = true
+	_lagged_basis = _lagged_basis.slerp(
+		ship.attitude, clampf(ATTITUDE_LAG * delta, 0.0, 1.0)).orthonormalized()
+
+	# Thrust widens FOV; spin sways the camera opposite the turn (screen-space).
+	var thrust_amt := clampf(ship.throttle, 0.0, 1.0)
+	_fov = lerpf(_fov, NEUTRAL_FOV + THRUST_FOV_GAIN * thrust_amt, clampf(FOV_LERP * delta, 0.0, 1.0))
+	chase_camera.fov = _fov
+	var target_sway := Vector3(-ship.angular_velocity.y, ship.angular_velocity.x, 0.0) * SWAY_GAIN
+	_sway = _sway.lerp(target_sway, clampf(SWAY_LERP * delta, 0.0, 1.0))
+
+	# chase camera: ship-relative orbit (off the lagged basis), offset by mouse drag
+	var chase_basis := _lagged_basis \
 		* Basis(Vector3(0, 1, 0), cam_yaw) * Basis(Vector3(1, 0, 0), cam_pitch)
 	# A slight shoulder angle keeps the radiator silhouette and antenna
 	# readable; a dead-center tail camera collapses the whole craft into the
-	# dark engine bell.
-	chase_camera.position = chase_basis * Vector3(4.2, 3.5, 11.0) * chase_distance
+	# dark engine bell. Thrust dollies the camera back a touch for a sense of shove.
+	var dolly := chase_distance * (1.0 + THRUST_DOLLY * thrust_amt)
+	chase_camera.position = chase_basis * (Vector3(4.2, 3.5, 11.0) * dolly + _sway)
 	chase_camera.look_at(Vector3.ZERO, chase_basis.y)
 
 	# side camera: orbits and tracks the ship, which - thanks to the floating

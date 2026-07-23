@@ -7,17 +7,28 @@ extends RefCounted
 ## starting orbit is the horizontal xz-plane. Ship forward is local -Z.
 
 enum FlightState { COASTING, BURNING }
-enum SasMode { OFF, PROGRADE, RETROGRADE, NORMAL, ANTI_NORMAL, RADIAL_OUT, RADIAL_IN, NODE }
+enum SasMode { OFF, PROGRADE, RETROGRADE, NORMAL, ANTI_NORMAL, RADIAL_OUT, RADIAL_IN, NODE, STABILITY }
 
 const BURN_SUBSTEP := 0.05
-const SAS_NAMES := ["OFF", "PROGRADE", "RETROGRADE", "NORMAL", "ANTI-NORM", "RADIAL+", "RADIAL-", "NODE"]
+const SAS_NAMES := ["OFF", "PROGRADE", "RETROGRADE", "NORMAL", "ANTI-NORM", "RADIAL+", "RADIAL-", "NODE", "KILL ROT"]
 const NODE_COMPLETE_DV := 0.5  # m/s left at which a node counts as burned
+
+## Rotational inertia (pitch x / yaw y / roll z, body-local). Roll has the least
+## inertia so it spins up fastest, matching the old fixed-rate feel. BASE_ANG_ACCEL
+## is the angular acceleration at full-fuel (initial) mass; a lighter, near-dry ship
+## turns proportionally quicker (mass is felt), capped so it never gets twitchy.
+const MAX_ANGULAR_VEL := Vector3(0.6, 0.6, 1.1)  # rad/s ceiling per axis
+const BASE_ANG_ACCEL := Vector3(0.5, 0.5, 1.0)   # rad/s^2 at initial_mass
+const ANG_ACCEL_MASS_CAP := 2.5                  # nimblest a drained tank gets
+const SAS_RATE_TAU := 0.2                         # s; how hard SAS chases its rate target
 
 var body: BodyDef
 var elements: OrbitElements
 var r := DVec3.new()
 var v := DVec3.new()
 var attitude := Basis.IDENTITY
+var angular_velocity := Vector3.ZERO  # body-local rad/s (pitch x / yaw y / roll z)
+var rcs_command := Vector3.ZERO       # net torque command this frame, signed [-1,1] per axis
 var throttle := 0.0
 var dry_mass := 0.0
 var prop_mass := 0.0
@@ -46,6 +57,8 @@ func setup(level: LevelDef) -> void:
 	r = DVec3.new(level.start_radius, 0.0, 0.0)
 	v = DVec3.new(0.0, 0.0, -sqrt(body.mu / level.start_radius))
 	attitude = Basis.IDENTITY  # forward (-Z) starts prograde
+	angular_velocity = Vector3.ZERO
+	rcs_command = Vector3.ZERO
 	elements = OrbitElements.from_state(r, v, body.mu, 0.0)
 	flight_state = FlightState.COASTING
 	last_time = 0.0
@@ -117,6 +130,71 @@ func rotate_local(angles: Vector3) -> void:
 		* Basis(Vector3(1, 0, 0), angles.x)
 		* Basis(Vector3(0, 1, 0), angles.y)
 		* Basis(Vector3(0, 0, 1), angles.z)).orthonormalized()
+
+
+## Angular acceleration the RCS can currently deliver per axis (rad/s^2). Scales
+## inversely with mass so a fuel-laden ship is sluggish and drains toward nimble.
+func max_angular_accel() -> Vector3:
+	var f := clampf(initial_mass / maxf(mass(), 1.0), 1.0, ANG_ACCEL_MASS_CAP)
+	return BASE_ANG_ACCEL * f
+
+
+## Apply a per-axis torque command in [-1,1] for one frame: builds angular
+## velocity (momentum persists — a zero command does NOT damp), then slews the
+## attitude by it. `command` comes from the player's stick or sas_command().
+func integrate_rotation(command: Vector3, delta: float) -> void:
+	rcs_command = Vector3(
+		clampf(command.x, -1.0, 1.0),
+		clampf(command.y, -1.0, 1.0),
+		clampf(command.z, -1.0, 1.0))
+	var acc := max_angular_accel()
+	angular_velocity += Vector3(
+		rcs_command.x * acc.x, rcs_command.y * acc.y, rcs_command.z * acc.z) * delta
+	angular_velocity = Vector3(
+		clampf(angular_velocity.x, -MAX_ANGULAR_VEL.x, MAX_ANGULAR_VEL.x),
+		clampf(angular_velocity.y, -MAX_ANGULAR_VEL.y, MAX_ANGULAR_VEL.y),
+		clampf(angular_velocity.z, -MAX_ANGULAR_VEL.z, MAX_ANGULAR_VEL.z))
+	rotate_local(angular_velocity * delta)
+
+
+## Torque command (per-axis [-1,1]) the active SAS hold wants this frame. Drives a
+## time-optimal slew: aim the nose at sas_target_dir() and arrive at zero rate
+## (no overshoot), damping residual spin — including roll — as it settles.
+## STABILITY simply brakes all rotation. Roll is otherwise left free.
+func sas_command() -> Vector3:
+	if sas_mode == SasMode.STABILITY:
+		return _rate_command(Vector3.ZERO)
+	var target := sas_target_dir().to_vector3()
+	var fwd := attitude * Vector3(0, 0, -1)
+	var angle := acos(clampf(fwd.dot(target), -1.0, 1.0))
+	var err_body := Vector3.ZERO
+	if angle > 1e-4:
+		var axis := fwd.cross(target)
+		if axis.length_squared() < 1e-12:  # anti-parallel: any perpendicular turns us around
+			axis = attitude.x
+		# error rotation vector (world) -> body frame (attitude is orthonormal: inverse = transpose)
+		err_body = attitude.transposed() * (axis.normalized() * angle)
+	var acc := max_angular_accel()
+	var desired := Vector3(
+		_time_optimal_rate(err_body.x, acc.x, MAX_ANGULAR_VEL.x),
+		_time_optimal_rate(err_body.y, acc.y, MAX_ANGULAR_VEL.y),
+		0.0)  # pointing modes hold no particular roll: just damp roll rate to zero
+	return _rate_command(desired)
+
+
+## Rate that decelerates to a stop exactly on target: v = sqrt(2*a*|err|), capped.
+static func _time_optimal_rate(err: float, accel: float, vmax: float) -> float:
+	return signf(err) * minf(vmax, sqrt(2.0 * accel * absf(err)))
+
+
+## Per-axis command that chases a desired angular velocity, saturating at full
+## authority; SAS_RATE_TAU sets how aggressively (smaller = snappier).
+func _rate_command(desired_rate: Vector3) -> Vector3:
+	var acc := max_angular_accel()
+	return Vector3(
+		clampf((desired_rate.x - angular_velocity.x) / (acc.x * SAS_RATE_TAU), -1.0, 1.0),
+		clampf((desired_rate.y - angular_velocity.y) / (acc.y * SAS_RATE_TAU), -1.0, 1.0),
+		clampf((desired_rate.z - angular_velocity.z) / (acc.z * SAS_RATE_TAU), -1.0, 1.0))
 
 
 ## Orbit elements matching the current state, valid this instant even
@@ -257,6 +335,7 @@ func serialize() -> Dictionary:
 		"r": [r.x, r.y, r.z],
 		"v": [v.x, v.y, v.z],
 		"attitude": _basis_to_array(attitude),
+		"angular_velocity": [angular_velocity.x, angular_velocity.y, angular_velocity.z],
 		"prop_mass": prop_mass,
 		"sas_mode": sas_mode,
 		"node": node_payload,
@@ -273,6 +352,9 @@ func apply_serialized(data: Dictionary, at_time: float) -> void:
 	var vv: Array = data.get("v", [v.x, v.y, v.z])
 	v = DVec3.new(vv[0], vv[1], vv[2])
 	attitude = _array_to_basis(data.get("attitude", []))
+	var av: Array = data.get("angular_velocity", [0.0, 0.0, 0.0])
+	angular_velocity = Vector3(av[0], av[1], av[2])
+	rcs_command = Vector3.ZERO
 	prop_mass = data.get("prop_mass", prop_mass)
 	sas_mode = data.get("sas_mode", SasMode.OFF) as SasMode
 	throttle = 0.0

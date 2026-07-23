@@ -24,7 +24,6 @@ const WARP_STEP_ACTIONS := [
 	"warp_step_1", "warp_step_2", "warp_step_3", "warp_step_4", "warp_step_5",
 	"warp_step_6", "warp_step_7", "warp_step_8", "warp_step_9",
 ]
-const ROT_RATE := Vector3(0.6, 0.6, 1.1)  # pitch/yaw/roll, rad/s
 const THROTTLE_RATE := 1.4  # full throttle sweep per second
 const ZOOM_PAN_SIGN := -1.0  # flip if trackpad scroll-up zooms out instead of in
 const ZOOM_PAN_SENSITIVITY := 0.01
@@ -158,14 +157,18 @@ func _physics_process(delta: float) -> void:
 	# on rails so the player can watch it (DESIGN.md §14.3). No input, no fail
 	# checks, no anchor recording - the result is already locked.
 	if phase == Phase.WON:
+		ship.rcs_command = Vector3.ZERO  # no attitude control post-win; keep the puffs off
 		sim_time += delta * WARP_STEPS[warp_index]
 		ship.advance_to(sim_time)
 		ship.apply_soi_transitions(sim_time)
 		return
 	if phase != Phase.FLYING:
+		ship.rcs_command = Vector3.ZERO  # paused/menu: don't leave nozzles stuck firing
 		return
 	if director != null:
-		director.update(self)
+		director.update(self)  # steers by snapping attitude; keep angular state inert for handoff
+		ship.angular_velocity = Vector3.ZERO
+		ship.rcs_command = Vector3.ZERO
 		var status := director.status()
 		if status != _last_director_status:
 			_last_director_status = status
@@ -322,6 +325,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif key.is_action_pressed("sas_off"):
 		if phase == Phase.FLYING:
 			ship.sas_mode = ShipSim.SasMode.OFF
+	elif key.is_action_pressed("kill_rotation"):
+		_toggle_sas(ShipSim.SasMode.STABILITY)
 	elif key.is_action_pressed("sas_prograde"):
 		_toggle_sas(ShipSim.SasMode.PROGRADE)
 	elif key.is_action_pressed("sas_retrograde"):
@@ -454,11 +459,15 @@ func _apply_flight_input(delta: float) -> void:
 		Input.get_axis("pitch_down", "pitch_up"),  # W noses down, S noses up (KSP convention)
 		Input.get_axis("yaw_right", "yaw_left"),
 		Input.get_axis("roll_right", "roll_left"))
+	var command: Vector3
 	if rot != Vector3.ZERO:
-		ship.rotate_local(rot * ROT_RATE * delta)
+		command = rot
 		ship.sas_mode = ShipSim.SasMode.OFF  # manual stick overrides the hold
 	elif ship.sas_mode != ShipSim.SasMode.OFF:
-		_run_sas(delta)
+		command = ship.sas_command()
+	else:
+		command = Vector3.ZERO  # free drift: angular momentum persists until countered
+	ship.integrate_rotation(command, delta)
 
 	var throttle_input := Input.get_axis("throttle_decrease", "throttle_increase")
 	if throttle_input != 0.0:
@@ -723,17 +732,3 @@ func _toggle_sas(mode: ShipSim.SasMode) -> void:
 		hud.flash("SAS NOT INSTALLED")
 		return
 	ship.sas_mode = ShipSim.SasMode.OFF if ship.sas_mode == mode else mode
-
-
-## Turn the nose toward the SAS target at the manual turn rate.
-func _run_sas(delta: float) -> void:
-	var target := ship.sas_target_dir().to_vector3()
-	var forward := ship.attitude * Vector3(0, 0, -1)
-	var angle := acos(clampf(forward.dot(target), -1.0, 1.0))
-	if angle < 0.0005:
-		return
-	var axis := forward.cross(target)
-	if axis.length_squared() < 1e-12:  # anti-parallel: any perpendicular works
-		axis = ship.attitude.x
-	var step := minf(angle, ROT_RATE.x * delta)
-	ship.attitude = (Basis(axis.normalized(), step) * ship.attitude).orthonormalized()

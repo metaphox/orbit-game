@@ -26,7 +26,7 @@ const WARP_STEPS := [1, 5, 10, 25, 50, 100, 200, 500, 1000]
 const STRIP_GROUPS := [
 	["SAS", [
 		["F", KEY_F, false], ["B", KEY_B, false], ["N", KEY_N, false],
-		["G", KEY_G, false], ["T", KEY_T, false]]],
+		["G", KEY_G, false], ["T", KEY_T, false], ["C", KEY_C, false]]],
 	["WARP", [["+", KEY_EQUAL, false], ["-", KEY_MINUS, false]]],
 	["NODE", [["ENTER", KEY_ENTER, false], ["BKSP", KEY_BACKSPACE, false]]],
 ]
@@ -743,10 +743,10 @@ func _help_text(level: LevelDef) -> String:
 			_key_label("quick_pause"), _key_label("pause_menu"), _key_label("reset_or_restart")],
 		"%s ORBIT VIEW  DRAG ROTATE  WHEEL/TRACKPAD ZOOM" % _key_label("toggle_side_camera")]
 	if level.sas_enabled:
-		lines.append("SAS: %s PRO  %s RETRO  %s NORM  %s ANTI  %s/%s RADIAL  %s OFF" % [
+		lines.append("SAS: %s PRO  %s RETRO  %s NORM  %s ANTI  %s/%s RADIAL  %s KILL ROT  %s OFF" % [
 			_key_label("sas_prograde"), _key_label("sas_retrograde"), _key_label("sas_normal"),
 			_key_label("sas_antinormal"), _key_label("sas_radial_out"), _key_label("sas_radial_in"),
-			_key_label("sas_off")])
+			_key_label("kill_rotation"), _key_label("sas_off")])
 	if level.nodes_enabled:
 		lines.append("NODE: %s ADD  %s DEL  %s/%s TIME  %s/%s PRO  %s/%s NORM  %s/%s RAD" % [
 			_key_label("node_create"), _key_label("node_delete"),

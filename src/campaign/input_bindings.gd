@@ -15,6 +15,7 @@ const EXTRA_DEFAULTS := {
 	"rewind_confirm": [KEY_ENTER, KEY_KP_ENTER],
 	"rewind_cancel": [KEY_ESCAPE],
 	"autopilot_toggle": [KEY_J],
+	"kill_rotation": [KEY_C],  # brake: SAS STABILITY, sits by the WASDQE attitude cluster
 }
 
 

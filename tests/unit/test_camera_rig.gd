@@ -19,12 +19,13 @@ func _rig_with_cameras() -> CameraRig:
 func test_update_poses_both_cameras_around_the_floating_origin() -> void:
 	var rig := _rig_with_cameras()
 	var scene_reach := 8.0e5
-	rig.update(Basis.IDENTITY, scene_reach)
+	var ship := ShipSim.new()  # identity attitude, zero throttle, zero spin: no cues
+	rig.update(ship, scene_reach, 1.0 / 60.0)
 
-	# chase: identity attitude with zero yaw/pitch leaves the authored shoulder offset
-	assert_eq(rig.chase_camera.position,
-		Vector3(4.2, 3.5, 11.0) * rig.chase_distance,
-		"chase camera keeps its shoulder offset scaled by zoom")
+	# chase: identity attitude with zero yaw/pitch/thrust/spin leaves the shoulder offset
+	assert_almost_eq(rig.chase_camera.position,
+		Vector3(4.2, 3.5, 11.0) * rig.chase_distance, Vector3(1e-4, 1e-4, 1e-4),
+		"chase camera keeps its shoulder offset scaled by zoom when idle")
 
 	var side_basis := Basis(Vector3(0, 1, 0), rig.side_azimuth) \
 		* Basis(Vector3(1, 0, 0), -rig.side_elevation)
@@ -34,6 +35,30 @@ func test_update_poses_both_cameras_around_the_floating_origin() -> void:
 		"side near tracks distance")
 	assert_almost_eq(rig.side_camera.far, rig.side_distance + scene_reach * 1.25 + 1000.0, 1e-1,
 		"side far reaches past the whole scene from any angle")
+
+
+func test_thrust_widens_chase_fov_and_coast_settles_it() -> void:
+	var rig := _rig_with_cameras()
+	var ship := ShipSim.new()
+	ship.throttle = 1.0
+	for i in 60:  # let the eased FOV converge under sustained thrust
+		rig.update(ship, 8.0e5, 1.0 / 60.0)
+	assert_almost_eq(rig.chase_camera.fov,
+		rig.NEUTRAL_FOV + rig.THRUST_FOV_GAIN, 0.2, "full throttle widens the chase FOV")
+	ship.throttle = 0.0
+	for i in 60:
+		rig.update(ship, 8.0e5, 1.0 / 60.0)
+	assert_almost_eq(rig.chase_camera.fov, rig.NEUTRAL_FOV, 0.2, "coasting settles FOV to neutral")
+
+
+func test_spin_sways_the_chase_camera_off_its_neutral_offset() -> void:
+	var rig := _rig_with_cameras()
+	var ship := ShipSim.new()
+	ship.angular_velocity = Vector3(0.0, 0.5, 0.0)  # yawing
+	for i in 30:
+		rig.update(ship, 8.0e5, 1.0 / 60.0)
+	assert_gt(rig.chase_camera.position.distance_to(Vector3(4.2, 3.5, 11.0) * rig.chase_distance),
+		0.05, "a sustained yaw sways the camera off its neutral shoulder offset")
 
 
 func test_chase_and_side_zoom_clamp_to_their_ranges() -> void:

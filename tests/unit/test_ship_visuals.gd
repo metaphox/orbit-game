@@ -49,3 +49,35 @@ func test_flame_shows_only_while_burning_with_propellant() -> void:
 	ship.prop_mass = 0.0
 	sv.sync(ship, ship_abs, 0.0, 3.0e5)
 	assert_false(flame.visible, "a dry tank keeps the flame out even at full throttle")
+
+
+func _visible_jets(sv: ShipVisuals) -> int:
+	var n := 0
+	for jet: Dictionary in sv._rcs_jets:
+		if (jet["node"] as MeshInstance3D).visible:
+			n += 1
+	return n
+
+
+func test_rcs_puffs_fire_only_while_the_ship_is_torquing() -> void:
+	var level: LevelDef = load("res://src/levels/data/level_01_01.tres")
+	var sv := ShipVisuals.new()
+	add_child_autofree(sv)
+	var ship_root := Node3D.new()
+	sv.add_child(ship_root)
+	var flame := MeshInstance3D.new()
+	ship_root.add_child(flame)
+	sv.build(level, ship_root, flame)
+	assert_eq(sv._rcs_jets.size(), 32, "eight clusters x four quad jets are built")
+
+	var ship := ShipSim.new()
+	ship.setup(level)
+	var ship_abs := ship.absolute_position(0.0)
+
+	ship.rcs_command = Vector3.ZERO
+	sv.sync(ship, ship_abs, 0.0, 3.0e5)
+	assert_eq(_visible_jets(sv), 0, "no puffs when the ship is not rotating")
+
+	ship.rcs_command = Vector3(1.0, 0.0, 0.0)  # full pitch
+	sv.sync(ship, ship_abs, 0.0, 3.0e5)
+	assert_gt(_visible_jets(sv), 0, "a pitch command lights the nozzles that produce it")

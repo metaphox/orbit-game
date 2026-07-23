@@ -13,6 +13,26 @@ extends Node3D
 ## so both live behind one set of marker-scale constants here.
 
 const STATION_MODEL := preload("res://src/ui/station_model.tscn")
+const RCS_FLAME_MATERIAL := preload("res://src/ui/materials/ship_flame_material.tres")
+
+## RCS thruster clusters, baked from sp_prototype.obj's eight rcs_housing groups
+## (centroids through the Hull's 0.2 scale/mirror transform, so they land in Ship
+## space). A forward ring at z~-2.16 and an aft ring at z~+1.92, four corners each.
+const RCS_MOUNTS: Array[Vector3] = [
+	Vector3(-0.311, -0.016, -2.163), Vector3(0.311, -0.016, -2.163),
+	Vector3(0.311, -0.639, -2.163), Vector3(-0.311, -0.639, -2.163),
+	Vector3(-0.337, 0.009, 1.917), Vector3(0.337, 0.009, 1.917),
+	Vector3(0.337, -0.664, 1.917), Vector3(-0.337, -0.664, 1.917),
+]
+## Approx centre of mass (average of the mounts): the moment-arm origin for
+## deciding which nozzle produces which torque.
+const RCS_COM := Vector3(0.0, -0.328, -0.123)
+## Each cluster is a quad firing laterally/vertically; force = -plume.
+const RCS_PLUMES: Array[Vector3] = [
+	Vector3(1, 0, 0), Vector3(-1, 0, 0), Vector3(0, 1, 0), Vector3(0, -1, 0),
+]
+const RCS_GAIN := 1.6          # lifts weak (roll) contributions to a visible level
+const RCS_FIRE_THRESHOLD := 0.08
 const STATION_PHYSICAL_SCALE := 32.0  # deliberately absurd: just over 1 km across
 # The distant station is intentionally larger than the ship marker too. The
 # base ratio accounts for their authored dimensions; the multiplier sells the
@@ -31,6 +51,7 @@ var retrograde_marker: Node3D
 
 var _ship_root: Node3D
 var _flame: MeshInstance3D
+var _rcs_jets: Array[Dictionary] = []  # {node: MeshInstance3D, torque: Vector3 (unit)}
 ## Rest Z of the flame node and half its cone length (ship-local), captured so
 ## the throttle-scaled cone can keep its wide base pinned to the nozzle.
 var _flame_rest_z := 0.0
@@ -54,6 +75,8 @@ func build(level: LevelDef, ship_root: Node3D, flame: MeshInstance3D, theme: Ren
 	star_dust = StarDust.new()
 	add_child(star_dust)
 	star_dust.build()
+
+	_build_rcs_jets()
 
 	_side_marker = _build_posture_marker()
 	add_child(_side_marker)
@@ -85,6 +108,8 @@ func sync(ship: ShipSim, ship_abs: DVec3, t: float, side_distance: float) -> voi
 		pos.z = _flame_rest_z + _flame_half_len * (s - 1.0)
 		_flame.position = pos
 
+	_sync_rcs(ship.rcs_command)
+
 	if _station_marker != null:
 		var st := (_objective as RendezvousObjective).station_orbit.state_at_time(t)
 		var station_position := st.r.sub(ship_abs).to_vector3()
@@ -105,6 +130,54 @@ func sync(ship: ShipSim, ship_abs: DVec3, t: float, side_distance: float) -> voi
 	# show a legible directional shape, not just a location.
 	var marker_scale := maxf(side_distance * SIDE_MARKER_SCALE_PER_CAMERA_DISTANCE, 4.0)
 	_side_marker.basis = ship.attitude.scaled(Vector3.ONE * marker_scale)
+
+
+## One small additive puff per nozzle (8 clusters x 4 quad jets). Each is tagged
+## with the unit body torque it produces (arm x -plume), so sync can light exactly
+## the nozzles that fight for the commanded rotation. Parented under the Ship node
+## so they inherit attitude + the floating-origin transform like the main flame.
+func _build_rcs_jets() -> void:
+	for mount: Vector3 in RCS_MOUNTS:
+		var arm := mount - RCS_COM
+		for plume: Vector3 in RCS_PLUMES:
+			var torque := arm.cross(-plume)
+			if torque.length() < 1e-4:
+				continue
+			var puff := MeshInstance3D.new()
+			var cone := CylinderMesh.new()
+			cone.top_radius = 0.005
+			cone.bottom_radius = 0.05
+			cone.height = 0.3
+			cone.material = RCS_FLAME_MATERIAL
+			puff.mesh = cone
+			puff.basis = _basis_from_y(plume)  # cone axis (+Y) fires along the plume
+			puff.position = mount + plume * 0.06
+			puff.visible = false
+			_ship_root.add_child(puff)
+			_rcs_jets.append({"node": puff, "torque": torque.normalized()})
+
+
+## Light each nozzle proportional to how much its torque agrees with the commanded
+## rotation; the RCS command is set for both manual turns and SAS/kill-rotation
+## braking, so the puffs read on either. Toned down: brief, small, flickering.
+func _sync_rcs(command: Vector3) -> void:
+	for jet: Dictionary in _rcs_jets:
+		var node := jet["node"] as MeshInstance3D
+		var intensity := clampf((jet["torque"] as Vector3).dot(command) * RCS_GAIN, 0.0, 1.0)
+		if intensity < RCS_FIRE_THRESHOLD:
+			node.visible = false
+			continue
+		node.visible = true
+		var s := intensity * randf_range(0.85, 1.15)
+		node.scale = Vector3(0.7 + 0.3 * s, 0.4 + 1.0 * s, 0.7 + 0.3 * s)
+
+
+## Basis whose local +Y points along `dir` (for orienting a cone mesh's axis).
+static func _basis_from_y(dir: Vector3) -> Basis:
+	var y := dir.normalized()
+	var ref := Vector3.FORWARD if absf(y.z) < 0.99 else Vector3.RIGHT
+	var x := ref.cross(y).normalized()
+	return Basis(x, y, x.cross(y))
 
 
 ## Small directional stand-in for the ship in the orbit-view/minimap

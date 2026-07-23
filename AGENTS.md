@@ -1,0 +1,99 @@
+# Contributor & Agent Guide
+
+Conventions for anyone (human or AI) writing code in this repo. Read this before
+touching anything. It captures *how* we build; **`DESIGN.md` is the source of
+truth for *what* we build** — change the design doc before changing behaviour.
+
+## 0. Ground rules
+
+- **Never commit.** Version control is the human owner's job — do not `git commit`
+  or `git add` on your own, and do not ask whether you should. Leave changes in the
+  working tree.
+- **Log new tech debt.** Any deliberate shortcut, hardcode, or "fix-later" gets a
+  row in `TECH_DEBTS.md` (what / where / why deferred / what "done" looks like).
+  Rediscovering debt is more expensive than writing it down.
+- **Self-documenting code over comments.** Name things so the code reads; comment
+  *why*, not *what*. Match the surrounding file's idiom, naming, and comment density.
+- **Keep the suite green.** `./tools/test.sh` must pass, and its coverage guard
+  (`tests/.test-baseline`) must not drop. Prefer headless-testable designs.
+
+## 1. What the game is (one paragraph)
+
+*Limited Propellant* — a level-based 3D orbital-mechanics game in a NASA-punk
+retro-futurist skin. You fly one spacecraft with a fixed propellant budget to a
+target orbit/rendezvous/landing. Physics is **plausible in form** (real Kepler /
+patched-conic / rocket equations, constants tuned for pacing), not SI-accurate.
+Full pitch, pillars, and mechanics live in `DESIGN.md`; the UI/aesthetic spec in
+`UI-DESIGN.md`; the debt ledger in `TECH_DEBTS.md`.
+
+## 2. Architecture invariants — do not violate silently
+
+These hold across the codebase; breaking one is a design change, not a refactor.
+
+- **Doubles for all orbital math**, in per-SOI local frames (position relative to
+  the current parent body). Bodies are **on rails** — pure closed-form functions of
+  `sim_time`; never snapshot a body's position, derive it from time.
+- **Floating / scaled origin for rendering.** The ship renders at exactly
+  `(0,0,0)` and the world shifts around it; 1 render unit = 1 m. Float32 GPU
+  precision never sees large coordinates. Do not introduce world-space rendering at
+  interplanetary scale.
+- **Determinism.** Given the same player input, a level plays out identically.
+  Objective predicates are pure functions of (ship state, time). Coasting state is
+  closed-form and never drifts.
+- **Nesting is not hardcoded to "Earth is root."** The Mars level roots the Sun
+  with Earth/Mars as children. Anything that walks the body graph must recurse
+  through `parent`, not assume a fixed depth.
+
+## 3. The theme system — no standalone colours
+
+Visual look is **swappable**, funnelled through three seams. The hard rule:
+**no raw `Color(...)` literals in UI code or level data.** A colour lives in
+exactly one of these, by meaning:
+
+| Seam | Owns | Where |
+|---|---|---|
+| **`RenderTheme`** | The 3D flight view's look — env/sky, body surface colours, trajectory, target ring, corridor, node ghost, orbit marks, ship markers. | `src/ui/render_theme.gd` |
+| **`Palette`** | Semantic UI colours — *one meaning per colour* (green = live/own, amber = planned intent, cyan = target, red = danger), plus ORBITAL-OS chrome tokens. | `src/ui/palette.gd` |
+| **`UiTheme`** | Fonts (Chakra Petch / IBM Plex Mono) and shared widget styles (panels, chips, meters). Colours come *from* `Palette`. | `src/ui/ui_theme.gd` |
+
+Consequences to respect:
+
+- **Levels (`src/levels/data/*.tres`) carry no colour.** A body's surface colour is
+  resolved by *kind* from `RenderTheme.body_colors` (Earth/Moon/Sun/Mars). A level
+  `.tres` should not set `color =` on a known-kind body; only a genuinely *generic*
+  body falls back to its own `BodyDef.color`. Adding a level = data only, no palette.
+- **Menu/HUD screens must not define local colour consts.** No `const GREEN := ...`
+  per screen — pull from `Palette` (use `Palette.hex()` for BBCode). The 3D
+  renderers read from the `RenderTheme` threaded into their `build(...)` (optional
+  param, defaults to `RenderTheme.default()` so tests stay simple).
+- **Adding a new coloured surface?** Add a named field to the right seam and read it
+  — never inline the literal at the call site. Intentional exceptions (chase fill
+  light, star-dust tint, the shared station `.tscn`) are documented in TD-3; don't
+  add new ones without a note.
+
+## 4. Design references
+
+The intended look is authored as static HTML mockups — treat them as the visual
+spec:
+
+- `ref/design-ref.html` — the "ORBITAL OS" system: menus, panels, typography,
+  chrome tokens. `Palette` + `UiTheme` implement this.
+- `ref/hud-ref.html` — the in-flight HUD layout (top telemetry bar, rails, bottom
+  strip, attitude director). `src/ui/hud.gd` is built to it.
+- `UI-DESIGN.md` — the written companion to the palette semantics; keep it and
+  `Palette` in lockstep.
+
+## 5. Tech-debt map )
+
+The sim/campaign core should be clean and well-tested; Tech debt used to concentrate
+in the view/UI layer. See `TECH_DEBTS.md` for the live registry. Consult the registry
+before assuming a subsystem is finished, and add a row when you defer something.
+
+## 6. Testing
+
+- `./tools/test.sh` runs the GUT suite headless and enforces `tests/.test-baseline`
+  (script/test counts) — a parse error or coverage drop fails the run, it does not
+  silently pass.
+- Favour logic that can be exercised without a live window or input simulation
+  (this is why maneuver-node editing is keyboard-event-driven and profiles/saves
+  round-trip through disk in tests). New systems should follow suit.

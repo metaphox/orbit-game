@@ -96,7 +96,7 @@ func sync(ship: ShipSim, delta: float) -> void:
 	# Far-plane sizing needs the farthest body, so the camera updates last -
 	# after BodyRenderer.sync has refreshed max_body_dist for this frame.
 	var scene_reach := maxf(_body_renderer.max_body_dist, _draw_limit)
-	_camera_rig.update(ship.attitude, scene_reach)
+	_camera_rig.update(ship, scene_reach, delta)
 
 	if _sun_flare != null:
 		_update_sun_flare()
