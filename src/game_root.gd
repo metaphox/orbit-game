@@ -488,8 +488,8 @@ func _check_end_conditions() -> void:
 				_fail("TOUCHDOWN TOO HARD")
 			_:
 				_fail("%s SURFACE IMPACT" % ship.body.name)
-	elif (level.fail_radius > 0.0 and ship.body.parent == null
-			and ship.r.length() > level.fail_radius):
+	elif (level.fail_radius > 0.0
+			and ship.absolute_position(sim_time).length() > level.fail_radius):
 		_fail("MISSION ENVELOPE EXCEEDED")
 	elif level.objective.is_met(ship):
 		_win()
@@ -513,11 +513,13 @@ func _enter_rewind() -> void:
 		return
 	if rewind.anchors.is_empty():
 		return
-	ship.throttle = 0.0
-	hud.center_label.visible = false  # clear a fail banner if we came from FAILED
+	# Snapshot the live state (incl. throttle/flight_state) BEFORE cutting
+	# throttle, so CANCEL restores an in-progress burn instead of a coast.
 	_rewind_return = {
 		"state": ship.serialize(), "sim_time": sim_time,
 		"warp_index": warp_index, "phase": phase}
+	ship.throttle = 0.0
+	hud.center_label.visible = false  # clear a fail banner if we came from FAILED
 	phase = Phase.REWINDING
 	_rewind_cursor = rewind.anchors.size() - 1
 	_show_anchor(_rewind_cursor, true)
@@ -605,10 +607,12 @@ func _rewind_resume() -> void:
 
 
 func _restore_live(state: Dictionary, at_time: float, warp: int) -> void:
-	ship.apply_serialized(state, at_time)
+	ship.apply_serialized(state, at_time, true)
 	sim_time = at_time
 	warp_index = warp
-	_was_burning = false
+	# Match the rising-edge burn detector to the restored throttle so a live
+	# burn isn't re-recorded as a fresh anchor on the resumed frame.
+	_was_burning = float(state.get("throttle", 0.0)) > 0.0
 	_sweep_left = 0.0
 	_event_revision = -1
 	flight_view.mark_traj_dirty()
@@ -617,14 +621,18 @@ func _restore_live(state: Dictionary, at_time: float, warp: int) -> void:
 func _refresh_rewind_hud() -> void:
 	var a: Dictionary = rewind.anchors[_rewind_cursor]
 	var charged: bool = float(_rewind_return["sim_time"]) - float(a["sim_time"]) > 1e-6
+	var confirm_key := InputBindings.primary_key_label("rewind_confirm")
 	var resume_text: String
 	if not charged:
-		resume_text = "[ENTER] RESUME (FREE)"
+		resume_text = "[%s] RESUME (FREE)" % confirm_key
 	elif rewind.has_charges():
-		resume_text = "[ENTER] RESUME HERE — USES 1 OF %d" % rewind.charges
+		resume_text = "[%s] RESUME HERE — USES 1 OF %d" % [confirm_key, rewind.charges]
 	else:
 		resume_text = "— NO REWINDS LEFT —"
-	hud.set_rewind_line("←/→ (or A/D) STEP ANCHOR    %s    [ESC] CANCEL" % resume_text)
+	hud.set_rewind_line("%s/%s STEP ANCHOR    %s    [%s] CANCEL" % [
+		InputBindings.primary_key_label("rewind_prev"),
+		InputBindings.primary_key_label("rewind_next"),
+		resume_text, InputBindings.primary_key_label("rewind_cancel")])
 	hud.update_rewind_timeline(
 		rewind.anchors[0]["sim_time"], float(_rewind_return["sim_time"]), sim_time,
 		_rewind_cursor, rewind.anchors, rewind.landmarks)

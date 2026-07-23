@@ -638,7 +638,11 @@ func show_win(level: LevelDef, dv_used: float, has_next: bool, clean := false) -
 	if clean:
 		body += "   ◇ CLEAN"
 	_banner_body.text = body
-	_banner_prompt.text = "[R] FLY AGAIN" + ("     [N] NEXT MISSION" if has_next else "")
+	var restart_key := InputBindings.primary_key_label("reset_or_restart")
+	# "Next mission" currently piggybacks on the sas_normal action's key.
+	var next_key := InputBindings.primary_key_label("sas_normal")
+	_banner_prompt.text = "[%s] FLY AGAIN" % restart_key + (
+		"     [%s] NEXT MISSION" % next_key if has_next else "")
 	center_label.visible = true
 
 
@@ -647,9 +651,10 @@ func show_fail(reason: String, rewinds_left := 0) -> void:
 	_banner_title.text = reason
 	_banner_title.add_theme_color_override("font_color", RED)
 	_banner_body.text = ""
-	var prompt := "[R] RESTART"
+	var prompt := "[%s] RESTART" % InputBindings.primary_key_label("reset_or_restart")
 	if rewinds_left > 0:
-		prompt = "[Z] REWIND — %d LEFT     %s" % [rewinds_left, prompt]
+		prompt = "[%s] REWIND — %d LEFT     %s" % [
+			InputBindings.primary_key_label("rewind_open"), rewinds_left, prompt]
 	_banner_prompt.text = prompt
 	center_label.visible = true
 
