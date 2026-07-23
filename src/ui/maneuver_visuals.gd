@@ -80,7 +80,12 @@ func sync(ship: ShipSim, delta: float, side_distance: float, guidance_enabled: b
 	_traj_timer -= delta
 	if _traj_timer <= 0.0:
 		_traj_timer = TRAJ_REFRESH
-		_rebuild_node_ghost(ship)
+		# The node ghost + its child-SOI encounter scan is a predictive aid, and
+		# the scan is the pricey part (see _encounter_entry_time). Skip the whole
+		# rebuild in hardcore, where it's hidden anyway; the orbit marks (ap/pe/
+		# nodes/impact) are informational and still update.
+		if guidance_enabled:
+			_rebuild_node_ghost(ship)
 		_update_orbit_marks(ship, ship.current_elements(), side_distance)
 
 	if not guidance_enabled:  # hardcore: no node ghost / preview

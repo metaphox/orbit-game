@@ -45,3 +45,55 @@ func test_guidance_disabled_hides_prediction_line_but_keeps_target() -> void:
 
 	renderer.sync(ship, ship_abs, t, true)
 	assert_true(renderer._traj_instance.visible, "guidance restores the prediction line")
+
+
+# --- PF-1: no wasted sampling on hidden or unchanged geometry ---------------
+
+func test_hardcore_hidden_line_is_never_sampled() -> void:
+	var level: LevelDef = load("res://src/levels/data/level_01_01.tres")
+	var renderer := TrajectoryRenderer.new()
+	add_child_autofree(renderer)
+	renderer.build(level, RenderTheme.default())
+	var ship := ShipSim.new()
+	ship.setup(level)
+
+	renderer.sync(ship, ship.absolute_position(ship.last_time), ship.last_time, false)
+	# A never-sampled line has zero mesh surfaces: the hidden path early-outs
+	# before _rebuild_line, so hardcore pays no sampling / mesh-upload cost.
+	assert_eq(renderer._traj_mesh.get_surface_count(), 0,
+		"hardcore never builds the hidden prediction line")
+
+
+func test_unchanged_geometry_is_not_rebuilt() -> void:
+	var level: LevelDef = load("res://src/levels/data/level_01_01.tres")
+	var renderer := TrajectoryRenderer.new()
+	add_child_autofree(renderer)
+	renderer.build(level, RenderTheme.default())
+	var ship := ShipSim.new()
+	ship.setup(level)
+	var t := ship.last_time
+
+	renderer.sync(ship, ship.absolute_position(t), t, true)
+	assert_gt(renderer._traj_mesh.get_surface_count(), 0, "the first visible frame builds the line")
+
+	# Wipe the mesh: a needless rebuild on an unchanged frame would refill it.
+	renderer._traj_mesh.clear_surfaces()
+	renderer.sync(ship, ship.absolute_position(t), t, true)  # same revision + time (frozen)
+	assert_eq(renderer._traj_mesh.get_surface_count(), 0,
+		"a frozen / unchanged frame reuses the cached line instead of rebuilding")
+
+
+func test_advancing_the_coast_rebuilds_the_line() -> void:
+	var level: LevelDef = load("res://src/levels/data/level_01_01.tres")
+	var renderer := TrajectoryRenderer.new()
+	add_child_autofree(renderer)
+	renderer.build(level, RenderTheme.default())
+	var ship := ShipSim.new()
+	ship.setup(level)
+
+	renderer.sync(ship, ship.absolute_position(ship.last_time), ship.last_time, true)
+	renderer._traj_mesh.clear_surfaces()
+	ship.advance_to(ship.last_time + 30.0)  # the ship walked along its orbit
+	renderer.sync(ship, ship.absolute_position(ship.last_time), ship.last_time, true)
+	assert_gt(renderer._traj_mesh.get_surface_count(), 0,
+		"a new coast frame rebuilds so the line stays glued to the ship")
