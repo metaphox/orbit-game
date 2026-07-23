@@ -223,9 +223,15 @@ func _process(delta: float) -> void:
 	else:
 		hud.set_rewind_line("")
 		hud.hide_rewind_timeline()
+	# The camera always syncs so the view stays draggable even while frozen.
 	flight_view.sync(ship, delta)
-	map_view.sync(ship, sim_time, delta)
-	hud.refresh(ship, level, sim_time, WARP_STEPS[warp_index])
+	# PF-4: while genuinely frozen (paused, or a settled failure) the ship state
+	# and clock don't change, so the per-frame telemetry reformat + minimap
+	# rebuild produce identical output - skip them. WON keeps coasting and
+	# REWINDING animates the sweep, so both still refresh.
+	if phase != Phase.PAUSED and phase != Phase.FAILED:
+		map_view.sync(ship, sim_time, delta)
+		hud.refresh(ship, level, sim_time, WARP_STEPS[warp_index])
 	# star dust runs its own clock independent of sim_time, so it needs an
 	# explicit freeze whenever the sim itself isn't advancing. WON now keeps
 	# coasting (§14.3), so only the genuinely-frozen phases freeze the dust.

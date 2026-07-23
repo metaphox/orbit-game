@@ -27,6 +27,41 @@ func test_closest_approach_matches_brute_force() -> void:
 	assert_close(ca.distance, best_d, 0.01, "refined min matches brute force")
 
 
+func test_closest_approach_cache_survives_warp_sized_time_jumps() -> void:
+	# PF-3: at high warp a render frame advances far more than the old 2 s cache
+	# window, but the conic is unchanged, so the cached solve must be reused.
+	var level := Campaign.level_at(1)
+	var ship := ShipSim.new()
+	ship.setup(level)
+	var objective: RendezvousObjective = level.objective
+
+	var ca1 := objective.closest_approach(ship)
+	var t_ca: float = ca1["time"]
+	assert_gt(t_ca, ship.last_time + 2.0, "the predicted approach is well beyond the old window")
+
+	# A big time jump that stays before the predicted approach: same revision,
+	# so the exact cached dictionary must come back (reference identity).
+	ship.last_time = lerpf(0.0, t_ca, 0.5)
+	var ca2 := objective.closest_approach(ship)
+	assert_true(is_same(ca1, ca2), "unchanged conic reuses the cached approach across a big jump")
+
+	# Once we pass the predicted approach time, the next window is solved fresh.
+	ship.last_time = t_ca + 1.0
+	var ca3 := objective.closest_approach(ship)
+	assert_false(is_same(ca1, ca3), "passing the approach time forces a fresh solve")
+
+
+func test_closest_approach_recomputes_after_a_refit() -> void:
+	var level := Campaign.level_at(1)
+	var ship := ShipSim.new()
+	ship.setup(level)
+	var objective: RendezvousObjective = level.objective
+	var ca1 := objective.closest_approach(ship)
+	ship.revision += 1  # a burn/refit: guidance must refresh immediately
+	var ca2 := objective.closest_approach(ship)
+	assert_false(is_same(ca1, ca2), "a refit (revision bump) invalidates the cache")
+
+
 func test_rendezvous_met_only_in_proximity() -> void:
 	var level := Campaign.level_at(1)
 	var objective: RendezvousObjective = level.objective

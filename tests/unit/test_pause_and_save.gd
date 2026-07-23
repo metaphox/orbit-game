@@ -216,6 +216,25 @@ func test_ship_state_without_node_round_trips_null() -> void:
 	assert_null(restored.node)
 
 
+func test_paused_phase_skips_the_hud_refresh() -> void:
+	# PF-4: a paused mission is static, so the per-frame telemetry reformat is
+	# skipped. Mutate a HUD-backed value while paused and confirm the label does
+	# not follow until flight resumes (prop_mass is untouched by a coast, so the
+	# resumed refresh shows the mutated value rather than reverting).
+	var game := _boot()
+	game._unhandled_input(_key(KEY_SPACE))  # quick pause, no menu
+	assert_eq(game.phase, game.Phase.PAUSED)
+	var pct_before: String = game.hud._prop_pct.text
+
+	game.ship.prop_mass = game.level.prop_mass * 0.3  # a live refresh would show 30%
+	simulate(game, 2, 1.0 / 60.0)
+	assert_eq(game.hud._prop_pct.text, pct_before, "paused HUD is not reformatted every frame")
+
+	game._unhandled_input(_key(KEY_SPACE))  # resume
+	simulate(game, 2, 1.0 / 60.0)
+	assert_ne(game.hud._prop_pct.text, pct_before, "resuming flight refreshes the HUD again")
+
+
 func test_star_dust_freezes_while_paused_and_resumes_cleanly() -> void:
 	var game := _boot()
 	var dust: StarDust = game.flight_view.star_dust
