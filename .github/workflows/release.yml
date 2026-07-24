@@ -1,0 +1,57 @@
+name: Release
+
+# Push a tag to cut a release:  git tag v0.3.0 && git push origin v0.3.0
+# Or run manually from the Actions tab (no GitHub Release is created then).
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+# Godot cross-exports every desktop target from one Linux runner, so a single
+# job produces the Windows, macOS, and Linux artifacts.
+env:
+  GODOT_VERSION: 4.7.1-stable   # bump together with the editor you build with
+
+permissions:
+  contents: write   # needed to create the GitHub Release
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # tags, so `git describe` in release.sh sees the version
+
+      - name: Install Godot + export templates
+        run: |
+          set -eux
+          base="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}"
+          curl -fLO "${base}/Godot_v${GODOT_VERSION}_linux.x86_64.zip"
+          curl -fLO "${base}/Godot_v${GODOT_VERSION}_export_templates.tpz"
+          unzip -q "Godot_v${GODOT_VERSION}_linux.x86_64.zip"
+          sudo install -m 0755 "Godot_v${GODOT_VERSION}_linux.x86_64" /usr/local/bin/godot
+          tpl="$HOME/.local/share/godot/export_templates/${GODOT_VERSION%-*}.${GODOT_VERSION#*-}"
+          mkdir -p "$tpl"
+          unzip -q "Godot_v${GODOT_VERSION}_export_templates.tpz"
+          mv templates/* "$tpl/"
+          godot --version
+
+      # Import resources once (headless) so the export finds every .import.
+      - name: Import project
+        run: godot --headless --import || true
+
+      - name: Build + package all platforms
+        run: tools/release.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: orbit-game-builds
+          path: dist/*
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true
