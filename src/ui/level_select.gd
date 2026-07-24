@@ -1,20 +1,24 @@
 class_name LevelSelect
 extends CanvasLayer
-## Mission-select menu: acts and levels with lock/medal state. Up/Down (also
-## W/S or K/J) move between missions (locked ones skipped); Left/Right (also
-## A/D or H/L) jump between acts; Enter launches the highlighted mission. Key
-## hints are hidden by default; F1 toggles them (Settings.menu_hints).
-## Chrome is scene-owned via the shared MenuTextLayout; the mission list is
-## BBCode built here from Palette colours.
+## Two-pane mission select (ref/ref-menu-design.png): a left column of act-grouped
+## mission cards and a right detail pane (brief + orbit preview + stats + LAUNCH).
+## Keyboard: Up/Down (also W/S, K/J) move the selected mission (locked ones
+## skipped); Left/Right (also A/D, H/L) jump acts; Enter launches. Mouse: hover
+## live-previews a card in the detail pane, click selects, LAUNCH / double-click
+## launches. Key hints are hidden by default; F1 toggles the compact hint bar.
 
 signal level_chosen(index: int)
 signal back_pressed
 
-var _text: RichTextLabel
+const HINT := "↑↓ / W S / K J  MISSION     ← → / A D / H L  ACT     ENTER  LAUNCH     [ESC]  TITLE     [F1]  HIDE"
+
 var _order: Array[int]
 var _profile: Profile
 var _cursor := 0
-var _layout: MenuTextLayout
+var _hover_pos := -1
+var _shell: MenuShell
+var _detail: MissionDetailPane
+var _cards: Array[MissionCard] = []
 
 
 func build(profile: Profile) -> void:
@@ -22,15 +26,56 @@ func build(profile: Profile) -> void:
 	_order = Campaign.order()
 	_cursor = _first_unlocked_pos()
 
-	_layout = preload("res://src/ui/menu_text_layout.tscn").instantiate()
-	add_child(_layout)
-	_layout.configure("■ ORBIT — MISSION SELECT ■", "PILOT: %s" % profile.profile_name, "")
-	_text = _layout.content
-	_text.custom_minimum_size = Vector2(620, 10)
+	_shell = MenuShell.new()
+	add_child(_shell)
+	_shell.configure("MAIN MENU ▶ MISSIONS")
+	_shell.set_hint(HINT)
 
-	_refresh()
+	_detail = MissionDetailPane.new()
+	_detail.launch_requested.connect(func(index: int) -> void: level_chosen.emit(index))
+	_shell.set_right(_detail)
+
+	_build_cards()
+	_shell.left_column.mouse_exited.connect(_clear_hover)
+
 	if Settings.effects_enabled:
 		add_child(ScreenGrade.new())
+	_refresh()
+
+
+func _build_cards() -> void:
+	_cards.clear()
+	var back := Button.new()
+	back.theme_type_variation = UiTheme.CARD
+	back.focus_mode = Control.FOCUS_NONE
+	back.text = "◀  BACK"
+	back.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	back.custom_minimum_size = Vector2(0, 48)  # 6×8
+	back.pressed.connect(func() -> void: back_pressed.emit())
+	_shell.left_column.add_child(back)
+
+	var pos := 0
+	for act: Dictionary in Campaign.acts():
+		var header := Label.new()
+		header.theme_type_variation = UiTheme.ACT_HEADER
+		header.text = act["name"]
+		var head_wrap := MarginContainer.new()
+		head_wrap.add_theme_constant_override("margin_top", 16)   # section break above act
+		head_wrap.add_theme_constant_override("margin_left", 16)  # align with card text gutter
+		head_wrap.add_theme_constant_override("margin_bottom", 4)
+		head_wrap.add_child(header)
+		_shell.left_column.add_child(head_wrap)
+		for index: int in act["indices"]:
+			var card := MissionCard.new()
+			_shell.left_column.add_child(card)
+			card.set_data(pos, Campaign.code(index), Campaign.short_title(index),
+				_profile.status_for(index), Campaign.level_at(index).difficulty,
+				not _is_selectable(index))
+			card.hovered.connect(_on_card_hovered)
+			card.clicked.connect(_on_card_clicked)
+			card.activated.connect(_on_card_activated)
+			_cards.append(card)
+			pos += 1
 
 
 func _first_unlocked_pos() -> int:
@@ -40,48 +85,47 @@ func _first_unlocked_pos() -> int:
 	return 0
 
 
-## True if the mission can be flown right now: either actually unlocked on
-## the profile, or Settings.debug_mode is bypassing the lock entirely.
+## True if the mission can be flown right now: unlocked on the profile, or
+## Settings.debug_mode is bypassing the lock entirely.
 func _is_selectable(index: int) -> bool:
 	return Settings.debug_mode or _profile.is_unlocked(index)
 
 
+## Repaint card selection and drive the detail pane (hovered card if any, else
+## the selected one), keeping the selected card scrolled into view.
 func _refresh() -> void:
-	var green := Palette.hex(Palette.LIVE)
-	var dim := Palette.hex(Palette.LIVE_DIM)
-	var gold := Palette.hex(Palette.MEDAL_GOLD)
-	var locked := Palette.hex(Palette.DISABLED)
-	var highlight := Palette.hex(Palette.INTENT)
-	var lines: Array[String] = []
-	var pos := 0  # 0-based; matches _order index and the number-key mapping
-	for act in Campaign.acts():
-		lines.append("")
-		lines.append("[color=%s]%s[/color]" % [dim, act["name"]])
-		for index: int in act["indices"]:
-			var mission_title: String = Campaign.title(index)
-			var selected := pos == _cursor
-			var marker := "▶ " if selected else "  "
-			var unlocked := _profile.is_unlocked(index)
-			if unlocked or Settings.debug_mode:
-				var medal := _profile.medal_for(index)
-				var medal_tag := "  [color=%s][%s][/color]" % [gold, medal] if medal != "" else ""
-				var debug_tag := "  [color=%s][DEBUG][/color]" % gold if not unlocked else ""
-				var title_color := highlight if selected else green
-				lines.append("%s[color=%s]%s[/color]%s%s" % [
-					marker, title_color, mission_title, medal_tag, debug_tag])
-			else:
-				lines.append("%s[color=%s]--- LOCKED ---[/color]" % [marker, locked])
-			pos += 1
-	lines.append("")
-	if Settings.debug_mode:
-		lines.append("[color=%s][DEBUG MODE — ALL LEVELS UNLOCKED][/color]" % gold)
-	if Settings.menu_hints_on():
-		lines.append(
-			"[color=%s]↑↓ / W S / K J  MISSION     ← → / A D / H L  ACT     ENTER  LAUNCH     [ESC]  TITLE     [F1]  HIDE[/color]"
-			% dim)
-	else:
-		lines.append("[color=%s][F1] KEYS     [ESC] TITLE[/color]" % dim)
-	_text.text = "\n".join(lines)
+	for i in _cards.size():
+		_cards[i].set_selected(i == _cursor)
+	var shown := _hover_pos if _hover_pos >= 0 else _cursor
+	if shown >= 0 and shown < _order.size():
+		var index: int = _order[shown]
+		_detail.show_level(index, _profile)
+		_detail.set_launch_enabled(_is_selectable(index))
+	if _cursor >= 0 and _cursor < _cards.size():
+		_shell.ensure_visible(_cards[_cursor])
+
+
+func _on_card_hovered(pos: int) -> void:
+	_hover_pos = pos
+	_refresh()
+
+
+func _clear_hover() -> void:
+	if _hover_pos != -1:
+		_hover_pos = -1
+		_refresh()
+
+
+func _on_card_clicked(pos: int) -> void:
+	if pos < 0 or pos >= _order.size() or not _is_selectable(_order[pos]):
+		return
+	_cursor = pos
+	_hover_pos = -1
+	_refresh()
+
+
+func _on_card_activated(pos: int) -> void:
+	_select_and_activate(pos)
 
 
 func _move_cursor(delta: int) -> void:
@@ -93,6 +137,7 @@ func _move_cursor(delta: int) -> void:
 		i = wrapi(i + delta, 0, n)
 		if _is_selectable(_order[i]):
 			_cursor = i
+			_hover_pos = -1
 			_refresh()
 			return
 
@@ -129,6 +174,7 @@ func _move_act(delta: int) -> void:
 		for pos: int in range(bounds[a][0], bounds[a][1]):
 			if _is_selectable(_order[pos]):
 				_cursor = pos
+				_hover_pos = -1
 				_refresh()
 				return
 
@@ -162,4 +208,4 @@ func _unhandled_input(event: InputEvent) -> void:
 			_select_and_activate(_cursor)
 		KEY_F1:
 			Settings.toggle_menu_hints()
-			_refresh()
+			_shell.refresh_hint_visibility()

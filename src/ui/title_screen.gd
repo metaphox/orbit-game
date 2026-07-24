@@ -1,10 +1,10 @@
 class_name TitleScreen
 extends CanvasLayer
-## The splash screen: game title plus the main menu. CONTINUE is disabled
-## when no profile has ever been active; NEW is disabled once all profile
-## slots are full. Navigate with Up/Down (also W/S or K/J) + Enter. Key hints
-## are hidden by default; F1 toggles them (Settings.menu_hints).
-## Styled with the shared ORBITAL-OS system (UiTheme + Palette).
+## Two-pane main menu (ORBITAL-OS): left column of option cards, right hero panel
+## with the game title, tagline, and a per-option contextual blurb. CONTINUE is
+## disabled with no active profile; NEW once profile slots are full. Keyboard
+## Up/Down (also W/S, K/J) + Enter; mouse hover previews the blurb, click
+## activates. F1 toggles the compact hint bar (hidden by default).
 
 signal continue_pressed
 signal new_pressed
@@ -13,21 +13,23 @@ signal settings_pressed
 signal credits_pressed
 signal quit_pressed
 
-var _text: RichTextLabel
+const HINT := "↑↓ / W S / K J  SELECT     ENTER  CONFIRM     [F1]  HIDE"
+
+var _store: ProfileStore
 var _items: Array = []  # [label: String, enabled: bool]
 var _cursor := 0
-var _layout: TitleScreenLayout
-var _slots_base := ""
+var _hover_pos := -1
+var _shell: MenuShell
+var _cards: Array[OptionCard] = []
+var _blurb: Label
+var _status: Label
 
 
 func build(store: ProfileStore) -> void:
+	_store = store
 	var last_profile := store.last_active_profile()
-	var continue_label := "CONTINUE"
-	if last_profile != null and last_profile.mission_save != null:
-		var saved_index: int = last_profile.mission_save.get("level_index", 0)
-		continue_label = "CONTINUE — %s" % Campaign.title(saved_index)
 	_items = [
-		[continue_label, last_profile != null],
+		["CONTINUE", last_profile != null],
 		["NEW PROFILE", store.can_create_profile()],
 		["LOAD PROFILE", true],
 		["SETTINGS", true],
@@ -36,25 +38,72 @@ func build(store: ProfileStore) -> void:
 	]
 	_cursor = _first_enabled()
 
-	_layout = preload("res://src/ui/title_screen_layout.tscn").instantiate()
-	add_child(_layout)
-	_text = _layout.menu_text
-	_layout.warning_label.text = "⚠ %s" % store.load_warning if store.load_warning != "" else ""
-	_layout.warning_label.visible = store.load_warning != ""
-	_slots_base = "%d / %d PROFILE SLOTS" % [store.profiles.size(), ProfileStore.MAX_PROFILES]
-	_apply_slots_label()
+	_shell = MenuShell.new()
+	add_child(_shell)
+	_shell.configure("MAIN MENU")
+	_shell.set_hint(HINT)
+	_shell.set_right(_build_hero())
+
+	for i in _items.size():
+		var card := OptionCard.new()
+		_shell.left_column.add_child(card)
+		card.set_data(i, _items[i][0], _items[i][1])
+		card.hovered.connect(_on_card_hovered)
+		card.clicked.connect(_select_and_activate)
+		card.activated.connect(_select_and_activate)
+		_cards.append(card)
+	_shell.left_column.mouse_exited.connect(_clear_hover)
 
 	_refresh()
 	if Settings.effects_enabled:
 		add_child(ScreenGrade.new())
 
 
-## The bottom status line: profile-slot count plus, when hints are on (F1),
-## the navigation keys. Collapsed to a small "[F1] KEYS" affordance by default.
-func _apply_slots_label() -> void:
-	var hint := "↑↓ / W S / K J  SELECT   ·   ENTER CONFIRM   ·   [F1] HIDE" \
-		if Settings.menu_hints_on() else "[F1] KEYS"
-	_layout.slots_label.text = "%s   ·   %s" % [_slots_base, hint]
+func _build_hero() -> Control:
+	var panel := PanelContainer.new()
+	panel.theme_type_variation = UiTheme.INSTRUMENT_PANEL
+	var pad := MarginContainer.new()
+	for side: String in ["margin_left", "margin_right", "margin_top", "margin_bottom"]:
+		pad.add_theme_constant_override(side, 12)  # +12 panel = 24 gutter
+	panel.add_child(pad)
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", 16)
+	pad.add_child(col)
+
+	var top := HBoxContainer.new()
+	col.add_child(top)
+	top.add_child(_lbl(UiTheme.MENU_FOOTER, "FLIGHT COMPUTER · MAIN MENU"))
+	var spacer := Control.new()
+	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	top.add_child(spacer)
+	top.add_child(_lbl(UiTheme.MENU_FOOTER, "V2 · FLIGHT"))
+
+	var title := _lbl(UiTheme.MENU_TITLE, "LIMITED PROPELLANT")
+	title.add_theme_font_size_override("font_size", 44)
+	col.add_child(title)
+	col.add_child(_lbl(UiTheme.MENU_TAGLINE, "LP // BURN FUEL. CHANGE ORBIT. SOLVE LAMBERT'S PROBLEM."))
+	col.add_child(HSeparator.new())
+
+	_blurb = _lbl(UiTheme.MONO_TEXT, "")
+	_blurb.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	col.add_child(_blurb)
+
+	var grow := Control.new()
+	grow.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	col.add_child(grow)
+
+	_status = _lbl(UiTheme.MENU_FOOTER, "")
+	col.add_child(_status)
+	if _store.load_warning != "":
+		col.add_child(_lbl(UiTheme.MENU_WARNING, "⚠ %s" % _store.load_warning))
+	return panel
+
+
+func _lbl(variation: StringName, text: String) -> Label:
+	var l := Label.new()
+	l.theme_type_variation = variation
+	l.text = text
+	return l
 
 
 func _first_enabled() -> int:
@@ -65,21 +114,43 @@ func _first_enabled() -> int:
 
 
 func _refresh() -> void:
-	var lines: Array[String] = []
-	for i in _items.size():
-		var label: String = _items[i][0]
-		var enabled: bool = _items[i][1]
-		var selected := i == _cursor
-		var color: Color
-		if selected and enabled:
-			color = Palette.SELECT
-		elif enabled:
-			color = Palette.LIVE
-		else:
-			color = Palette.DISABLED
-		var marker := "▶ " if selected else "  "
-		lines.append("[color=%s]%s%s[/color]" % [Palette.hex(color), marker, label])
-	_text.text = "\n".join(lines)
+	for i in _cards.size():
+		_cards[i].set_selected(i == _cursor)
+	var shown := _hover_pos if _hover_pos >= 0 else _cursor
+	_blurb.text = _blurb_for(shown)
+	_status.text = "%d / %d PROFILE SLOTS" % [_store.profiles.size(), ProfileStore.MAX_PROFILES]
+
+
+func _blurb_for(i: int) -> String:
+	match i:
+		0:
+			var lp := _store.last_active_profile()
+			if lp != null and lp.mission_save != null:
+				var idx: int = lp.mission_save.get("level_index", 0)
+				return "RESUME  %s · %s  %s" % [lp.profile_name, Campaign.code(idx), Campaign.short_title(idx)]
+			return "NO MISSION IN PROGRESS"
+		1:
+			return "CREATE A NEW PILOT" if _items[1][1] else "ALL PROFILE SLOTS ARE FULL"
+		2:
+			return "SWITCH THE ACTIVE PILOT"
+		3:
+			return "DISPLAY & EFFECTS"
+		4:
+			return "ABOUT LIMITED PROPELLANT"
+		5:
+			return "EXIT TO DESKTOP"
+	return ""
+
+
+func _on_card_hovered(pos: int) -> void:
+	_hover_pos = pos
+	_refresh()
+
+
+func _clear_hover() -> void:
+	if _hover_pos != -1:
+		_hover_pos = -1
+		_refresh()
 
 
 func _move_cursor(delta: int) -> void:
@@ -89,6 +160,7 @@ func _move_cursor(delta: int) -> void:
 		i = wrapi(i + delta, 0, n)
 		if _items[i][1]:
 			_cursor = i
+			_hover_pos = -1
 			_refresh()
 			return
 
@@ -125,4 +197,4 @@ func _unhandled_input(event: InputEvent) -> void:
 			_select_and_activate(_cursor)
 		KEY_F1:
 			Settings.toggle_menu_hints()
-			_apply_slots_label()
+			_shell.refresh_hint_visibility()

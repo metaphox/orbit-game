@@ -56,6 +56,14 @@ const REWIND_PANEL := &"RewindPanel"
 const TOOLBAR_BUTTON := &"ToolbarButton"
 const PRIMARY_BUTTON := &"PrimaryButton"
 const DANGER_BUTTON := &"DangerButton"
+# Menu-redesign chrome (two-pane mission select + shared shell).
+const CARD := &"Card"                  # a list card (Button): default/hover/locked states
+const CARD_SELECTED := &"CardSelected" # the selected card: filled bright green
+const ACT_HEADER := &"ActHeader"       # dim act section label in a list
+const BREADCRUMB := &"Breadcrumb"      # top "MAIN MENU ▶ MISSIONS" trail
+const HINT_BAR := &"HintBar"           # bottom compact key-hint bar (F1)
+const CODE_CHIP := &"CodeChip"         # mission code chip (ORB-01)
+const LAUNCH_BUTTON := &"LaunchButton" # the amber primary CTA
 const SHARED_THEME_PATH := "res://src/ui/generated_ui_theme.tres"
 
 static var _shared_theme: Theme
@@ -167,8 +175,40 @@ static func populate(theme: Theme) -> void:
 		Palette.LIVE, Palette.VOID, Palette.VOID, 20, 11)
 	_configure_button_variation(theme, DANGER_BUTTON, Palette.WARNING,
 		Palette.WARNING, Palette.VOID, Palette.VOID, 20, 11)
+	_configure_button_variation(theme, LAUNCH_BUTTON, Palette.INTENT,
+		Palette.INTENT, Palette.VOID, Palette.VOID, 24, 12)
 
+	_configure_menu_chrome(theme)
 	_configure_base_widgets(theme)
+
+
+## The two-pane menu redesign: breadcrumb, act headers, hint bar, code chip, and
+## the list cards (a Button with default/hover/locked states + a filled-green
+## selected variation the controller swaps in).
+static func _configure_menu_chrome(theme: Theme) -> void:
+	_set_label_variation(theme, ACT_HEADER, MONO_SEMI, 12, Palette.LIVE_DIM)
+	_set_label_variation(theme, BREADCRUMB, MONO_SEMI, 13, Palette.INK)
+	# Chrome paddings are 8px-grid multiples (text never touches an edge).
+	theme.set_type_variation(HINT_BAR, &"PanelContainer")
+	theme.set_stylebox("panel", HINT_BAR,
+		_flat_box(Palette.CONSOLE_BG, Palette.HAIRLINE, 1, 16, 16, 8, 8))
+	theme.set_type_variation(CODE_CHIP, &"PanelContainer")
+	theme.set_stylebox("panel", CODE_CHIP,
+		_flat_box(Palette.PANEL_BG_SOFT, Palette.HAIRLINE, 1, 8, 8, 4, 4))
+
+	theme.set_type_variation(CARD, &"Button")
+	theme.set_stylebox("normal", CARD, _flat_box(Palette.PANEL, Palette.HAIRLINE, 1, 16, 16, 8, 8))
+	var card_hover := _flat_box(Palette.PANEL_HI, Palette.LIVE, 1, 16, 16, 8, 8)
+	theme.set_stylebox("hover", CARD, card_hover)
+	theme.set_stylebox("pressed", CARD, card_hover)
+	theme.set_stylebox("hover_pressed", CARD, card_hover)
+	theme.set_stylebox("focus", CARD, card_hover)
+	theme.set_stylebox("disabled", CARD, _flat_box(Palette.PANEL, Palette.HAIRLINE, 1, 16, 16, 8, 8))
+
+	theme.set_type_variation(CARD_SELECTED, &"Button")
+	var card_sel := _flat_box(Palette.LIVE, Palette.LIVE, 0, 16, 16, 8, 8)
+	for state: String in ["normal", "hover", "pressed", "hover_pressed", "focus", "disabled"]:
+		theme.set_stylebox(state, CARD_SELECTED, card_sel)
 
 
 ## Mirrors Palette into the generated Theme so Godot's Theme inspector exposes
@@ -214,17 +254,22 @@ static func _configure_button_variation(
 	else:
 		hover.bg_color = fill.lightened(0.12)
 		pressed.bg_color = hover.bg_color
+	var disabled: StyleBoxFlat = normal.duplicate()
+	disabled.bg_color = Palette.TRANSPARENT if variation == TOOLBAR_BUTTON else fill.darkened(0.55)
+	disabled.border_color = Palette.HAIRLINE
 	theme.set_stylebox("normal", variation, normal)
 	theme.set_stylebox("hover", variation, hover)
 	theme.set_stylebox("pressed", variation, pressed)
 	theme.set_stylebox("hover_pressed", variation, pressed)
 	theme.set_stylebox("focus", variation, hover)
+	theme.set_stylebox("disabled", variation, disabled)
 	theme.set_color("font_color", variation, foreground)
 	theme.set_color("font_hover_color", variation, hover_foreground)
 	theme.set_color("font_pressed_color", variation,
 		Palette.INTENT if variation == TOOLBAR_BUTTON else hover_foreground)
 	theme.set_color("font_hover_pressed_color", variation,
 		Palette.INTENT if variation == TOOLBAR_BUTTON else hover_foreground)
+	theme.set_color("font_disabled_color", variation, Palette.DISABLED)
 
 
 static func _configure_base_widgets(theme: Theme) -> void:

@@ -7,4 +7,7 @@ extends Control
 
 
 func _ready() -> void:
-	%Background.color = Palette.VOID
+	%Background.color = Palette.TRANSPARENT
+	var backdrop := Backdrop.new()
+	add_child(backdrop)
+	move_child(backdrop, 0)  # behind the form, in front of nothing

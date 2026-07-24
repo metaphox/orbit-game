@@ -297,6 +297,50 @@ func test_title_screen_activation_moves_cursor() -> void:
 	assert_eq(screen._cursor, 3, "activating an item also moves the cursor there")
 
 
+func test_main_menu_hero_blurb_follows_focus() -> void:
+	var store := ProfileStore.load_or_new(SAVE_TEST_PATH)
+	store.create_profile("Ada")  # CONTINUE enabled
+	var screen := TitleScreen.new()
+	add_child_autofree(screen)
+	screen.build(store)
+	assert_eq(screen._cards[0].theme_type_variation, UiTheme.CARD_SELECTED, "cursor starts on CONTINUE")
+	assert_true(screen._blurb.text.length() > 0, "the hero shows a blurb for the focused option")
+	screen._on_card_hovered(3)  # SETTINGS
+	assert_eq(screen._blurb.text, "DISPLAY & EFFECTS", "hover previews that option's blurb")
+	screen._clear_hover()
+	assert_true(screen._status.text.contains("PROFILE SLOTS"), "the slot count shows in the hero")
+
+
+func test_settings_two_pane_toggles_flip_and_persist() -> void:
+	var store := ProfileStore.load_or_new(SAVE_TEST_PATH)
+	var screen := SettingsScreen.new()
+	add_child_autofree(screen)
+	screen.build(store)
+	var before := Settings.effects_enabled
+	screen._toggle(0)  # SCREEN EFFECTS
+	assert_ne(Settings.effects_enabled, before, "toggling flips SCREEN EFFECTS")
+	assert_false(Settings.menu_hints_on())
+	screen._toggle(1)  # MENU HINTS
+	assert_true(Settings.menu_hints_on(), "MENU HINTS toggles too")
+
+
+func test_load_profile_detail_follows_selection_and_loads() -> void:
+	var store := ProfileStore.load_or_new(SAVE_TEST_PATH)
+	store.create_profile("Ada")
+	store.create_profile("Bo")
+	var screen := LoadProfileScreen.new()
+	add_child_autofree(screen)
+	screen.build(store)
+	assert_eq(screen._name.text, "Ada", "detail shows the selected pilot")
+	screen._on_card_hovered(1)
+	assert_eq(screen._name.text, "Bo", "hover previews the other pilot")
+	screen._clear_hover()
+	var chosen := [""]
+	screen.profile_chosen.connect(func(pname: String) -> void: chosen[0] = pname)
+	screen._load.pressed.emit()
+	assert_eq(chosen[0], "Ada", "the LOAD button loads the selected pilot")
+
+
 func _key(keycode: Key) -> InputEventKey:
 	var event := InputEventKey.new()
 	event.physical_keycode = keycode
@@ -328,20 +372,77 @@ func test_menu_navigation_keys_move_the_cursor_and_numbers_do_not() -> void:
 		assert_eq(screen._cursor, 2, "number keys no longer move the menu cursor")
 
 
+func test_mission_metadata_helpers() -> void:
+	assert_eq(Campaign.code(0), "ORB-01", "act prefix + within-act position")
+	assert_eq(Campaign.code(2), "ORB-03")
+	assert_eq(Campaign.code(3), "LUN-01", "act 2 starts a fresh -01")
+	assert_eq(Campaign.code(6), "INT-01")
+	assert_eq(Campaign.act_of(4), 1, "level index 4 sits in act 2")
+	assert_eq(Campaign.sortie(0), Vector2i(1, Campaign.level_count()), "1-based flat position / total")
+	assert_eq(Campaign.short_title(0), "RAISE ORBIT", "card name is the title after the colon")
+	assert_eq(Campaign.level_at(0).difficulty, 1, "difficulty authored per level")
+	assert_eq(Campaign.level_at(6).difficulty, 4)
+
+
+func test_profile_status_for_reflects_lock_and_medal() -> void:
+	var profile := Profile.new()  # only level 0 unlocked, none cleared
+	assert_eq(profile.status_for(0), "ACTIVE", "unlocked but not yet cleared")
+	assert_eq(profile.status_for(1), "LOCKED", "not unlocked")
+	profile.record_win(0, "GOLD ★★★", 40.0)
+	assert_eq(profile.status_for(0), "GOLD ★★★", "cleared shows the earned medal")
+
+
+func test_mission_select_hover_previews_and_click_selects() -> void:
+	Settings.debug_mode = true  # unlock all so any card is hoverable/selectable
+	var screen := LevelSelect.new()
+	add_child_autofree(screen)
+	screen.build(Profile.new())
+	assert_eq(screen._cursor, 0, "starts on the first mission")
+	assert_eq(screen._cards[0].theme_type_variation, UiTheme.CARD_SELECTED, "cursor card is filled green")
+
+	screen._on_card_hovered(2)
+	assert_eq(screen._detail._index, screen._order[2], "hover live-previews that mission's detail")
+	assert_eq(screen._cursor, 0, "hover does not move the selection")
+	screen._clear_hover()
+	assert_eq(screen._detail._index, screen._order[0], "leaving the list reverts to the selected mission")
+
+	screen._on_card_clicked(3)
+	assert_eq(screen._cursor, 3, "a click selects that card")
+	assert_eq(screen._cards[3].theme_type_variation, UiTheme.CARD_SELECTED)
+
+
+func test_mission_select_launch_parity_and_locked_lock() -> void:
+	var screen := LevelSelect.new()
+	add_child_autofree(screen)
+	screen.build(Profile.new())  # only level 0 unlocked
+	screen._on_card_hovered(1)
+	assert_true(screen._detail._launch.disabled, "LAUNCH is disabled while a locked mission is shown")
+	screen._clear_hover()
+	assert_false(screen._detail._launch.disabled, "and enabled for the unlocked selected mission")
+
+	var chosen := [-1]
+	screen.level_chosen.connect(func(i: int) -> void: chosen[0] = i)
+	screen._unhandled_input(_key(KEY_ENTER))  # keyboard launch
+	assert_eq(chosen[0], screen._order[0], "Enter launches the selected mission")
+	chosen[0] = -1
+	screen._detail._launch.pressed.emit()  # LAUNCH button
+	assert_eq(chosen[0], screen._order[0], "the LAUNCH button fires the same mission")
+
+
 func test_menu_hints_hidden_by_default_and_f1_toggles_them() -> void:
 	assert_false(Settings.menu_hints_on(), "menu key hints are hidden by default")
 	var screen := LevelSelect.new()
 	add_child_autofree(screen)
 	screen.build(Profile.new())
-	assert_true(screen._text.text.contains("[F1] KEYS"), "collapsed footer shows the F1 affordance")
-	assert_false(screen._text.text.contains("HIDE"), "the movement hints are hidden by default")
+	assert_false(screen._shell.hints_visible(), "the hint bar is hidden by default")
 
 	screen._unhandled_input(_key(KEY_F1))
 	assert_true(Settings.menu_hints_on(), "F1 turns the hints on")
-	assert_true(screen._text.text.contains("HIDE"), "and the full movement hints now show")
+	assert_true(screen._shell.hints_visible(), "and shows the compact hint bar")
 
 	screen._unhandled_input(_key(KEY_F1))
 	assert_false(Settings.menu_hints_on(), "F1 again hides them")
+	assert_false(screen._shell.hints_visible(), "hint bar hidden again")
 
 
 func test_level_select_act_navigation_jumps_between_acts() -> void:

@@ -28,4 +28,5 @@ thrust = 6000.0
 isp = 82.0
 objective = SubResource("Resource_1ajdf")
 dv_par = 350.0
+difficulty = 2
 sas_enabled = true

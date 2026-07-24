@@ -28,6 +28,15 @@ func medal_for(index: int) -> String:
 	return m.get("medal", "")
 
 
+## The mission-select status word: LOCKED (not unlocked), the earned medal once
+## cleared, else ACTIVE (unlocked, not yet cleared).
+func status_for(index: int) -> String:
+	if not is_unlocked(index):
+		return "LOCKED"
+	var medal := medal_for(index)
+	return medal if medal != "" else "ACTIVE"
+
+
 ## True once this level has been cleared without spending any rewinds - the
 ## ◇ CLEAN ribbon (DESIGN.md §14.4). Sticky: a later rewind-assisted run
 ## never revokes it. Hardcore profiles are CLEAN by construction.

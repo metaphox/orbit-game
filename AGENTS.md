@@ -85,6 +85,16 @@ Consequences to respect:
   set in the layout script from `Palette`, not baked into the `.tscn`. Several of
   these scripts are `@tool` so they preview in the editor — keep editor-only code
   (save hooks, placeholder builds) guarded by `Engine.is_editor_hint()`.
+- **Menu redesign is code-built (deliberate exception).** The two-pane ORBITAL-OS
+  menu system (`menu_shell`, `mission_card`, `option_card`, `mission_detail_pane`,
+  `difficulty_pips`, `backdrop`, `orbit_preview`, and the `*_screen.gd` controllers)
+  is built in **GDScript**, not `.tscn`: each component's node tree is assembled in
+  `_ready`/`build`, and it inherits the shared Theme by **propagation** from
+  `MenuShell` (which sets `theme = UiTheme.shared()`). This was chosen for
+  editor-less reliability. Same rules still hold: style via `theme_type_variation`,
+  runtime colours from `Palette` (never a raw `Color(...)` literal). Cards are
+  `Button`s using the `CARD` / `CARD_SELECTED` variations; layout uses an 8px grid
+  (`const GRID := 8`, all margins/gaps/heights are multiples).
 - **Lint scope.** `tools/lint_ui_colors.sh` (in `tools/test.sh`) enforces the
   no-raw-`Color()` rule on `src/ui/*.gd` only; it does **not** scan `.tscn`. Keep
   scene *chrome* colour-clean by construction (type variations). The remaining raw

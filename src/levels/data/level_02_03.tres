@@ -38,6 +38,7 @@ thrust = 12000.0
 isp = 82.0
 objective = SubResource("Resource_4dan1")
 dv_par = 150.0
+difficulty = 3
 map_extent = 9200.0
 draw_limit = 6000000.0
 fail_radius = 8000000.0

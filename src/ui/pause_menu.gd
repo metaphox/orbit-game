@@ -1,40 +1,71 @@
 class_name PauseMenu
 extends CanvasLayer
-## In-flight pause overlay: Resume / Save Progress / Restart / Quit to
-## mission select. Semi-transparent backdrop (unlike the other full-screen
-## menus) so the frozen flight is still visible behind it. Navigate with
-## Up/Down (also W/S or K/J) + Enter, matching the title/mission-select menus.
-## Key hints are hidden by default; F1 toggles them (and is swallowed here so it
-## doesn't also open the in-flight HUD keybind overlay behind the menu).
+## In-flight pause overlay: a translucent scrim over the frozen flight (so it
+## still shows through) with a centered card list — Resume / Save / Restart /
+## Quit. Keyboard Up/Down (also W/S, K/J) + Enter; mouse hover outlines, click
+## activates. The resume keys always show; F1 adds the nav hints and is swallowed
+## so it doesn't also open the in-flight HUD keybind overlay behind the menu.
 
 signal resume_pressed
 signal save_pressed
 signal restart_pressed
 signal quit_pressed
 
-var _text: RichTextLabel
 var _items: Array[String] = ["RESUME", "SAVE PROGRESS", "RESTART MISSION", "QUIT TO MISSION SELECT"]
 var _cursor := 0
 var _saved_flash := false
-var _layout: MenuTextLayout
+var _cards: Array[OptionCard] = []
+var _saved: Label
+var _hint: Label
 
 
 func build() -> void:
-	_layout = preload("res://src/ui/menu_text_layout.tscn").instantiate()
-	add_child(_layout)
-	_layout.configure("■ PAUSED ■", "", "", true)
-	_text = _layout.content
-	_apply_footer()
+	var root := Control.new()
+	root.theme = UiTheme.shared()
+	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(root)
 
+	var scrim := ColorRect.new()
+	scrim.color = Palette.PAUSE_BG  # lint-ok: runtime scrim fill from Palette
+	scrim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	root.add_child(scrim)
+
+	var center := CenterContainer.new()
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	root.add_child(center)
+
+	var panel := PanelContainer.new()
+	panel.theme_type_variation = UiTheme.MODAL_PANEL
+	center.add_child(panel)
+	var col := VBoxContainer.new()
+	col.custom_minimum_size = Vector2(384, 0)  # 48×8
+	col.add_theme_constant_override("separation", 16)
+	panel.add_child(col)
+
+	var title := Label.new()
+	title.theme_type_variation = UiTheme.MENU_TITLE
+	title.text = "PAUSED"
+	col.add_child(title)
+
+	for i in _items.size():
+		var card := OptionCard.new()
+		col.add_child(card)
+		card.set_data(i, _items[i], true)
+		card.hovered.connect(func(p: int) -> void: _select(p))
+		card.clicked.connect(_activate)
+		card.activated.connect(_activate)
+		_cards.append(card)
+
+	_saved = Label.new()
+	_saved.theme_type_variation = UiTheme.MENU_SUBTITLE
+	_saved.text = "✓ PROGRESS SAVED   (rewind anchors are not saved)"
+	_saved.visible = false
+	col.add_child(_saved)
+
+	_hint = Label.new()
+	_hint.theme_type_variation = UiTheme.MENU_FOOTER
+	col.add_child(_hint)
 	_refresh()
-
-
-## Footer: the resume keys always show; the up/down nav hints only when F1 is on.
-func _apply_footer() -> void:
-	var nav := "↑↓ / W S / K J  SELECT   ENTER CONFIRM   [F1] HIDE   " \
-		if Settings.menu_hints_on() else "[F1] KEYS   "
-	_layout.footer_label.text = nav + "[ESC]/[SPACE]/[0] RESUME"
-	_layout.footer_label.visible = true
 
 
 func show_saved_confirmation() -> void:
@@ -43,20 +74,18 @@ func show_saved_confirmation() -> void:
 
 
 func _refresh() -> void:
-	var green := Palette.hex(Palette.LIVE)
-	var dim := Palette.hex(Palette.LIVE_DIM)
-	var highlight := Palette.hex(Palette.INTENT)
-	var lines: Array[String] = []
-	for i in _items.size():
-		var selected := i == _cursor
-		var color := highlight if selected else green
-		var marker := "▶ " if selected else "  "
-		lines.append("[color=%s]%s%s[/color]" % [color, marker, _items[i]])
-	if _saved_flash:
-		lines.append("")
-		lines.append("[color=%s]✓ PROGRESS SAVED[/color]" % green)
-		lines.append("[color=%s]  (rewind anchors are not saved)[/color]" % dim)
-	_text.text = "\n".join(lines)
+	for i in _cards.size():
+		_cards[i].set_selected(i == _cursor)
+	_saved.visible = _saved_flash
+	var nav := "↑↓ / W S / K J  SELECT   ENTER CONFIRM   [F1] HIDE   " \
+		if Settings.menu_hints_on() else "[F1] KEYS   "
+	_hint.text = nav + "[ESC]/[SPACE]/[0] RESUME"
+
+
+func _select(i: int) -> void:
+	_cursor = i
+	_saved_flash = false
+	_refresh()
 
 
 func _move_cursor(delta: int) -> void:
@@ -94,5 +123,5 @@ func _unhandled_input(event: InputEvent) -> void:
 			_activate(_cursor)
 		KEY_F1:
 			Settings.toggle_menu_hints()
-			_apply_footer()
+			_refresh()
 			get_viewport().set_input_as_handled()

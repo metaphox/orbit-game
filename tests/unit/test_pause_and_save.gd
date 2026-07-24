@@ -104,13 +104,14 @@ func test_pause_menu_f1_toggles_key_hints() -> void:
 	var game := _boot()
 	game._open_pause_menu()
 	assert_false(Settings.menu_hints_on(), "hints hidden by default")
-	assert_true(game._pause_menu._layout.footer_label.text.contains("[F1] KEYS"),
-		"collapsed footer shows the F1 affordance")
+	assert_true(game._pause_menu._hint.text.contains("[F1] KEYS"),
+		"collapsed hint shows the F1 affordance (resume keys always visible)")
+	assert_true(game._pause_menu._hint.text.contains("RESUME"), "resume keys always show")
 
 	game._pause_menu._unhandled_input(_key(KEY_F1))
 	assert_true(Settings.menu_hints_on(), "F1 shows the hints")
-	assert_true(game._pause_menu._layout.footer_label.text.contains("SELECT"),
-		"and the movement hints now show in the footer")
+	assert_true(game._pause_menu._hint.text.contains("SELECT"),
+		"and the movement hints now show in the hint line")
 
 
 func test_pause_menu_buttons_emit_expected_signals() -> void:

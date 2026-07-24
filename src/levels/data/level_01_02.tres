@@ -27,4 +27,5 @@ thrust = 6000.0
 isp = 82.0
 objective = SubResource("Resource_5ny8l")
 dv_par = 160.0
+difficulty = 2
 sas_enabled = true

@@ -19,9 +19,9 @@ static var LEVELS: Array[LevelDef] = [
 ]
 
 const ACTS: Array[Dictionary] = [
-	{"name": "ACT 1 — EARTH ORBIT SCHOOL", "indices": [0, 1, 2]},
-	{"name": "ACT 2 — LUNAR PROGRAM", "indices": [3, 4, 5]},
-	{"name": "ACT 3 — INTERPLANETARY", "indices": [6]},
+	{"name": "ACT 1 — EARTH ORBIT SCHOOL", "code": "ORB", "indices": [0, 1, 2]},
+	{"name": "ACT 2 — LUNAR PROGRAM", "code": "LUN", "indices": [3, 4, 5]},
+	{"name": "ACT 3 — INTERPLANETARY", "code": "INT", "indices": [6]},
 ]
 
 
@@ -64,3 +64,30 @@ static func next_after(index: int) -> int:
 
 static func title(index: int) -> String:
 	return LEVELS[index].title
+
+
+## Index of the act that contains this level.
+static func act_of(index: int) -> int:
+	for a: int in ACTS.size():
+		if index in (ACTS[a]["indices"] as Array):
+			return a
+	return 0
+
+
+## Short mission code like "ORB-02": the act's prefix + 1-based position in it.
+static func code(index: int) -> String:
+	var a := act_of(index)
+	var within: int = (ACTS[a]["indices"] as Array).find(index)
+	return "%s-%02d" % [ACTS[a]["code"], within + 1]
+
+
+## (position, total) in flat play order, 1-based — for "SORTIE nn / NN".
+static func sortie(index: int) -> Vector2i:
+	return Vector2i(order().find(index) + 1, level_count())
+
+
+## The mission name for cards: the level title after the ":" (whole title if
+## there's no colon), trimmed. "ORBIT SCHOOL 1: RAISE ORBIT" -> "RAISE ORBIT".
+static func short_title(index: int) -> String:
+	var parts := title(index).split(":")
+	return (parts[1] if parts.size() > 1 else parts[0]).strip_edges()

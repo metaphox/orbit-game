@@ -17,6 +17,15 @@ func test_shared_theme_is_cached_and_defines_core_variations() -> void:
 	assert_eq(theme.get_type_variation_base(UiTheme.TOOLBAR_BUTTON), &"Button")
 	assert_eq(theme.get_type_variation_base(UiTheme.PRIMARY_BUTTON), &"Button")
 	assert_eq(theme.get_type_variation_base(UiTheme.DANGER_BUTTON), &"Button")
+	assert_eq(theme.get_type_variation_base(UiTheme.CARD), &"Button")
+	assert_eq(theme.get_type_variation_base(UiTheme.CARD_SELECTED), &"Button")
+	assert_eq(theme.get_type_variation_base(UiTheme.LAUNCH_BUTTON), &"Button")
+	assert_eq(theme.get_type_variation_base(UiTheme.ACT_HEADER), &"Label")
+	assert_eq(theme.get_type_variation_base(UiTheme.BREADCRUMB), &"Label")
+	assert_eq(theme.get_type_variation_base(UiTheme.CODE_CHIP), &"PanelContainer")
+	assert_eq(theme.get_type_variation_base(UiTheme.HINT_BAR), &"PanelContainer")
+	assert_true(theme.has_stylebox("disabled", UiTheme.LAUNCH_BUTTON),
+		"buttons carry a disabled stylebox (locked LAUNCH reads dim)")
 	assert_eq(theme.get_color(&"HAIRLINE", &"Palette"), Palette.HAIRLINE)
 	assert_eq(theme.get_color(&"BODY_EARTH", &"Palette"), Palette.BODY_TINTS["EARTH"])
 	var editor_preview_scripts: Array[String] = [
@@ -28,6 +37,8 @@ func test_shared_theme_is_cached_and_defines_core_variations() -> void:
 		"res://src/ui/attitude_director.gd",
 		"res://src/ui/hazard_stripe.gd",
 		"res://src/ui/rewind_timeline.gd",
+		"res://src/ui/difficulty_pips.gd",
+		"res://src/ui/backdrop.gd",
 	]
 	for path: String in editor_preview_scripts:
 		var preview_script: Script = load(path)
@@ -64,20 +75,19 @@ func test_complete_hud_layout_instantiates_all_components() -> void:
 
 
 func test_menu_layout_scenes_expose_typed_dynamic_slots() -> void:
-	var text_layout: MenuTextLayout = preload("res://src/ui/menu_text_layout.tscn").instantiate()
-	add_child_autofree(text_layout)
-	assert_same(text_layout.theme, UiTheme.shared())
-	assert_not_null(text_layout.content)
-	assert_not_null(text_layout.title_label)
-
-	var title_layout: TitleScreenLayout = preload("res://src/ui/title_screen_layout.tscn").instantiate()
-	add_child_autofree(title_layout)
-	assert_same(title_layout.theme, UiTheme.shared())
-	assert_not_null(title_layout.menu_text)
-	assert_not_null(title_layout.slots_label)
-
+	# The two-pane redesign owns the menu chrome now (MenuShell + code-built
+	# components); NewProfileLayout is the last remaining scene-authored form.
 	var profile_layout: NewProfileLayout = preload("res://src/ui/new_profile_layout.tscn").instantiate()
 	add_child_autofree(profile_layout)
 	assert_same(profile_layout.theme, UiTheme.shared())
 	assert_not_null(profile_layout.line_edit)
 	assert_not_null(profile_layout.hardcore_check)
+
+
+func test_menu_shell_and_cards_build_headless() -> void:
+	var shell := MenuShell.new()
+	add_child_autofree(shell)
+	shell.configure("MAIN MENU ▶ MISSIONS")
+	assert_same(shell.theme, UiTheme.shared(), "the shell carries the shared theme for its children")
+	assert_not_null(shell.left_column)
+	assert_not_null(shell.right_pane)

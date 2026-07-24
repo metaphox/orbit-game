@@ -14,6 +14,9 @@ extends Resource
 @export var isp := 0.0
 @export var objective: Objective
 @export var dv_par := 0.0
+## Informational challenge rating shown in the mission-select UI as 1–4 pips.
+## Purely cosmetic — dv_par / medals / rewind_budget remain the real challenge.
+@export_range(1, 4) var difficulty := 1
 ## Do-overs granted in this level for a Normal profile (DESIGN.md §14); a
 ## Hardcore profile forces this to 0. Authored per level to reflect its
 ## length/difficulty - a trainer grants 1, a long interplanetary run more.

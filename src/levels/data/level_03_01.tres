@@ -47,6 +47,7 @@ thrust = 15000.0
 isp = 90.0
 objective = SubResource("Resource_fhmye")
 dv_par = 700.0
+difficulty = 4
 map_extent = 145000.0
 draw_limit = 90000000.0
 fail_radius = 130000000.0
