@@ -39,7 +39,7 @@ func test_mission_card_emits_click_and_double_click() -> void:
 
 
 func test_menu_shell_builds_the_two_pane_frame() -> void:
-	var shell := MenuShell.new()
+	var shell := MenuShell.create()
 	add_child_autofree(shell)
 	shell.configure("MAIN MENU ▶ MISSIONS")
 	shell.set_hint("↑↓ NAVIGATE   ENTER LAUNCH")
@@ -60,7 +60,7 @@ func test_orbit_preview_builds_for_every_level() -> void:
 
 
 func test_mission_detail_pane_shows_a_level_and_launches() -> void:
-	var detail := MissionDetailPane.new()
+	var detail := MissionDetailPane.create()
 	add_child_autofree(detail)
 	var profile := Profile.new()  # level 0 unlocked, none cleared
 	detail.show_level(0, profile)

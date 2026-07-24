@@ -5,8 +5,8 @@
 #
 # Flags `Color(<number>...` (a raw literal) in src/ui, both `.gd` and `.tscn`.
 # Allowed:
-#   - src/ui/palette.gd and src/ui/render_theme.gd (the seams themselves),
-#   - src/ui/station_model.tscn (the shared 3D station model, a documented TD-3
+#   - src/ui/theme/palette.gd and src/ui/world/render_theme.gd (the seams themselves),
+#   - src/ui/world/station_model.tscn (the shared 3D station model, a documented TD-3
 #     exception; its material colours are authored in the scene),
 #   - Color(<var>, alpha) forms like Color(Palette.DIM, 0.5) (not a literal),
 #   - any line carrying a `# lint-ok:` marker (a reviewed, documented exception).
@@ -15,8 +15,8 @@
 cd "$(dirname "$0")/.." || exit 1
 
 HITS=$(grep -rnE 'Color8?\(\s*[-0-9.]' src/ui --include='*.gd' --include='*.tscn' \
-	| grep -vE 'src/ui/(palette|render_theme)\.gd' \
-	| grep -vE 'src/ui/station_model\.tscn' \
+	| grep -vE 'src/ui/(theme/palette|world/render_theme)\.gd' \
+	| grep -vE 'src/ui/world/station_model\.tscn' \
 	| grep -v '# lint-ok')
 
 if [ -n "$HITS" ]; then

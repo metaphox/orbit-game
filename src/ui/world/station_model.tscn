@@ -1,0 +1,395 @@
+[gd_scene load_steps=28 format=3]
+
+[ext_resource type="Material" path="res://src/ui/world/materials/ship_hull_material.tres" id="1_hull"]
+[ext_resource type="Material" path="res://src/ui/world/materials/ship_dark_material.tres" id="2_dark"]
+[ext_resource type="Material" path="res://src/ui/world/materials/ship_solar_material.tres" id="3_solar"]
+[ext_resource type="Material" path="res://src/ui/world/materials/ship_nose_material.tres" id="4_orange"]
+[ext_resource type="Material" path="res://src/ui/world/materials/ship_light_material.tres" id="5_green"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_radiator"]
+shading_mode = 0
+albedo_color = Color(0.72, 0.74, 0.68, 1)
+roughness = 0.78
+emission_enabled = true
+emission = Color(0.12, 0.14, 0.11, 1)
+emission_energy_multiplier = 0.55
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_amber"]
+shading_mode = 0
+albedo_color = Color(1, 0.62, 0.12, 1)
+emission_enabled = true
+emission = Color(1, 0.28, 0.015, 1)
+emission_energy_multiplier = 2.2
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_hub"]
+material = ExtResource("1_hull")
+top_radius = 1.72
+bottom_radius = 1.72
+height = 3.3
+radial_segments = 12
+rings = 2
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_lab"]
+material = ExtResource("1_hull")
+top_radius = 1.28
+bottom_radius = 1.28
+height = 5.6
+radial_segments = 12
+rings = 2
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_hab"]
+material = ExtResource("1_hull")
+top_radius = 1.48
+bottom_radius = 1.48
+height = 4.8
+radial_segments = 12
+rings = 2
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_collar"]
+material = ExtResource("4_orange")
+top_radius = 1.52
+bottom_radius = 1.52
+height = 0.28
+radial_segments = 12
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_adapter"]
+material = ExtResource("1_hull")
+top_radius = 0.62
+bottom_radius = 1.22
+height = 1.18
+radial_segments = 12
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_port"]
+material = ExtResource("2_dark")
+top_radius = 0.62
+bottom_radius = 0.62
+height = 0.38
+radial_segments = 12
+
+[sub_resource type="BoxMesh" id="BoxMesh_truss"]
+material = ExtResource("2_dark")
+size = Vector3(31.8, 0.28, 0.34)
+
+[sub_resource type="BoxMesh" id="BoxMesh_panel"]
+material = ExtResource("3_solar")
+size = Vector3(6.4, 0.09, 4.15)
+subdivide_width = 3
+subdivide_depth = 2
+
+[sub_resource type="BoxMesh" id="BoxMesh_panel_rail"]
+material = ExtResource("4_orange")
+size = Vector3(0.09, 0.14, 4.28)
+
+[sub_resource type="BoxMesh" id="BoxMesh_radiator"]
+material = SubResource("StandardMaterial3D_radiator")
+size = Vector3(3.15, 0.08, 2.15)
+subdivide_width = 2
+subdivide_depth = 2
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_mast"]
+material = ExtResource("2_dark")
+top_radius = 0.055
+bottom_radius = 0.075
+height = 1.35
+radial_segments = 8
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_dish"]
+material = SubResource("StandardMaterial3D_radiator")
+top_radius = 0.72
+bottom_radius = 0.2
+height = 0.18
+radial_segments = 12
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_cupola"]
+material = ExtResource("2_dark")
+top_radius = 0.58
+bottom_radius = 0.88
+height = 0.52
+radial_segments = 10
+
+[sub_resource type="SphereMesh" id="SphereMesh_green"]
+material = ExtResource("5_green")
+radius = 0.11
+height = 0.22
+radial_segments = 8
+rings = 4
+
+[sub_resource type="SphereMesh" id="SphereMesh_amber"]
+material = SubResource("StandardMaterial3D_amber")
+radius = 0.11
+height = 0.22
+radial_segments = 8
+rings = 4
+
+[sub_resource type="TorusMesh" id="TorusMesh_habitat"]
+material = ExtResource("1_hull")
+inner_radius = 3.5
+outer_radius = 4.28
+rings = 12
+ring_segments = 24
+
+[sub_resource type="TorusMesh" id="TorusMesh_habitat_trim"]
+material = ExtResource("4_orange")
+inner_radius = 4.27
+outer_radius = 4.48
+rings = 8
+ring_segments = 24
+
+[sub_resource type="BoxMesh" id="BoxMesh_ring_spoke"]
+material = ExtResource("2_dark")
+size = Vector3(8.1, 0.18, 0.18)
+
+[sub_resource type="SphereMesh" id="SphereMesh_command_dome"]
+material = ExtResource("1_hull")
+radius = 2.2
+height = 3.8
+radial_segments = 12
+rings = 8
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_side_pod"]
+material = ExtResource("1_hull")
+top_radius = 0.88
+bottom_radius = 0.88
+height = 2.8
+radial_segments = 10
+rings = 2
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_side_pod_collar"]
+material = ExtResource("4_orange")
+top_radius = 0.96
+bottom_radius = 0.96
+height = 0.24
+radial_segments = 10
+
+[node name="Station" type="Node3D"]
+
+[node name="CentralHub" type="MeshInstance3D" parent="."]
+mesh = SubResource("CylinderMesh_hub")
+
+[node name="CommandDome" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0, 0.55)
+mesh = SubResource("SphereMesh_command_dome")
+
+[node name="ForwardLab" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0, -4.25)
+rotation = Vector3(1.5708, 0, 0)
+mesh = SubResource("CylinderMesh_lab")
+
+[node name="AftHabitat" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0, 4.02)
+rotation = Vector3(1.5708, 0, 0)
+mesh = SubResource("CylinderMesh_hab")
+
+[node name="ForwardCollar" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0, -1.52)
+rotation = Vector3(1.5708, 0, 0)
+mesh = SubResource("CylinderMesh_collar")
+
+[node name="AftCollar" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0, 1.65)
+rotation = Vector3(1.5708, 0, 0)
+mesh = SubResource("CylinderMesh_collar")
+
+[node name="ForwardAdapter" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0, -7.62)
+rotation = Vector3(1.5708, 0, 0)
+mesh = SubResource("CylinderMesh_adapter")
+
+[node name="ForwardDock" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0, -8.38)
+rotation = Vector3(1.5708, 0, 0)
+mesh = SubResource("CylinderMesh_port")
+
+[node name="AftAdapter" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0, 6.92)
+rotation = Vector3(-1.5708, 0, 0)
+mesh = SubResource("CylinderMesh_adapter")
+
+[node name="AftDock" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0, 7.68)
+rotation = Vector3(1.5708, 0, 0)
+mesh = SubResource("CylinderMesh_port")
+
+[node name="CrossTruss" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.42, 0)
+mesh = SubResource("BoxMesh_truss")
+
+[node name="VerticalTruss" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.42, 0)
+rotation = Vector3(0, 0, 1.5708)
+mesh = SubResource("BoxMesh_truss")
+
+[node name="PortOuterArray" type="MeshInstance3D" parent="."]
+position = Vector3(-12.35, 0.46, 0)
+mesh = SubResource("BoxMesh_panel")
+
+[node name="PortOuterRail" type="MeshInstance3D" parent="."]
+position = Vector3(-9.15, 0.46, 0)
+mesh = SubResource("BoxMesh_panel_rail")
+
+[node name="PortInnerArray" type="MeshInstance3D" parent="."]
+position = Vector3(-5.45, 0.46, 0)
+mesh = SubResource("BoxMesh_panel")
+
+[node name="PortInnerRail" type="MeshInstance3D" parent="."]
+position = Vector3(-2.25, 0.46, 0)
+mesh = SubResource("BoxMesh_panel_rail")
+
+[node name="StarboardInnerArray" type="MeshInstance3D" parent="."]
+position = Vector3(5.45, 0.46, 0)
+mesh = SubResource("BoxMesh_panel")
+
+[node name="StarboardInnerRail" type="MeshInstance3D" parent="."]
+position = Vector3(2.25, 0.46, 0)
+mesh = SubResource("BoxMesh_panel_rail")
+
+[node name="StarboardOuterArray" type="MeshInstance3D" parent="."]
+position = Vector3(12.35, 0.46, 0)
+mesh = SubResource("BoxMesh_panel")
+
+[node name="StarboardOuterRail" type="MeshInstance3D" parent="."]
+position = Vector3(9.15, 0.46, 0)
+mesh = SubResource("BoxMesh_panel_rail")
+
+[node name="NadirOuterArray" type="MeshInstance3D" parent="."]
+position = Vector3(0, -12.35, 0)
+rotation = Vector3(0, 0, 1.5708)
+mesh = SubResource("BoxMesh_panel")
+
+[node name="NadirOuterRail" type="MeshInstance3D" parent="."]
+position = Vector3(0, -9.15, 0)
+rotation = Vector3(0, 0, 1.5708)
+mesh = SubResource("BoxMesh_panel_rail")
+
+[node name="NadirInnerArray" type="MeshInstance3D" parent="."]
+position = Vector3(0, -5.45, 0)
+rotation = Vector3(0, 0, 1.5708)
+mesh = SubResource("BoxMesh_panel")
+
+[node name="NadirInnerRail" type="MeshInstance3D" parent="."]
+position = Vector3(0, -2.25, 0)
+rotation = Vector3(0, 0, 1.5708)
+mesh = SubResource("BoxMesh_panel_rail")
+
+[node name="ZenithInnerArray" type="MeshInstance3D" parent="."]
+position = Vector3(0, 5.45, 0)
+rotation = Vector3(0, 0, 1.5708)
+mesh = SubResource("BoxMesh_panel")
+
+[node name="ZenithInnerRail" type="MeshInstance3D" parent="."]
+position = Vector3(0, 2.25, 0)
+rotation = Vector3(0, 0, 1.5708)
+mesh = SubResource("BoxMesh_panel_rail")
+
+[node name="ZenithOuterArray" type="MeshInstance3D" parent="."]
+position = Vector3(0, 12.35, 0)
+rotation = Vector3(0, 0, 1.5708)
+mesh = SubResource("BoxMesh_panel")
+
+[node name="ZenithOuterRail" type="MeshInstance3D" parent="."]
+position = Vector3(0, 9.15, 0)
+rotation = Vector3(0, 0, 1.5708)
+mesh = SubResource("BoxMesh_panel_rail")
+
+[node name="PortRadiator" type="MeshInstance3D" parent="."]
+position = Vector3(-3.75, -1.05, 3.52)
+rotation = Vector3(0.26, 0, 0)
+mesh = SubResource("BoxMesh_radiator")
+
+[node name="StarboardRadiator" type="MeshInstance3D" parent="."]
+position = Vector3(3.75, -1.05, 3.52)
+rotation = Vector3(0.26, 0, 0)
+mesh = SubResource("BoxMesh_radiator")
+
+[node name="ForwardHabitatRing" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0, 2.72)
+rotation = Vector3(1.5708, 0, 0)
+mesh = SubResource("TorusMesh_habitat")
+
+[node name="ForwardHabitatRingTrim" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0, 2.72)
+rotation = Vector3(1.5708, 0, 0)
+mesh = SubResource("TorusMesh_habitat_trim")
+
+[node name="ForwardRingHorizontalSpoke" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0, 2.72)
+mesh = SubResource("BoxMesh_ring_spoke")
+
+[node name="ForwardRingVerticalSpoke" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0, 2.72)
+rotation = Vector3(0, 0, 1.5708)
+mesh = SubResource("BoxMesh_ring_spoke")
+
+[node name="AftHabitatRing" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0, 5.35)
+rotation = Vector3(1.5708, 0, 0)
+mesh = SubResource("TorusMesh_habitat")
+
+[node name="AftHabitatRingTrim" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0, 5.35)
+rotation = Vector3(1.5708, 0, 0)
+mesh = SubResource("TorusMesh_habitat_trim")
+
+[node name="AftRingHorizontalSpoke" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0, 5.35)
+rotation = Vector3(0, 0, 0.3927)
+mesh = SubResource("BoxMesh_ring_spoke")
+
+[node name="AftRingVerticalSpoke" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0, 5.35)
+rotation = Vector3(0, 0, 1.9635)
+mesh = SubResource("BoxMesh_ring_spoke")
+
+[node name="PortDockingPalace" type="MeshInstance3D" parent="."]
+position = Vector3(-3.15, 0, -2.45)
+rotation = Vector3(0, 0, 1.5708)
+mesh = SubResource("CylinderMesh_side_pod")
+
+[node name="PortDockingPalaceCollar" type="MeshInstance3D" parent="."]
+position = Vector3(-4.55, 0, -2.45)
+rotation = Vector3(0, 0, 1.5708)
+mesh = SubResource("CylinderMesh_side_pod_collar")
+
+[node name="StarboardDockingPalace" type="MeshInstance3D" parent="."]
+position = Vector3(3.15, 0, -2.45)
+rotation = Vector3(0, 0, 1.5708)
+mesh = SubResource("CylinderMesh_side_pod")
+
+[node name="StarboardDockingPalaceCollar" type="MeshInstance3D" parent="."]
+position = Vector3(4.55, 0, -2.45)
+rotation = Vector3(0, 0, 1.5708)
+mesh = SubResource("CylinderMesh_side_pod_collar")
+
+[node name="Cupola" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.9, 2.05)
+mesh = SubResource("CylinderMesh_cupola")
+
+[node name="AntennaMast" type="MeshInstance3D" parent="."]
+position = Vector3(0.86, 2.26, 0.8)
+rotation = Vector3(0, 0, -0.18)
+mesh = SubResource("CylinderMesh_mast")
+
+[node name="AntennaDish" type="MeshInstance3D" parent="."]
+position = Vector3(0.98, 2.94, 0.8)
+rotation = Vector3(0.08, 0, -0.18)
+mesh = SubResource("CylinderMesh_dish")
+
+[node name="PortBeacon" type="MeshInstance3D" parent="."]
+position = Vector3(-15.78, 0.54, 0)
+mesh = SubResource("SphereMesh_amber")
+
+[node name="StarboardBeacon" type="MeshInstance3D" parent="."]
+position = Vector3(15.78, 0.54, 0)
+mesh = SubResource("SphereMesh_green")
+
+[node name="NadirBeacon" type="MeshInstance3D" parent="."]
+position = Vector3(0, -15.78, 0)
+mesh = SubResource("SphereMesh_green")
+
+[node name="ZenithBeacon" type="MeshInstance3D" parent="."]
+position = Vector3(0, 15.78, 0)
+mesh = SubResource("SphereMesh_amber")
+
+[node name="DockingBeacon" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.72, -8.1)
+mesh = SubResource("SphereMesh_green")

@@ -29,16 +29,16 @@ func test_shared_theme_is_cached_and_defines_core_variations() -> void:
 	assert_eq(theme.get_color(&"HAIRLINE", &"Palette"), Palette.HAIRLINE)
 	assert_eq(theme.get_color(&"BODY_EARTH", &"Palette"), Palette.BODY_TINTS["EARTH"])
 	var editor_preview_scripts: Array[String] = [
-		"res://src/ui/generated_ui_theme.gd",
-		"res://src/ui/top_telemetry_bar.gd",
-		"res://src/ui/propellant_flight_strip.gd",
-		"res://src/ui/flight_toolbar.gd",
-		"res://src/ui/bar_meter.gd",
-		"res://src/ui/attitude_director.gd",
-		"res://src/ui/hazard_stripe.gd",
-		"res://src/ui/rewind_timeline.gd",
-		"res://src/ui/difficulty_pips.gd",
-		"res://src/ui/backdrop.gd",
+		"res://src/ui/theme/generated_ui_theme.gd",
+		"res://src/ui/hud/top_telemetry_bar.gd",
+		"res://src/ui/hud/propellant_flight_strip.gd",
+		"res://src/ui/hud/flight_toolbar.gd",
+		"res://src/ui/hud/bar_meter.gd",
+		"res://src/ui/hud/attitude_director.gd",
+		"res://src/ui/hud/hazard_stripe.gd",
+		"res://src/ui/hud/rewind_timeline.gd",
+		"res://src/ui/menu/difficulty_pips.gd",
+		"res://src/ui/menu/backdrop.gd",
 	]
 	for path: String in editor_preview_scripts:
 		var preview_script: Script = load(path)
@@ -47,12 +47,12 @@ func test_shared_theme_is_cached_and_defines_core_variations() -> void:
 
 func test_hud_component_scenes_expose_required_unique_nodes() -> void:
 	var cases: Array[Array] = [
-		["res://src/ui/top_telemetry_bar.tscn", "%MetValue"],
-		["res://src/ui/minimap_objective_rail.tscn", "%MinimapRoot"],
-		["res://src/ui/guidance_warp_rail.tscn", "%GuidanceDirector"],
-		["res://src/ui/flight_toolbar.tscn", "%Groups"],
-		["res://src/ui/propellant_flight_strip.tscn", "%PropellantPercent"],
-		["res://src/ui/hud_overlays.tscn", "%MissionPanel"],
+		["res://src/ui/hud/top_telemetry_bar.tscn", "%MetValue"],
+		["res://src/ui/hud/minimap_objective_rail.tscn", "%MinimapRoot"],
+		["res://src/ui/hud/guidance_warp_rail.tscn", "%GuidanceDirector"],
+		["res://src/ui/hud/flight_toolbar.tscn", "%Groups"],
+		["res://src/ui/hud/propellant_flight_strip.tscn", "%PropellantPercent"],
+		["res://src/ui/hud/hud_overlays.tscn", "%MissionPanel"],
 	]
 	for entry: Array in cases:
 		var packed: PackedScene = load(entry[0])
@@ -64,7 +64,7 @@ func test_hud_component_scenes_expose_required_unique_nodes() -> void:
 
 
 func test_complete_hud_layout_instantiates_all_components() -> void:
-	var layout: HudLayout = preload("res://src/ui/hud_layout.tscn").instantiate()
+	var layout: HudLayout = preload("res://src/ui/hud/hud_layout.tscn").instantiate()
 	add_child_autofree(layout)
 	assert_not_null(layout.get_node("%TopTelemetryBar"))
 	assert_not_null(layout.get_node("%MinimapObjectiveRail"))
@@ -75,9 +75,9 @@ func test_complete_hud_layout_instantiates_all_components() -> void:
 
 
 func test_menu_layout_scenes_expose_typed_dynamic_slots() -> void:
-	# The two-pane redesign owns the menu chrome now (MenuShell + code-built
-	# components); NewProfileLayout is the last remaining scene-authored form.
-	var profile_layout: NewProfileLayout = preload("res://src/ui/new_profile_layout.tscn").instantiate()
+	# The menu chrome is scene-authored (MenuShell + per-screen layouts) with
+	# behavior in the attached scripts; cards stay code-built.
+	var profile_layout: NewProfileLayout = preload("res://src/ui/menu/new_profile_layout.tscn").instantiate()
 	add_child_autofree(profile_layout)
 	assert_same(profile_layout.theme, UiTheme.shared())
 	assert_not_null(profile_layout.line_edit)
@@ -85,7 +85,7 @@ func test_menu_layout_scenes_expose_typed_dynamic_slots() -> void:
 
 
 func test_menu_shell_and_cards_build_headless() -> void:
-	var shell := MenuShell.new()
+	var shell := MenuShell.create()
 	add_child_autofree(shell)
 	shell.configure("MAIN MENU ▶ MISSIONS")
 	assert_same(shell.theme, UiTheme.shared(), "the shell carries the shared theme for its children")

@@ -1,0 +1,144 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://src/ui/hud/guidance_warp_rail.gd" id="1_rail"]
+[ext_resource type="Script" path="res://src/ui/hud/attitude_director.gd" id="2_director"]
+[ext_resource type="Script" path="res://src/ui/hud/bar_meter.gd" id="3_meter"]
+[ext_resource type="Theme" path="res://src/ui/theme/generated_ui_theme.tres" id="4_theme"]
+
+[node name="GuidanceWarpRail" type="VBoxContainer"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -286.0
+offset_top = 58.0
+offset_right = -14.0
+grow_horizontal = 0
+mouse_filter = 2
+theme = ExtResource("4_theme")
+theme_override_constants/separation = 12
+script = ExtResource("1_rail")
+
+[node name="GuidancePanel" type="PanelContainer" parent="."]
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"InstrumentPanel"
+
+[node name="Column" type="VBoxContainer" parent="GuidancePanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Header" type="HBoxContainer" parent="GuidancePanel/Column"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Eyebrow" type="Label" parent="GuidancePanel/Column/Header"]
+layout_mode = 2
+theme_type_variation = &"EyebrowIntent"
+text = "GUIDANCE"
+
+[node name="Spacer" type="Control" parent="GuidancePanel/Column/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="GuidanceHeading" type="Label" parent="GuidancePanel/Column/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"HudValueIntent"
+theme_override_font_sizes/font_size = 10
+text = "LOCK OFF"
+
+[node name="GuidanceDirector" type="Control" parent="GuidancePanel/Column"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 170)
+layout_mode = 2
+mouse_filter = 2
+script = ExtResource("2_director")
+
+[node name="AccelerationRow" type="HBoxContainer" parent="GuidancePanel/Column"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="GuidancePanel/Column/AccelerationRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"MonoSmall"
+text = "ACC"
+
+[node name="AccelerationValue" type="Label" parent="GuidancePanel/Column/AccelerationRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"HudValue"
+theme_override_font_sizes/font_size = 13
+text = "+0.00 m/s² —"
+horizontal_alignment = 2
+
+[node name="VelocityRow" type="HBoxContainer" parent="GuidancePanel/Column"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="GuidancePanel/Column/VelocityRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"MonoSmall"
+text = "VEL"
+
+[node name="VelocityValue" type="Label" parent="GuidancePanel/Column/VelocityRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"HudValue"
+theme_override_font_sizes/font_size = 13
+text = "0000.0 m/s"
+horizontal_alignment = 2
+
+[node name="DeltaVRow" type="HBoxContainer" parent="GuidancePanel/Column"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="GuidancePanel/Column/DeltaVRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"MonoSmall"
+text = "ΔV REMAINING"
+
+[node name="DeltaVValue" type="Label" parent="GuidancePanel/Column/DeltaVRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"HudValueIntent"
+theme_override_font_sizes/font_size = 13
+text = "000.0 m/s"
+horizontal_alignment = 2
+
+[node name="WarpPanel" type="PanelContainer" parent="."]
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"InstrumentPanel"
+
+[node name="Column" type="VBoxContainer" parent="WarpPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Header" type="HBoxContainer" parent="WarpPanel/Column"]
+layout_mode = 2
+
+[node name="Eyebrow" type="Label" parent="WarpPanel/Column/Header"]
+layout_mode = 2
+theme_type_variation = &"Eyebrow"
+text = "WARP"
+
+[node name="Spacer" type="Control" parent="WarpPanel/Column/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="WarpValue" type="Label" parent="WarpPanel/Column/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"HudValue"
+theme_override_font_sizes/font_size = 13
+text = "1x"
+
+[node name="WarpMeter" type="Control" parent="WarpPanel/Column"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 22)
+layout_mode = 2
+mouse_filter = 2
+script = ExtResource("3_meter")
+segments = 9
+stepped = true

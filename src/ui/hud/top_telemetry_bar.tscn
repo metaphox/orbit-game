@@ -1,0 +1,359 @@
+[gd_scene format=3 uid="uid://ci0577ks0y0po"]
+
+[ext_resource type="Script" uid="uid://cp711ilx6dr3g" path="res://src/ui/hud/top_telemetry_bar.gd" id="1_top"]
+[ext_resource type="Theme" path="res://src/ui/theme/generated_ui_theme.tres" id="2_theme"]
+
+[node name="TopTelemetryBar" type="Control" unique_id=1742944666]
+clip_contents = true
+layout_mode = 3
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 48.0
+grow_horizontal = 2
+mouse_filter = 2
+theme = ExtResource("2_theme")
+script = ExtResource("1_top")
+metadata/_edit_horizontal_guides_ = [32.0, 15.0]
+
+[node name="Background" type="Panel" parent="." unique_id=1567519509]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"HudBarBackground"
+
+[node name="BottomRule" type="HSeparator" parent="." unique_id=184556862]
+unique_name_in_owner = true
+z_index = 1
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -2.0
+offset_bottom = 2.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+theme_type_variation = &"HudRule"
+
+[node name="LeftTelemetry" type="HBoxContainer" parent="." unique_id=1878651414]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/separation = 0
+
+[node name="MetBlock" type="PanelContainer" parent="LeftTelemetry" unique_id=1840775344]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(176, 0)
+layout_mode = 2
+theme_type_variation = &"TopMetPanel"
+
+[node name="Column" type="VBoxContainer" parent="LeftTelemetry/MetBlock" unique_id=233979954]
+layout_mode = 2
+theme_override_constants/separation = 0
+alignment = 1
+
+[node name="Label" type="Label" parent="LeftTelemetry/MetBlock/Column" unique_id=256000209]
+layout_mode = 2
+theme_type_variation = &"TopMetLabel"
+text = "MET"
+
+[node name="MetValue" type="Label" parent="LeftTelemetry/MetBlock/Column" unique_id=1978695635]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+offset_transform_enabled = true
+offset_transform_position = Vector2(0, -6)
+theme_type_variation = &"TopMetValue"
+text = "T+ 00:00:00"
+
+[node name="Sep1" type="VSeparator" parent="LeftTelemetry" unique_id=581237244]
+custom_minimum_size = Vector2(2, 30)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+theme_type_variation = &"HudDivider"
+
+[node name="WarpCell" type="VBoxContainer" parent="LeftTelemetry" unique_id=719224831]
+custom_minimum_size = Vector2(94, 0)
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="LeftTelemetry/WarpCell" unique_id=1941987419]
+layout_mode = 2
+offset_transform_enabled = true
+offset_transform_position = Vector2(8, 0)
+theme_type_variation = &"MonoSmall"
+theme_override_font_sizes/font_size = 9
+text = "WARP"
+
+[node name="WarpValue" type="Label" parent="LeftTelemetry/WarpCell" unique_id=148284458]
+unique_name_in_owner = true
+layout_mode = 2
+offset_transform_enabled = true
+offset_transform_position = Vector2(0, -8)
+theme_type_variation = &"HudValueIntent"
+text = "1x"
+horizontal_alignment = 1
+
+[node name="Sep2" type="VSeparator" parent="LeftTelemetry" unique_id=984312438]
+custom_minimum_size = Vector2(2, 30)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+theme_type_variation = &"HudDivider"
+
+[node name="SoiCell" type="VBoxContainer" parent="LeftTelemetry" unique_id=1223709431]
+custom_minimum_size = Vector2(94, 0)
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="LeftTelemetry/SoiCell" unique_id=937358340]
+layout_mode = 2
+offset_transform_enabled = true
+offset_transform_position = Vector2(8, 0)
+theme_type_variation = &"MonoSmall"
+theme_override_font_sizes/font_size = 9
+text = "SOI"
+
+[node name="SoiValue" type="Label" parent="LeftTelemetry/SoiCell" unique_id=1719981977]
+unique_name_in_owner = true
+layout_mode = 2
+offset_transform_enabled = true
+offset_transform_position = Vector2(0, -8)
+theme_type_variation = &"HudValueInk"
+text = "EARTH"
+horizontal_alignment = 1
+
+[node name="Sep3" type="VSeparator" parent="LeftTelemetry" unique_id=1344241979]
+custom_minimum_size = Vector2(2, 30)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+theme_type_variation = &"HudDivider"
+
+[node name="AltitudeCell" type="VBoxContainer" parent="LeftTelemetry" unique_id=2063841775]
+custom_minimum_size = Vector2(126, 0)
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="LeftTelemetry/AltitudeCell" unique_id=591489646]
+layout_mode = 2
+offset_transform_enabled = true
+offset_transform_position = Vector2(8, 0)
+theme_type_variation = &"MonoSmall"
+theme_override_font_sizes/font_size = 9
+text = "ALT"
+
+[node name="AltitudeValue" type="Label" parent="LeftTelemetry/AltitudeCell" unique_id=1831959915]
+unique_name_in_owner = true
+layout_mode = 2
+offset_transform_enabled = true
+offset_transform_position = Vector2(0, -8)
+theme_type_variation = &"HudValue"
+text = "6.29 km"
+horizontal_alignment = 1
+
+[node name="Sep4" type="VSeparator" parent="LeftTelemetry" unique_id=656593875]
+custom_minimum_size = Vector2(2, 30)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+theme_type_variation = &"HudDivider"
+
+[node name="VelocityCell" type="VBoxContainer" parent="LeftTelemetry" unique_id=1012759169]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(142, 0)
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="LeftTelemetry/VelocityCell" unique_id=1075314519]
+layout_mode = 2
+offset_transform_enabled = true
+offset_transform_position = Vector2(8, 0)
+theme_type_variation = &"MonoSmall"
+theme_override_font_sizes/font_size = 9
+text = "VEL"
+
+[node name="VelocityValue" type="Label" parent="LeftTelemetry/VelocityCell" unique_id=258316289]
+unique_name_in_owner = true
+layout_mode = 2
+offset_transform_enabled = true
+offset_transform_position = Vector2(0, -8)
+theme_type_variation = &"HudValue"
+text = "1048.7 m/s"
+horizontal_alignment = 1
+
+[node name="Sep5" type="VSeparator" parent="LeftTelemetry" unique_id=1646815889]
+custom_minimum_size = Vector2(2, 30)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+theme_type_variation = &"HudDivider"
+
+[node name="ApoapsisCell" type="VBoxContainer" parent="LeftTelemetry" unique_id=553432835]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(126, 0)
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="LeftTelemetry/ApoapsisCell" unique_id=765852642]
+layout_mode = 2
+offset_transform_enabled = true
+offset_transform_position = Vector2(8, 0)
+theme_type_variation = &"MonoSmall"
+theme_override_font_sizes/font_size = 9
+text = "R-AP"
+
+[node name="ApoapsisValue" type="Label" parent="LeftTelemetry/ApoapsisCell" unique_id=402154651]
+unique_name_in_owner = true
+layout_mode = 2
+offset_transform_enabled = true
+offset_transform_position = Vector2(0, -8)
+theme_type_variation = &"HudValue"
+text = "70.43 km"
+horizontal_alignment = 1
+
+[node name="Sep6" type="VSeparator" parent="LeftTelemetry" unique_id=15216397]
+custom_minimum_size = Vector2(2, 30)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+theme_type_variation = &"HudDivider"
+
+[node name="PeriapsisCell" type="VBoxContainer" parent="LeftTelemetry" unique_id=3832656]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(126, 0)
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="LeftTelemetry/PeriapsisCell" unique_id=1007268968]
+layout_mode = 2
+offset_transform_enabled = true
+offset_transform_position = Vector2(8, 0)
+theme_type_variation = &"MonoSmall"
+theme_override_font_sizes/font_size = 9
+text = "R-PE"
+
+[node name="PeriapsisValue" type="Label" parent="LeftTelemetry/PeriapsisCell" unique_id=1637330630]
+unique_name_in_owner = true
+layout_mode = 2
+offset_transform_enabled = true
+offset_transform_position = Vector2(0, -8)
+theme_type_variation = &"HudValue"
+text = "69.99 km"
+horizontal_alignment = 1
+
+[node name="TitleChip" type="PanelContainer" parent="." unique_id=684086565]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -301.0
+offset_top = -17.0
+offset_right = -384.0
+offset_bottom = 17.0
+grow_horizontal = 0
+grow_vertical = 2
+offset_transform_enabled = true
+theme_type_variation = &"TitleChip"
+
+[node name="Row" type="HBoxContainer" parent="TitleChip" unique_id=360800680]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ActLabel" type="Label" parent="TitleChip/Row" unique_id=794060004]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"TitleAct"
+text = "LUNAR 1"
+
+[node name="TitleSeparator" type="Label" parent="TitleChip/Row" unique_id=1485296552]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"MonoSmall"
+text = "|"
+horizontal_alignment = 1
+
+[node name="TitleObjective" type="Label" parent="TitleChip/Row" unique_id=367971898]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"TitleObjective"
+text = "TRANSLUNAR INJECTION"
+
+[node name="RightStatus" type="HBoxContainer" parent="." unique_id=1625534885]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -382.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_constants/separation = 0
+alignment = 2
+
+[node name="Burn" type="HBoxContainer" parent="RightStatus" unique_id=867238144]
+custom_minimum_size = Vector2(116, 0)
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="BurnDot" type="Panel" parent="RightStatus/Burn" unique_id=738162822]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(9, 9)
+layout_mode = 2
+size_flags_vertical = 4
+theme_type_variation = &"IntentIndicator"
+
+[node name="BurnLabel" type="Label" parent="RightStatus/Burn" unique_id=1841297161]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"HudValueIntent"
+theme_override_font_sizes/font_size = 12
+text = "COAST"
+
+[node name="Sep1" type="VSeparator" parent="RightStatus" unique_id=393883481]
+custom_minimum_size = Vector2(1, 30)
+layout_mode = 2
+size_flags_vertical = 4
+theme_type_variation = &"HudDivider"
+
+[node name="OffProgradeLabel" type="Label" parent="RightStatus" unique_id=795101456]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(126, 0)
+layout_mode = 2
+theme_type_variation = &"HudValueIntent"
+theme_override_font_sizes/font_size = 12
+text = "OFF-PRO 0°"
+horizontal_alignment = 1
+
+[node name="Sep2" type="VSeparator" parent="RightStatus" unique_id=1321846650]
+custom_minimum_size = Vector2(1, 30)
+layout_mode = 2
+size_flags_vertical = 4
+theme_type_variation = &"HudDivider"
+
+[node name="SasChip" type="PanelContainer" parent="RightStatus" unique_id=295939924]
+layout_mode = 2
+size_flags_vertical = 4
+theme_type_variation = &"SasChip"
+
+[node name="SasLabel" type="Label" parent="RightStatus/SasChip" unique_id=1384538781]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"HudValueIntent"
+theme_override_font_sizes/font_size = 12
+text = "SAS OFF"

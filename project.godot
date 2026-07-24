@@ -16,8 +16,8 @@ config/features=PackedStringArray("4.7", "Forward Plus")
 
 [autoload]
 
-DesignGrid="*res://src/ui/grid_overlay.gd"
-UiScale="*res://src/ui/ui_scale.gd"
+DesignGrid="*res://src/ui/fx/grid_overlay.gd"
+UiScale="*res://src/ui/theme/ui_scale.gd"
 
 [debug]
 
