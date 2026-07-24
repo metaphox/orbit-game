@@ -15,3 +15,5 @@ TODO List
 - BGM and sound effects
 - in-game calculator for hardcore space nerds
 - more levels!
+- FLIGHT PLAN brief formatting: inline icon syntax (deferred). Define a small set of brief-embeddable icons rendered inline in the FLIGHT PLAN RichTextLabel — e.g. `:prograde:` `:retrograde:` `:normal:` `:node:` → a glyph next to the maneuver. Extend `BriefText.md_to_bbcode()` to map tokens to `[img]`/font-icon BBCode; pick/draw the icon set. Tokens stay locale-independent.
+- localize the briefs: English lives in `assets/briefs/en/`; add `assets/briefs/<locale>/<level>.md` per locale (loader already falls back to English).

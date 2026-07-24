@@ -57,6 +57,7 @@ func build(level: LevelDef) -> void:
 
 
 func _draw() -> void:
+	_draw_instrument_bg()
 	if not _built or size.x < 40.0 or size.y < 40.0:
 		return
 	var mid := size * 0.5
@@ -93,6 +94,26 @@ func _draw() -> void:
 
 ## A dashed half-ellipse (Hohmann-ish) from the inner radius to the outer, with
 ## its focus at the body — hints the journey without pretending to be exact.
+## The instrument field the schematic sits on: a dark green-amber fill, a faint
+## square grid, and a thin rim — so the preview reads as a radar readout rather
+## than a lone diagram floating on the pane's black.
+func _draw_instrument_bg() -> void:
+	var rect := Rect2(Vector2.ZERO, size)
+	draw_rect(rect, Palette.BRIEF_BG, true)
+	# Grid centred on the middle (a line runs through each axis' centre), so it
+	# reads as a symmetric radar field rather than paper anchored to a corner.
+	const STEP := 28.0
+	var x := fmod(size.x * 0.5, STEP)
+	while x < size.x:
+		draw_line(Vector2(x, 0.0), Vector2(x, size.y), Palette.BRIEF_GRID, 1.0)
+		x += STEP
+	var y := fmod(size.y * 0.5, STEP)
+	while y < size.y:
+		draw_line(Vector2(0.0, y), Vector2(size.x, y), Palette.BRIEF_GRID, 1.0)
+		y += STEP
+	draw_rect(rect, Palette.BRIEF_RIM, false, 1.0)
+
+
 func _draw_transfer(mid: Vector2, r_a: float, r_b: float) -> void:
 	var peri := minf(r_a, r_b)
 	var apo := maxf(r_a, r_b)

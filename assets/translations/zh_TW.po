@@ -24,6 +24,9 @@ msgstr ""
 msgid "MAIN MENU ▶ CREDITS"
 msgstr ""
 
+msgid "MAIN MENU ▶ NEW PILOT"
+msgstr ""
+
 # --- Navigation hint bars ---
 msgid "↑ ↓ / W S / K J  SELECT     ENTER  CONFIRM     [F1]  HIDE"
 msgstr ""
@@ -69,6 +72,9 @@ msgid "CREDITS"
 msgstr ""
 
 msgid "QUIT"
+msgstr ""
+
+msgid "CANCEL"
 msgstr ""
 
 # --- Title screen: per-item blurbs ---
@@ -133,6 +139,12 @@ msgid "MISSIONS"
 msgstr ""
 
 msgid "DIFFICULTY"
+msgstr ""
+
+msgid "OBJECTIVE"
+msgstr ""
+
+msgid "FLIGHT PLAN"
 msgstr ""
 
 msgid "LAUNCH ▶"

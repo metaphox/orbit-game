@@ -1,7 +1,7 @@
 class_name CreditsScreen
 extends CanvasLayer
-## Single-panel credits in the ORBITAL-OS chrome (backdrop + breadcrumb + a
-## bordered panel). Esc returns to the main menu.
+## Credits in the ORBITAL-OS two-pane chrome: a left column carrying the standard
+## BACK card and the credits panel on the right. Esc (or BACK) returns to menu.
 
 signal back_pressed
 
@@ -15,7 +15,7 @@ func build() -> void:
 	add_child(_shell)
 	_shell.configure("MAIN MENU ▶ CREDITS")
 	_shell.set_hint(HINT)
-	_shell.hide_left()
+	_shell.add_back(func() -> void: back_pressed.emit())
 	_shell.set_right(_build_panel())
 	if Settings.effects_enabled:
 		add_child(ScreenGrade.new())

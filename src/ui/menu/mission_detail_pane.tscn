@@ -1,10 +1,10 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene format=3 uid="uid://bgvd2dqjb1osv"]
 
-[ext_resource type="Script" path="res://src/ui/menu/mission_detail_pane.gd" id="1_pane"]
-[ext_resource type="Theme" path="res://src/ui/theme/generated_ui_theme.tres" id="2_theme"]
-[ext_resource type="Script" path="res://src/ui/menu/difficulty_pips.gd" id="3_pips"]
+[ext_resource type="Script" uid="uid://dv8rw6ihxavn3" path="res://src/ui/menu/mission_detail_pane.gd" id="1_pane"]
+[ext_resource type="Theme" uid="uid://bh8bu7nerhp0x" path="res://src/ui/theme/generated_ui_theme.tres" id="2_theme"]
+[ext_resource type="Script" uid="uid://danjek3j1jbjr" path="res://src/ui/menu/difficulty_pips.gd" id="3_pips"]
 
-[node name="MissionDetailPane" type="PanelContainer"]
+[node name="MissionDetailPane" type="PanelContainer" unique_id=48161117]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -14,82 +14,110 @@ theme = ExtResource("2_theme")
 theme_type_variation = &"InstrumentPanel"
 script = ExtResource("1_pane")
 
-[node name="Pad" type="MarginContainer" parent="."]
+[node name="Pad" type="MarginContainer" parent="." unique_id=1581334366]
 layout_mode = 2
 theme_override_constants/margin_left = 12
 theme_override_constants/margin_top = 12
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 12
 
-[node name="Col" type="VBoxContainer" parent="Pad"]
+[node name="Col" type="VBoxContainer" parent="Pad" unique_id=1219623279]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="Header" type="HBoxContainer" parent="Pad/Col"]
+[node name="Header" type="HBoxContainer" parent="Pad/Col" unique_id=556270897]
 layout_mode = 2
 
-[node name="Chip" type="Label" parent="Pad/Col/Header"]
+[node name="Chip" type="Label" parent="Pad/Col/Header" unique_id=223552037]
 layout_mode = 2
 theme_type_variation = &"Eyebrow"
 text = "MISSIONS"
 
-[node name="Spacer" type="Control" parent="Pad/Col/Header"]
+[node name="Spacer" type="Control" parent="Pad/Col/Header" unique_id=750841482]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Sortie" type="Label" parent="Pad/Col/Header"]
+[node name="Sortie" type="Label" parent="Pad/Col/Header" unique_id=1247205069]
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"MenuFooter"
 
-[node name="Title" type="Label" parent="Pad/Col"]
+[node name="Title" type="Label" parent="Pad/Col" unique_id=2133305703]
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"MenuTitle"
 
-[node name="CodeStatus" type="Label" parent="Pad/Col"]
+[node name="CodeStatus" type="Label" parent="Pad/Col" unique_id=673648411]
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"MenuWarning"
 
-[node name="Brief" type="Label" parent="Pad/Col"]
+[node name="Scroll" type="ScrollContainer" parent="Pad/Col" unique_id=990901471]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="ScrollBody" type="VBoxContainer" parent="Pad/Col/Scroll" unique_id=1443875097]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
+
+[node name="ObjectiveHeader" type="Label" parent="Pad/Col/Scroll/ScrollBody" unique_id=1802744338]
+layout_mode = 2
+theme_type_variation = &"HudValue"
+text = "OBJECTIVE"
+
+[node name="Brief" type="Label" parent="Pad/Col/Scroll/ScrollBody" unique_id=1804018113]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(360, 0)
 layout_mode = 2
 theme_type_variation = &"MonoText"
 autowrap_mode = 3
 
-[node name="Diff" type="HBoxContainer" parent="Pad/Col"]
+[node name="Diff" type="HBoxContainer" parent="Pad/Col/Scroll/ScrollBody" unique_id=904993412]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="DiffLabel" type="Label" parent="Pad/Col/Diff"]
+[node name="DiffLabel" type="Label" parent="Pad/Col/Scroll/ScrollBody/Diff" unique_id=1567602181]
 layout_mode = 2
 theme_type_variation = &"MenuFooter"
 text = "DIFFICULTY"
 
-[node name="Pips" type="Control" parent="Pad/Col/Diff"]
+[node name="Pips" type="Control" parent="Pad/Col/Scroll/ScrollBody/Diff" unique_id=81570252]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(51, 9)
 layout_mode = 2
 size_flags_vertical = 4
 script = ExtResource("3_pips")
 
-[node name="PreviewSlot" type="Control" parent="Pad/Col"]
+[node name="PreviewSlot" type="Control" parent="Pad/Col/Scroll/ScrollBody" unique_id=1415598089]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(360, 208)
+custom_minimum_size = Vector2(0, 420)
 layout_mode = 2
 
-[node name="Stats" type="Label" parent="Pad/Col"]
+[node name="PlanHeader" type="Label" parent="Pad/Col/Scroll/ScrollBody" unique_id=1569414104]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"HudValue"
+text = "FLIGHT PLAN"
+
+[node name="FlightPlan" type="RichTextLabel" parent="Pad/Col/Scroll/ScrollBody" unique_id=571366295]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(360, 0)
+layout_mode = 2
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+
+[node name="Stats" type="Label" parent="Pad/Col/Scroll/ScrollBody" unique_id=1203966]
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"MonoSmall"
 
-[node name="Grow" type="Control" parent="Pad/Col"]
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="Launch" type="Button" parent="Pad/Col"]
+[node name="Launch" type="Button" parent="Pad/Col" unique_id=1316016952]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(100, 0)
+custom_maximum_size = Vector2(256, -1)
 layout_mode = 2
 focus_mode = 0
 theme_type_variation = &"LaunchButton"

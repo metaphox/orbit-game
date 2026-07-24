@@ -17,14 +17,30 @@ static func create() -> MenuShell:
 @onready var left_column: VBoxContainer = %LeftColumn
 @onready var right_pane: MarginContainer = %RightPane
 
+## The menu content block (columns + padding) never grows past this; beyond it
+## the extra width becomes equal side gutters so the menu stays centred instead
+## of the panes stretching edge to edge on ultrawide / 4K displays.
+const MAX_WIDTH := 2560.0
+const BASE_PAD := 48.0
+
 @onready var _breadcrumb: Label = %Breadcrumb
 @onready var _scroll: ScrollContainer = %Scroll
 @onready var _hint_bar: PanelContainer = %HintBar
 @onready var _hint_label: Label = %HintLabel
+@onready var _margin: MarginContainer = $Margin
 
 
 func _ready() -> void:
 	refresh_hint_visibility()
+	get_viewport().size_changed.connect(_clamp_width)
+	_clamp_width()
+
+
+func _clamp_width() -> void:
+	var w := get_viewport_rect().size.x
+	var side := int(BASE_PAD + maxf(0.0, w - MAX_WIDTH) * 0.5)
+	_margin.add_theme_constant_override("margin_left", side)
+	_margin.add_theme_constant_override("margin_right", side)
 
 
 func configure(breadcrumb: String) -> void:
@@ -56,6 +72,21 @@ func hints_visible() -> bool:
 func hide_left() -> void:
 	if _scroll != null:
 		_scroll.visible = false
+
+
+## Prepend the standard "◀ BACK" card to the left column, wired to `on_back`.
+## Every non-root menu calls this so the affordance looks and sits identically
+## (keyboard still leaves via Esc; this is the mouse + visual affordance).
+func add_back(on_back: Callable) -> void:
+	var back := Button.new()
+	back.theme_type_variation = UiTheme.CARD
+	back.focus_mode = Control.FOCUS_NONE
+	back.text = "◀  BACK"
+	back.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	back.custom_minimum_size = Vector2(0, 48)  # 6×8, matches an act-header row
+	back.pressed.connect(on_back)
+	left_column.add_child(back)
+	left_column.move_child(back, 0)
 
 
 ## Keep the cursor card in view as the selection / act jumps around.

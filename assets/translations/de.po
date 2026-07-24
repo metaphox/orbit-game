@@ -21,6 +21,9 @@ msgstr "HAUPTMENÜ ▶ EINSTELLUNGEN"
 msgid "MAIN MENU ▶ CREDITS"
 msgstr "HAUPTMENÜ ▶ MITWIRKENDE"
 
+msgid "MAIN MENU ▶ NEW PILOT"
+msgstr "HAUPTMENÜ ▶ NEUER PILOT"
+
 # --- Navigation hint bars ---
 msgid "↑ ↓ / W S / K J  SELECT     ENTER  CONFIRM     [F1]  HIDE"
 msgstr "↑ ↓ / W S / K J  WÄHLEN     ENTER  BESTÄTIGEN     [F1]  AUSBLENDEN"
@@ -67,6 +70,9 @@ msgstr "MITWIRKENDE"
 
 msgid "QUIT"
 msgstr "BEENDEN"
+
+msgid "CANCEL"
+msgstr "ABBRECHEN"
 
 # --- Title screen: per-item blurbs ---
 msgid "NO MISSION IN PROGRESS"
@@ -131,6 +137,12 @@ msgstr "MISSIONEN"
 
 msgid "DIFFICULTY"
 msgstr "SCHWIERIGKEIT"
+
+msgid "OBJECTIVE"
+msgstr "ZIEL"
+
+msgid "FLIGHT PLAN"
+msgstr "FLUGPLAN"
 
 msgid "LAUNCH ▶"
 msgstr "START ▶"

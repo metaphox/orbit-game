@@ -23,14 +23,35 @@ var _previews: Dictionary[int, OrbitPreview] = {}
 @onready var _brief: Label = %Brief
 @onready var _pips: DifficultyPips = %Pips
 @onready var _preview_slot: Control = %PreviewSlot
+@onready var _plan_header: Label = %PlanHeader
+@onready var _flight_plan: RichTextLabel = %FlightPlan
 @onready var _stats: Label = %Stats
 @onready var _launch: Button = %Launch
 
 
 func _ready() -> void:
+	_style_flight_plan()
 	_launch.pressed.connect(func() -> void:
 		if _index >= 0 and not _launch.disabled:
 			launch_requested.emit(_index))
+
+
+## The FLIGHT PLAN body is a RichTextLabel (for **bold** / *italic*); style it to
+## match MonoText (the base RichTextLabel theme is a larger heading font), with
+## synthesised bold/italic faces so the markdown emphasis renders on the mono
+## font (which ships only a regular weight).
+func _style_flight_plan() -> void:
+	_flight_plan.add_theme_font_override("normal_font", UiTheme.MONO)
+	_flight_plan.add_theme_font_size_override("normal_font_size", 14)
+	_flight_plan.add_theme_color_override("default_color", Palette.INK)
+	var bold := FontVariation.new()
+	bold.base_font = UiTheme.MONO
+	bold.variation_embolden = 0.65
+	_flight_plan.add_theme_font_override("bold_font", bold)
+	var italic := FontVariation.new()
+	italic.base_font = UiTheme.MONO
+	italic.variation_transform = Transform2D(Vector2(1.0, 0.0), Vector2(0.22, 1.0), Vector2.ZERO)
+	_flight_plan.add_theme_font_override("italics_font", italic)  # Godot names it plural
 
 
 func show_level(index: int, profile: Profile) -> void:
@@ -46,6 +67,12 @@ func show_level(index: int, profile: Profile) -> void:
 	_stats.text = tr("Δv PAR   %d m/s\nBEST     %s\nREWINDS  %d\nAVIONICS %s") % [
 		int(level.dv_par), tr(medal) if medal != "" else "—", level.rewind_budget, _avionics(level)]
 	_show_preview(index, level)
+	# Authored FLIGHT PLAN prose (per-locale file, English fallback); hide the
+	# whole section for levels that don't have one yet.
+	var plan := BriefText.md_to_bbcode(BriefText.flight_plan(index))
+	_flight_plan.text = plan
+	_flight_plan.visible = not plan.is_empty()
+	_plan_header.visible = not plan.is_empty()
 
 
 func set_launch_enabled(enabled: bool) -> void:

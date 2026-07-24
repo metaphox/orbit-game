@@ -36,6 +36,7 @@ func build(profile: Profile) -> void:
 	_shell.set_right(_detail)
 
 	_build_cards()
+	_shell.add_back(func() -> void: back_pressed.emit())
 	_shell.left_column.mouse_exited.connect(_clear_hover)
 
 	if Settings.effects_enabled:
@@ -45,15 +46,6 @@ func build(profile: Profile) -> void:
 
 func _build_cards() -> void:
 	_cards.clear()
-	var back := Button.new()
-	back.theme_type_variation = UiTheme.CARD
-	back.focus_mode = Control.FOCUS_NONE
-	back.text = "◀  BACK"
-	back.alignment = HORIZONTAL_ALIGNMENT_LEFT
-	back.custom_minimum_size = Vector2(0, 48)  # 6×8
-	back.pressed.connect(func() -> void: back_pressed.emit())
-	_shell.left_column.add_child(back)
-
 	var pos := 0
 	for act: Dictionary in Campaign.acts():
 		var header := Label.new()
@@ -72,6 +64,7 @@ func _build_cards() -> void:
 				Campaign.status_label(_profile, index), Campaign.level_at(index).difficulty,
 				not _is_selectable(index))
 			card.hovered.connect(_on_card_hovered)
+			card.unhovered.connect(_on_card_unhovered)
 			card.clicked.connect(_on_card_clicked)
 			card.activated.connect(_on_card_activated)
 			_cards.append(card)
@@ -108,6 +101,14 @@ func _refresh() -> void:
 func _on_card_hovered(pos: int) -> void:
 	_hover_pos = pos
 	_refresh()
+
+
+## The pointer left this card (onto an act header, the gap, or empty space, not
+## another card): drop the preview so the detail pane returns to the selection.
+func _on_card_unhovered(pos: int) -> void:
+	if _hover_pos == pos:
+		_hover_pos = -1
+		_refresh()
 
 
 func _clear_hover() -> void:

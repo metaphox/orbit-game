@@ -21,12 +21,18 @@ func _ready() -> void:
 
 func _run() -> void:
 	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
-	get_window().size = Vector2i(1280, 720)
 	# --locale=<code> renders every screen in that language (font/tofu + overflow QA).
+	# --size=WxH overrides the 1280x720 window (e.g. --size=3200x900 for the 2560 cap).
 	var locale := "en"
+	var win := Vector2i(1280, 720)
 	for a: String in OS.get_cmdline_args():
 		if a.begins_with("--locale="):
 			locale = a.trim_prefix("--locale=")
+		elif a.begins_with("--size="):
+			var wh := a.trim_prefix("--size=").split("x")
+			if wh.size() == 2:
+				win = Vector2i(int(wh[0]), int(wh[1]))
+	get_window().size = win
 	TranslationServer.set_locale(locale)
 	UiTheme.apply_locale_fonts(locale)
 	var shot_dir := "%s_%s" % [SHOT_DIR, locale] if locale != "en" else SHOT_DIR
@@ -58,6 +64,12 @@ func _run() -> void:
 
 	var credits := CreditsScreen.new()
 	await _capture(credits, "5_credits", func() -> void: credits.build())
+
+	var new_profile := NewProfileScreen.new()
+	await _capture(new_profile, "7_new_profile", func() -> void: new_profile.build(store))
+
+	var quit := ConfirmPopup.new()
+	await _capture(quit, "8_quit_confirm", func() -> void: quit.open("EXIT TO DESKTOP", "QUIT", "CANCEL"))
 
 	var pause := PauseMenu.new()
 	await _capture(pause, "6_pause", func() -> void: pause.build())

@@ -668,3 +668,16 @@ func test_winning_clears_the_mission_save() -> void:
 	simulate(root, 5, 1.0 / 60.0)
 	assert_eq(root.game.phase, root.game.Phase.WON)
 	assert_null(root.active_profile.mission_save, "no point resuming an already-won mission")
+
+
+func test_flight_plan_briefs_load_and_convert() -> void:
+	assert_eq(Campaign.brief_id(0), "level_01_01", "brief_id is the level's .tres basename")
+	for i in Campaign.level_count():
+		assert_true(BriefText.flight_plan(i).length() > 0,
+			"level %d ships an authored English FLIGHT PLAN" % i)
+	assert_eq(BriefText.md_to_bbcode("**burn** now"), "[b]burn[/b] now")
+	assert_eq(BriefText.md_to_bbcode("a *soft* aside"), "a [i]soft[/i] aside")
+	assert_eq(BriefText.md_to_bbcode("**b** and *i*"), "[b]b[/b] and [i]i[/i]")
+	assert_eq(BriefText.md_to_bbcode("tag [x]"), "tag [lb]x]",
+		"a stray '[' is escaped so authored text can't inject BBCode")
+	assert_eq(BriefText.md_to_bbcode(""), "")

@@ -58,8 +58,16 @@ func _show_title() -> void:
 	screen.load_pressed.connect(_show_load_profile)
 	screen.settings_pressed.connect(_show_settings)
 	screen.credits_pressed.connect(_show_credits)
-	screen.quit_pressed.connect(func() -> void: get_tree().quit())
+	screen.quit_pressed.connect(_confirm_quit)
 	_current_ui = screen
+
+
+func _confirm_quit() -> void:
+	var popup := ConfirmPopup.new()
+	add_child(popup)
+	popup.open("EXIT TO DESKTOP", "QUIT", "CANCEL")
+	popup.confirmed.connect(func() -> void: get_tree().quit())
+	popup.cancelled.connect(popup.queue_free)
 
 
 func _on_continue() -> void:

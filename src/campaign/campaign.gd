@@ -66,6 +66,13 @@ static func title(index: int) -> String:
 	return LEVELS[index].title
 
 
+## Stable id for a level's authored brief files, e.g. "level_01_01". Read from
+## the preloaded original's resource_path — level_at() deep-duplicates and drops
+## the path, so callers that already hold a duplicate can't derive this.
+static func brief_id(index: int) -> String:
+	return LEVELS[index].resource_path.get_file().get_basename()
+
+
 ## Index of the act that contains this level.
 static func act_of(index: int) -> int:
 	for a: int in ACTS.size():

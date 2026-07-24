@@ -26,6 +26,7 @@ func build(profile_store: ProfileStore) -> void:
 	add_child(_shell)
 	_shell.configure("MAIN MENU ▶ LOAD PILOT")
 	_shell.set_hint(HINT)
+	_shell.add_back(func() -> void: cancelled.emit())
 	_shell.set_right(_build_detail())
 
 	if store.profiles.is_empty():

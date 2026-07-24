@@ -27,6 +27,9 @@ msgstr "メインメニュー ▶ 設定"
 msgid "MAIN MENU ▶ CREDITS"
 msgstr "メインメニュー ▶ クレジット"
 
+msgid "MAIN MENU ▶ NEW PILOT"
+msgstr "メインメニュー ▶ 新規パイロット"
+
 # --- Navigation hint bars ---
 msgid "↑ ↓ / W S / K J  SELECT     ENTER  CONFIRM     [F1]  HIDE"
 msgstr "↑ ↓ / W S / K J  選択     ENTER  決定     [F1]  非表示"
@@ -73,6 +76,9 @@ msgstr "クレジット"
 
 msgid "QUIT"
 msgstr "終了"
+
+msgid "CANCEL"
+msgstr "キャンセル"
 
 # --- Title screen: per-item blurbs ---
 msgid "NO MISSION IN PROGRESS"
@@ -137,6 +143,12 @@ msgstr "ミッション"
 
 msgid "DIFFICULTY"
 msgstr "難易度"
+
+msgid "OBJECTIVE"
+msgstr "目標"
+
+msgid "FLIGHT PLAN"
+msgstr "飛行計画"
 
 msgid "LAUNCH ▶"
 msgstr "発射 ▶"

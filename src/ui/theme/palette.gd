@@ -43,6 +43,12 @@ const SCRIM := Color(0.0, 0.0, 0.0, 0.45)            # modal dim (pause)
 const MEDAL_GOLD := Color("ffd94d")            # medal / achievement gold
 const PAUSE_BG := Color(0.0, 0.02, 0.0, 0.72)  # pause overlay scrim (over live flight)
 
+## Mission-brief orbit preview (orbit_preview.gd): a dark green-amber instrument
+## field with a faint grid, so the schematic reads as a radar readout not a void.
+const BRIEF_BG := Color(0.07, 0.085, 0.028, 1.0)
+const BRIEF_GRID := Color(0.20, 0.25, 0.09, 0.5)
+const BRIEF_RIM := Color(0.28, 0.34, 0.13, 0.75)
+
 ## Rewind-timeline scrubber (rewind_timeline.gd).
 const REWIND_LINE := Color(0.3, 0.65, 0.38)
 const REWIND_ANCHOR := Color(0.45, 1.0, 0.55)

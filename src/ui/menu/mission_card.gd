@@ -7,6 +7,7 @@ extends Button
 ## variation and overriding the child text to VOID. Locked = a disabled Button.
 
 signal hovered(pos: int)
+signal unhovered(pos: int)
 signal clicked(pos: int)
 signal activated(pos: int)
 
@@ -14,6 +15,7 @@ var pos := -1
 var _locked := false
 var _selected := false
 var _status_text := ""
+var _unhover_timer: Timer
 
 var _code: Label
 var _name: Label
@@ -71,7 +73,23 @@ func _ready() -> void:
 	_cursor.visible = false
 	row.add_child(_cursor)
 
-	mouse_entered.connect(func() -> void: hovered.emit(pos))
+	# Debounced hover-out (see OptionCard): moving straight to another card fires
+	# that card's hovered first, so the detail pane never flickers back to the
+	# selected mission in between; landing on a non-card (act header, gap) reverts
+	# after the linger. Gate start() on the timer being in the tree — mouse_exited
+	# also fires as the card is torn down on a screen change.
+	_unhover_timer = Timer.new()
+	_unhover_timer.one_shot = true
+	_unhover_timer.wait_time = OptionCard.HOVER_LINGER
+	_unhover_timer.timeout.connect(func() -> void: unhovered.emit(pos))
+	add_child(_unhover_timer)
+
+	mouse_entered.connect(func() -> void:
+		_unhover_timer.stop()
+		hovered.emit(pos))
+	mouse_exited.connect(func() -> void:
+		if _unhover_timer.is_inside_tree():
+			_unhover_timer.start())
 	pressed.connect(func() -> void: clicked.emit(pos))
 	gui_input.connect(_on_gui_input)
 	_apply_style()

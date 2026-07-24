@@ -21,6 +21,9 @@ msgstr "主菜单 ▶ 设置"
 msgid "MAIN MENU ▶ CREDITS"
 msgstr "主菜单 ▶ 制作人员"
 
+msgid "MAIN MENU ▶ NEW PILOT"
+msgstr "主菜单 ▶ 新宇航员"
+
 # --- Navigation hint bars ---
 msgid "↑ ↓ / W S / K J  SELECT     ENTER  CONFIRM     [F1]  HIDE"
 msgstr "↑ ↓ / W S / K J  选择     ENTER  确认     [F1]  隐藏"
@@ -67,6 +70,9 @@ msgstr "制作人员"
 
 msgid "QUIT"
 msgstr "退出"
+
+msgid "CANCEL"
+msgstr "取消"
 
 # --- Title screen: per-item blurbs ---
 msgid "NO MISSION IN PROGRESS"
@@ -131,6 +137,12 @@ msgstr "任务"
 
 msgid "DIFFICULTY"
 msgstr "难度"
+
+msgid "OBJECTIVE"
+msgstr "任务目标"
+
+msgid "FLIGHT PLAN"
+msgstr "飞行计划"
 
 msgid "LAUNCH ▶"
 msgstr "发射 ▶"

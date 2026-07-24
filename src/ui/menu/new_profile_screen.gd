@@ -7,20 +7,29 @@ extends CanvasLayer
 signal profile_created(profile_name: String, hardcore: bool)
 signal cancelled
 
+const HINT := "[ENTER] CREATE   [ESC] CANCEL"
+
 var store: ProfileStore
 var _line_edit: LineEdit
 var _error_label: Label
 var _hardcore_check: CheckButton
 ## Hardcore is permanent, so a checked box requires a second ENTER to confirm.
 var _confirm_pending := false
+var _shell: MenuShell
 var _layout: NewProfileLayout
 
 
 func build(profile_store: ProfileStore) -> void:
 	store = profile_store
 
+	_shell = MenuShell.create()
+	add_child(_shell)
+	_shell.configure("MAIN MENU ▶ NEW PILOT")
+	_shell.set_hint(HINT)
+	_shell.add_back(func() -> void: cancelled.emit())
+
 	_layout = preload("res://src/ui/menu/new_profile_layout.tscn").instantiate()
-	add_child(_layout)
+	_shell.set_right(_layout)
 	_line_edit = _layout.line_edit
 	_line_edit.max_length = ProfileStore.NAME_MAX_LENGTH
 	_line_edit.text_submitted.connect(func(_t: String) -> void: _attempt_create())

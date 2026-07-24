@@ -55,6 +55,7 @@ func build(profile_store: ProfileStore) -> void:
 	add_child(_shell)
 	_shell.configure("MAIN MENU ▶ SETTINGS")
 	_shell.set_hint(HINT)
+	_shell.add_back(func() -> void: back_pressed.emit())
 
 	for i in ROWS.size():
 		var card := OptionCard.new()
