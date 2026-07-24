@@ -17,7 +17,7 @@ func is_met(ship: ShipSim) -> bool:
 
 
 func describe() -> String:
-	return "ACHIEVE ORBIT AROUND THE %s" % target.name
+	return tr("ACHIEVE ORBIT AROUND THE %s") % tr(target.name)
 
 
 func status_lines(ship: ShipSim) -> Array[String]:
@@ -25,9 +25,9 @@ func status_lines(ship: ShipSim) -> Array[String]:
 		var el := ship.current_elements()
 		if el.is_elliptic() and el.radius_apoapsis() <= target.soi_radius * 0.98:
 			if el.radius_periapsis() <= target.radius:
-				return ["CAPTURED — PE BELOW SURFACE, RAISE IT"]
-			return ["CAPTURED — HOLDING ORBIT"]
-		return ["IN %s SOI — BURN RETROGRADE NEAR PE" % target.name]
+				return [tr("CAPTURED — PE BELOW SURFACE, RAISE IT")]
+			return [tr("CAPTURED — HOLDING ORBIT")]
+		return [tr("IN %s SOI — BURN RETROGRADE NEAR PE") % tr(target.name)]
 	var lines: Array[String] = []
 	if ship.body.parent == null:
 		var el := ship.current_elements()
@@ -36,11 +36,11 @@ func status_lines(ship: ShipSim) -> Array[String]:
 			lines.append("AP Δ%+8.0f km vs %s DIST" % [
 				(el.radius_apoapsis() - d) / 1000.0, target.name])
 		else:
-			lines.append("ESCAPE TRAJECTORY — TOO FAST")
+			lines.append(tr("ESCAPE TRAJECTORY — TOO FAST"))
 	else:
-		lines.append("DEPARTING %s" % ship.body.name)
-	lines.append("PHASE TO %s %+4.0f°  (BURN AT %+4.0f°)" % [
-		target.name, rad_to_deg(_phase_angle(ship)), rad_to_deg(_tli_lead_angle(ship))])
+		lines.append(tr("DEPARTING %s") % tr(ship.body.name))
+	lines.append(tr("PHASE TO %s %+4.0f°  (BURN AT %+4.0f°)") % [
+		tr(target.name), rad_to_deg(_phase_angle(ship)), rad_to_deg(_tli_lead_angle(ship))])
 	return lines
 
 

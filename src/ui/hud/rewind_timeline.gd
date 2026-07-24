@@ -30,8 +30,8 @@ func _ready() -> void:
 		playhead = 180.0
 		cursor = 1
 		anchors = [
-			{"sim_time": 60.0, "label": "BURN 1"},
-			{"sim_time": 180.0, "label": "BURN 2"},
+			{"sim_time": 60.0, "label": "BURN 1"},   # i18n-ok: editor preview only
+			{"sim_time": 180.0, "label": "BURN 2"},  # i18n-ok: editor preview only
 		]
 		landmarks = [{"sim_time": 245.0, "label": "SOI"}]
 
@@ -55,15 +55,15 @@ func _draw() -> void:
 
 	# "NOW" cap at the right end - where you are before rewinding.
 	draw_line(Vector2(x1, y - 13), Vector2(x1, y + 13), ANCHOR, 3.0)
-	_centered("NOW", x1, y - 20, ANCHOR, 13)
-	_centered("you are here", x1, y + 28, LABEL, 11)
+	_centered(tr("NOW"), x1, y - 20, ANCHOR, 13)
+	_centered(tr("you are here"), x1, y + 28, LABEL, 11)
 
 	for i in anchors.size():
 		var ax := _x(anchors[i]["sim_time"], x0, x1, span)
 		var selected := i == cursor
 		draw_circle(Vector2(ax, y), 7.0 if selected else 4.0, SELECTED if selected else ANCHOR)
 		if selected:
-			_centered(str(anchors[i]["label"]), ax, y - 20, SELECTED, 14)
+			_centered(tr(str(anchors[i]["label"])), ax, y - 20, SELECTED, 14)
 			_centered("T+" + _clock(anchors[i]["sim_time"]), ax, y + 28, LABEL, 12)
 
 	var px := _x(playhead, x0, x1, span)

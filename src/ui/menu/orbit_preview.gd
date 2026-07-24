@@ -110,6 +110,7 @@ func _draw_transfer(mid: Vector2, r_a: float, r_b: float) -> void:
 
 
 func _label(font: Font, text: String, at: Vector2, color: Color, centered: bool) -> void:
+	text = tr(text)  # body name / YOUR ORBIT / TARGET / STATION / REENTRY / SURFACE
 	var fs := 10
 	var w := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
 	var pos := at - Vector2(w * 0.5, 0.0) if centered else at

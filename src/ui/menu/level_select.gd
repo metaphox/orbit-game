@@ -69,7 +69,7 @@ func _build_cards() -> void:
 			var card := MissionCard.new()
 			_shell.left_column.add_child(card)
 			card.set_data(pos, Campaign.code(index), Campaign.short_title(index),
-				_profile.status_for(index), Campaign.level_at(index).difficulty,
+				Campaign.status_label(_profile, index), Campaign.level_at(index).difficulty,
 				not _is_selectable(index))
 			card.hovered.connect(_on_card_hovered)
 			card.clicked.connect(_on_card_clicked)

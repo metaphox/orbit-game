@@ -15,6 +15,9 @@ var _maximum_size := 1.0e9
 
 
 func _ready() -> void:
+	# AUTO carries the "mode" context, which auto-translation can't apply, so set
+	# the button text explicitly here rather than leaving it to the scene label.
+	%AutoButton.text = tr("AUTO", &"mode")
 	%AutoButton.pressed.connect(func() -> void: _on_zoom("auto"))
 	%ZoomInButton.pressed.connect(func() -> void: _on_zoom("in"))
 	%ZoomOutButton.pressed.connect(func() -> void: _on_zoom("out"))
@@ -63,7 +66,7 @@ func refresh(ship: ShipSim, time: float) -> void:
 func update_objective(ship: ShipSim, level: LevelDef) -> void:
 	var lines: Array[String] = [level.objective.describe()]
 	lines.append_array(level.objective.status_lines(ship))
-	lines.append("PAR %.0f m/s" % level.dv_par)
+	lines.append(tr("PAR %.0f m/s") % level.dv_par)
 	objective_label.text = "\n".join(lines)
 
 

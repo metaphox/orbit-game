@@ -89,13 +89,18 @@ static func from_dict(data: Dictionary) -> void:
 static func apply_cmdline_args() -> void:
 	var args := OS.get_cmdline_args()
 	debug_mode = "--debug-mode" in args
-	for a: String in args:
-		if a.begins_with("--locale="):
-			locale_override = a.trim_prefix("--locale=")
+	# The locale override is a dev affordance, gated behind --debug-mode so a
+	# shipped build can't be locale-forced from the command line. Requires both:
+	#   godot --debug-mode --locale=zh
+	if debug_mode:
+		for a: String in args:
+			if a.begins_with("--locale="):
+				locale_override = a.trim_prefix("--locale=")
 
 
-## Launch-time UI locale: the --locale=<code> dev override wins, else the saved
-## preference. Never persisted (the override is a process-lifetime flag).
+## Launch-time UI locale: the --debug-mode-only --locale=<code> override wins,
+## else the saved preference. Never persisted (the override is a process-lifetime
+## flag).
 static var locale_override := ""
 
 

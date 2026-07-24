@@ -55,7 +55,7 @@ func refresh(ship: ShipSim, level: LevelDef, sim_time: float) -> void:
 	var propellant_fraction := ship.prop_mass / level.prop_mass
 	propellant_meter.set_frac(propellant_fraction)
 	propellant_percent.text = "%.0f%%" % (propellant_fraction * 100.0)
-	propellant_extra.text = "Δv %.1f · USED %.1f" % [ship.dv_remaining(), ship.dv_used()]
+	propellant_extra.text = tr("Δv %.1f · USED %.1f") % [ship.dv_remaining(), ship.dv_used()]
 
 	node_label.visible = ship.node != null
 	if ship.node != null:
@@ -63,7 +63,7 @@ func refresh(ship: ShipSim, level: LevelDef, sim_time: float) -> void:
 		var exhaust_velocity := ship.isp * Integrator.G0
 		var burn_time := ship.mass() * (1.0 - exp(-delta_v / exhaust_velocity)) / (
 			ship.thrust_max / exhaust_velocity)
-		node_label.text = "NODE Δv %.1f · T%+.0fs · BURN %.0fs · REM %.1f" % [
+		node_label.text = tr("NODE Δv %.1f · T%+.0fs · BURN %.0fs · REM %.1f") % [
 			delta_v, sim_time - ship.node.t_node, burn_time, ship.node.remaining.length()]
 	toolbar.sync_state(ship)
 

@@ -63,10 +63,15 @@ var _objective: Objective
 var _theme: RenderTheme
 
 
-func build(level: LevelDef, ship_root: Node3D, flame: MeshInstance3D, theme: RenderTheme = null) -> void:
+func build(level: LevelDef, ship_root: Node3D, hull: MeshInstance3D,
+		flame: MeshInstance3D, theme: RenderTheme = null) -> void:
 	_theme = theme if theme != null else RenderTheme.default()
 	_ship_root = ship_root
 	_flame = flame
+	if _theme.ship_skin == null:
+		push_error("RenderTheme has no ShipSkin; keeping the OBJ materials.")
+	else:
+		_theme.ship_skin.apply_to(hull)
 	_flame_rest_z = flame.position.z
 	var flame_cone := flame.mesh as CylinderMesh
 	_flame_half_len = flame_cone.height * 0.5 if flame_cone != null else 0.0

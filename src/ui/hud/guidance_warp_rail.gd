@@ -13,8 +13,8 @@ const WARP_STEPS := [1, 5, 10, 25, 50, 100, 200, 500, 1000]
 
 func refresh(ship: ShipSim, warp: int) -> void:
 	guidance.set_attitude(ship)
-	guidance_heading.text = "LOCK %s · %.0f°" % [
-		ShipSim.SAS_NAMES[ship.sas_mode], rad_to_deg(ship.off_prograde_angle())]
+	guidance_heading.text = tr("LOCK %s · %.0f°") % [
+		tr(ShipSim.SAS_NAMES[ship.sas_mode], &"sas"), rad_to_deg(ship.off_prograde_angle())]
 	var acceleration := ship.accel_along_track
 	var trend := "▲" if acceleration > 0.05 else ("▼" if acceleration < -0.05 else "—")
 	acceleration_value.text = "%+.2f m/s² %s" % [acceleration, trend]

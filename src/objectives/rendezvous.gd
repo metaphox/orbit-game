@@ -34,8 +34,8 @@ func is_met(ship: ShipSim) -> bool:
 
 
 func describe() -> String:
-	return "RENDEZVOUS WITH %s (<%.1f KM, <%.0f M/S)" % [
-		station_name, max_distance / 1000.0, max_rel_speed]
+	return tr("RENDEZVOUS WITH %s (<%.1f KM, <%.0f M/S)") % [
+		tr(station_name), max_distance / 1000.0, max_rel_speed]
 
 
 func status_lines(ship: ShipSim) -> Array[String]:

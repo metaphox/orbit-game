@@ -31,8 +31,8 @@ func _run() -> void:
 	var profile: Profile = store.find_profile("ARES")
 	if profile == null:
 		profile = store.create_profile("ARES", false)
-	profile.record_win(0, "GOLD", 118.0, 0)
-	profile.record_win(1, "SILVER", 244.0, 1)
+	profile.record_win(0, "GOLD ★★★", 118.0, 0)
+	profile.record_win(1, "SILVER ★★", 244.0, 1)
 	store.set_active("ARES")
 
 	var title := TitleScreen.new()

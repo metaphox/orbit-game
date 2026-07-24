@@ -85,7 +85,7 @@ func _refresh() -> void:
 		_cards[i].set_selected(i == _cursor)
 	var shown := _hover_pos if _hover_pos >= 0 else _cursor
 	_blurb.text = _blurb_for(shown)
-	_status.text = "%d / %d PROFILE SLOTS" % [_store.profiles.size(), ProfileStore.MAX_PROFILES]
+	_status.text = tr("%d / %d PROFILE SLOTS") % [_store.profiles.size(), ProfileStore.MAX_PROFILES]
 
 
 func _blurb_for(i: int) -> String:
@@ -94,7 +94,7 @@ func _blurb_for(i: int) -> String:
 			var lp := _store.last_active_profile()
 			if lp != null and lp.mission_save != null:
 				var idx: int = lp.mission_save.get("level_index", 0)
-				return "RESUME  %s · %s  %s" % [lp.profile_name, Campaign.code(idx), Campaign.short_title(idx)]
+				return tr("RESUME  %s · %s  %s") % [lp.profile_name, Campaign.code(idx), tr(Campaign.short_title(idx))]
 			return "NO MISSION IN PROGRESS"
 		1:
 			return "CREATE A NEW PILOT" if _items[1][1] else "ALL PROFILE SLOTS ARE FULL"

@@ -324,7 +324,7 @@ func _plan_transfer_capture(game: GameRoot, obj: TransferCaptureObjective) -> Ar
 		_coast_to_time("TLI PHASING", func(_g: GameRoot) -> float: return fire_at, true),
 		_burn("TRANS-LUNAR INJECTION", func(s: ShipSim) -> DVec3: return s.v,
 			func(s: ShipSim) -> bool: return s.current_elements().radius_apoapsis() >= r_dest),
-		_coast_until("COAST TO " + target.name + " SOI", func(s: ShipSim) -> bool: return s.body == target),
+		_coast_until(tr("COAST TO %s SOI") % tr(target.name), func(s: ShipSim) -> bool: return s.body == target),
 		_coast_to_time("COAST TO PERIAPSIS",
 			func(g: GameRoot) -> float: return OrbitEvents.periapsis_time(g.ship.current_elements(), g.sim_time)),
 		_burn("CAPTURE BURN", func(s: ShipSim) -> DVec3: return s.v.neg(), func(s: ShipSim) -> bool:
@@ -381,7 +381,7 @@ func _plan_interplanetary(game: GameRoot, obj: TransferCaptureObjective) -> Arra
 			return
 		dir.insert_next([
 			dir._burn_toward("MID-COURSE CORRECTION", func(_s: ShipSim) -> DVec3: return best_v1),
-			dir._coast_until("COAST TO " + target.name + " SOI", func(sh: ShipSim) -> bool: return sh.body == target),
+			dir._coast_until(tr("COAST TO %s SOI") % tr(target.name), func(sh: ShipSim) -> bool: return sh.body == target),
 			dir._coast_to_time("COAST TO PERIAPSIS",
 				func(g: GameRoot) -> float: return OrbitEvents.periapsis_time(g.ship.current_elements(), g.sim_time)),
 			dir._burn("CAPTURE BURN", func(sh: ShipSim) -> DVec3: return sh.v.neg(), func(sh: ShipSim) -> bool:
@@ -412,7 +412,7 @@ func _plan_return(game: GameRoot, obj: EntryCorridorObjective) -> Array:
 		_burn("TRANS-EARTH INJECTION", func(s: ShipSim) -> DVec3: return s.v, func(s: ShipSim) -> bool:
 			var el := s.current_elements()
 			return not el.is_elliptic() or el.radius_apoapsis() >= moon.soi_radius),
-		_coast_until("ESCAPE " + moon.name + " SOI", func(s: ShipSim) -> bool: return s.body == parent),
+		_coast_until(tr("ESCAPE %s SOI") % tr(moon.name), func(s: ShipSim) -> bool: return s.body == parent),
 	]
 	# The escape leaves a high-energy Earth orbit whose apoapsis can breach the
 	# mission's fail_radius; pull it in first so coasting to apoapsis stays

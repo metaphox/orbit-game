@@ -16,13 +16,13 @@ func is_met(ship: ShipSim) -> bool:
 
 
 func describe() -> String:
-	return "ENTRY CORRIDOR: PE %.1f ± %.1f KM" % [
+	return tr("ENTRY CORRIDOR: PE %.1f ± %.1f KM") % [
 		target_periapsis / 1000.0, tolerance / 1000.0]
 
 
 func status_lines(ship: ShipSim) -> Array[String]:
 	if ship.body.parent != null:
-		return ["ESCAPE THE %s FIRST" % ship.body.name]
+		return [tr("ESCAPE THE %s FIRST") % tr(ship.body.name)]
 	return ["PE Δ%+9.2f km vs CORRIDOR" % [
 		(ship.current_elements().radius_periapsis() - target_periapsis) / 1000.0]]
 

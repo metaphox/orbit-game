@@ -44,3 +44,6 @@ fi
 
 # 4) Theme-seam lint: no raw Color() literals in src/ui (CR-6 / AGENTS.md).
 sh "$(dirname "$0")/lint_ui_colors.sh" || fail "raw Color() literals in src/ui (see above)."
+
+# 5) i18n lint: de/zh cover the POT, and no untranslated prose in display code.
+python3 "$(dirname "$0")/lint_i18n.py" || fail "untranslated / missing strings (see above)."

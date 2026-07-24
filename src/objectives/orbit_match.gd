@@ -26,10 +26,10 @@ func is_met(ship: ShipSim) -> bool:
 
 
 func describe() -> String:
-	var base := "CIRCULARIZE AT R %.1f KM ± %.1f" % [
+	var base := tr("CIRCULARIZE AT R %.1f KM ± %.1f") % [
 		target_radius / 1000.0, tolerance / 1000.0]
 	if inclination_tolerance < PI:
-		base += "\nINCLINATION %.1f° ± %.1f°" % [
+		base += "\n" + tr("INCLINATION %.1f° ± %.1f°") % [
 			rad_to_deg(target_inclination), rad_to_deg(inclination_tolerance)]
 	return base
 
@@ -38,7 +38,7 @@ func status_lines(ship: ShipSim) -> Array[String]:
 	var el := ship.current_elements()
 	var lines: Array[String]
 	if not el.is_elliptic():
-		lines = ["AP  ESCAPE   PE Δ%+8.2f" % ((el.radius_periapsis() - target_radius) / 1000.0)]
+		lines = ["AP  ESCAPE   PE Δ%+8.2f" % ((el.radius_periapsis() - target_radius) / 1000.0)]  # i18n-ok: aligned telemetry, notation stays English
 	else:
 		lines = ["AP Δ%+8.2f   PE Δ%+8.2f" % [
 			(el.radius_apoapsis() - target_radius) / 1000.0,

@@ -20,13 +20,13 @@ func contact_result(ship: ShipSim) -> ContactResult:
 
 
 func describe() -> String:
-	return "LAND ON THE %s (V<%.0f  H<%.0f m/s)" % [
-		target.name, max_vertical, max_horizontal]
+	return tr("LAND ON THE %s (V<%.0f  H<%.0f m/s)") % [
+		tr(target.name), max_vertical, max_horizontal]
 
 
 func status_lines(ship: ShipSim) -> Array[String]:
 	if ship.body != target:
-		return ["TRANSIT TO THE %s" % target.name]
+		return [tr("TRANSIT TO THE %s") % tr(target.name)]
 	var up := ship.r.normalized()
 	var vertical := ship.v.dot(up)
 	var horizontal := ship.v.sub(up.scaled(vertical)).length()

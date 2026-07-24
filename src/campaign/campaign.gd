@@ -91,3 +91,16 @@ static func sortie(index: int) -> Vector2i:
 static func short_title(index: int) -> String:
 	var parts := title(index).split(":")
 	return (parts[1] if parts.size() > 1 else parts[0]).strip_edges()
+
+
+## The translated mission-select status, derived from profile state (not by
+## sniffing the status string). The generic state words carry the "status"
+## translation context so they never collide with an unrelated future use of the
+## same word; an earned medal translates plainly.
+static func status_label(profile: Profile, index: int) -> String:
+	if not profile.is_unlocked(index):
+		return TranslationServer.translate("LOCKED", &"status")
+	var medal := profile.medal_for(index)
+	if medal.is_empty():
+		return TranslationServer.translate("ACTIVE", &"status")
+	return TranslationServer.translate(medal)

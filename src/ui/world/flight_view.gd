@@ -81,7 +81,8 @@ func build(level: LevelDef, theme: RenderTheme = null) -> void:
 
 	_ship_visuals = ShipVisuals.new()
 	add_child(_ship_visuals)
-	_ship_visuals.build(level, rig.get_node("Ship"), rig.get_node("Ship/Flame"), _theme)
+	_ship_visuals.build(level, rig.get_node("Ship"), rig.get_node("Ship/Hull"),
+		rig.get_node("Ship/Flame"), _theme)
 	star_dust = _ship_visuals.star_dust
 
 	_camera_rig.bind(rig.get_node("ChaseCamera"), rig.get_node("SideCamera"))

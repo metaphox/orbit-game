@@ -39,6 +39,7 @@ func _draw() -> void:
 
 ## Draw a short tag, nudged fully on-panel if it would spill off the right/top.
 func _label(text: String, at: Vector2, color: Color) -> void:
+	text = tr(text)  # body names / NODE translate; AP/PE/TGT notation has no msgid -> stays English
 	var fs := 11
 	var w := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
 	var pos := at

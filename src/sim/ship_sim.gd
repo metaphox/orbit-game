@@ -110,7 +110,7 @@ func apply_soi_transitions(t: float) -> String:
 		r = st.r
 		v = st.v
 		_refit_elements(t)
-		return "LEAVING %s SOI" % old
+		return tr("LEAVING %s SOI") % tr(old)
 	for moon in _level.moons:
 		if moon.parent != body:
 			continue
@@ -121,7 +121,7 @@ func apply_soi_transitions(t: float) -> String:
 			r = st.r
 			v = st.v
 			_refit_elements(t)
-			return "ENTERING %s SOI" % moon.name
+			return tr("ENTERING %s SOI") % tr(moon.name)
 	return ""
 
 

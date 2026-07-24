@@ -37,14 +37,14 @@ func show_level(index: int, profile: Profile) -> void:
 	_index = index
 	var level := Campaign.level_at(index)
 	var s := Campaign.sortie(index)
-	_sortie.text = "SORTIE %02d / %02d" % [s.x, s.y]
+	_sortie.text = tr("SORTIE %02d / %02d") % [s.x, s.y]
 	_title.text = Campaign.short_title(index)
-	_code_status.text = "%s · %s" % [Campaign.code(index), profile.status_for(index)]
+	_code_status.text = "%s · %s" % [Campaign.code(index), Campaign.status_label(profile, index)]
 	_brief.text = level.objective.describe()
 	_pips.value = level.difficulty
 	var medal := profile.medal_for(index)
-	_stats.text = "Δv PAR   %d m/s\nBEST     %s\nREWINDS  %d\nAVIONICS %s" % [
-		int(level.dv_par), medal if medal != "" else "—", level.rewind_budget, _avionics(level)]
+	_stats.text = tr("Δv PAR   %d m/s\nBEST     %s\nREWINDS  %d\nAVIONICS %s") % [
+		int(level.dv_par), tr(medal) if medal != "" else "—", level.rewind_budget, _avionics(level)]
 	_show_preview(index, level)
 
 
@@ -55,10 +55,10 @@ func set_launch_enabled(enabled: bool) -> void:
 func _avionics(level: LevelDef) -> String:
 	var parts: Array[String] = []
 	if level.sas_enabled:
-		parts.append("SAS")
+		parts.append(tr("SAS"))
 	if level.nodes_enabled:
-		parts.append("NODES")
-	return " · ".join(parts) if not parts.is_empty() else "MANUAL"
+		parts.append(tr("NODES"))
+	return " · ".join(parts) if not parts.is_empty() else tr("MANUAL", &"mode")
 
 
 func _show_preview(index: int, level: LevelDef) -> void:

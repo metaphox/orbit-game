@@ -50,9 +50,9 @@ func _refresh() -> void:
 	for i in _cards.size():
 		_cards[i].set_selected(i == _cursor)
 	_saved.visible = _saved_flash
-	var nav := "↑↓ / W S / K J  SELECT   ENTER CONFIRM   [F1] HIDE   " \
-		if Settings.menu_hints_on() else "[F1] KEYS   "
-	_hint.text = nav + "[ESC]/[SPACE]/[0] RESUME"
+	var nav := tr("↑↓ / W S / K J  SELECT   ENTER CONFIRM   [F1] HIDE   ") \
+		if Settings.menu_hints_on() else tr("[F1] KEYS   ")
+	_hint.text = nav + tr("[ESC]/[SPACE]/[0] RESUME")
 
 
 func _select(i: int) -> void:

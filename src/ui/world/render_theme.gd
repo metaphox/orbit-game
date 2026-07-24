@@ -64,6 +64,7 @@ var flare_ghosts: Array = [
 	[1.15, 34.0, Color(0.5, 0.46, 0.2)], [1.4, 18.0, Color(0.5, 0.3, 0.3)]]
 
 # Ship markers
+var ship_skin: ShipSkin = preload("res://src/ui/world/materials/player_ship/default_ship_skin.tres")
 var prograde_color := Color(0.3, 1.0, 0.4)
 var retrograde_color := Color(1.0, 0.35, 0.25)
 var posture_hull_color := Color(0.92, 0.9, 0.86)

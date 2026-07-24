@@ -50,23 +50,23 @@ func refresh(ship: ShipSim, sim_time: float, warp: int) -> void:
 	var elements := ship.current_elements()
 	met_value.text = "T+ %s" % _clock(sim_time)
 	warp_value.text = "%dx" % warp
-	soi_value.text = ship.body.name
+	soi_value.text = tr(ship.body.name)
 	altitude_value.text = "%.2f km" % (ship.altitude() / 1000.0)
 	velocity_value.text = "%.1f m/s" % ship.speed()
 	if elements.is_elliptic():
 		apoapsis_value.text = "%.2f km" % (elements.radius_apoapsis() / 1000.0)
 		apoapsis_value.add_theme_color_override("font_color", Palette.LIVE)
 	else:
-		apoapsis_value.text = "ESCAPE"
+		apoapsis_value.text = tr("ESCAPE")
 		apoapsis_value.add_theme_color_override("font_color", Palette.INTENT)
 	periapsis_value.text = "%.2f km" % (elements.radius_periapsis() / 1000.0)
 
 	var burning := ship.flight_state == ShipSim.FlightState.BURNING
-	burn_label.text = "BURNING" if burning else "COAST"
+	burn_label.text = tr("BURNING") if burning else tr("COAST")
 	burn_label.add_theme_color_override("font_color", Palette.INTENT if burning else Palette.DIM)
 	burn_dot.visible = burning
 	off_prograde_label.text = "OFF-PRO %.0f°" % rad_to_deg(ship.off_prograde_angle())
-	sas_label.text = "SAS %s" % ShipSim.SAS_NAMES[ship.sas_mode]
+	sas_label.text = "SAS %s" % tr(ShipSim.SAS_NAMES[ship.sas_mode], &"sas")
 
 
 func animate_burn_dot() -> void:

@@ -317,11 +317,18 @@ func test_settings_two_pane_toggles_flip_and_persist() -> void:
 	add_child_autofree(screen)
 	screen.build(store)
 	var before := Settings.effects_enabled
-	screen._toggle(0)  # SCREEN EFFECTS
+	screen._activate(1)  # SCREEN EFFECTS (row 0 is the language picker)
 	assert_ne(Settings.effects_enabled, before, "toggling flips SCREEN EFFECTS")
 	assert_false(Settings.menu_hints_on())
-	screen._toggle(1)  # MENU HINTS
+	screen._activate(2)  # MENU HINTS
 	assert_true(Settings.menu_hints_on(), "MENU HINTS toggles too")
+	var lang_before := String(Settings.get_value(Settings.LANGUAGE))
+	screen._activate(0)  # LANGUAGE cycles to the next locale
+	assert_ne(String(Settings.get_value(Settings.LANGUAGE)), lang_before,
+		"activating the LANGUAGE row cycles the saved locale")
+	# Restore the process-global locale so later tests keep their English strings.
+	Settings.set_value(Settings.LANGUAGE, "en")
+	TranslationServer.set_locale("en")
 
 
 func test_load_profile_detail_follows_selection_and_loads() -> void:

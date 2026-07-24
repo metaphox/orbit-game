@@ -5,8 +5,56 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+# --- Breadcrumbs ---
 msgid "MAIN MENU"
 msgstr "HAUPTMENÜ"
+
+msgid "MAIN MENU ▶ MISSIONS"
+msgstr "HAUPTMENÜ ▶ MISSIONEN"
+
+msgid "MAIN MENU ▶ LOAD PILOT"
+msgstr "HAUPTMENÜ ▶ PILOT LADEN"
+
+msgid "MAIN MENU ▶ SETTINGS"
+msgstr "HAUPTMENÜ ▶ EINSTELLUNGEN"
+
+msgid "MAIN MENU ▶ CREDITS"
+msgstr "HAUPTMENÜ ▶ MITWIRKENDE"
+
+# --- Navigation hint bars ---
+msgid "↑ ↓ / W S / K J  SELECT     ENTER  CONFIRM     [F1]  HIDE"
+msgstr "↑ ↓ / W S / K J  WÄHLEN     ENTER  BESTÄTIGEN     [F1]  AUSBLENDEN"
+
+msgid "↑↓ / W S / K J  MISSION     ← → / A D / H L  ACT     ENTER  LAUNCH     [ESC]  TITLE     [F1]  HIDE"
+msgstr "↑↓ / W S / K J  MISSION     ← → / A D / H L  AKT     ENTER  START     [ESC]  TITEL     [F1]  AUSBLENDEN"
+
+msgid "↑↓ / W S / K J  SELECT     ENTER  LOAD     [ESC]  CANCEL     [F1]  HIDE"
+msgstr "↑↓ / W S / K J  WÄHLEN     ENTER  LADEN     [ESC]  ABBRECHEN     [F1]  AUSBLENDEN"
+
+msgid "↑↓ / W S / K J  SELECT     ENTER  TOGGLE     [ESC]  BACK     [F1]  HIDE"
+msgstr "↑↓ / W S / K J  WÄHLEN     ENTER  UMSCHALTEN     [ESC]  ZURÜCK     [F1]  AUSBLENDEN"
+
+msgid "[ESC]  BACK"
+msgstr "[ESC]  ZURÜCK"
+
+msgid "↑↓ / W S / K J  SELECT   ENTER CONFIRM   [F1] HIDE   "
+msgstr "↑↓ / W S / K J  WÄHLEN   ENTER BESTÄTIGEN   [F1] AUSBL.   "
+
+msgid "[F1] KEYS   "
+msgstr "[F1] TASTEN   "
+
+msgid "[ESC]/[SPACE]/[0] RESUME"
+msgstr "[ESC]/[LEER]/[0] FORTSETZEN"
+
+# --- Title screen: menu items ---
+msgid "CONTINUE"
+msgstr "FORTSETZEN"
+
+msgid "NEW PROFILE"
+msgstr "NEUES PROFIL"
+
+msgid "LOAD PROFILE"
+msgstr "PROFIL LADEN"
 
 msgid "SETTINGS"
 msgstr "EINSTELLUNGEN"
@@ -14,8 +62,639 @@ msgstr "EINSTELLUNGEN"
 msgid "CREDITS"
 msgstr "MITWIRKENDE"
 
+msgid "QUIT"
+msgstr "BEENDEN"
+
+# --- Title screen: per-item blurbs ---
+msgid "NO MISSION IN PROGRESS"
+msgstr "KEINE MISSION AKTIV"
+
+msgid "CREATE A NEW PILOT"
+msgstr "NEUEN PILOTEN ERSTELLEN"
+
+msgid "ALL PROFILE SLOTS ARE FULL"
+msgstr "ALLE PROFILPLÄTZE BELEGT"
+
+msgid "SWITCH THE ACTIVE PILOT"
+msgstr "AKTIVEN PILOTEN WECHSELN"
+
+msgid "DISPLAY & EFFECTS"
+msgstr "ANZEIGE & EFFEKTE"
+
+msgid "ABOUT LIMITED PROPELLANT"
+msgstr "ÜBER LIMITED PROPELLANT"
+
+msgid "EXIT TO DESKTOP"
+msgstr "ZUM DESKTOP BEENDEN"
+
+msgid "RESUME  %s · %s  %s"
+msgstr "WEITER  %s · %s  %s"
+
+msgid "%d / %d PROFILE SLOTS"
+msgstr "%d / %d PROFILPLÄTZE"
+
+# --- Title hero panel ---
+msgid "FLIGHT COMPUTER · MAIN MENU"
+msgstr "FLUGRECHNER · HAUPTMENÜ"
+
+msgid "V2 · FLIGHT"
+msgstr "V2 · FLUG"
+
+msgid "LP // BURN FUEL. CHANGE ORBIT. SOLVE LAMBERT'S PROBLEM."
+msgstr "LP // TREIBSTOFF VERBRENNEN. ORBIT ÄNDERN. LAMBERT-PROBLEM LÖSEN."
+
+# --- Pause menu ---
 msgid "PAUSED"
 msgstr "PAUSIERT"
 
 msgid "RESUME"
 msgstr "FORTSETZEN"
+
+msgid "SAVE PROGRESS"
+msgstr "FORTSCHRITT SPEICHERN"
+
+msgid "RESTART MISSION"
+msgstr "MISSION NEU STARTEN"
+
+msgid "QUIT TO MISSION SELECT"
+msgstr "ZUR MISSIONSAUSWAHL"
+
+msgid "✓ PROGRESS SAVED   (rewind anchors are not saved)"
+msgstr "✓ FORTSCHRITT GESPEICHERT   (Rückspul-Anker werden nicht gespeichert)"
+
+# --- Mission detail pane ---
+msgid "MISSIONS"
+msgstr "MISSIONEN"
+
+msgid "DIFFICULTY"
+msgstr "SCHWIERIGKEIT"
+
+msgid "LAUNCH ▶"
+msgstr "START ▶"
+
+msgid "SORTIE %02d / %02d"
+msgstr "EINSATZ %02d / %02d"
+
+msgid "Δv PAR   %d m/s\nBEST     %s\nREWINDS  %d\nAVIONICS %s"
+msgstr "Δv SOLL  %d m/s\nBESTE    %s\nRÜCKSP.  %d\nAVIONIK  %s"
+
+msgctxt "status"
+msgid "LOCKED"
+msgstr "GESPERRT"
+
+msgctxt "status"
+msgid "ACTIVE"
+msgstr "AKTIV"
+
+msgid "GOLD ★★★"
+msgstr "GOLD ★★★"
+
+msgid "SILVER ★★"
+msgstr "SILBER ★★"
+
+msgid "BRONZE ★"
+msgstr "BRONZE ★"
+
+msgid "SAS"
+msgstr "SAS"
+
+msgid "NODES"
+msgstr "KNOTEN"
+
+msgctxt "mode"
+msgid "MANUAL"
+msgstr "MANUELL"
+
+# --- Settings screen ---
+msgid "SETTING"
+msgstr "EINSTELLUNG"
+
+msgid "SCREEN EFFECTS"
+msgstr "BILDSCHIRMEFFEKTE"
+
+msgid "MENU HINTS"
+msgstr "MENÜHINWEISE"
+
+msgid "Film grade + CRT scanline overlay on every screen."
+msgstr "Filmkorn + CRT-Scanlinien auf jedem Bildschirm."
+
+msgid "Show the navigation key hints in menus by default (F1 toggles them anywhere)."
+msgstr "Navigationshinweise in Menüs standardmäßig anzeigen (F1 schaltet sie überall um)."
+
+msgctxt "toggle"
+msgid "ON"
+msgstr "EIN"
+
+msgctxt "toggle"
+msgid "OFF"
+msgstr "AUS"
+
+# --- Load pilot screen ---
+msgid "PILOT"
+msgstr "PILOT"
+
+msgid "LOAD PILOT ▶"
+msgstr "PILOT LADEN ▶"
+
+msgid "NO PROFILES YET"
+msgstr "NOCH KEINE PROFILE"
+
+msgid "COMPLETED  %d / %d\nMODE       %s"
+msgstr "ABGESCHL.  %d / %d\nMODUS      %s"
+
+msgctxt "mode"
+msgid "HARDCORE"
+msgstr "HARDCORE"
+
+msgctxt "mode"
+msgid "NORMAL"
+msgstr "NORMAL"
+
+# --- New profile screen ---
+msgid "■ NEW PILOT ■"
+msgstr "■ NEUER PILOT ■"
+
+msgid "ENTER CALLSIGN"
+msgstr "RUFZEICHEN EINGEBEN"
+
+msgid "HARDCORE — no rewind, no guidance (PERMANENT)"
+msgstr "HARDCORE — kein Rückspulen, keine Hilfen (PERMANENT)"
+
+msgid "[ENTER] CREATE   [ESC] CANCEL"
+msgstr "[ENTER] ERSTELLEN   [ESC] ABBRECHEN"
+
+msgid "⚠ HARDCORE IS PERMANENT — PRESS ENTER AGAIN TO CONFIRM"
+msgstr "⚠ HARDCORE IST PERMANENT — ENTER ERNEUT DRÜCKEN ZUM BESTÄTIGEN"
+
+msgid "ENTER A NAME"
+msgstr "NAMEN EINGEBEN"
+
+msgid "NAME TOO LONG (%d CHARS MAX)"
+msgstr "NAME ZU LANG (MAX. %d ZEICHEN)"
+
+msgid "NAME ALREADY TAKEN"
+msgstr "NAME BEREITS VERGEBEN"
+
+msgid "ALL %d PROFILE SLOTS FULL"
+msgstr "ALLE %d PROFILPLÄTZE BELEGT"
+
+# --- Credits ---
+msgid "Burn fuel. Change orbit. Solve Lambert's problem."
+msgstr "Treibstoff verbrennen. Orbit ändern. Lamberts Problem lösen."
+
+msgid "DESIGN & CODE"
+msgstr "DESIGN & CODE"
+
+msgid "ENGINE"
+msgstr "ENGINE"
+
+msgid "TYPE"
+msgstr "SCHRIFT"
+
+msgid "PHYSICS"
+msgstr "PHYSIK"
+
+# --- Mission list: back, act headers, mission short titles ---
+msgid "◀  BACK"
+msgstr "◀  ZURÜCK"
+
+msgid "ACT 1 — EARTH ORBIT SCHOOL"
+msgstr "AKT 1 — ERDORBIT-SCHULE"
+
+msgid "ACT 2 — LUNAR PROGRAM"
+msgstr "AKT 2 — MONDPROGRAMM"
+
+msgid "ACT 3 — INTERPLANETARY"
+msgstr "AKT 3 — INTERPLANETAR"
+
+msgid "RAISE ORBIT"
+msgstr "ORBIT ANHEBEN"
+
+msgid "RENDEZVOUS"
+msgstr "RENDEZVOUS"
+
+msgid "PLANE CHANGE"
+msgstr "BAHNEBENENWECHSEL"
+
+msgid "TRANSLUNAR INJECTION"
+msgstr "TRANSLUNARE INJEKTION"
+
+msgid "MARE SERENITATIS"
+msgstr "MARE SERENITATIS"
+
+msgid "COME HOME"
+msgstr "HEIMKEHR"
+
+msgid "EARTH TO MARS"
+msgstr "ERDE ZUM MARS"
+
+# --- Objective briefs ---
+msgid "CIRCULARIZE AT R %.1f KM ± %.1f"
+msgstr "KREISBAHN BEI R %.1f KM ± %.1f"
+
+msgid "INCLINATION %.1f° ± %.1f°"
+msgstr "INKLINATION %.1f° ± %.1f°"
+
+msgid "RENDEZVOUS WITH %s (<%.1f KM, <%.0f M/S)"
+msgstr "RENDEZVOUS MIT %s (<%.1f KM, <%.0f M/S)"
+
+msgid "STATION"
+msgstr "STATION"
+
+msgid "ACHIEVE ORBIT AROUND THE %s"
+msgstr "ORBIT UM %s ERREICHEN"
+
+msgid "LAND ON THE %s (V<%.0f  H<%.0f m/s)"
+msgstr "AUF %s LANDEN (V<%.0f  H<%.0f m/s)"
+
+msgid "ENTRY CORRIDOR: PE %.1f ± %.1f KM"
+msgstr "EINTRITTSKORRIDOR: PE %.1f ± %.1f KM"
+
+# --- Body names ---
+msgid "EARTH"
+msgstr "ERDE"
+
+msgid "MOON"
+msgstr "MOND"
+
+msgid "MARS"
+msgstr "MARS"
+
+msgid "SOL"
+msgstr "SONNE"
+
+# ============ HUD (persistent widgets) ============
+
+msgid "GUIDANCE"
+msgstr "FÜHRUNG"
+
+msgid "ΔV REMAINING"
+msgstr "ΔV REST"
+
+msgid "OBJECTIVE"
+msgstr "ZIEL"
+
+msgid "ORBIT MAP"
+msgstr "ORBITKARTE"
+
+msgctxt "mode"
+msgid "AUTO"
+msgstr "AUTO"
+
+msgid "VIEW"
+msgstr "ANSICHT"
+
+msgid "THROTTLE"
+msgstr "SCHUB"
+
+msgid "NODE"
+msgstr "KNOTEN"
+
+msgid "F1 · ALL KEYS"
+msgstr "F1 · ALLE TASTEN"
+
+# --- Flight status words ---
+msgid "ESCAPE"
+msgstr "FLUCHT"
+
+msgid "BURNING"
+msgstr "BRENNT"
+
+msgid "COAST"
+msgstr "GLEITEN"
+
+# --- Live readout templates ---
+msgid "LOCK %s · %.0f°"
+msgstr "LOCK %s · %.0f°"
+
+msgid "Δv %.1f · USED %.1f"
+msgstr "Δv %.1f · VERBR. %.1f"
+
+msgid "NODE Δv %.1f · T%+.0fs · BURN %.0fs · REM %.1f"
+msgstr "KNOTEN Δv %.1f · T%+.0fs · BRENN %.0fs · REST %.1f"
+
+msgid "PAR %.0f m/s"
+msgstr "PAR %.0f m/s"
+
+# --- SAS attitude modes ---
+msgctxt "sas"
+msgid "OFF"
+msgstr "AUS"
+
+msgctxt "sas"
+msgid "PROGRADE"
+msgstr "PROGRAD"
+
+msgctxt "sas"
+msgid "RETROGRADE"
+msgstr "RETROGRAD"
+
+msgctxt "sas"
+msgid "NORMAL"
+msgstr "NORMAL"
+
+msgctxt "sas"
+msgid "ANTI-NORM"
+msgstr "ANTI-NORM"
+
+msgctxt "sas"
+msgid "RADIAL+"
+msgstr "RADIAL+"
+
+msgctxt "sas"
+msgid "RADIAL-"
+msgstr "RADIAL-"
+
+msgctxt "sas"
+msgid "NODE"
+msgstr "KNOTEN"
+
+msgctxt "sas"
+msgid "KILL ROT"
+msgstr "ROT-STOP"
+
+# --- In-flight mission title prefix ---
+msgid "ORBIT SCHOOL 1"
+msgstr "ORBIT-SCHULE 1"
+
+msgid "ORBIT SCHOOL 2"
+msgstr "ORBIT-SCHULE 2"
+
+msgid "ORBIT SCHOOL 3"
+msgstr "ORBIT-SCHULE 3"
+
+msgid "LUNAR PROGRAM 1"
+msgstr "MONDPROGRAMM 1"
+
+msgid "LUNAR PROGRAM 2"
+msgstr "MONDPROGRAMM 2"
+
+msgid "LUNAR PROGRAM 3"
+msgstr "MONDPROGRAMM 3"
+
+msgid "INTERPLANETARY 1"
+msgstr "INTERPLANETAR 1"
+
+# ============ HUD overlays (banner / prompts / pause / help) ============
+
+msgid "OBJECTIVE COMPLETE"
+msgstr "ZIEL ERREICHT"
+
+msgid "ΔV USED %.1f m/s — PAR %.0f\nMEDAL: %s"
+msgstr "ΔV VERBR. %.1f m/s — PAR %.0f\nMEDAILLE: %s"
+
+msgid "◇ CLEAN"
+msgstr "◇ SAUBER"
+
+msgid "[%s] FLY AGAIN"
+msgstr "[%s] NOCHMAL"
+
+msgid "     [%s] NEXT MISSION"
+msgstr "     [%s] NÄCHSTE MISSION"
+
+msgid "[%s] RESTART"
+msgstr "[%s] NEUSTART"
+
+msgid "[%s] REWIND — %d LEFT     %s"
+msgstr "[%s] RÜCKSPULEN — %d ÜBRIG     %s"
+
+msgid "FPS %d · DEBUG BUILD"
+msgstr "FPS %d · DEBUG-BUILD"
+
+msgid "‖ PAUSED — SPACE / 0 / ESC TO RESUME"
+msgstr "‖ PAUSIERT — LEER / 0 / ESC ZUM FORTSETZEN"
+
+msgid "ALL KEYS · F1"
+msgstr "ALLE TASTEN · F1"
+
+msgid "%s/%s PITCH  %s/%s YAW  %s/%s ROLL"
+msgstr "%s/%s NICKEN  %s/%s GIEREN  %s/%s ROLLEN"
+
+msgid "%s/%s THROTTLE  %s MAX  %s CUT"
+msgstr "%s/%s SCHUB  %s MAX  %s AUS"
+
+msgid "1-9 WARP LEVEL  %s/%s WARP STEP"
+msgstr "1-9 WARP-STUFE  %s/%s WARP-SCHRITT"
+
+msgid "%s PAUSE  %s PAUSE MENU  %s RESET VIEW"
+msgstr "%s PAUSE  %s PAUSEMENÜ  %s ANSICHT ZURÜCK"
+
+msgid "%s ORBIT VIEW  DRAG ROTATE  WHEEL/TRACKPAD ZOOM"
+msgstr "%s ORBITANSICHT  ZIEHEN DREHEN  RAD/TRACKPAD ZOOM"
+
+msgid "SAS: %s PRO  %s RETRO  %s NORM  %s ANTI  %s/%s RADIAL  %s KILL ROT  %s OFF"
+msgstr "SAS: %s PRO  %s RETRO  %s NORM  %s ANTI  %s/%s RADIAL  %s ROT-STOP  %s AUS"
+
+msgid "NODE: %s ADD  %s DEL  %s/%s TIME  %s/%s PRO  %s/%s NORM  %s/%s RAD"
+msgstr "KNOTEN: %s NEU  %s LÖSCHEN  %s/%s ZEIT  %s/%s PRO  %s/%s NORM  %s/%s RAD"
+
+msgid "      SHIFT = COARSE   %s HOLD NODE"
+msgstr "      SHIFT = GROB   %s KNOTEN HALTEN"
+
+# --- Rewind timeline ---
+
+msgid "NOW"
+msgstr "JETZT"
+
+msgid "you are here"
+msgstr "du bist hier"
+
+# ============ Gameplay (flash / fail / SOI / rewind / autopilot / status) ============
+
+msgid "NODE COMPLETE"
+msgstr "KNOTEN FERTIG"
+
+msgid "AUTOPILOT DISENGAGED"
+msgstr "AUTOPILOT DEAKTIVIERT"
+
+msgid "NO AUTOPILOT PLAN FOR THIS LEVEL"
+msgstr "KEIN AUTOPILOT-PLAN FÜR DIESES LEVEL"
+
+msgid "FLIGHT COMPUTER NOT INSTALLED"
+msgstr "FLUGRECHNER NICHT INSTALLIERT"
+
+msgid "SAS NOT INSTALLED"
+msgstr "SAS NICHT INSTALLIERT"
+
+msgid "ORBIT TRAJECTORY DEGENERATE"
+msgstr "ORBIT-TRAJEKTORIE DEGENERIERT"
+
+msgid "TOUCHDOWN TOO HARD"
+msgstr "LANDUNG ZU HART"
+
+msgid "%s SURFACE IMPACT"
+msgstr "%s OBERFLÄCHENAUFPRALL"
+
+msgid "MISSION ENVELOPE EXCEEDED"
+msgstr "MISSIONSGRENZEN ÜBERSCHRITTEN"
+
+msgid "SAVE FAILED - PROGRESS MAY NOT PERSIST"
+msgstr "SPEICHERN FEHLGESCHLAGEN - FORTSCHRITT GEHT EVTL. VERLOREN"
+
+msgid "LEAVING %s SOI"
+msgstr "VERLASSE %s SOI"
+
+msgid "ENTERING %s SOI"
+msgstr "BETRETE %s SOI"
+
+msgid "RESUME POINT"
+msgstr "WIEDERAUFNAHMEPUNKT"
+
+msgid "LAUNCH"
+msgstr "START"
+
+msgid "BURN"
+msgstr "BRENNEN"
+
+msgid "STANDING BY"
+msgstr "BEREIT"
+
+msgid "AUTOPILOT ENGAGED"
+msgstr "AUTOPILOT AKTIV"
+
+msgid "NO PLAN"
+msgstr "KEIN PLAN"
+
+msgid "AUTOPILOT COMPLETE"
+msgstr "AUTOPILOT FERTIG"
+
+msgid "COAST TO APOAPSIS"
+msgstr "GLEITEN ZUM APOAPSIS"
+
+msgid "COAST TO PERIAPSIS"
+msgstr "GLEITEN ZUM PERIAPSIS"
+
+msgid "RECIRCULARIZE"
+msgstr "REZIRKULARISIEREN"
+
+msgid "RAISE APOAPSIS"
+msgstr "APOAPSIS ANHEBEN"
+
+msgid "CIRCULARIZE"
+msgstr "ZIRKULARISIEREN"
+
+msgid "LOWER PERIAPSIS"
+msgstr "PERIAPSIS SENKEN"
+
+msgid "PHASING"
+msgstr "PHASING"
+
+msgid "HOHMANN BURN"
+msgstr "HOHMANN-BURN"
+
+msgid "MATCH STATION"
+msgstr "STATION ANGLEICHEN"
+
+msgid "FINAL APPROACH"
+msgstr "ENDANFLUG"
+
+msgid "TLI PHASING"
+msgstr "TLI-PHASING"
+
+msgid "TRANS-LUNAR INJECTION"
+msgstr "TRANS-LUNARE INJEKTION"
+
+msgid "CAPTURE BURN"
+msgstr "EINFANGBURN"
+
+msgid "MARS INTERCEPT (LAMBERT)"
+msgstr "MARS-ABFANG (LAMBERT)"
+
+msgid "MID-COURSE CORRECTION"
+msgstr "KURSKORREKTUR"
+
+msgid "DEPARTURE PHASING"
+msgstr "ABFLUG-PHASING"
+
+msgid "ALIGN TO PROGRADE"
+msgstr "AUF PROGRAD AUSRICHTEN"
+
+msgid "EARTH DEPARTURE"
+msgstr "ERDABFLUG"
+
+msgid "ESCAPE EARTH SOI"
+msgstr "ERD-SOI VERLASSEN"
+
+msgid "TRANS-EARTH INJECTION"
+msgstr "TRANS-TERRA INJEKTION"
+
+msgid "LOWER RETURN APOAPSIS"
+msgstr "RÜCKKEHR-APOAPSIS SENKEN"
+
+msgid "TRIM PERIAPSIS"
+msgstr "PERIAPSIS TRIMMEN"
+
+msgid "DEORBIT"
+msgstr "DEORBIT"
+
+msgid "POWERED DESCENT"
+msgstr "ANTRIEBSABSTIEG"
+
+msgid "COAST TO %s SOI"
+msgstr "GLEITEN ZU %s SOI"
+
+msgid "ESCAPE %s SOI"
+msgstr "%s SOI VERLASSEN"
+
+msgid "CAPTURED — PE BELOW SURFACE, RAISE IT"
+msgstr "EINGEFANGEN — PE UNTER OBERFLÄCHE, ANHEBEN"
+
+msgid "CAPTURED — HOLDING ORBIT"
+msgstr "EINGEFANGEN — ORBIT STABIL"
+
+msgid "IN %s SOI — BURN RETROGRADE NEAR PE"
+msgstr "IN %s SOI — RETROGRAD NAHE PE BRENNEN"
+
+msgid "ESCAPE TRAJECTORY — TOO FAST"
+msgstr "FLUCHTBAHN — ZU SCHNELL"
+
+msgid "DEPARTING %s"
+msgstr "VERLASSE %s"
+
+msgid "PHASE TO %s %+4.0f°  (BURN AT %+4.0f°)"
+msgstr "PHASE ZU %s %+4.0f°  (BURN BEI %+4.0f°)"
+
+msgid "TRANSIT TO THE %s"
+msgstr "TRANSFER ZUM %s"
+
+msgid "ESCAPE THE %s FIRST"
+msgstr "ZUERST %s VERLASSEN"
+
+# --- Language picker ---
+
+msgid "LANGUAGE"
+msgstr "SPRACHE"
+
+msgid "UI display language."
+msgstr "Anzeigesprache der Benutzeroberfläche."
+
+# --- Rewind HUD line ---
+
+msgid "REWIND %s%s   [%s]"
+msgstr "RÜCKSPULEN %s%s   [%s]"
+
+msgid "%s/%s STEP ANCHOR    %s    [%s] CANCEL"
+msgstr "%s/%s ANKER WECHSELN    %s    [%s] ABBRECHEN"
+
+msgid "[%s] RESUME (FREE)"
+msgstr "[%s] FORTSETZEN (GRATIS)"
+
+msgid "[%s] RESUME HERE — USES 1 OF %d"
+msgstr "[%s] HIER FORTSETZEN — VERBRAUCHT 1 VON %d"
+
+msgid "— NO REWINDS LEFT —"
+msgstr "— KEINE RÜCKSPULUNGEN ÜBRIG —"
+
+# --- Orbit preview / minimap schematic labels ---
+
+msgid "YOUR ORBIT"
+msgstr "DEINE BAHN"
+
+msgid "TARGET"
+msgstr "ZIEL"
+
+msgid "REENTRY"
+msgstr "WIEDEREINTRITT"
+
+msgid "SURFACE"
+msgstr "OBERFLÄCHE"

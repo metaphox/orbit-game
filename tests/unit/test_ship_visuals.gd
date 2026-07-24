@@ -8,11 +8,9 @@ func _built() -> ShipVisuals:
 	var level: LevelDef = load("res://src/levels/data/level_01_01.tres")
 	var sv := ShipVisuals.new()
 	add_child_autofree(sv)
-	var ship_root := Node3D.new()
-	sv.add_child(ship_root)
-	var flame := MeshInstance3D.new()
-	ship_root.add_child(flame)
-	sv.build(level, ship_root, flame)
+	var rig := preload("res://src/ui/world/ship_camera_rig.tscn").instantiate()
+	sv.add_child(rig)
+	sv.build(level, rig.get_node("Ship"), rig.get_node("Ship/Hull"), rig.get_node("Ship/Flame"))
 	return sv
 
 
@@ -25,13 +23,8 @@ func test_build_creates_markers_and_star_dust() -> void:
 
 func test_flame_shows_only_while_burning_with_propellant() -> void:
 	var level: LevelDef = load("res://src/levels/data/level_01_01.tres")
-	var sv := ShipVisuals.new()
-	add_child_autofree(sv)
-	var ship_root := Node3D.new()
-	sv.add_child(ship_root)
-	var flame := MeshInstance3D.new()
-	ship_root.add_child(flame)
-	sv.build(level, ship_root, flame)
+	var sv := _built()
+	var flame := sv._flame
 
 	var ship := ShipSim.new()
 	ship.setup(level)
@@ -61,13 +54,7 @@ func _visible_jets(sv: ShipVisuals) -> int:
 
 func test_rcs_puffs_fire_only_while_the_ship_is_torquing() -> void:
 	var level: LevelDef = load("res://src/levels/data/level_01_01.tres")
-	var sv := ShipVisuals.new()
-	add_child_autofree(sv)
-	var ship_root := Node3D.new()
-	sv.add_child(ship_root)
-	var flame := MeshInstance3D.new()
-	ship_root.add_child(flame)
-	sv.build(level, ship_root, flame)
+	var sv := _built()
 	assert_eq(sv._rcs_jets.size(), 32, "eight clusters x four quad jets are built")
 
 	var ship := ShipSim.new()

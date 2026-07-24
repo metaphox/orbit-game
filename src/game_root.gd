@@ -510,7 +510,7 @@ func _check_end_conditions() -> void:
 			Objective.ContactResult.CRASH:
 				_fail("TOUCHDOWN TOO HARD")
 			_:
-				_fail("%s SURFACE IMPACT" % ship.body.name)
+				_fail(tr("%s SURFACE IMPACT") % tr(ship.body.name))
 	elif (level.fail_radius > 0.0
 			and ship.absolute_position(sim_time).length() > level.fail_radius):
 		_fail("MISSION ENVELOPE EXCEEDED")
@@ -647,12 +647,12 @@ func _refresh_rewind_hud() -> void:
 	var confirm_key := InputBindings.primary_key_label("rewind_confirm")
 	var resume_text: String
 	if not charged:
-		resume_text = "[%s] RESUME (FREE)" % confirm_key
+		resume_text = tr("[%s] RESUME (FREE)") % confirm_key
 	elif rewind.has_charges():
-		resume_text = "[%s] RESUME HERE — USES 1 OF %d" % [confirm_key, rewind.charges]
+		resume_text = tr("[%s] RESUME HERE — USES 1 OF %d") % [confirm_key, rewind.charges]
 	else:
-		resume_text = "— NO REWINDS LEFT —"
-	hud.set_rewind_line("%s/%s STEP ANCHOR    %s    [%s] CANCEL" % [
+		resume_text = tr("— NO REWINDS LEFT —")
+	hud.set_rewind_line(tr("%s/%s STEP ANCHOR    %s    [%s] CANCEL") % [
 		InputBindings.primary_key_label("rewind_prev"),
 		InputBindings.primary_key_label("rewind_next"),
 		resume_text, InputBindings.primary_key_label("rewind_cancel")])
@@ -668,7 +668,7 @@ func _rewind_pips() -> String:
 		return ""
 	var filled := "●".repeat(rewind.charges)
 	var empty := "○".repeat(maxi(level.rewind_budget - rewind.charges, 0))
-	return "REWIND %s%s   [%s]" % [filled, empty, InputBindings.primary_key_label("rewind_open")]
+	return tr("REWIND %s%s   [%s]") % [filled, empty, InputBindings.primary_key_label("rewind_open")]
 
 
 func _win() -> void:

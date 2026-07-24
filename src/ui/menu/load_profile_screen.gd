@@ -72,8 +72,9 @@ func _refresh() -> void:
 			if profile.medal_for(index) != "":
 				done += 1
 		_name.text = profile.profile_name
-		_stats.text = "COMPLETED  %d / %d\nMODE       %s" % [
-			done, Campaign.level_count(), "HARDCORE" if profile.hardcore else "NORMAL"]
+		_stats.text = tr("COMPLETED  %d / %d\nMODE       %s") % [
+			done, Campaign.level_count(),
+			tr("HARDCORE", &"mode") if profile.hardcore else tr("NORMAL", &"mode")]
 		_load.disabled = false
 	else:
 		_name.text = "—"

@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="ShipSkin" load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://src/ui/world/ship_skin.gd" id="1_skin"]
+[ext_resource type="Material" path="res://src/ui/world/materials/player_ship/hull_white.tres" id="2_hull_white"]
+[ext_resource type="Material" path="res://src/ui/world/materials/player_ship/hull_beige.tres" id="3_hull_beige"]
+[ext_resource type="Material" path="res://src/ui/world/materials/player_ship/panel_dark.tres" id="4_panel_dark"]
+[ext_resource type="Material" path="res://src/ui/world/materials/player_ship/hazard_amber.tres" id="5_hazard_amber"]
+[ext_resource type="Material" path="res://src/ui/world/materials/player_ship/frame_alloy.tres" id="6_frame_alloy"]
+[ext_resource type="Material" path="res://src/ui/world/materials/player_ship/nozzle_steel.tres" id="7_nozzle_steel"]
+[ext_resource type="Material" path="res://src/ui/world/materials/player_ship/nozzle_scorched.tres" id="8_nozzle_scorched"]
+[ext_resource type="Material" path="res://src/ui/world/materials/player_ship/solar_cell.tres" id="9_solar_cell"]
+[ext_resource type="Material" path="res://src/ui/world/materials/player_ship/foil_gold.tres" id="10_foil_gold"]
+
+[resource]
+script = ExtResource("1_skin")
+hull_white = ExtResource("2_hull_white")
+hull_beige = ExtResource("3_hull_beige")
+panel_dark = ExtResource("4_panel_dark")
+hazard_amber = ExtResource("5_hazard_amber")
+frame_alloy = ExtResource("6_frame_alloy")
+nozzle_steel = ExtResource("7_nozzle_steel")
+nozzle_scorched = ExtResource("8_nozzle_scorched")
+solar_cell = ExtResource("9_solar_cell")
+foil_gold = ExtResource("10_foil_gold")

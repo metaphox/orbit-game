@@ -173,13 +173,13 @@ func find_profile(profile_name: String) -> Profile:
 func validate_new_name(profile_name: String) -> String:
 	var trimmed := profile_name.strip_edges()
 	if trimmed == "":
-		return "ENTER A NAME"
+		return tr("ENTER A NAME")
 	if trimmed.length() > NAME_MAX_LENGTH:
-		return "NAME TOO LONG (%d CHARS MAX)" % NAME_MAX_LENGTH
+		return tr("NAME TOO LONG (%d CHARS MAX)") % NAME_MAX_LENGTH
 	if find_profile(trimmed) != null:
-		return "NAME ALREADY TAKEN"
+		return tr("NAME ALREADY TAKEN")
 	if not can_create_profile():
-		return "ALL %d PROFILE SLOTS FULL" % MAX_PROFILES
+		return tr("ALL %d PROFILE SLOTS FULL") % MAX_PROFILES
 	return ""
 
 
