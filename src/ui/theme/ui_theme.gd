@@ -17,6 +17,12 @@ const MONO := preload("res://assets/fonts/IBMPlexMono-Regular.ttf")       # data
 const MONO_MED := preload("res://assets/fonts/IBMPlexMono-Medium.ttf")
 const MONO_SEMI := preload("res://assets/fonts/IBMPlexMono-SemiBold.ttf")  # labels / eyebrows
 
+## CJK + Cyrillic fallback: the Latin display/mono faces have no CJK glyphs, so
+## ZH/JA/KO (and Chakra's missing Cyrillic) would tofu. The pan-CJK "SC" build is
+## a superset — kana + hangul + ideographs + Latin/Greek/Cyrillic — so one file
+## covers every locale. Wired as a fallback on all five faces in populate().
+const CJK_FALLBACK := preload("res://assets/fonts/NotoSansCJKsc-Regular.otf")
+
 const DISPLAY_TITLE := &"DisplayTitle"
 const MENU_TITLE := &"MenuTitle"
 const MONO_TEXT := &"MonoText"
@@ -80,6 +86,10 @@ static func shared() -> Theme:
 ## Populates the external generated Theme resource. The resource is referenced
 ## directly by scenes, so its exact font metrics are available in the editor.
 static func populate(theme: Theme) -> void:
+	# CJK/Cyrillic fallback on every Latin face so ZH/JA/KO/RU render, not tofu.
+	var fb: Array[Font] = [CJK_FALLBACK]
+	for f: FontFile in [DISPLAY, DISPLAY_SEMI, MONO, MONO_MED, MONO_SEMI]:
+		f.fallbacks = fb.duplicate()
 	_register_palette_colors(theme)
 	theme.default_font = MONO
 	theme.default_font_size = 14
@@ -138,8 +148,11 @@ static func populate(theme: Theme) -> void:
 	hud_divider.vertical = true
 	theme.set_stylebox("separator", HUD_DIVIDER, hud_divider)
 	theme.set_type_variation(TOP_MET_PANEL, &"PanelContainer")
+	# Vertical pad trimmed 2->1: the CJK font fallback raised every line height ~1.5px,
+	# and this is the one place tight enough to overflow the 48px top bar. Keeps the
+	# numeric MET clock (never CJK) at its size and the block within the bar.
 	theme.set_stylebox("panel", TOP_MET_PANEL,
-		_flat_box(Palette.LIVE, Palette.TRANSPARENT, 0, 16, 18, 2, 2))
+		_flat_box(Palette.LIVE, Palette.TRANSPARENT, 0, 16, 18, 1, 1))
 	theme.set_type_variation(HUD_RULE, &"HSeparator")
 	var hud_rule := StyleBoxLine.new()
 	hud_rule.color = Palette.HAIRLINE

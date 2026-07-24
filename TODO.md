@@ -1,6 +1,7 @@
 TODO List
 =========
 
+- F1 leaks in pause menu, maybe other places as well
 - 2nd minimap mode: the minimap always follow the ship from behind, everything rotates around it.
 - decide a minimal game window size
 - menu overhaul / redesign based on design-ref

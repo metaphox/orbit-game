@@ -1,0 +1,25 @@
+# Limited Propellant — translation template (POT).
+# msgid is the English source string (used directly as the lookup key in code).
+# Copy this file to <locale>.po and fill each msgstr to add a language.
+# NOTE: Godot has no headless POT export, so this template is maintained by hand
+# alongside the per-locale .po files as strings are added.
+msgid ""
+msgstr ""
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "MAIN MENU"
+msgstr ""
+
+msgid "SETTINGS"
+msgstr ""
+
+msgid "CREDITS"
+msgstr ""
+
+msgid "PAUSED"
+msgstr ""
+
+msgid "RESUME"
+msgstr ""

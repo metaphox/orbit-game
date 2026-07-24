@@ -13,7 +13,7 @@ signal settings_pressed
 signal credits_pressed
 signal quit_pressed
 
-const HINT := "↑↓ / W S / K J  SELECT     ENTER  CONFIRM     [F1]  HIDE"
+const HINT := "↑ ↓ / W S / K J  SELECT     ENTER  CONFIRM     [F1]  HIDE"
 
 var _store: ProfileStore
 var _items: Array = []  # [label: String, enabled: bool]

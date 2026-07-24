@@ -1,0 +1,21 @@
+msgid ""
+msgstr ""
+"Language: zh\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "MAIN MENU"
+msgstr "主菜单"
+
+msgid "SETTINGS"
+msgstr "设置"
+
+msgid "CREDITS"
+msgstr "制作人员"
+
+msgid "PAUSED"
+msgstr "已暂停"
+
+msgid "RESUME"
+msgstr "继续"

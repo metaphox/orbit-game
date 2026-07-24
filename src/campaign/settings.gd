@@ -15,7 +15,10 @@ const DEFAULTS := {
 	"volume_master": 0.8,      # 0..1, wired when audio lands
 	"volume_music": 0.7,
 	"volume_sfx": 0.9,
+	"language": "en",          # UI locale code (en/de/fr/ru/zh/ja/ko); applied at startup
 }
+
+const LANGUAGE := "language"
 
 ## Menus hide their navigation key hints by default (most players don't need
 ## them); F1 toggles them in any modal menu. Kept here so every screen reads one
@@ -84,4 +87,17 @@ static func from_dict(data: Dictionary) -> void:
 ## --debug-mode rather than --debug: the latter is a reserved engine flag
 ## (Godot's script debugger, "-d"), consumed before user code sees it.
 static func apply_cmdline_args() -> void:
-	debug_mode = "--debug-mode" in OS.get_cmdline_args()
+	var args := OS.get_cmdline_args()
+	debug_mode = "--debug-mode" in args
+	for a: String in args:
+		if a.begins_with("--locale="):
+			locale_override = a.trim_prefix("--locale=")
+
+
+## Launch-time UI locale: the --locale=<code> dev override wins, else the saved
+## preference. Never persisted (the override is a process-lifetime flag).
+static var locale_override := ""
+
+
+static func language() -> String:
+	return locale_override if locale_override != "" else String(get_value(LANGUAGE))

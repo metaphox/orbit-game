@@ -23,6 +23,11 @@ UiScale="*res://src/ui/theme/ui_scale.gd"
 
 gdscript/warnings/untyped_declaration=1
 
+[internationalization]
+
+locale/translations=PackedStringArray("res://assets/translations/de.po", "res://assets/translations/zh.po")
+locale/fallback="en"
+
 [display]
 
 window/size/viewport_width=1920

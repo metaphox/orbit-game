@@ -7,6 +7,8 @@ extends Node
 
 const SHOT_DIR := "user://menu_shots"
 
+var _shot_dir := SHOT_DIR
+
 
 func _ready() -> void:
 	await _run()
@@ -15,7 +17,15 @@ func _ready() -> void:
 func _run() -> void:
 	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
 	get_window().size = Vector2i(1280, 720)
-	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(SHOT_DIR))
+	# --locale=<code> renders every screen in that language (font/tofu + overflow QA).
+	var locale := "en"
+	for a: String in OS.get_cmdline_args():
+		if a.begins_with("--locale="):
+			locale = a.trim_prefix("--locale=")
+	TranslationServer.set_locale(locale)
+	var shot_dir := "%s_%s" % [SHOT_DIR, locale] if locale != "en" else SHOT_DIR
+	_shot_dir = shot_dir
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(shot_dir))
 
 	var store := ProfileStore.load_or_new("user://menu_shots_demo.json")
 	var profile: Profile = store.find_profile("ARES")
@@ -54,7 +64,7 @@ func _capture(screen: Node, shot_name: String, builder: Callable) -> void:
 		await get_tree().process_frame
 	await RenderingServer.frame_post_draw
 	var img := get_viewport().get_texture().get_image()
-	var path := "%s/%s.png" % [SHOT_DIR, shot_name]
+	var path := "%s/%s.png" % [_shot_dir, shot_name]
 	var err := img.save_png(path)
 	print("SHOT %s -> %s (%dx%d) err=%d" % [
 		shot_name, ProjectSettings.globalize_path(path), img.get_width(), img.get_height(), err])

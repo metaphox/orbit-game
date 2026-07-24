@@ -1,0 +1,21 @@
+msgid ""
+msgstr ""
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "MAIN MENU"
+msgstr "HAUPTMENÜ"
+
+msgid "SETTINGS"
+msgstr "EINSTELLUNGEN"
+
+msgid "CREDITS"
+msgstr "MITWIRKENDE"
+
+msgid "PAUSED"
+msgstr "PAUSIERT"
+
+msgid "RESUME"
+msgstr "FORTSETZEN"

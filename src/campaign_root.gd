@@ -27,6 +27,9 @@ func _ready() -> void:
 	# silently redirecting to the default save path.
 	if store == null:
 		store = ProfileStore.load_or_new()
+	# Apply the saved (or --locale) UI language before the first screen builds, so
+	# every tr()/auto-translated label renders in the chosen locale from the start.
+	TranslationServer.set_locale(Settings.language())
 	InputBindings.install()  # register extra actions + apply saved rebinds (after settings load)
 	_show_title()
 
