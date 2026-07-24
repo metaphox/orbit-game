@@ -3,7 +3,12 @@ extends Node
 ## menu screen with a demo profile, renders a frame, and dumps a PNG so the
 ## code-built layouts can be eyeballed without the editor. Run with:
 ##   godot --path . res://tools/menu_shots.tscn
+##   godot --path . res://tools/menu_shots.tscn --locale=ja   # font/overflow QA
 ## Screenshots land in user://menu_shots (globalized path is printed).
+##
+## Run WITHOUT --headless: it needs a real window. The headless dummy renderer
+## never emits RenderingServer.frame_post_draw, so _capture() awaits forever and
+## the process just hangs after the engine banner.
 
 const SHOT_DIR := "user://menu_shots"
 
@@ -48,6 +53,9 @@ func _run() -> void:
 	var settings := SettingsScreen.new()
 	await _capture(settings, "4_settings", func() -> void: settings.build(store))
 
+	var language := SettingsScreen.new()
+	await _capture(language, "4b_language", _open_language_list.bind(language, store))
+
 	var credits := CreditsScreen.new()
 	await _capture(credits, "5_credits", func() -> void: credits.build())
 
@@ -56,6 +64,11 @@ func _run() -> void:
 
 	print("MENU_SHOTS_DONE")
 	get_tree().quit()
+
+
+func _open_language_list(screen: SettingsScreen, store: ProfileStore) -> void:
+	screen.build(store)
+	screen._enter_language_focus()
 
 
 func _capture(screen: Node, shot_name: String, builder: Callable) -> void:

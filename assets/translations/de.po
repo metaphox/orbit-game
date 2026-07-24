@@ -34,6 +34,9 @@ msgstr "↑↓ / W S / K J  WÄHLEN     ENTER  LADEN     [ESC]  ABBRECHEN     [F
 msgid "↑↓ / W S / K J  SELECT     ENTER  TOGGLE     [ESC]  BACK     [F1]  HIDE"
 msgstr "↑↓ / W S / K J  WÄHLEN     ENTER  UMSCHALTEN     [ESC]  ZURÜCK     [F1]  AUSBLENDEN"
 
+msgid "↑↓ / W S / K J  SELECT     ENTER  CONFIRM     [ESC]  CANCEL     [F1]  HIDE"
+msgstr "↑↓ / W S / K J  WÄHLEN     ENTER  BESTÄTIGEN     [ESC]  ABBRECHEN     [F1]  AUSBLENDEN"
+
 msgid "[ESC]  BACK"
 msgstr "[ESC]  ZURÜCK"
 

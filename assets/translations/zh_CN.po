@@ -34,6 +34,9 @@ msgstr "↑↓ / W S / K J  选择     ENTER  载入     [ESC]  取消     [F1] 
 msgid "↑↓ / W S / K J  SELECT     ENTER  TOGGLE     [ESC]  BACK     [F1]  HIDE"
 msgstr "↑↓ / W S / K J  选择     ENTER  切换     [ESC]  返回     [F1]  隐藏"
 
+msgid "↑↓ / W S / K J  SELECT     ENTER  CONFIRM     [ESC]  CANCEL     [F1]  HIDE"
+msgstr "↑↓ / W S / K J  选择     ENTER  确认     [ESC]  取消     [F1]  隐藏"
+
 msgid "[ESC]  BACK"
 msgstr "[ESC]  返回"
 

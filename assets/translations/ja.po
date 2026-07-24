@@ -40,6 +40,9 @@ msgstr "↑↓ / W S / K J  選択     ENTER  読込     [ESC]  キャンセル 
 msgid "↑↓ / W S / K J  SELECT     ENTER  TOGGLE     [ESC]  BACK     [F1]  HIDE"
 msgstr "↑↓ / W S / K J  選択     ENTER  切替     [ESC]  戻る     [F1]  非表示"
 
+msgid "↑↓ / W S / K J  SELECT     ENTER  CONFIRM     [ESC]  CANCEL     [F1]  HIDE"
+msgstr "↑↓ / W S / K J  選択     ENTER  決定     [ESC]  キャンセル     [F1]  非表示"
+
 msgid "[ESC]  BACK"
 msgstr "[ESC]  戻る"
 

@@ -323,9 +323,21 @@ func test_settings_two_pane_toggles_flip_and_persist() -> void:
 	screen._activate(2)  # MENU HINTS
 	assert_true(Settings.menu_hints_on(), "MENU HINTS toggles too")
 	var lang_before := String(Settings.get_value(Settings.LANGUAGE))
-	screen._activate(0)  # LANGUAGE cycles to the next locale
-	assert_ne(String(Settings.get_value(Settings.LANGUAGE)), lang_before,
-		"activating the LANGUAGE row cycles the saved locale")
+	assert_eq(screen._lang_cards.size(), SettingsScreen.LANGUAGES.size(),
+		"the locale list shows on entry (LANGUAGE is the first, selected row)")
+	screen._activate(0)  # step keyboard focus into the already-visible list
+	assert_true(screen._lang_open, "activating LANGUAGE focuses the locale list")
+	screen._confirm_language(1)  # click / Enter on the second locale
+	assert_false(screen._lang_open, "confirming a locale drops list focus")
+	assert_eq(String(Settings.get_value(Settings.LANGUAGE)), String(SettingsScreen.LANGUAGES[1]["code"]),
+		"selecting a locale from the list applies + persists it")
+	assert_ne(String(Settings.get_value(Settings.LANGUAGE)), lang_before, "the locale actually changed")
+	assert_eq(screen._current_language_index(), 1, "the list reflects the live locale, not the saved default")
+	screen._activate(0)
+	screen._cancel_language_focus()  # Esc / cancel keeps the current locale
+	assert_false(screen._lang_open, "cancelling drops list focus")
+	assert_eq(String(Settings.get_value(Settings.LANGUAGE)), String(SettingsScreen.LANGUAGES[1]["code"]),
+		"cancelling leaves the locale unchanged")
 	# Restore the process-global locale so later tests keep their English strings.
 	Settings.set_value(Settings.LANGUAGE, "en")
 	TranslationServer.set_locale("en")

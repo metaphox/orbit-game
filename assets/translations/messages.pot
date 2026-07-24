@@ -38,6 +38,9 @@ msgstr ""
 msgid "↑↓ / W S / K J  SELECT     ENTER  TOGGLE     [ESC]  BACK     [F1]  HIDE"
 msgstr ""
 
+msgid "↑↓ / W S / K J  SELECT     ENTER  CONFIRM     [ESC]  CANCEL     [F1]  HIDE"
+msgstr ""
+
 msgid "[ESC]  BACK"
 msgstr ""
 

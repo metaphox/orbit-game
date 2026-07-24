@@ -14,6 +14,7 @@ signal credits_pressed
 signal quit_pressed
 
 const HINT := "↑ ↓ / W S / K J  SELECT     ENTER  CONFIRM     [F1]  HIDE"
+const GEAR := preload("res://assets/textures/icons/gear.svg")
 
 var _store: ProfileStore
 var _items: Array = []  # [label: String, enabled: bool]
@@ -48,7 +49,10 @@ func build(store: ProfileStore) -> void:
 		var card := OptionCard.new()
 		_shell.left_column.add_child(card)
 		card.set_data(i, _items[i][0], _items[i][1])
+		if _items[i][0] == "SETTINGS":
+			card.set_icon(GEAR)
 		card.hovered.connect(_on_card_hovered)
+		card.unhovered.connect(_on_card_unhovered)
 		card.clicked.connect(_select_and_activate)
 		card.activated.connect(_select_and_activate)
 		_cards.append(card)
@@ -112,6 +116,14 @@ func _blurb_for(i: int) -> String:
 func _on_card_hovered(pos: int) -> void:
 	_hover_pos = pos
 	_refresh()
+
+
+## Mouse left this card (moved to a gap or empty space, not another card): drop
+## the preview so a card with no green outline never leaves its hint showing.
+func _on_card_unhovered(pos: int) -> void:
+	if _hover_pos == pos:
+		_hover_pos = -1
+		_refresh()
 
 
 func _clear_hover() -> void:

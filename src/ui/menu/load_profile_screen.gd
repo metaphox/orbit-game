@@ -38,6 +38,7 @@ func build(profile_store: ProfileStore) -> void:
 		_shell.left_column.add_child(card)
 		card.set_data(i, store.profiles[i].profile_name, true)
 		card.hovered.connect(_on_card_hovered)
+		card.unhovered.connect(_on_card_unhovered)
 		card.clicked.connect(_on_card_clicked)
 		card.activated.connect(func(_p: int) -> void: _activate())
 		_cards.append(card)
@@ -85,6 +86,12 @@ func _refresh() -> void:
 func _on_card_hovered(pos: int) -> void:
 	_hover_pos = pos
 	_refresh()
+
+
+func _on_card_unhovered(pos: int) -> void:
+	if _hover_pos == pos:
+		_hover_pos = -1
+		_refresh()
 
 
 func _clear_hover() -> void:
