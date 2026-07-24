@@ -62,10 +62,7 @@ def subset(cfg, text):
     from fontTools.subset import Subsetter, Options
     src = ensure_source(cfg)
     font = TTFont(src)
-    # Flatten a variable font to a single weight — a fallback only needs one.
-    if "instance" in cfg and "fvar" in font:
-        from fontTools.varLib.instancer import instantiateVariableFont
-        instantiateVariableFont(font, cfg["instance"], inplace=True)
+    # Variable-font weight axis is kept (the game uses bold/light CJK text).
     opts = Options()
     opts.name_IDs = ["*"]      # keep the name table (OFL copyright/license notices)
     opts.name_legacy = True
@@ -89,7 +86,6 @@ FONTS = [
         "src": "MPLUS1Code-VF.ttf",
         "url": "https://github.com/google/fonts/raw/main/ofl/mplus1code/MPLUS1Code%5Bwght%5D.ttf",
         "out": "MPLUS1Code.subset.ttf",
-        "instance": {"wght": 400},
         "text": COMMON | chars_in_po("ja.po"),
     },
     {

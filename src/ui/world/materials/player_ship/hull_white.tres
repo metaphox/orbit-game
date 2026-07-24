@@ -1,6 +1,8 @@
-[gd_resource type="StandardMaterial3D" format=3]
+[gd_resource type="StandardMaterial3D" format=3 uid="uid://63pm1donmo5q"]
+
+[ext_resource type="Texture2D" uid="uid://5n33k7p0k40d" path="res://assets/textures/player_ship/lp_stencil_placeholder.png" id="1_mdjxw"]
 
 [resource]
-albedo_color = Color(0.82, 0.79, 0.7, 1)
-metallic = 0.0
+albedo_color = Color(1, 1, 1, 0)
+albedo_texture = ExtResource("1_mdjxw")
 roughness = 0.72
