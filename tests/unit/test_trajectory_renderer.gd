@@ -82,6 +82,34 @@ func test_unchanged_geometry_is_not_rebuilt() -> void:
 		"a frozen / unchanged frame reuses the cached line instead of rebuilding")
 
 
+# --- Floating-origin precision: the line is built in ship-relative space -----
+
+func test_line_is_built_ship_relative_not_body_centred() -> void:
+	# The whole float32 fix: vertices are (conic point - ship.r) folded in double,
+	# so the vertex sitting on the ship is ~origin (small) - NOT the ship's
+	# body-centred position (~7e4), which the old cast-then-GPU-subtract path
+	# emitted. A large min-magnitude vertex means the regression is back and the
+	# near-camera line will quantize/jitter at the float32 ULP of that magnitude.
+	var level: LevelDef = Campaign.level_at(0)
+	var renderer := TrajectoryRenderer.new()
+	add_child_autofree(renderer)
+	renderer.build(level, RenderTheme.default())
+	var ship := ShipSim.new()
+	ship.setup(level)
+	var t := ship.last_time
+	renderer.sync(ship, ship.absolute_position(t), t, true)
+
+	var verts: PackedVector3Array = renderer._traj_mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
+	var nearest := INF
+	for vertex: Vector3 in verts:
+		nearest = minf(nearest, vertex.length())
+	assert_lt(nearest, 1.0,
+		"the on-ship vertex sits ~at the render origin (ship-relative), not at r~7e4")
+	# The instance itself stays at the origin - the offset lives in the vertices.
+	assert_eq(renderer._traj_instance.position, Vector3.ZERO,
+		"the line instance is not re-centred by a large float32 node translation")
+
+
 func test_advancing_the_coast_rebuilds_the_line() -> void:
 	var level: LevelDef = Campaign.level_at(0)
 	var renderer := TrajectoryRenderer.new()

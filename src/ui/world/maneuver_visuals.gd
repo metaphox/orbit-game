@@ -24,6 +24,13 @@ var _traj_timer := 0.0
 
 var _node_mesh: ImmediateMesh
 var _node_instance: MeshInstance3D
+## Ship position (parent frame) the node-ghost mesh was baked ship-relative to.
+## The ghost only rebuilds on the throttled tick, so its vertices are frozen for
+## several frames; each frame we re-glue it by the small delta _node_anchor -
+## ship.r (which stays tiny between ticks, so its float32 cast is exact). Baking
+## the vertices ship-relative in double is what keeps the near-camera part of the
+## conic from quantizing at its ~1e5 radius - same fix as the prediction line.
+var _node_anchor := DVec3.new()
 var _preview_mesh: ImmediateMesh
 var _preview_instance: MeshInstance3D
 var _preview_anchor: DVec3  # parent-frame moon position at predicted entry
@@ -66,7 +73,7 @@ func mark_dirty() -> void:
 ## tick, rebuild the ghost and re-place the orbit marks. `guidance_enabled` false
 ## (hardcore) hides the node ghost, preview and node marker.
 func sync(ship: ShipSim, delta: float, side_distance: float, guidance_enabled: bool) -> void:
-	_node_instance.position = ship.r.neg().to_vector3()
+	_node_instance.position = _node_anchor.sub(ship.r).to_vector3()
 	if _preview_active:
 		_preview_instance.position = _preview_anchor.sub(ship.r).to_vector3()
 
@@ -256,12 +263,16 @@ func _rebuild_node_ghost(ship: ShipSim) -> void:
 	var r_max := minf(_draw_limit, ship.body.soi_radius * 1.15)
 	var pts: Array[DVec3] = pred.sample_positions(TrajectoryRenderer.TRAJ_SAMPLES, r_max)
 	var closed := pred.is_elliptic() and pred.radius_apoapsis() <= r_max
+	# Bake ship-relative in double (see _node_anchor): near the ship the conic
+	# point ≈ ship.r, so the cast value is small and exact. sync() re-glues the
+	# frozen mesh each frame by the tiny anchor delta.
+	_node_anchor = ship.r.copy()
 	_node_mesh.surface_begin(Mesh.PRIMITIVE_LINE_STRIP)
 	for p: DVec3 in pts:
-		_node_mesh.surface_add_vertex(p.to_vector3())
+		_node_mesh.surface_add_vertex(p.sub(_node_anchor).to_vector3())
 	if closed:
 		var first: DVec3 = pts[0]
-		_node_mesh.surface_add_vertex(first.to_vector3())
+		_node_mesh.surface_add_vertex(first.sub(_node_anchor).to_vector3())
 	_node_mesh.surface_end()
 
 	# OrbitEvents.child_soi_entry_time below is a numerical root-find with no

@@ -11,6 +11,10 @@ func before_each() -> void:
 	_clear_save()
 	Settings.reset_to_defaults()
 	Settings.debug_mode = false
+	# Isolate from the dev machine's real mods folder: these tests exercise the
+	# campaign's index-keyed unlock navigation, which drop-in community levels
+	# (always unlocked) would otherwise perturb.
+	CommunityLevels.override_for_test([])
 
 
 func after_each() -> void:
@@ -18,6 +22,7 @@ func after_each() -> void:
 	GameRootScript.level_index = 0
 	Settings.reset_to_defaults()
 	Settings.debug_mode = false
+	CommunityLevels.reload()
 
 
 func _clear_save() -> void:

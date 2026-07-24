@@ -21,6 +21,14 @@ static func reload() -> void:
 	_loaded = false
 
 
+## Test seam: force the community set (bypassing the filesystem scan) so tests
+## that exercise the mission list are deterministic regardless of the dev
+## machine's real mods folder. Pair with reload() in teardown to restore scanning.
+static func override_for_test(entries: Array) -> void:
+	_cache = entries
+	_loaded = true
+
+
 static func level_for(id: String) -> LevelDef:
 	for e: Dictionary in all():
 		if e["id"] == id:
