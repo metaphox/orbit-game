@@ -1,0 +1,11 @@
+{
+  "title": "LUNAR PROGRAM 2: MARE SERENITATIS",
+  "system": "EARTH",
+  "bodies": [ { "name": "MOON", "phase_deg": 114.59155902616465 } ],
+  "start": { "body": "MOON", "radius_km": 25 },
+  "ship": { "dry_mass": 1000, "prop_mass": 650, "thrust": 12000, "isp": 82 },
+  "objective": { "type": "airless_landing", "target": "MOON" },
+  "dv_par": 280, "difficulty": 3,
+  "map_extent_km": 9200, "draw_limit_km": 6000, "fail_radius_km": 8000,
+  "avionics": { "sas": true, "nodes": true }
+}

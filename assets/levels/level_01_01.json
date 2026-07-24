@@ -1,0 +1,8 @@
+{
+  "title": "ORBIT SCHOOL 1: RAISE ORBIT",
+  "system": "EARTH",
+  "start": { "radius_km": 70 },
+  "ship": { "dry_mass": 1000, "prop_mass": 250, "thrust": 6000, "isp": 82 },
+  "objective": { "type": "orbit_match", "radius_km": 80, "tolerance_km": 1.5 },
+  "dv_par": 75, "difficulty": 1
+}

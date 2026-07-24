@@ -711,7 +711,7 @@ func _recompute_events() -> void:
 	# of that body's own children (e.g. a moon of Earth while Earth is
 	# itself a child of the Sun) - see ShipSim.apply_soi_transitions.
 	for moon in level.moons:
-		if moon.parent != ship.body:
+		if moon.decorative or moon.parent != ship.body:
 			continue
 		var entry := OrbitEvents.child_soi_entry_time(
 			el, moon.orbit, moon.soi_radius, sim_time, horizon,

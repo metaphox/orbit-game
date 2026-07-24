@@ -232,7 +232,7 @@ func _encounter_entry_time(ship: ShipSim, el: OrbitElements) -> float:
 	_encounter_horizon = t + span
 	_encounter_entry_t = NAN
 	for moon in _level.moons:
-		if moon.parent != ship.body:
+		if moon.decorative or moon.parent != ship.body:
 			continue
 		var entry := OrbitEvents.child_soi_entry_time(
 			el, moon.orbit, moon.soi_radius, t, t + span, maxf(span / 400.0, 1.0))
@@ -285,7 +285,7 @@ func _rebuild_node_ghost(ship: ShipSim) -> void:
 	_preview_mesh.clear_surfaces()
 	_preview_active = false
 	for moon in _level.moons:
-		if moon.parent != ship.body:
+		if moon.decorative or moon.parent != ship.body:
 			continue
 		var span := pred.period() if pred.is_elliptic() else 6.0e4
 		var entry := OrbitEvents.child_soi_entry_time(

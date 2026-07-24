@@ -4,8 +4,7 @@ extends "res://tests/unit/base_orbit_test.gd"
 ## hardcore rule that hides the prediction line while the target ring stays.
 
 
-func _renderer_for(level_path: String) -> TrajectoryRenderer:
-	var level: LevelDef = load(level_path)
+func _renderer_for(level: LevelDef) -> TrajectoryRenderer:
 	var renderer := TrajectoryRenderer.new()
 	add_child_autofree(renderer)
 	renderer.build(level, RenderTheme.default())
@@ -13,7 +12,7 @@ func _renderer_for(level_path: String) -> TrajectoryRenderer:
 
 
 func test_orbit_match_level_builds_a_dashed_target_ring() -> void:
-	var renderer := _renderer_for("res://src/levels/data/level_01_01.tres")
+	var renderer := _renderer_for(Campaign.level_at(0))
 	assert_not_null(renderer._traj_instance, "prediction line instance is built")
 	assert_not_null(renderer._target_instance, "target ring instance is built")
 	assert_not_null(renderer._target_instance.material_override,
@@ -21,7 +20,7 @@ func test_orbit_match_level_builds_a_dashed_target_ring() -> void:
 
 
 func test_entry_corridor_level_builds_a_banded_gate() -> void:
-	var renderer := _renderer_for("res://src/levels/data/level_02_03.tres")
+	var renderer := _renderer_for(Campaign.level_at(5))
 	assert_gt(renderer._target_instance.mesh.get_surface_count(), 1,
 		"the corridor gate is a multi-surface band (fill + edge rings), not a single ring")
 	assert_null(renderer._target_instance.material_override,
@@ -29,7 +28,7 @@ func test_entry_corridor_level_builds_a_banded_gate() -> void:
 
 
 func test_guidance_disabled_hides_prediction_line_but_keeps_target() -> void:
-	var level: LevelDef = load("res://src/levels/data/level_01_01.tres")
+	var level: LevelDef = Campaign.level_at(0)
 	var renderer := TrajectoryRenderer.new()
 	add_child_autofree(renderer)
 	renderer.build(level, RenderTheme.default())
@@ -50,7 +49,7 @@ func test_guidance_disabled_hides_prediction_line_but_keeps_target() -> void:
 # --- PF-1: no wasted sampling on hidden or unchanged geometry ---------------
 
 func test_hardcore_hidden_line_is_never_sampled() -> void:
-	var level: LevelDef = load("res://src/levels/data/level_01_01.tres")
+	var level: LevelDef = Campaign.level_at(0)
 	var renderer := TrajectoryRenderer.new()
 	add_child_autofree(renderer)
 	renderer.build(level, RenderTheme.default())
@@ -65,7 +64,7 @@ func test_hardcore_hidden_line_is_never_sampled() -> void:
 
 
 func test_unchanged_geometry_is_not_rebuilt() -> void:
-	var level: LevelDef = load("res://src/levels/data/level_01_01.tres")
+	var level: LevelDef = Campaign.level_at(0)
 	var renderer := TrajectoryRenderer.new()
 	add_child_autofree(renderer)
 	renderer.build(level, RenderTheme.default())
@@ -84,7 +83,7 @@ func test_unchanged_geometry_is_not_rebuilt() -> void:
 
 
 func test_advancing_the_coast_rebuilds_the_line() -> void:
-	var level: LevelDef = load("res://src/levels/data/level_01_01.tres")
+	var level: LevelDef = Campaign.level_at(0)
 	var renderer := TrajectoryRenderer.new()
 	add_child_autofree(renderer)
 	renderer.build(level, RenderTheme.default())

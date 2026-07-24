@@ -1,0 +1,9 @@
+{
+  "title": "ORBIT SCHOOL 2: RENDEZVOUS",
+  "system": "EARTH",
+  "start": { "radius_km": 70 },
+  "ship": { "dry_mass": 1000, "prop_mass": 250, "thrust": 6000, "isp": 82 },
+  "objective": { "type": "rendezvous", "station_radius_km": 90, "station_phase_deg": 40.10704565915762 },
+  "dv_par": 160, "difficulty": 2,
+  "avionics": { "sas": true }
+}

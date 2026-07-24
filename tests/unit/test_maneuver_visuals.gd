@@ -4,8 +4,7 @@ extends "res://tests/unit/base_orbit_test.gd"
 ## end-to-end in test_moon_transfer; this pins the cheap invariants directly.
 
 
-func _built_on(level_path: String) -> ManeuverVisuals:
-	var level: LevelDef = load(level_path)
+func _built_on(level: LevelDef) -> ManeuverVisuals:
 	var mv := ManeuverVisuals.new()
 	add_child_autofree(mv)
 	mv.build(level)
@@ -13,7 +12,7 @@ func _built_on(level_path: String) -> ManeuverVisuals:
 
 
 func test_build_creates_orbit_marks_and_node_visuals_all_hidden() -> void:
-	var mv := _built_on("res://src/levels/data/level_01_01.tres")
+	var mv := _built_on(Campaign.level_at(0))
 	for mark in [mv._ap_marker, mv._pe_marker, mv._an_marker, mv._dn_marker,
 			mv._impact_marker, mv._encounter_marker, mv._closest_approach_marker]:
 		assert_not_null(mark, "each orbit mark is built up front")
@@ -24,7 +23,7 @@ func test_build_creates_orbit_marks_and_node_visuals_all_hidden() -> void:
 
 
 func test_refresh_shows_periapsis_and_apoapsis_for_an_elliptic_orbit() -> void:
-	var level: LevelDef = load("res://src/levels/data/level_01_01.tres")
+	var level: LevelDef = Campaign.level_at(0)
 	var mv := ManeuverVisuals.new()
 	add_child_autofree(mv)
 	mv.build(level)
@@ -37,7 +36,7 @@ func test_refresh_shows_periapsis_and_apoapsis_for_an_elliptic_orbit() -> void:
 
 
 func test_guidance_disabled_hides_the_node_ghost_and_preview() -> void:
-	var level: LevelDef = load("res://src/levels/data/level_01_01.tres")
+	var level: LevelDef = Campaign.level_at(0)
 	var mv := ManeuverVisuals.new()
 	add_child_autofree(mv)
 	mv.build(level)

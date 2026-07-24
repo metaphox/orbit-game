@@ -80,7 +80,7 @@ func test_custom_render_theme_skin_reaches_flight_view_hull() -> void:
 	theme.ship_skin = _sentinel_skin()
 	var view := FlightView.new()
 	add_child_autofree(view)
-	var level: LevelDef = load("res://src/levels/data/level_01_01.tres")
+	var level: LevelDef = Campaign.level_at(0)
 	view.build(level, theme)
 
 	var hull := view.get_node("ShipCameraRig/Ship/Hull") as MeshInstance3D

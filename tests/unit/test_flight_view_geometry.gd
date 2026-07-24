@@ -48,7 +48,7 @@ func test_side_zoom_clamps_between_close_and_orbital_scale() -> void:
 func test_station_model_keeps_physical_and_orbit_marker_scales_separate() -> void:
 	var sv := ShipVisuals.new()
 	add_child_autofree(sv)
-	sv._objective = preload("res://src/levels/data/level_01_02.tres").objective
+	sv._objective = Campaign.level_at(1).objective
 	sv._build_station_markers()
 
 	assert_not_null(sv._station_marker, "rendezvous level builds the close-up station")

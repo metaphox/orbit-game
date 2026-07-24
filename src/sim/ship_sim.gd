@@ -59,8 +59,9 @@ func setup(level: LevelDef) -> void:
 	thrust_max = level.thrust
 	isp = level.isp
 	initial_mass = mass()
-	r = DVec3.new(level.start_radius, 0.0, 0.0)
-	v = DVec3.new(0.0, 0.0, -sqrt(body.mu / level.start_radius))
+	var st := level.start_state(body.mu)
+	r = st.r
+	v = st.v
 	attitude = Basis.IDENTITY  # forward (-Z) starts prograde
 	angular_velocity = Vector3.ZERO
 	rcs_command = Vector3.ZERO
@@ -112,7 +113,7 @@ func apply_soi_transitions(t: float) -> String:
 		_refit_elements(t)
 		return tr("LEAVING %s SOI") % tr(old)
 	for moon in _level.moons:
-		if moon.parent != body:
+		if moon.decorative or moon.parent != body:  # scenery bodies never capture the ship
 			continue
 		var moon_state := moon.orbit.state_at_time(t)
 		if r.distance_to(moon_state.r) <= moon.soi_radius:

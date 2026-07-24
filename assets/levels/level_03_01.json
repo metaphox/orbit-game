@@ -1,0 +1,14 @@
+{
+  "title": "INTERPLANETARY 1: EARTH TO MARS",
+  "system": "SOL",
+  "bodies": [
+    { "name": "EARTH", "phase_deg": 0 },
+    { "name": "MARS", "phase_deg": 43.76 }
+  ],
+  "start": { "body": "EARTH", "radius_km": 70 },
+  "ship": { "dry_mass": 1200, "prop_mass": 2300, "thrust": 15000, "isp": 90 },
+  "objective": { "type": "transfer_capture", "target": "MARS", "approach_falloff_km": 3000 },
+  "dv_par": 700, "difficulty": 4,
+  "map_extent_km": 145000, "draw_limit_km": 90000, "fail_radius_km": 130000,
+  "avionics": { "sas": true, "nodes": true }
+}

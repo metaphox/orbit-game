@@ -9,6 +9,10 @@ extends Resource
 @export var mu := 0.0
 @export var radius := 0.0
 @export var soi_radius := INF
+## Scenery only: rendered for context but inert to the sim — the ship never
+## captures into a decorative body's SOI and it can't be an objective target.
+## Lets a level show, say, Jupiter's other moons or a distant Earth as backdrop.
+@export var decorative := false
 @export var parent: BodyDef:
 	set(value):
 		parent = value

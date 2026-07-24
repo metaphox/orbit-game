@@ -41,6 +41,21 @@ func _count(arr: Array, value: int) -> int:
 	return n
 
 
+## A body name identifies one object per level, so save/load, SOI resolution
+## (_find_body) and objective targets stay unambiguous. Holds for every level,
+## including community ones with real + decorative bodies.
+func test_every_level_has_distinct_body_names() -> void:
+	for i: int in Campaign.level_count():
+		var level := Campaign.level_at(i)
+		var seen := {}
+		var all_bodies: Array[BodyDef] = [level.body]
+		all_bodies.append_array(level.moons)
+		for b: BodyDef in all_bodies:
+			assert_false(seen.has(b.name),
+				"%s: body name '%s' appears more than once" % [Campaign.title(i), b.name])
+			seen[b.name] = true
+
+
 func test_every_level_has_exactly_one_sun() -> void:
 	for i: int in Campaign.level_count():
 		var title: String = Campaign.title(i)

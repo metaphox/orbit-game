@@ -5,7 +5,7 @@ extends "res://tests/unit/base_orbit_test.gd"
 
 
 func _built() -> ShipVisuals:
-	var level: LevelDef = load("res://src/levels/data/level_01_01.tres")
+	var level: LevelDef = Campaign.level_at(0)
 	var sv := ShipVisuals.new()
 	add_child_autofree(sv)
 	var rig := preload("res://src/ui/world/ship_camera_rig.tscn").instantiate()
@@ -22,7 +22,7 @@ func test_build_creates_markers_and_star_dust() -> void:
 
 
 func test_flame_shows_only_while_burning_with_propellant() -> void:
-	var level: LevelDef = load("res://src/levels/data/level_01_01.tres")
+	var level: LevelDef = Campaign.level_at(0)
 	var sv := _built()
 	var flame := sv._flame
 
@@ -53,7 +53,7 @@ func _visible_jets(sv: ShipVisuals) -> int:
 
 
 func test_rcs_puffs_fire_only_while_the_ship_is_torquing() -> void:
-	var level: LevelDef = load("res://src/levels/data/level_01_01.tres")
+	var level: LevelDef = Campaign.level_at(0)
 	var sv := _built()
 	assert_eq(sv._rcs_jets.size(), 32, "eight clusters x four quad jets are built")
 

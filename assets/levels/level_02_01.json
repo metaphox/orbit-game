@@ -1,0 +1,11 @@
+{
+  "title": "LUNAR PROGRAM 1: TRANSLUNAR INJECTION",
+  "system": "EARTH",
+  "bodies": [ { "name": "MOON", "phase_deg": 114.59155902616465 } ],
+  "start": { "radius_km": 70 },
+  "ship": { "dry_mass": 1000, "prop_mass": 1500, "thrust": 12000, "isp": 82 },
+  "objective": { "type": "transfer_capture", "target": "MOON" },
+  "dv_par": 600, "difficulty": 3,
+  "map_extent_km": 9200, "draw_limit_km": 6000, "fail_radius_km": 8000,
+  "avionics": { "sas": true, "nodes": true }
+}

@@ -1,0 +1,7 @@
+{
+  "_comment": "Body catalog — canonical physics at the game scale (radius = real_km x10, mu = real/5190, soi = real_SOI_km x10, moon orbit x10, heliocentric orbit = AU x 40e6; SOL special-cased). Levels reference bodies by name; the loader assigns the role (a level's root gets soi=INF and no parent). Phase is a per-level scenario param, not stored here.",
+  "SOL":   { "mu": 54800000000000.0, "radius": 400000.0 },
+  "EARTH": { "mu": 76760000000.0, "radius": 63710.0, "soi_radius": 9240000.0, "parent": "SOL",   "orbit_radius": 40000000.0 },
+  "MOON":  { "mu": 944000000.0,    "radius": 17374.0, "soi_radius": 660000.0,  "parent": "EARTH", "orbit_radius": 3844000.0 },
+  "MARS":  { "mu": 8210000000.0,   "radius": 33900.0, "soi_radius": 3000000.0, "parent": "SOL",   "orbit_radius": 60000000.0 }
+}

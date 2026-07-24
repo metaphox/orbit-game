@@ -92,5 +92,8 @@ const BODY_TINTS := {
 const BODY_TINT_DEFAULT := Color(0.12, 0.13, 0.13)  # unknown body: neutral dark grey
 
 
-static func body_tint(body_name: String) -> Color:
-	return BODY_TINTS.get(body_name.to_upper(), BODY_TINT_DEFAULT)
+## Minimap tint for a body. Known bodies use the curated BODY_TINTS; catalog
+## bodies not listed there fall back to their own BodyDef.color (pass it as
+## `fallback`) rather than a flat grey, so community worlds still read distinctly.
+static func body_tint(body_name: String, fallback: Color = BODY_TINT_DEFAULT) -> Color:
+	return BODY_TINTS.get(body_name.to_upper(), fallback)

@@ -1,0 +1,10 @@
+{
+  "title": "ORBIT SCHOOL 3: PLANE CHANGE",
+  "system": "EARTH",
+  "start": { "radius_km": 70 },
+  "ship": { "dry_mass": 1000, "prop_mass": 750, "thrust": 6000, "isp": 82 },
+  "objective": { "type": "orbit_match", "radius_km": 70, "tolerance_km": 1.5,
+    "inclination_deg": 15, "inclination_tolerance_deg": 1 },
+  "dv_par": 350, "difficulty": 2,
+  "avionics": { "sas": true }
+}

@@ -6,17 +6,29 @@ extends RefCounted
 ## index is still the stable ID that tests and save files reference, so
 ## append new levels at the end of their act's range rather than reordering.
 
-## Not `const`: GDScript's const requires a compile-time constant
-## expression, and preload() calls don't qualify.
-static var LEVELS: Array[LevelDef] = [
-	preload("res://src/levels/data/level_01_01.tres"),
-	preload("res://src/levels/data/level_01_02.tres"),
-	preload("res://src/levels/data/level_01_03.tres"),
-	preload("res://src/levels/data/level_02_01.tres"),
-	preload("res://src/levels/data/level_02_02.tres"),
-	preload("res://src/levels/data/level_02_03.tres"),
-	preload("res://src/levels/data/level_03_01.tres"),
+## The built-in levels are authored as JSON (assets/levels/) and built through
+## LevelLoader, the same pipeline community levels use. Order = play order = the
+## stable save index, so never reorder — append within an act's range.
+const LEVEL_IDS := [
+	"level_01_01", "level_01_02", "level_01_03",
+	"level_02_01", "level_02_02", "level_02_03",
+	"level_03_01",
 ]
+
+static var _specs: Array = []            # parsed JSON per index (loaded once)
+static var _canon: Array[LevelDef] = []  # one canonical build per index, for metadata reads
+
+
+static func _ensure_loaded() -> void:
+	if not _specs.is_empty():
+		return
+	for id: String in LEVEL_IDS:
+		var path := "res://assets/levels/%s.json" % id
+		var spec: Variant = JSON.parse_string(FileAccess.open(path, FileAccess.READ).get_as_text())
+		var built := LevelLoader.from_dict(spec, id)
+		assert(built.error == "", "built-in level %s failed to load: %s" % [id, built.error])
+		_specs.append(spec)
+		_canon.append(built.level)
 
 const ACTS: Array[Dictionary] = [
 	{"name": "ACT 1 — EARTH ORBIT SCHOOL", "code": "ORB", "indices": [0, 1, 2]},
@@ -30,7 +42,8 @@ const ACTS: Array[Dictionary] = [
 ## through dotted access ("Could not resolve external class member"),
 ## even though it happily resolves a function call on the same class.
 static func level_count() -> int:
-	return LEVELS.size()
+	_ensure_loaded()
+	return _canon.size()
 
 
 ## A fresh, independent LevelDef every call - preload() caches a single
@@ -38,7 +51,10 @@ static func level_count() -> int:
 ## an in-progress save) expect their own copy to mutate freely without
 ## leaking into other attempts or profiles.
 static func level_at(index: int) -> LevelDef:
-	return LEVELS[index].duplicate(true)
+	_ensure_loaded()
+	# Rebuilt from the spec each call: fresh body/objective instances (callers
+	# mutate freely) with the loader's guaranteed objective.target === moons entry.
+	return LevelLoader.from_dict(_specs[index], LEVEL_IDS[index]).level
 
 
 static func acts() -> Array[Dictionary]:
@@ -63,14 +79,13 @@ static func next_after(index: int) -> int:
 
 
 static func title(index: int) -> String:
-	return LEVELS[index].title
+	_ensure_loaded()
+	return _canon[index].title
 
 
-## Stable id for a level's authored brief files, e.g. "level_01_01". Read from
-## the preloaded original's resource_path — level_at() deep-duplicates and drops
-## the path, so callers that already hold a duplicate can't derive this.
+## Stable id for a level's authored brief files, e.g. "level_01_01".
 static func brief_id(index: int) -> String:
-	return LEVELS[index].resource_path.get_file().get_basename()
+	return LEVEL_IDS[index]
 
 
 ## Index of the act that contains this level.

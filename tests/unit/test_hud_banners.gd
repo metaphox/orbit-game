@@ -4,7 +4,6 @@ extends "res://tests/unit/base_orbit_test.gd"
 ## works and follows rebinds. Regression for CR-2: the fail banner used to
 ## hardcode "[Z] REWIND" while rewind is bound to H (and is rebindable).
 
-const LEVEL_PATH := "res://src/levels/data/level_01_01.tres"
 
 
 func before_each() -> void:
@@ -14,7 +13,7 @@ func before_each() -> void:
 func _hud() -> Hud:
 	var hud := Hud.new()
 	add_child_autofree(hud)
-	hud.build(load(LEVEL_PATH))
+	hud.build(Campaign.level_at(0))
 	return hud
 
 
