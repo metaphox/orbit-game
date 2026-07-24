@@ -1,0 +1,709 @@
+msgid ""
+msgstr ""
+"Language: ja\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+# Limited Propellant — translation template (POT).
+# msgid is the English source string (used directly as the lookup key in code).
+# Copy this file to <locale>.po and fill each msgstr to add a language.
+# NOTE: Godot has no headless POT export, so this template is maintained by hand
+# alongside the per-locale .po files as strings are added.
+
+# --- Breadcrumbs ---
+msgid "MAIN MENU"
+msgstr "メインメニュー"
+
+msgid "MAIN MENU ▶ MISSIONS"
+msgstr "メインメニュー ▶ ミッション"
+
+msgid "MAIN MENU ▶ LOAD PILOT"
+msgstr "メインメニュー ▶ パイロット読込"
+
+msgid "MAIN MENU ▶ SETTINGS"
+msgstr "メインメニュー ▶ 設定"
+
+msgid "MAIN MENU ▶ CREDITS"
+msgstr "メインメニュー ▶ クレジット"
+
+# --- Navigation hint bars ---
+msgid "↑ ↓ / W S / K J  SELECT     ENTER  CONFIRM     [F1]  HIDE"
+msgstr "↑ ↓ / W S / K J  選択     ENTER  決定     [F1]  非表示"
+
+msgid "↑↓ / W S / K J  MISSION     ← → / A D / H L  ACT     ENTER  LAUNCH     [ESC]  TITLE     [F1]  HIDE"
+msgstr "↑↓ / W S / K J  ミッション     ← → / A D / H L  幕     ENTER  発射     [ESC]  タイトル     [F1]  非表示"
+
+msgid "↑↓ / W S / K J  SELECT     ENTER  LOAD     [ESC]  CANCEL     [F1]  HIDE"
+msgstr "↑↓ / W S / K J  選択     ENTER  読込     [ESC]  キャンセル     [F1]  非表示"
+
+msgid "↑↓ / W S / K J  SELECT     ENTER  TOGGLE     [ESC]  BACK     [F1]  HIDE"
+msgstr "↑↓ / W S / K J  選択     ENTER  切替     [ESC]  戻る     [F1]  非表示"
+
+msgid "[ESC]  BACK"
+msgstr "[ESC]  戻る"
+
+msgid "↑↓ / W S / K J  SELECT   ENTER CONFIRM   [F1] HIDE   "
+msgstr "↑↓ / W S / K J  選択   ENTER 決定   [F1] 非表示   "
+
+msgid "[F1] KEYS   "
+msgstr "[F1] キー   "
+
+msgid "[ESC]/[SPACE]/[0] RESUME"
+msgstr "[ESC]/[SPACE]/[0] 再開"
+
+# --- Title screen: menu items ---
+msgid "CONTINUE"
+msgstr "つづきから"
+
+msgid "NEW PROFILE"
+msgstr "新規プロフィール"
+
+msgid "LOAD PROFILE"
+msgstr "プロフィール読込"
+
+msgid "SETTINGS"
+msgstr "設定"
+
+msgid "CREDITS"
+msgstr "クレジット"
+
+msgid "QUIT"
+msgstr "終了"
+
+# --- Title screen: per-item blurbs ---
+msgid "NO MISSION IN PROGRESS"
+msgstr "進行中のミッションなし"
+
+msgid "CREATE A NEW PILOT"
+msgstr "新しいパイロットを作成"
+
+msgid "ALL PROFILE SLOTS ARE FULL"
+msgstr "プロフィール枠がすべて満杯"
+
+msgid "SWITCH THE ACTIVE PILOT"
+msgstr "アクティブなパイロットを切替"
+
+msgid "DISPLAY & EFFECTS"
+msgstr "表示とエフェクト"
+
+msgid "ABOUT LIMITED PROPELLANT"
+msgstr "LIMITED PROPELLANT について"
+
+msgid "EXIT TO DESKTOP"
+msgstr "デスクトップに戻る"
+
+msgid "RESUME  %s · %s  %s"
+msgstr "再開  %s · %s  %s"
+
+msgid "%d / %d PROFILE SLOTS"
+msgstr "%d / %d プロフィール枠"
+
+# --- Title hero panel ---
+msgid "FLIGHT COMPUTER · MAIN MENU"
+msgstr "フライトコンピュータ · メインメニュー"
+
+msgid "V2 · FLIGHT"
+msgstr "V2 · フライト"
+
+msgid "LP // BURN FUEL. CHANGE ORBIT. SOLVE LAMBERT'S PROBLEM."
+msgstr "LP // 燃料を燃やせ。軌道を変えろ。ランベルト問題を解け。"
+
+# --- Pause menu ---
+msgid "PAUSED"
+msgstr "一時停止"
+
+msgid "RESUME"
+msgstr "再開"
+
+msgid "SAVE PROGRESS"
+msgstr "進捗を保存"
+
+msgid "RESTART MISSION"
+msgstr "ミッションをやり直す"
+
+msgid "QUIT TO MISSION SELECT"
+msgstr "ミッション選択に戻る"
+
+msgid "✓ PROGRESS SAVED   (rewind anchors are not saved)"
+msgstr "✓ 進捗を保存しました   (巻き戻しアンカーは保存されません)"
+
+# --- Mission detail pane ---
+msgid "MISSIONS"
+msgstr "ミッション"
+
+msgid "DIFFICULTY"
+msgstr "難易度"
+
+msgid "LAUNCH ▶"
+msgstr "発射 ▶"
+
+msgid "SORTIE %02d / %02d"
+msgstr "出撃 %02d / %02d"
+
+# Multi-line aligned stat block — left untranslated until Phase 3 (alignment).
+msgid "Δv PAR   %d m/s\nBEST     %s\nREWINDS  %d\nAVIONICS %s"
+msgstr "Δv 基準  %d m/s\nベスト  %s\n巻戻し  %d\n機器  %s"
+
+msgctxt "status"
+msgid "LOCKED"
+msgstr "ロック"
+
+msgctxt "status"
+msgid "ACTIVE"
+msgstr "挑戦可"
+
+msgid "GOLD ★★★"
+msgstr "ゴールド ★★★"
+
+msgid "SILVER ★★"
+msgstr "シルバー ★★"
+
+msgid "BRONZE ★"
+msgstr "ブロンズ ★"
+
+msgid "SAS"
+msgstr "SAS"
+
+msgid "NODES"
+msgstr "ノード"
+
+msgctxt "mode"
+msgid "MANUAL"
+msgstr "マニュアル"
+
+# --- Settings screen ---
+msgid "SETTING"
+msgstr "設定"
+
+msgid "SCREEN EFFECTS"
+msgstr "画面エフェクト"
+
+msgid "MENU HINTS"
+msgstr "メニューヒント"
+
+msgid "Film grade + CRT scanline overlay on every screen."
+msgstr "全画面にフィルム調とCRTスキャンラインを重ねます。"
+
+msgid "Show the navigation key hints in menus by default (F1 toggles them anywhere)."
+msgstr "メニューで操作キーのヒントを既定で表示します（F1でいつでも切替）。"
+
+msgctxt "toggle"
+msgid "ON"
+msgstr "オン"
+
+msgctxt "toggle"
+msgid "OFF"
+msgstr "オフ"
+
+# --- Load pilot screen ---
+msgid "PILOT"
+msgstr "パイロット"
+
+msgid "LOAD PILOT ▶"
+msgstr "パイロット読込 ▶"
+
+msgid "NO PROFILES YET"
+msgstr "プロフィールがまだありません"
+
+# Multi-line aligned stat block — left untranslated until Phase 3 (alignment).
+msgid "COMPLETED  %d / %d\nMODE       %s"
+msgstr "クリア  %d / %d\nモード  %s"
+
+msgctxt "mode"
+msgid "HARDCORE"
+msgstr "ハードコア"
+
+msgctxt "mode"
+msgid "NORMAL"
+msgstr "ノーマル"
+
+# --- New profile screen ---
+msgid "■ NEW PILOT ■"
+msgstr "■ 新規パイロット ■"
+
+msgid "ENTER CALLSIGN"
+msgstr "コールサインを入力"
+
+msgid "HARDCORE — no rewind, no guidance (PERMANENT)"
+msgstr "ハードコア — 巻き戻しなし、ガイドなし（永続）"
+
+msgid "[ENTER] CREATE   [ESC] CANCEL"
+msgstr "[ENTER] 作成   [ESC] キャンセル"
+
+msgid "⚠ HARDCORE IS PERMANENT — PRESS ENTER AGAIN TO CONFIRM"
+msgstr "⚠ ハードコアは永続です — もう一度 ENTER で確定"
+
+msgid "ENTER A NAME"
+msgstr "名前を入力してください"
+
+msgid "NAME TOO LONG (%d CHARS MAX)"
+msgstr "名前が長すぎます（最大 %d 文字）"
+
+msgid "NAME ALREADY TAKEN"
+msgstr "その名前は使用済みです"
+
+msgid "ALL %d PROFILE SLOTS FULL"
+msgstr "%d 個のプロフィール枠がすべて満杯"
+
+# --- Credits ---
+msgid "Burn fuel. Change orbit. Solve Lambert's problem."
+msgstr "燃料を燃やせ。軌道を変えろ。ランベルト問題を解け。"
+
+msgid "DESIGN & CODE"
+msgstr "デザイン＆コード"
+
+msgid "ENGINE"
+msgstr "エンジン"
+
+msgid "TYPE"
+msgstr "書体"
+
+msgid "PHYSICS"
+msgstr "物理"
+
+# --- Mission list: back, act headers, mission short titles ---
+msgid "◀  BACK"
+msgstr "◀  戻る"
+
+msgid "ACT 1 — EARTH ORBIT SCHOOL"
+msgstr "第1幕 — 地球軌道スクール"
+
+msgid "ACT 2 — LUNAR PROGRAM"
+msgstr "第2幕 — 月計画"
+
+msgid "ACT 3 — INTERPLANETARY"
+msgstr "第3幕 — 惑星間"
+
+msgid "RAISE ORBIT"
+msgstr "軌道上昇"
+
+msgid "RENDEZVOUS"
+msgstr "ランデブー"
+
+msgid "PLANE CHANGE"
+msgstr "軌道面変更"
+
+msgid "TRANSLUNAR INJECTION"
+msgstr "月遷移軌道投入"
+
+msgid "MARE SERENITATIS"
+msgstr "晴れの海"
+
+msgid "COME HOME"
+msgstr "帰還"
+
+msgid "EARTH TO MARS"
+msgstr "地球から火星へ"
+
+# --- Objective briefs (mission detail + minimap rail) ---
+msgid "CIRCULARIZE AT R %.1f KM ± %.1f"
+msgstr "R %.1f KM ± %.1f で円軌道化"
+
+msgid "INCLINATION %.1f° ± %.1f°"
+msgstr "軌道傾斜 %.1f° ± %.1f°"
+
+msgid "RENDEZVOUS WITH %s (<%.1f KM, <%.0f M/S)"
+msgstr "%s とランデブー (<%.1f KM, <%.0f M/S)"
+
+msgid "STATION"
+msgstr "ステーション"
+
+msgid "ACHIEVE ORBIT AROUND THE %s"
+msgstr "%s の周回軌道に到達"
+
+msgid "LAND ON THE %s (V<%.0f  H<%.0f m/s)"
+msgstr "%s に着陸 (V<%.0f  H<%.0f m/s)"
+
+msgid "ENTRY CORRIDOR: PE %.1f ± %.1f KM"
+msgstr "再突入回廊: PE %.1f ± %.1f KM"
+
+# --- Body names (interpolated into briefs) ---
+msgid "EARTH"
+msgstr "地球"
+
+msgid "MOON"
+msgstr "月"
+
+msgid "MARS"
+msgstr "火星"
+
+msgid "SOL"
+msgstr "太陽"
+
+# ============ HUD (persistent widgets) ============
+# Tabular cockpit abbreviations stay English: MET ALT VEL R-AP R-PE ACC THR PROP SOI WARP OFF-PRO.
+
+msgid "GUIDANCE"
+msgstr "誘導"
+
+msgid "ΔV REMAINING"
+msgstr "ΔV 残量"
+
+msgid "OBJECTIVE"
+msgstr "目標"
+
+msgid "ORBIT MAP"
+msgstr "軌道マップ"
+
+msgctxt "mode"
+msgid "AUTO"
+msgstr "オート"
+
+msgid "VIEW"
+msgstr "視点"
+
+msgid "THROTTLE"
+msgstr "スロットル"
+
+msgid "NODE"
+msgstr "ノード"
+
+msgid "F1 · ALL KEYS"
+msgstr "F1 · 全キー"
+
+# --- Flight status words ---
+msgid "ESCAPE"
+msgstr "脱出"
+
+msgid "BURNING"
+msgstr "噴射中"
+
+msgid "COAST"
+msgstr "慣性飛行"
+
+# --- Live readout templates (Δv / units / keys stay as notation) ---
+msgid "LOCK %s · %.0f°"
+msgstr "ロック %s · %.0f°"
+
+msgid "Δv %.1f · USED %.1f"
+msgstr "Δv %.1f · 使用 %.1f"
+
+msgid "NODE Δv %.1f · T%+.0fs · BURN %.0fs · REM %.1f"
+msgstr "ノード Δv %.1f · T%+.0fs · 噴射 %.0fs · 残 %.1f"
+
+msgid "PAR %.0f m/s"
+msgstr "基準 %.0f m/s"
+
+# --- SAS attitude modes (context 'sas': disambiguates NORMAL from the profile MODE) ---
+msgctxt "sas"
+msgid "OFF"
+msgstr "オフ"
+
+msgctxt "sas"
+msgid "PROGRADE"
+msgstr "順行"
+
+msgctxt "sas"
+msgid "RETROGRADE"
+msgstr "逆行"
+
+msgctxt "sas"
+msgid "NORMAL"
+msgstr "法線"
+
+msgctxt "sas"
+msgid "ANTI-NORM"
+msgstr "逆法線"
+
+msgctxt "sas"
+msgid "RADIAL+"
+msgstr "動径+"
+
+msgctxt "sas"
+msgid "RADIAL-"
+msgstr "動径-"
+
+msgctxt "sas"
+msgid "NODE"
+msgstr "ノード"
+
+msgctxt "sas"
+msgid "KILL ROT"
+msgstr "回転停止"
+
+# --- In-flight mission title prefix (top bar act label) ---
+msgid "ORBIT SCHOOL 1"
+msgstr "軌道スクール 1"
+
+msgid "ORBIT SCHOOL 2"
+msgstr "軌道スクール 2"
+
+msgid "ORBIT SCHOOL 3"
+msgstr "軌道スクール 3"
+
+msgid "LUNAR PROGRAM 1"
+msgstr "月計画 1"
+
+msgid "LUNAR PROGRAM 2"
+msgstr "月計画 2"
+
+msgid "LUNAR PROGRAM 3"
+msgstr "月計画 3"
+
+msgid "INTERPLANETARY 1"
+msgstr "惑星間 1"
+
+# ============ HUD overlays (banner / prompts / pause / help) ============
+
+msgid "OBJECTIVE COMPLETE"
+msgstr "目標達成"
+
+msgid "ΔV USED %.1f m/s — PAR %.0f\nMEDAL: %s"
+msgstr "ΔV 使用 %.1f m/s — 基準 %.0f\nメダル: %s"
+
+msgid "◇ CLEAN"
+msgstr "◇ クリーン"
+
+msgid "[%s] FLY AGAIN"
+msgstr "[%s] もう一度"
+
+msgid "     [%s] NEXT MISSION"
+msgstr "     [%s] 次のミッション"
+
+msgid "[%s] RESTART"
+msgstr "[%s] やり直す"
+
+msgid "[%s] REWIND — %d LEFT     %s"
+msgstr "[%s] 巻き戻し — 残り %d     %s"
+
+msgid "FPS %d · DEBUG BUILD"
+msgstr "FPS %d · デバッグビルド"
+
+msgid "‖ PAUSED — SPACE / 0 / ESC TO RESUME"
+msgstr "‖ 一時停止 — SPACE / 0 / ESC で再開"
+
+msgid "ALL KEYS · F1"
+msgstr "全キー · F1"
+
+msgid "%s/%s PITCH  %s/%s YAW  %s/%s ROLL"
+msgstr "%s/%s ピッチ  %s/%s ヨー  %s/%s ロール"
+
+msgid "%s/%s THROTTLE  %s MAX  %s CUT"
+msgstr "%s/%s スロットル  %s 最大  %s 停止"
+
+msgid "1-9 WARP LEVEL  %s/%s WARP STEP"
+msgstr "1-9 ワープ段階  %s/%s ワープ調整"
+
+msgid "%s PAUSE  %s PAUSE MENU  %s RESET VIEW"
+msgstr "%s 一時停止  %s ポーズメニュー  %s 視点リセット"
+
+msgid "%s ORBIT VIEW  DRAG ROTATE  WHEEL/TRACKPAD ZOOM"
+msgstr "%s 軌道ビュー  ドラッグで回転  ホイール/トラックパッドでズーム"
+
+msgid "SAS: %s PRO  %s RETRO  %s NORM  %s ANTI  %s/%s RADIAL  %s KILL ROT  %s OFF"
+msgstr "SAS: %s 順行  %s 逆行  %s 法線  %s 逆法線  %s/%s 動径  %s 回転停止  %s オフ"
+
+msgid "NODE: %s ADD  %s DEL  %s/%s TIME  %s/%s PRO  %s/%s NORM  %s/%s RAD"
+msgstr "ノード: %s 追加  %s 削除  %s/%s 時刻  %s/%s 順行  %s/%s 法線  %s/%s 動径"
+
+msgid "      SHIFT = COARSE   %s HOLD NODE"
+msgstr "      SHIFT = 粗調整   %s ノード保持"
+
+# --- Rewind timeline ---
+
+msgid "NOW"
+msgstr "現在"
+
+msgid "you are here"
+msgstr "現在地"
+
+# ============ Gameplay (flash / fail / SOI / rewind / autopilot / status) ============
+
+msgid "NODE COMPLETE"
+msgstr "ノード完了"
+
+msgid "AUTOPILOT DISENGAGED"
+msgstr "オートパイロット解除"
+
+msgid "NO AUTOPILOT PLAN FOR THIS LEVEL"
+msgstr "このレベルにはオートパイロット計画がありません"
+
+msgid "FLIGHT COMPUTER NOT INSTALLED"
+msgstr "フライトコンピュータ未搭載"
+
+msgid "SAS NOT INSTALLED"
+msgstr "SAS 未搭載"
+
+msgid "ORBIT TRAJECTORY DEGENERATE"
+msgstr "軌道が退化しました"
+
+msgid "TOUCHDOWN TOO HARD"
+msgstr "着陸が激しすぎます"
+
+msgid "%s SURFACE IMPACT"
+msgstr "%s 表面に衝突"
+
+msgid "MISSION ENVELOPE EXCEEDED"
+msgstr "ミッション範囲を超過"
+
+msgid "SAVE FAILED - PROGRESS MAY NOT PERSIST"
+msgstr "保存失敗 - 進捗が保持されない可能性があります"
+
+msgid "LEAVING %s SOI"
+msgstr "%s SOI を離脱"
+
+msgid "ENTERING %s SOI"
+msgstr "%s SOI に進入"
+
+msgid "RESUME POINT"
+msgstr "再開ポイント"
+
+msgid "LAUNCH"
+msgstr "発射"
+
+msgid "BURN"
+msgstr "噴射"
+
+msgid "STANDING BY"
+msgstr "待機中"
+
+msgid "AUTOPILOT ENGAGED"
+msgstr "オートパイロット作動"
+
+msgid "NO PLAN"
+msgstr "計画なし"
+
+msgid "AUTOPILOT COMPLETE"
+msgstr "オートパイロット完了"
+
+msgid "COAST TO APOAPSIS"
+msgstr "遠点まで慣性飛行"
+
+msgid "COAST TO PERIAPSIS"
+msgstr "近点まで慣性飛行"
+
+msgid "RECIRCULARIZE"
+msgstr "再円軌道化"
+
+msgid "RAISE APOAPSIS"
+msgstr "遠点上昇"
+
+msgid "CIRCULARIZE"
+msgstr "円軌道化"
+
+msgid "LOWER PERIAPSIS"
+msgstr "近点降下"
+
+msgid "PHASING"
+msgstr "位相調整"
+
+msgid "HOHMANN BURN"
+msgstr "ホーマン噴射"
+
+msgid "MATCH STATION"
+msgstr "ステーションに合わせる"
+
+msgid "FINAL APPROACH"
+msgstr "最終進入"
+
+msgid "TLI PHASING"
+msgstr "TLI 位相調整"
+
+msgid "TRANS-LUNAR INJECTION"
+msgstr "月遷移軌道投入"
+
+msgid "CAPTURE BURN"
+msgstr "捕獲噴射"
+
+msgid "MARS INTERCEPT (LAMBERT)"
+msgstr "火星迎撃（ランベルト）"
+
+msgid "MID-COURSE CORRECTION"
+msgstr "中間軌道修正"
+
+msgid "DEPARTURE PHASING"
+msgstr "出発位相調整"
+
+msgid "ALIGN TO PROGRADE"
+msgstr "順行に整列"
+
+msgid "EARTH DEPARTURE"
+msgstr "地球出発"
+
+msgid "ESCAPE EARTH SOI"
+msgstr "地球 SOI を脱出"
+
+msgid "TRANS-EARTH INJECTION"
+msgstr "地球遷移軌道投入"
+
+msgid "LOWER RETURN APOAPSIS"
+msgstr "帰還遠点降下"
+
+msgid "TRIM PERIAPSIS"
+msgstr "近点微調整"
+
+msgid "DEORBIT"
+msgstr "軌道離脱"
+
+msgid "POWERED DESCENT"
+msgstr "動力降下"
+
+msgid "COAST TO %s SOI"
+msgstr "%s SOI まで慣性飛行"
+
+msgid "ESCAPE %s SOI"
+msgstr "%s SOI を脱出"
+
+msgid "CAPTURED — PE BELOW SURFACE, RAISE IT"
+msgstr "捕獲 — PE が地表以下、上昇せよ"
+
+msgid "CAPTURED — HOLDING ORBIT"
+msgstr "捕獲 — 軌道維持中"
+
+msgid "IN %s SOI — BURN RETROGRADE NEAR PE"
+msgstr "%s SOI 内 — PE 付近で逆行噴射"
+
+msgid "ESCAPE TRAJECTORY — TOO FAST"
+msgstr "脱出軌道 — 速すぎる"
+
+msgid "DEPARTING %s"
+msgstr "%s を出発中"
+
+msgid "PHASE TO %s %+4.0f°  (BURN AT %+4.0f°)"
+msgstr "%s へ位相 %+4.0f°  (%+4.0f° で噴射)"
+
+msgid "TRANSIT TO THE %s"
+msgstr "%s へ移動"
+
+msgid "ESCAPE THE %s FIRST"
+msgstr "まず %s を脱出せよ"
+
+# --- Language picker ---
+
+msgid "LANGUAGE"
+msgstr "言語"
+
+msgid "UI display language."
+msgstr "UI の表示言語。"
+
+# --- Rewind HUD line ---
+
+msgid "REWIND %s%s   [%s]"
+msgstr "巻き戻し %s%s   [%s]"
+
+msgid "%s/%s STEP ANCHOR    %s    [%s] CANCEL"
+msgstr "%s/%s アンカー移動    %s    [%s] キャンセル"
+
+msgid "[%s] RESUME (FREE)"
+msgstr "[%s] 再開（無料）"
+
+msgid "[%s] RESUME HERE — USES 1 OF %d"
+msgstr "[%s] ここから再開 — %d 回中 1 回使用"
+
+msgid "— NO REWINDS LEFT —"
+msgstr "— 巻き戻し残りなし —"
+
+# --- Orbit preview / minimap schematic labels ---
+
+msgid "YOUR ORBIT"
+msgstr "現在の軌道"
+
+msgid "TARGET"
+msgstr "目標軌道"
+
+msgid "REENTRY"
+msgstr "再突入"
+
+msgid "SURFACE"
+msgstr "地表"

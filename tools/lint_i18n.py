@@ -35,7 +35,7 @@ NOTATION = {
     "CLOSEST", "HS", "VS", "KM",
 }
 
-IDENT_RE = re.compile(r"^[a-z][a-z0-9_]*$")  # snake_case identifier / action / dict key
+IDENT_RE = re.compile(r"^[a-z][A-Za-z0-9_]*$")  # identifier / action / dict key / locale code (zh_CN)
 
 STRING_RE = re.compile(r'"((?:[^"\\]|\\.)*)"')
 WORD_RE = re.compile(r"[A-Za-z]{2,}")
@@ -94,7 +94,7 @@ def main():
     errors = []
 
     # (A) coverage
-    for loc in ("de", "zh"):
+    for loc in ("de", "zh_CN", "ja"):  # zh_TW is a deferred placeholder (not enforced)
         po = parse_po(os.path.join(TRANS, f"{loc}.po"))
         for key in pot:
             if not po.get(key):
@@ -128,7 +128,7 @@ def main():
         print(f"\n{len(errors)} issue(s). Wrap in tr() + add to messages.pot, or mark "
               "the line `# i18n-ok: <reason>` if it is intentionally English.")
         return 1
-    print("\033[32mi18n lint OK\033[0m - de/zh cover the POT; no untranslated prose in display code.")
+    print("\033[32mi18n lint OK\033[0m - de/zh_CN/ja cover the POT; no untranslated prose in display code.")
     return 0
 
 

@@ -10,3 +10,6 @@ build/
 export/
 .claude
 scratchpad
+
+# Full CJK source fonts (subset into assets/fonts by tools/subset_fonts.py)
+.fonts_cache/

@@ -21,7 +21,12 @@ const MONO_SEMI := preload("res://assets/fonts/IBMPlexMono-SemiBold.ttf")  # lab
 ## ZH/JA/KO (and Chakra's missing Cyrillic) would tofu. The pan-CJK "SC" build is
 ## a superset — kana + hangul + ideographs + Latin/Greek/Cyrillic — so one file
 ## covers every locale. Wired as a fallback on all five faces in populate().
-const CJK_FALLBACK := preload("res://assets/fonts/NotoSansCJKsc-Regular.otf")
+const CJK_FALLBACK := preload("res://assets/fonts/NotoSansCJKsc.subset.otf")
+
+## Stylish Japanese fallback (M PLUS 1 Code, monospaced, OFL). Preferred over the
+## pan-CJK Noto build for the `ja` locale, which draws kanji with Chinese glyph
+## variants. Covers JP + Latin only, so it stays small; Noto sits behind it.
+const JP_FALLBACK := preload("res://assets/fonts/MPLUS1Code.subset.ttf")
 
 const DISPLAY_TITLE := &"DisplayTitle"
 const MENU_TITLE := &"MenuTitle"
@@ -83,13 +88,22 @@ static func shared() -> Theme:
 	return _shared_theme
 
 
+## Point the CJK fallback at the locale-appropriate face: M PLUS 1 Code (with Noto
+## behind it for anything it lacks) for Japanese, else the pan-CJK Noto build.
+## Mutates the shared FontFiles, so call at startup and on a live language change.
+static func apply_locale_fonts(locale: String) -> void:
+	var fb: Array[Font] = []
+	if locale.begins_with("ja"):
+		fb.append(JP_FALLBACK)  # stylish JP glyphs first
+	fb.append(CJK_FALLBACK)     # Noto behind it (and for zh/ko/others)
+	for f: FontFile in [DISPLAY, DISPLAY_SEMI, MONO, MONO_MED, MONO_SEMI]:
+		f.fallbacks = fb.duplicate()
+
+
 ## Populates the external generated Theme resource. The resource is referenced
 ## directly by scenes, so its exact font metrics are available in the editor.
 static func populate(theme: Theme) -> void:
-	# CJK/Cyrillic fallback on every Latin face so ZH/JA/KO/RU render, not tofu.
-	var fb: Array[Font] = [CJK_FALLBACK]
-	for f: FontFile in [DISPLAY, DISPLAY_SEMI, MONO, MONO_MED, MONO_SEMI]:
-		f.fallbacks = fb.duplicate()
+	apply_locale_fonts(TranslationServer.get_locale())
 	_register_palette_colors(theme)
 	theme.default_font = MONO
 	theme.default_font_size = 14

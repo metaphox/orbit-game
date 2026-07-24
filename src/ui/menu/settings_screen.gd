@@ -15,7 +15,8 @@ const LANGUAGES := [
 	{"code": "de", "name": "Deutsch"},   # i18n-ok: endonym
 	{"code": "fr", "name": "Français"},  # i18n-ok: endonym
 	{"code": "ru", "name": "Русский"},
-	{"code": "zh", "name": "中文"},
+	{"code": "zh_CN", "name": "简体中文"},
+	{"code": "zh_TW", "name": "繁體中文"},
 	{"code": "ja", "name": "日本語"},
 	{"code": "ko", "name": "한국어"},
 ]
@@ -123,6 +124,7 @@ func _cycle_language() -> void:
 	var next_code: String = LANGUAGES[(idx + 1) % LANGUAGES.size()]["code"]
 	Settings.set_value(Settings.LANGUAGE, next_code)
 	TranslationServer.set_locale(next_code)
+	UiTheme.apply_locale_fonts(next_code)  # swap the CJK fallback (M PLUS for ja)
 	store.save()
 	_refresh()
 

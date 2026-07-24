@@ -23,6 +23,7 @@ func _run() -> void:
 		if a.begins_with("--locale="):
 			locale = a.trim_prefix("--locale=")
 	TranslationServer.set_locale(locale)
+	UiTheme.apply_locale_fonts(locale)
 	var shot_dir := "%s_%s" % [SHOT_DIR, locale] if locale != "en" else SHOT_DIR
 	_shot_dir = shot_dir
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(shot_dir))

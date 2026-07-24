@@ -30,6 +30,7 @@ func _ready() -> void:
 	# Apply the saved (or --locale) UI language before the first screen builds, so
 	# every tr()/auto-translated label renders in the chosen locale from the start.
 	TranslationServer.set_locale(Settings.language())
+	UiTheme.apply_locale_fonts(Settings.language())  # locale-specific CJK fallback
 	InputBindings.install()  # register extra actions + apply saved rebinds (after settings load)
 	_show_title()
 
