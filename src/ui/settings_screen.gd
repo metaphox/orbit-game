@@ -23,7 +23,7 @@ var _desc: Label
 
 func build(profile_store: ProfileStore) -> void:
 	store = profile_store
-	_shell = MenuShell.new()
+	_shell = MenuShell.create()
 	add_child(_shell)
 	_shell.configure("MAIN MENU ▶ SETTINGS")
 	_shell.set_hint(HINT)
@@ -44,30 +44,12 @@ func build(profile_store: ProfileStore) -> void:
 		add_child(ScreenGrade.new())
 
 
+## The detail panel is authored in settings_detail.tscn (editable in the editor).
 func _build_detail() -> Control:
-	var panel := PanelContainer.new()
-	panel.theme_type_variation = UiTheme.INSTRUMENT_PANEL
-	var pad := MarginContainer.new()
-	for side: String in ["margin_left", "margin_right", "margin_top", "margin_bottom"]:
-		pad.add_theme_constant_override(side, 12)
-	panel.add_child(pad)
-	var col := VBoxContainer.new()
-	col.add_theme_constant_override("separation", 16)
-	pad.add_child(col)
-	col.add_child(_lbl(UiTheme.EYEBROW, "SETTING"))
-	_title = _lbl(UiTheme.MENU_TITLE, "")
-	col.add_child(_title)
-	_desc = _lbl(UiTheme.MONO_TEXT, "")
-	_desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	col.add_child(_desc)
+	var panel := preload("res://src/ui/settings_detail.tscn").instantiate()
+	_title = panel.get_node("%Title")
+	_desc = panel.get_node("%Desc")
 	return panel
-
-
-func _lbl(variation: StringName, text: String) -> Label:
-	var l := Label.new()
-	l.theme_type_variation = variation
-	l.text = text
-	return l
 
 
 func _row_label(i: int) -> String:

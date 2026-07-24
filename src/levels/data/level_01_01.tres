@@ -26,4 +26,3 @@ thrust = 6000.0
 isp = 82.0
 objective = SubResource("Resource_300pn")
 dv_par = 75.0
-difficulty = 1

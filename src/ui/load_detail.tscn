@@ -1,0 +1,49 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Theme" path="res://src/ui/generated_ui_theme.tres" id="1_theme"]
+
+[node name="LoadDetail" type="PanelContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_theme")
+theme_type_variation = &"InstrumentPanel"
+
+[node name="Pad" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="Col" type="VBoxContainer" parent="Pad"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Eyebrow" type="Label" parent="Pad/Col"]
+layout_mode = 2
+theme_type_variation = &"Eyebrow"
+text = "PILOT"
+
+[node name="Name" type="Label" parent="Pad/Col"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"MenuTitle"
+
+[node name="Stats" type="Label" parent="Pad/Col"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"MonoSmall"
+
+[node name="Grow" type="Control" parent="Pad/Col"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Load" type="Button" parent="Pad/Col"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+theme_type_variation = &"PrimaryButton"
+text = "LOAD PILOT ▶"

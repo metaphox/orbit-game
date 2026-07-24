@@ -1,0 +1,96 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://src/ui/mission_detail_pane.gd" id="1_pane"]
+[ext_resource type="Theme" path="res://src/ui/generated_ui_theme.tres" id="2_theme"]
+[ext_resource type="Script" path="res://src/ui/difficulty_pips.gd" id="3_pips"]
+
+[node name="MissionDetailPane" type="PanelContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_theme")
+theme_type_variation = &"InstrumentPanel"
+script = ExtResource("1_pane")
+
+[node name="Pad" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="Col" type="VBoxContainer" parent="Pad"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Header" type="HBoxContainer" parent="Pad/Col"]
+layout_mode = 2
+
+[node name="Chip" type="Label" parent="Pad/Col/Header"]
+layout_mode = 2
+theme_type_variation = &"Eyebrow"
+text = "MISSIONS"
+
+[node name="Spacer" type="Control" parent="Pad/Col/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Sortie" type="Label" parent="Pad/Col/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"MenuFooter"
+
+[node name="Title" type="Label" parent="Pad/Col"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"MenuTitle"
+
+[node name="CodeStatus" type="Label" parent="Pad/Col"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"MenuWarning"
+
+[node name="Brief" type="Label" parent="Pad/Col"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(360, 0)
+layout_mode = 2
+theme_type_variation = &"MonoText"
+autowrap_mode = 3
+
+[node name="Diff" type="HBoxContainer" parent="Pad/Col"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="DiffLabel" type="Label" parent="Pad/Col/Diff"]
+layout_mode = 2
+theme_type_variation = &"MenuFooter"
+text = "DIFFICULTY"
+
+[node name="Pips" type="Control" parent="Pad/Col/Diff"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 4
+script = ExtResource("3_pips")
+
+[node name="PreviewSlot" type="Control" parent="Pad/Col"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(360, 208)
+layout_mode = 2
+
+[node name="Stats" type="Label" parent="Pad/Col"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"MonoSmall"
+
+[node name="Grow" type="Control" parent="Pad/Col"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Launch" type="Button" parent="Pad/Col"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+theme_type_variation = &"LaunchButton"
+text = "LAUNCH ▶"

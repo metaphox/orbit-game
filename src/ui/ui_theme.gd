@@ -163,7 +163,6 @@ static func populate(theme: Theme) -> void:
 		_flat_box(Palette.INTENT_DK, Palette.TRANSPARENT, 0, 14, 14, 8, 8))
 	theme.set_type_variation(OBJECTIVE_PANEL, &"PanelContainer")
 	var objective_panel := _flat_box(Palette.PANEL, Palette.HAIRLINE, 2, 14, 14, 14, 14)
-	objective_panel.border_width_left = 5
 	theme.set_stylebox("panel", OBJECTIVE_PANEL, objective_panel)
 	theme.set_type_variation(REWIND_PANEL, &"PanelContainer")
 	theme.set_stylebox("panel", REWIND_PANEL,

@@ -22,7 +22,7 @@ var _load: Button
 
 func build(profile_store: ProfileStore) -> void:
 	store = profile_store
-	_shell = MenuShell.new()
+	_shell = MenuShell.create()
 	add_child(_shell)
 	_shell.configure("MAIN MENU ▶ LOAD PILOT")
 	_shell.set_hint(HINT)
@@ -48,41 +48,17 @@ func build(profile_store: ProfileStore) -> void:
 		add_child(ScreenGrade.new())
 
 
+## The detail panel is authored in load_detail.tscn (editable in the editor);
+## this fills the `%`-named slots and wires the LOAD button.
 func _build_detail() -> Control:
-	var panel := PanelContainer.new()
-	panel.theme_type_variation = UiTheme.INSTRUMENT_PANEL
-	var pad := MarginContainer.new()
-	for side: String in ["margin_left", "margin_right", "margin_top", "margin_bottom"]:
-		pad.add_theme_constant_override(side, 12)
-	panel.add_child(pad)
-	var col := VBoxContainer.new()
-	col.add_theme_constant_override("separation", 16)
-	pad.add_child(col)
-
-	col.add_child(_lbl(UiTheme.EYEBROW, "PILOT"))
-	_name = _lbl(UiTheme.MENU_TITLE, "")
-	col.add_child(_name)
-	_stats = _lbl(UiTheme.MONO_SMALL, "")
-	col.add_child(_stats)
-	var grow := Control.new()
-	grow.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	col.add_child(grow)
-	_load = Button.new()
-	_load.theme_type_variation = UiTheme.PRIMARY_BUTTON
-	_load.focus_mode = Control.FOCUS_NONE
-	_load.text = "LOAD PILOT ▶"
+	var panel := preload("res://src/ui/load_detail.tscn").instantiate()
+	_name = panel.get_node("%Name")
+	_stats = panel.get_node("%Stats")
+	_load = panel.get_node("%Load")
 	_load.pressed.connect(func() -> void:
 		if not _load.disabled:
 			_activate())
-	col.add_child(_load)
 	return panel
-
-
-func _lbl(variation: StringName, text: String) -> Label:
-	var l := Label.new()
-	l.theme_type_variation = variation
-	l.text = text
-	return l
 
 
 func _refresh() -> void:

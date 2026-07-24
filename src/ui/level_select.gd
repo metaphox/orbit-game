@@ -26,12 +26,12 @@ func build(profile: Profile) -> void:
 	_order = Campaign.order()
 	_cursor = _first_unlocked_pos()
 
-	_shell = MenuShell.new()
+	_shell = MenuShell.create()
 	add_child(_shell)
 	_shell.configure("MAIN MENU ▶ MISSIONS")
 	_shell.set_hint(HINT)
 
-	_detail = MissionDetailPane.new()
+	_detail = MissionDetailPane.create()
 	_detail.launch_requested.connect(func(index: int) -> void: level_chosen.emit(index))
 	_shell.set_right(_detail)
 

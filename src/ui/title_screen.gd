@@ -38,7 +38,7 @@ func build(store: ProfileStore) -> void:
 	]
 	_cursor = _first_enabled()
 
-	_shell = MenuShell.new()
+	_shell = MenuShell.create()
 	add_child(_shell)
 	_shell.configure("MAIN MENU")
 	_shell.set_hint(HINT)
@@ -59,51 +59,18 @@ func build(store: ProfileStore) -> void:
 		add_child(ScreenGrade.new())
 
 
+## The right hero panel is authored in title_hero.tscn (editable in the editor);
+## this only fills the `%`-named blurb/status slots and appends a load warning.
 func _build_hero() -> Control:
-	var panel := PanelContainer.new()
-	panel.theme_type_variation = UiTheme.INSTRUMENT_PANEL
-	var pad := MarginContainer.new()
-	for side: String in ["margin_left", "margin_right", "margin_top", "margin_bottom"]:
-		pad.add_theme_constant_override(side, 12)  # +12 panel = 24 gutter
-	panel.add_child(pad)
-	var col := VBoxContainer.new()
-	col.add_theme_constant_override("separation", 16)
-	pad.add_child(col)
-
-	var top := HBoxContainer.new()
-	col.add_child(top)
-	top.add_child(_lbl(UiTheme.MENU_FOOTER, "FLIGHT COMPUTER · MAIN MENU"))
-	var spacer := Control.new()
-	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	top.add_child(spacer)
-	top.add_child(_lbl(UiTheme.MENU_FOOTER, "V2 · FLIGHT"))
-
-	var title := _lbl(UiTheme.MENU_TITLE, "LIMITED PROPELLANT")
-	title.add_theme_font_size_override("font_size", 44)
-	col.add_child(title)
-	col.add_child(_lbl(UiTheme.MENU_TAGLINE, "LP // BURN FUEL. CHANGE ORBIT. SOLVE LAMBERT'S PROBLEM."))
-	col.add_child(HSeparator.new())
-
-	_blurb = _lbl(UiTheme.MONO_TEXT, "")
-	_blurb.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	col.add_child(_blurb)
-
-	var grow := Control.new()
-	grow.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	col.add_child(grow)
-
-	_status = _lbl(UiTheme.MENU_FOOTER, "")
-	col.add_child(_status)
+	var hero := preload("res://src/ui/title_hero.tscn").instantiate()
+	_blurb = hero.get_node("%Blurb")
+	_status = hero.get_node("%Status")
 	if _store.load_warning != "":
-		col.add_child(_lbl(UiTheme.MENU_WARNING, "⚠ %s" % _store.load_warning))
-	return panel
-
-
-func _lbl(variation: StringName, text: String) -> Label:
-	var l := Label.new()
-	l.theme_type_variation = variation
-	l.text = text
-	return l
+		var warn := Label.new()
+		warn.theme_type_variation = UiTheme.MENU_WARNING
+		warn.text = "⚠ %s" % _store.load_warning
+		(hero.get_node("%Col") as VBoxContainer).add_child(warn)
+	return hero
 
 
 func _first_enabled() -> int:

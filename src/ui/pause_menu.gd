@@ -19,52 +19,25 @@ var _saved: Label
 var _hint: Label
 
 
+## The overlay layout is authored in pause_menu_layout.tscn (editable in the
+## editor); this fills the `%CardSlot` with cards and wires the slots. The scrim
+## fill stays code-set so it stays sourced from Palette.
 func build() -> void:
-	var root := Control.new()
-	root.theme = UiTheme.shared()
-	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	add_child(root)
+	var layout := preload("res://src/ui/pause_menu_layout.tscn").instantiate()
+	add_child(layout)
+	(layout.get_node("%Scrim") as ColorRect).color = Palette.PAUSE_BG  # lint-ok: runtime scrim fill from Palette
+	_saved = layout.get_node("%Saved")
+	_hint = layout.get_node("%Hint")
 
-	var scrim := ColorRect.new()
-	scrim.color = Palette.PAUSE_BG  # lint-ok: runtime scrim fill from Palette
-	scrim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	root.add_child(scrim)
-
-	var center := CenterContainer.new()
-	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	root.add_child(center)
-
-	var panel := PanelContainer.new()
-	panel.theme_type_variation = UiTheme.MODAL_PANEL
-	center.add_child(panel)
-	var col := VBoxContainer.new()
-	col.custom_minimum_size = Vector2(384, 0)  # 48×8
-	col.add_theme_constant_override("separation", 16)
-	panel.add_child(col)
-
-	var title := Label.new()
-	title.theme_type_variation = UiTheme.MENU_TITLE
-	title.text = "PAUSED"
-	col.add_child(title)
-
+	var card_slot: VBoxContainer = layout.get_node("%CardSlot")
 	for i in _items.size():
 		var card := OptionCard.new()
-		col.add_child(card)
+		card_slot.add_child(card)
 		card.set_data(i, _items[i], true)
 		card.hovered.connect(func(p: int) -> void: _select(p))
 		card.clicked.connect(_activate)
 		card.activated.connect(_activate)
 		_cards.append(card)
-
-	_saved = Label.new()
-	_saved.theme_type_variation = UiTheme.MENU_SUBTITLE
-	_saved.text = "✓ PROGRESS SAVED   (rewind anchors are not saved)"
-	_saved.visible = false
-	col.add_child(_saved)
-
-	_hint = Label.new()
-	_hint.theme_type_variation = UiTheme.MENU_FOOTER
-	col.add_child(_hint)
 	_refresh()
 
 
