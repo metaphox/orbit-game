@@ -144,6 +144,12 @@ msgstr "任务目标"
 msgid "FLIGHT PLAN"
 msgstr "飞行计划"
 
+msgid "COMMUNITY"
+msgstr "社区"
+
+msgid "OPEN MODS FOLDER"
+msgstr "打开模组文件夹"
+
 msgid "LAUNCH ▶"
 msgstr "发射 ▶"
 
@@ -545,6 +551,9 @@ msgstr "超出任务边界"
 
 msgid "SAVE FAILED - PROGRESS MAY NOT PERSIST"
 msgstr "保存失败 - 进度可能不会保留"
+
+msgid "SAVE UNAVAILABLE FOR COMMUNITY LEVELS"
+msgstr "社区关卡不支持存档"
 
 msgid "LEAVING %s SOI"
 msgstr "离开 %s SOI"

@@ -33,6 +33,11 @@ const ZOOM_PAN_SENSITIVITY := 0.01
 ## scene, or directly by tests/the temp jump before loading it.
 static var level_index := 0
 
+## A drop-in community level to fly directly, bypassing the index/Campaign path.
+## When non-null it wins over level_index; campaign_root clears it before an
+## ordinary (built-in) launch.
+static var custom_level: LevelDef = null
+
 ## When true, the flight director engages automatically on _ready so the
 ## mission flies itself (used by the live-autopilot demo and its tests).
 static var autopilot_on_launch := false
@@ -80,8 +85,11 @@ var _next_event := INF
 
 func _ready() -> void:
 	InputBindings.install()  # register rewind/autopilot actions + apply rebinds (idempotent)
-	level_index = clampi(level_index, 0, Campaign.level_count() - 1)
-	level = Campaign.level_at(level_index)
+	if custom_level != null:
+		level = custom_level
+	else:
+		level_index = clampi(level_index, 0, Campaign.level_count() - 1)
+		level = Campaign.level_at(level_index)
 	ship = ShipSim.new()
 	ship.setup(level)
 

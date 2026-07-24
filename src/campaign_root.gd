@@ -9,10 +9,12 @@ const GameRootScript := preload("res://src/game_root.gd")
 const GameRootScene := preload("res://src/main.tscn")
 
 var store: ProfileStore
+var sandbox: SandboxStore  # community-level progress (separate string-ID namespace)
 var active_profile: Profile
 
 var _current_ui: Node
 var game: Node
+var _active_community_id := ""  # non-empty while a community (drop-in) level is being flown
 
 
 func _ready() -> void:
@@ -27,6 +29,9 @@ func _ready() -> void:
 	# silently redirecting to the default save path.
 	if store == null:
 		store = ProfileStore.load_or_new()
+	if sandbox == null:
+		sandbox = SandboxStore.load_or_new()
+	ModPaths.ensure_scaffold()  # create the Documents mods folder + example on first run
 	# Apply the saved (or --locale) UI language before the first screen builds, so
 	# every tr()/auto-translated label renders in the chosen locale from the start.
 	TranslationServer.set_locale(Settings.language())
@@ -147,8 +152,9 @@ func _show_mission_select() -> void:
 	_clear_game()
 	var menu := LevelSelect.new()
 	add_child(menu)
-	menu.build(active_profile)
+	menu.build(active_profile, sandbox)
 	menu.level_chosen.connect(_launch)
+	menu.community_chosen.connect(_launch_custom)
 	menu.back_pressed.connect(_show_title)
 	_current_ui = menu
 
@@ -156,7 +162,22 @@ func _show_mission_select() -> void:
 func _launch(index: int) -> void:
 	_clear_ui()
 	_clear_game()
+	_active_community_id = ""
+	GameRootScript.custom_level = null
 	GameRootScript.level_index = index
+	GameRootScript.hardcore = active_profile.hardcore
+	game = GameRootScene.instantiate()
+	add_child(game)
+	_connect_game_signals()
+
+
+## Fly a community (drop-in) level directly, tracked by string ID in the sandbox
+## namespace rather than the campaign's integer progression.
+func _launch_custom(id: String, level: LevelDef) -> void:
+	_clear_ui()
+	_clear_game()
+	_active_community_id = id
+	GameRootScript.custom_level = level
 	GameRootScript.hardcore = active_profile.hardcore
 	game = GameRootScene.instantiate()
 	add_child(game)
@@ -172,22 +193,36 @@ func _connect_game_signals() -> void:
 
 
 func _on_win(index: int, dv_used: float, medal: String, rewinds_used: int) -> void:
+	if _active_community_id != "":  # community levels persist to the sandbox, not the campaign
+		sandbox.record(_active_community_id, medal, dv_used, rewinds_used == 0)
+		if not sandbox.save():
+			game.hud.flash("SAVE FAILED - PROGRESS MAY NOT PERSIST")
+		return
 	active_profile.record_win(index, medal, dv_used, rewinds_used)
 	if not store.save():
 		game.hud.flash("SAVE FAILED - PROGRESS MAY NOT PERSIST")
 
 
 func _on_save(payload: Dictionary) -> void:
+	if _active_community_id != "":  # no resumable mid-mission save slot for drop-in levels
+		game.hud.flash("SAVE UNAVAILABLE FOR COMMUNITY LEVELS")
+		return
 	active_profile.mission_save = payload
 	if not store.save():
 		game.hud.flash("SAVE FAILED - PROGRESS MAY NOT PERSIST")
 
 
 func _on_restart() -> void:
-	_launch(GameRootScript.level_index)
+	if _active_community_id != "":
+		_launch_custom(_active_community_id, GameRootScript.custom_level)
+	else:
+		_launch(GameRootScript.level_index)
 
 
 func _on_next(index: int) -> void:
+	if _active_community_id != "":  # community levels have no next in the campaign order
+		_show_mission_select()
+		return
 	var next_index := Campaign.next_after(index)
 	if next_index != -1:
 		_launch(next_index)

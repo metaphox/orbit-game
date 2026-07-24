@@ -56,7 +56,7 @@ func build(level: LevelDef) -> void:
 	planet_mesh.height = level.body.radius * MAP_SCALE * 2.0
 	# Dark, faintly body-tinted fill, no bright rim: the tint alone says which
 	# world this is (UI-DESIGN.md → Celestial body tints).
-	_planet.material_override = _line_material(Palette.body_tint(level.body.name))
+	_planet.material_override = _line_material(Palette.body_tint(level.body.name, level.body.color))
 
 	orbit_instance = layout.get_node("OrbitInstance")
 	orbit_mesh = orbit_instance.mesh
@@ -106,7 +106,7 @@ func build(level: LevelDef) -> void:
 		var dot_radius := moon.radius * MAP_SCALE
 		dot.radius = dot_radius
 		dot.height = dot_radius * 2.0
-		dot.material = _line_material(Palette.body_tint(moon.name))
+		dot.material = _line_material(Palette.body_tint(moon.name, moon.color))
 		marker.mesh = dot
 		marker.layers = MAP_LAYER
 		add_child(marker)

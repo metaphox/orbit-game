@@ -5,7 +5,7 @@ extends PanelContainer
 ## and the amber LAUNCH button. `show_level` renders one mission (hovered or
 ## selected); `set_launch_enabled` greys LAUNCH for a locked mission.
 
-signal launch_requested(index: int)
+signal launch_requested  # launch whatever the pane currently shows (owner resolves it)
 
 
 ## The panel layout is authored in mission_detail_pane.tscn (editable in the
@@ -14,8 +14,8 @@ static func create() -> MissionDetailPane:
 	return preload("res://src/ui/menu/mission_detail_pane.tscn").instantiate()
 
 
-var _index := -1
-var _previews: Dictionary[int, OrbitPreview] = {}
+var _index := -1  # built-in index currently shown (-1 for a community level)
+var _previews: Dictionary[String, OrbitPreview] = {}  # keyed by level id (community levels have no index)
 
 @onready var _sortie: Label = %Sortie
 @onready var _title: Label = %Title
@@ -32,8 +32,8 @@ var _previews: Dictionary[int, OrbitPreview] = {}
 func _ready() -> void:
 	_style_flight_plan()
 	_launch.pressed.connect(func() -> void:
-		if _index >= 0 and not _launch.disabled:
-			launch_requested.emit(_index))
+		if not _launch.disabled:
+			launch_requested.emit())
 
 
 ## The FLIGHT PLAN body is a RichTextLabel (for **bold** / *italic*); style it to
@@ -59,20 +59,45 @@ func show_level(index: int, profile: Profile) -> void:
 	var level := Campaign.level_at(index)
 	var s := Campaign.sortie(index)
 	_sortie.text = tr("SORTIE %02d / %02d") % [s.x, s.y]
-	_title.text = Campaign.short_title(index)
-	_code_status.text = "%s · %s" % [Campaign.code(index), Campaign.status_label(profile, index)]
+	_fill(level, Campaign.short_title(index),
+		"%s · %s" % [Campaign.code(index), Campaign.status_label(profile, index)],
+		profile.medal_for(index), true)
+	# Authored FLIGHT PLAN prose (per-locale file, English fallback).
+	_set_plan(BriefText.md_to_bbcode(BriefText.flight_plan(index)))
+
+
+## Fill the pane for a drop-in community level (no Campaign index): its own
+## title/brief/preview, a COMMUNITY chip + sandbox medal, and a ready-made plan.
+func show_community(level: LevelDef, medal: String, plan_bbcode: String) -> void:
+	_index = -1
+	_sortie.text = tr("COMMUNITY")
+	_fill(level, _short_title(level.title), "%s · %s" % [
+		tr("COMMUNITY"), medal if medal != "" else TranslationServer.translate("ACTIVE", &"status")],
+		medal, false)
+	_set_plan(plan_bbcode)
+
+
+## Shared body of the two show_* methods: brief, difficulty pips, stats, preview.
+func _fill(level: LevelDef, title: String, code_status: String, medal: String, translate_medal: bool) -> void:
+	_title.text = title
+	_code_status.text = code_status
 	_brief.text = level.objective.describe()
 	_pips.value = level.difficulty
-	var medal := profile.medal_for(index)
+	var medal_txt := (tr(medal) if translate_medal else medal) if medal != "" else "—"
 	_stats.text = tr("Δv PAR   %d m/s\nBEST     %s\nREWINDS  %d\nAVIONICS %s") % [
-		int(level.dv_par), tr(medal) if medal != "" else "—", level.rewind_budget, _avionics(level)]
-	_show_preview(index, level)
-	# Authored FLIGHT PLAN prose (per-locale file, English fallback); hide the
-	# whole section for levels that don't have one yet.
-	var plan := BriefText.md_to_bbcode(BriefText.flight_plan(index))
-	_flight_plan.text = plan
-	_flight_plan.visible = not plan.is_empty()
-	_plan_header.visible = not plan.is_empty()
+		int(level.dv_par), medal_txt, level.rewind_budget, _avionics(level)]
+	_show_preview(level)
+
+
+func _set_plan(plan_bbcode: String) -> void:
+	_flight_plan.text = plan_bbcode
+	_flight_plan.visible = not plan_bbcode.is_empty()
+	_plan_header.visible = not plan_bbcode.is_empty()
+
+
+func _short_title(full: String) -> String:
+	var parts := full.split(":")
+	return (parts[1] if parts.size() > 1 else parts[0]).strip_edges()
 
 
 func set_launch_enabled(enabled: bool) -> void:
@@ -88,13 +113,14 @@ func _avionics(level: LevelDef) -> String:
 	return " · ".join(parts) if not parts.is_empty() else tr("MANUAL", &"mode")
 
 
-func _show_preview(index: int, level: LevelDef) -> void:
+func _show_preview(level: LevelDef) -> void:
 	for p: OrbitPreview in _previews.values():
 		p.visible = false
-	if not _previews.has(index):
+	var key := level.id if level.id != "" else level.title
+	if not _previews.has(key):
 		var preview := OrbitPreview.new()
 		preview.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		_preview_slot.add_child(preview)
-		_previews[index] = preview
+		_previews[key] = preview
 		preview.build(level)
-	_previews[index].visible = true
+	_previews[key].visible = true

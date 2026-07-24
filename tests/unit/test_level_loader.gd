@@ -214,6 +214,25 @@ func test_decorative_moon_never_captures() -> void:
 			assert_eq(ship.body.name, "MOON", "a real moon captures the ship (control)")
 
 
+func test_full_catalog_supports_a_moon_of_a_planet() -> void:
+	assert_true(BodyCatalog.has_body("JUPITER") and BodyCatalog.has_body("PLUTO") and BodyCatalog.has_body("IO"))
+	assert_gt(BodyCatalog.names().size(), 15, "the whole solar system is in the catalog")
+	# Two-level nesting: SOL -> JUPITER -> IO, with scenery moons + a distant Earth.
+	var r := LevelLoader.from_dict({
+		"title": "Jupiter", "system": "SOL",
+		"bodies": [{"name": "JUPITER"}, {"name": "IO"},
+			{"name": "EUROPA", "decorative": true}, {"name": "EARTH", "decorative": true}],
+		"start": {"body": "JUPITER", "radius_km": 1200},
+		"objective": {"type": "transfer_capture", "target": "IO"}}, "jup")
+	assert_eq(r.error, "", "a Jupiter/Io level with scenery loads: %s" % r.error)
+	var by := {}
+	for m: BodyDef in r.level.moons:
+		by[m.name] = m
+	assert_same((by["IO"] as BodyDef).parent, by["JUPITER"], "IO orbits the in-graph JUPITER (SOL->JUPITER->IO)")
+	assert_same((r.level.objective as TransferCaptureObjective).target, by["IO"], "target is the IO instance")
+	assert_true((by["EUROPA"] as BodyDef).decorative and not (by["IO"] as BodyDef).decorative)
+
+
 func test_loader_rejects_bad_specs_with_readable_errors() -> void:
 	var unknown_body := LevelLoader.from_dict({"system": "PLANET_X",
 		"objective": {"type": "orbit_match", "radius_km": 80, "tolerance_km": 1}}, "x")

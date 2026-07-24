@@ -1,7 +1,152 @@
 {
-  "_comment": "Body catalog — canonical physics at the game scale (radius = real_km x10, mu = real/5190, soi = real_SOI_km x10, moon orbit x10, heliocentric orbit = AU x 40e6; SOL special-cased). Levels reference bodies by name; the loader assigns the role (a level's root gets soi=INF and no parent). Phase is a per-level scenario param, not stored here.",
-  "SOL":   { "mu": 54800000000000.0, "radius": 400000.0 },
-  "EARTH": { "mu": 76760000000.0, "radius": 63710.0, "soi_radius": 9240000.0, "parent": "SOL",   "orbit_radius": 40000000.0 },
-  "MOON":  { "mu": 944000000.0,    "radius": 17374.0, "soi_radius": 660000.0,  "parent": "EARTH", "orbit_radius": 3844000.0 },
-  "MARS":  { "mu": 8210000000.0,   "radius": 33900.0, "soi_radius": 3000000.0, "parent": "SOL",   "orbit_radius": 60000000.0 }
+  "_comment": "Body catalog at the game scale. Existing SOL/EARTH/MOON/MARS are the hand-tuned originals (kept exact). New bodies derive from real data: radius=real_km*10, mu=real_mu/5190, heliocentric orbit=AU*40e6, moon orbit=real_km*10, SOI capped to a safe fraction of the orbit. Outer-body values are approximate and tunable per playtest.",
+  "SOL": {
+    "mu": 54800000000000.0,
+    "radius": 400000.0,
+    "color": "#3a2a08"
+  },
+  "EARTH": {
+    "mu": 76760000000.0,
+    "radius": 63710.0,
+    "soi_radius": 9240000.0,
+    "parent": "SOL",
+    "orbit_radius": 40000000.0,
+    "color": "#2a4a6a"
+  },
+  "MOON": {
+    "mu": 944000000.0,
+    "radius": 17374.0,
+    "soi_radius": 660000.0,
+    "parent": "EARTH",
+    "orbit_radius": 3844000.0,
+    "color": "#8a8a8a"
+  },
+  "MARS": {
+    "mu": 8210000000.0,
+    "radius": 33900.0,
+    "soi_radius": 3000000.0,
+    "parent": "SOL",
+    "orbit_radius": 60000000.0,
+    "color": "#b5502a"
+  },
+  "MERCURY": {
+    "mu": 4245086705.202312,
+    "radius": 24397.0,
+    "soi_radius": 1120000.0,
+    "parent": "SOL",
+    "orbit_radius": 15484000.0,
+    "color": "#8a7f76"
+  },
+  "VENUS": {
+    "mu": 62593256262.04239,
+    "radius": 60518.0,
+    "soi_radius": 6160000.0,
+    "parent": "SOL",
+    "orbit_radius": 28932000.0,
+    "color": "#d9c27a"
+  },
+  "JUPITER": {
+    "mu": 24409826589595.375,
+    "radius": 699110.0,
+    "soi_radius": 72861600.0,
+    "parent": "SOL",
+    "orbit_radius": 208176000.0,
+    "color": "#c9a97e"
+  },
+  "SATURN": {
+    "mu": 7308477842003.854,
+    "radius": 582320.0,
+    "soi_radius": 134156400.0,
+    "parent": "SOL",
+    "orbit_radius": 383304000.0,
+    "color": "#d8c48f"
+  },
+  "URANUS": {
+    "mu": 1116377649325.6262,
+    "radius": 253620.0,
+    "soi_radius": 269057600.0,
+    "parent": "SOL",
+    "orbit_radius": 768736000.0,
+    "color": "#a8d8dd"
+  },
+  "NEPTUNE": {
+    "mu": 1316974951830.443,
+    "radius": 246220.0,
+    "soi_radius": 420980000.0,
+    "parent": "SOL",
+    "orbit_radius": 1202800000.0,
+    "color": "#4a6fd0"
+  },
+  "PLUTO": {
+    "mu": 167822736.030829,
+    "radius": 11883.0,
+    "soi_radius": 31000000.0,
+    "parent": "SOL",
+    "orbit_radius": 1579280000.0,
+    "color": "#b8a58c"
+  },
+  "PHOBOS": {
+    "mu": 136.99422,
+    "radius": 112.7,
+    "soi_radius": 300.0,
+    "parent": "MARS",
+    "orbit_radius": 93760.0,
+    "color": "#7a6f66"
+  },
+  "DEIMOS": {
+    "mu": 18.49711,
+    "radius": 62.0,
+    "soi_radius": 400.0,
+    "parent": "MARS",
+    "orbit_radius": 234630.0,
+    "color": "#7a6f66"
+  },
+  "IO": {
+    "mu": 1139884393.063584,
+    "radius": 18216.0,
+    "soi_radius": 71600.0,
+    "parent": "JUPITER",
+    "orbit_radius": 4217000.0,
+    "color": "#d9cf6a"
+  },
+  "EUROPA": {
+    "mu": 616955684.007707,
+    "radius": 15608.0,
+    "soi_radius": 97200.0,
+    "parent": "JUPITER",
+    "orbit_radius": 6710340.0,
+    "color": "#cfd4d8"
+  },
+  "GANYMEDE": {
+    "mu": 1905202312.138728,
+    "radius": 26341.0,
+    "soi_radius": 243500.0,
+    "parent": "JUPITER",
+    "orbit_radius": 10704120.0,
+    "color": "#9a8c7a"
+  },
+  "CALLISTO": {
+    "mu": 1383236994.219653,
+    "radius": 24103.0,
+    "soi_radius": 377000.0,
+    "parent": "JUPITER",
+    "orbit_radius": 18827090.0,
+    "color": "#6b6259"
+  },
+  "TITAN": {
+    "mu": 1729865125.240848,
+    "radius": 25747.0,
+    "soi_radius": 435000.0,
+    "parent": "SATURN",
+    "orbit_radius": 12218700.0,
+    "color": "#d9a86a"
+  },
+  "TRITON": {
+    "mu": 275144508.67052,
+    "radius": 13534.0,
+    "soi_radius": 121000.0,
+    "parent": "NEPTUNE",
+    "orbit_radius": 3547590.0,
+    "color": "#cbb0b8"
+  }
 }

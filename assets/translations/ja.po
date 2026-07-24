@@ -150,6 +150,12 @@ msgstr "目標"
 msgid "FLIGHT PLAN"
 msgstr "飛行計画"
 
+msgid "COMMUNITY"
+msgstr "コミュニティ"
+
+msgid "OPEN MODS FOLDER"
+msgstr "MODフォルダを開く"
+
 msgid "LAUNCH ▶"
 msgstr "発射 ▶"
 
@@ -554,6 +560,9 @@ msgstr "ミッション範囲を超過"
 
 msgid "SAVE FAILED - PROGRESS MAY NOT PERSIST"
 msgstr "保存失敗 - 進捗が保持されない可能性があります"
+
+msgid "SAVE UNAVAILABLE FOR COMMUNITY LEVELS"
+msgstr "コミュニティレベルでは保存できません"
 
 msgid "LEAVING %s SOI"
 msgstr "%s SOI を離脱"

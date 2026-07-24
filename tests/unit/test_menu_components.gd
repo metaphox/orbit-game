@@ -67,11 +67,13 @@ func test_mission_detail_pane_shows_a_level_and_launches() -> void:
 	assert_eq(detail._title.text, "RAISE ORBIT", "title is the short mission name")
 	assert_true(detail._code_status.text.begins_with("ORB-01"), "code · status line")
 
-	var launched := [-1]
-	detail.launch_requested.connect(func(idx: int) -> void: launched[0] = idx)
+	# launch_requested is now argument-less: the owner (LevelSelect) launches
+	# whatever the pane shows, so the pane just signals intent.
+	var launched := [0]
+	detail.launch_requested.connect(func() -> void: launched[0] += 1)
 	detail.set_launch_enabled(false)
 	detail._launch.pressed.emit()
-	assert_eq(launched[0], -1, "a disabled LAUNCH does not fire")
+	assert_eq(launched[0], 0, "a disabled LAUNCH does not fire")
 	detail.set_launch_enabled(true)
 	detail._launch.pressed.emit()
-	assert_eq(launched[0], 0, "LAUNCH emits the shown mission index")
+	assert_eq(launched[0], 1, "an enabled LAUNCH fires launch_requested")

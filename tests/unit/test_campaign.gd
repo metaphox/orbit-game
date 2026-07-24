@@ -420,10 +420,10 @@ func test_mission_select_hover_previews_and_click_selects() -> void:
 	assert_eq(screen._cards[0].theme_type_variation, UiTheme.CARD_SELECTED, "cursor card is filled green")
 
 	screen._on_card_hovered(2)
-	assert_eq(screen._detail._index, screen._order[2], "hover live-previews that mission's detail")
+	assert_eq(screen._detail._index, screen._entries[2]["index"], "hover live-previews that mission's detail")
 	assert_eq(screen._cursor, 0, "hover does not move the selection")
 	screen._clear_hover()
-	assert_eq(screen._detail._index, screen._order[0], "leaving the list reverts to the selected mission")
+	assert_eq(screen._detail._index, screen._entries[0]["index"], "leaving the list reverts to the selected mission")
 
 	screen._on_card_clicked(3)
 	assert_eq(screen._cursor, 3, "a click selects that card")
@@ -442,10 +442,10 @@ func test_mission_select_launch_parity_and_locked_lock() -> void:
 	var chosen := [-1]
 	screen.level_chosen.connect(func(i: int) -> void: chosen[0] = i)
 	screen._unhandled_input(_key(KEY_ENTER))  # keyboard launch
-	assert_eq(chosen[0], screen._order[0], "Enter launches the selected mission")
+	assert_eq(chosen[0], screen._entries[0]["index"], "Enter launches the selected mission")
 	chosen[0] = -1
 	screen._detail._launch.pressed.emit()  # LAUNCH button
-	assert_eq(chosen[0], screen._order[0], "the LAUNCH button fires the same mission")
+	assert_eq(chosen[0], screen._entries[0]["index"], "the LAUNCH button fires the same mission")
 
 
 func test_menu_hints_hidden_by_default_and_f1_toggles_them() -> void:
@@ -470,7 +470,7 @@ func test_level_select_act_navigation_jumps_between_acts() -> void:
 	add_child_autofree(screen)
 	screen.build(Profile.new())
 
-	var bounds := screen._act_bounds()
+	var bounds := screen._bounds
 	assert_gt(bounds.size(), 1, "the campaign has multiple acts to move between")
 	assert_eq(screen._cursor, 0, "starts on the first mission of act 0")
 

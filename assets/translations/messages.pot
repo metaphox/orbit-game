@@ -148,6 +148,12 @@ msgstr ""
 msgid "FLIGHT PLAN"
 msgstr ""
 
+msgid "COMMUNITY"
+msgstr ""
+
+msgid "OPEN MODS FOLDER"
+msgstr ""
+
 msgid "LAUNCH ▶"
 msgstr ""
 
@@ -551,6 +557,9 @@ msgid "MISSION ENVELOPE EXCEEDED"
 msgstr ""
 
 msgid "SAVE FAILED - PROGRESS MAY NOT PERSIST"
+msgstr ""
+
+msgid "SAVE UNAVAILABLE FOR COMMUNITY LEVELS"
 msgstr ""
 
 msgid "LEAVING %s SOI"
