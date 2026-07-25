@@ -54,6 +54,63 @@ func test_burn_depletes_remaining_and_completes_node() -> void:
 	assert_between(ship.dv_used(), 19.0, 21.5, "burned roughly the planned dv")
 
 
+func test_predicted_ghost_does_not_double_count_delivered_dv() -> void:
+	# CR-7: mid-burn the ghost must apply the REMAINING plan, not the full authored
+	# dv on top of the already-delivered part. The predicted final orbit is the
+	# same throughout the burn (delivered + remaining = the full plan).
+	var ship := _lunar_ship()
+	ship.create_node(300.0)
+	ship.node.prograde = 30.0
+	ship.refresh_node_plan()
+	var pred_before := ship.predicted_elements().radius_apoapsis()
+
+	var dir := ship.node.remaining.normalized().to_vector3()
+	ship.attitude = Basis.looking_at(dir, Vector3.UP)
+	ship.throttle = 1.0
+	var t := 0.0
+	while ship.node != null and ship.node.remaining.length() > 15.0 and t < 20.0:
+		t += 0.1
+		ship.advance_to(t)
+	assert_not_null(ship.node, "still mid-burn (~half the node delivered)")
+	var pred_mid := ship.predicted_elements().radius_apoapsis()
+	assert_almost_eq(pred_mid, pred_before, pred_before * 0.05,
+		"predicted apoapsis stays stable mid-burn (the old bug ballooned it)")
+
+
+func test_off_axis_burn_still_completes_the_node() -> void:
+	# CR-7: burning off the node direction can't shrink the perpendicular part of
+	# remaining, so the old |remaining|<0.5 test left the node stuck forever. The
+	# projection crossing completes it once the owed dv along the nose is spent.
+	var ship := _lunar_ship()
+	ship.create_node(60.0)
+	ship.node.prograde = 20.0
+	ship.refresh_node_plan()
+	var dir := ship.node.remaining.normalized().to_vector3()
+	var axis := Vector3(0, 1, 0).cross(dir).normalized()
+	ship.attitude = Basis.looking_at(dir.rotated(axis, deg_to_rad(40.0)), Vector3.UP)
+	ship.throttle = 1.0
+	var t := 0.0
+	while ship.node != null and t < 40.0:
+		t += 0.1
+		ship.advance_to(t)
+	assert_null(ship.node, "an off-axis burn still completes instead of getting stuck")
+
+
+func test_single_tick_over_delivering_completes_the_node() -> void:
+	# CR-7: one high-accel tick can deliver far more than the remaining dv; that
+	# must complete the node, not overshoot into a growing opposite vector.
+	var ship := _lunar_ship()
+	ship.create_node(100.0)
+	ship.node.prograde = 2.0  # tiny node vs a multi-second full-throttle tick
+	ship.refresh_node_plan()
+	var dir := ship.node.remaining.normalized().to_vector3()
+	ship.attitude = Basis.looking_at(dir, Vector3.UP)
+	ship.throttle = 1.0
+	ship.advance_to(5.0)  # a single burn call delivering >> 2 m/s
+	assert_null(ship.node, "over-delivering in one tick completes the node")
+	assert_true(ship.node_completed, "completion flag raised")
+
+
 func test_warp_stops_at_scheduled_node_time() -> void:
 	GameRootScript.level_index = 3
 	var game: Node = load("res://src/main.tscn").instantiate()

@@ -301,8 +301,11 @@ func predicted_elements() -> OrbitElements:
 		return null
 	var el := current_elements()
 	var state := el.state_at_time(node.t_node)
+	# Apply what's LEFT of the plan (node.remaining), not the full authored dv:
+	# before a burn remaining == the full plan, but mid-burn it's the true
+	# remainder, so the ghost never re-adds already-delivered dv (CR-7).
 	return OrbitElements.from_state(
-		state.r, state.v.add(node.planned_world_dv(el)), body.mu, node.t_node)
+		state.r, state.v.add(node.remaining), body.mu, node.t_node)
 
 
 ## Direction the active SAS mode wants the nose pointing (unit vector in
@@ -356,12 +359,18 @@ func _integrate_burn(duration: float, thrust: float, flow: float) -> void:
 	prop_mass = maxf(s.mass - dry_mass, 0.0)
 	if node != null:
 		var dv_step := Integrator.delta_v(mass_before, mass(), isp)
-		node.remaining = node.remaining.sub(dir.scaled(dv_step))
-		if node.remaining.length() < NODE_COMPLETE_DV:
+		# Complete on a projection crossing, not on |remaining| shrinking: a
+		# high-accel craft can deliver more than the remaining dv in one tick,
+		# which would otherwise leave a growing vector pointing the other way and
+		# never trip the magnitude threshold (CR-7). `dir.dot(remaining)` is the dv
+		# still owed along the burn direction; once this tick meets it, we're done.
+		if dir.dot(node.remaining) <= dv_step + NODE_COMPLETE_DV:
 			node = null
 			node_completed = true
 			if sas_mode == SasMode.NODE:
 				sas_mode = SasMode.OFF
+		else:
+			node.remaining = node.remaining.sub(dir.scaled(dv_step))
 
 
 func _refit_elements(at_time: float) -> void:

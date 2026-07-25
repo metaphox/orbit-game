@@ -185,14 +185,15 @@ func focus_point(ship: ShipSim, t: float) -> Vector3:
 ## Orthographic size (render units) that frames the ship's current orbit and,
 ## when the ship is at the root body, its target - so AUTO zoom fills the panel
 ## instead of leaving dead margin. Measured from the current parent centre.
-func auto_extent(ship: ShipSim, _t: float) -> float:
+func auto_extent(ship: ShipSim, t: float) -> float:
 	var el := ship.current_elements()
 	var r_max := minf(_level.draw_limit, ship.body.soi_radius * 1.15)
 	var reach := ship.r.length()
 	if el.is_elliptic():
 		reach = maxf(reach, minf(el.radius_apoapsis(), r_max))
-	if ship.body == _level.body:
-		reach = maxf(reach, _target_reach())
+	# Include the objective's target, measured from the CURRENT focus, for every
+	# objective type (CR-9) - so a lunar/interplanetary target isn't off-screen.
+	reach = maxf(reach, _target_reach(ship, t))
 	reach = maxf(reach, ship.body.radius * 1.2)
 	return reach * 3.0 * MAP_SCALE  # *2 for diameter, *1.5 margin inside the round bezel
 
@@ -229,7 +230,11 @@ func marked_points(ship: ShipSim, t: float) -> Array:
 	return out
 
 
-func _target_reach() -> float:
+## How far from the ship's current focus the objective's target sits, so AUTO
+## can frame it. Ring goals (match/rendezvous/corridor) return their radius in the
+## focus frame; body goals (transfer/landing) return the distance to the next body
+## on the route toward the target, plus enough to show its capture SOI / surface.
+func _target_reach(ship: ShipSim, t: float) -> float:
 	var o := _level.objective
 	if o is OrbitMatchObjective:
 		return (o as OrbitMatchObjective).target_radius
@@ -237,7 +242,25 @@ func _target_reach() -> float:
 		return (o as RendezvousObjective).station_orbit.a
 	if o is EntryCorridorObjective:
 		return (o as EntryCorridorObjective).target_periapsis
+	if o is TransferCaptureObjective:
+		var aim := _leg_body(ship.body, (o as TransferCaptureObjective).target)
+		if aim != null:
+			return Frames.position_relative_to(aim, ship.body, t).length() + aim.soi_radius
+	elif o is AirlessLandingObjective:
+		var aim := _leg_body(ship.body, (o as AirlessLandingObjective).target)
+		if aim != null:
+			return Frames.position_relative_to(aim, ship.body, t).length() + aim.radius * 1.5
 	return 0.0
+
+
+## The child of `from_body` on the route toward `target` (the immediate leg's
+## body), `target` itself if it's a direct child, or null if `from_body` isn't an
+## ancestor of the target - the same route walk the transfer objective uses.
+func _leg_body(from_body: BodyDef, target: BodyDef) -> BodyDef:
+	var node := target
+	while node != null and node.parent != from_body:
+		node = node.parent
+	return node
 
 
 func _rebuild_orbit_line(el: OrbitElements, r_max: float) -> void:

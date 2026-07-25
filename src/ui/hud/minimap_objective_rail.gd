@@ -10,8 +10,8 @@ var map_view: MapView
 var _overlay: MinimapOverlay
 var _zoom_auto := true
 var _manual_size := 0.0
-var _minimum_size := 1.0
 var _maximum_size := 1.0e9
+var _current_min := 1.0  # SOI-relative zoom floor, refreshed from ship.body each frame
 
 
 func _ready() -> void:
@@ -25,7 +25,6 @@ func _ready() -> void:
 
 func configure(level: LevelDef) -> void:
 	minimap_camera.size = level.map_extent
-	_minimum_size = level.body.radius * 1.6 * MapView.MAP_SCALE
 	_maximum_size = level.draw_limit * 2.6 * MapView.MAP_SCALE
 	_manual_size = level.map_extent
 	_zoom_auto = true
@@ -44,7 +43,10 @@ func refresh(ship: ShipSim, time: float) -> void:
 	var target_size := _manual_size
 	if _zoom_auto and map_view != null:
 		target_size = map_view.auto_extent(ship, time)
-	target_size = clampf(target_size, _minimum_size, _maximum_size)
+	# Min zoom follows the CURRENT SOI body, not the level root (CR-9) — so after
+	# entering a small planet/moon SOI you can still zoom in past the Sun scale.
+	_current_min = ship.body.radius * 1.6 * MapView.MAP_SCALE
+	target_size = clampf(target_size, _current_min, _maximum_size)
 	minimap_camera.size = lerpf(minimap_camera.size, target_size, 0.15)
 
 	var camera_size := minimap_camera.size
@@ -82,7 +84,7 @@ func _on_zoom(mode: String) -> void:
 			if _zoom_auto:
 				_manual_size = minimap_camera.size
 			_zoom_auto = false
-			_manual_size = maxf(_manual_size / 1.35, _minimum_size)
+			_manual_size = maxf(_manual_size / 1.35, _current_min)
 		"out":
 			if _zoom_auto:
 				_manual_size = minimap_camera.size
