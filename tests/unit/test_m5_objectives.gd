@@ -27,6 +27,21 @@ func test_closest_approach_matches_brute_force() -> void:
 	assert_close(ca.distance, best_d, 0.01, "refined min matches brute force")
 
 
+func test_station_orbit_is_cached_and_invalidates_on_param_change() -> void:
+	# PF-4: station_orbit used to rebuild (a circular() fit + allocations) on
+	# every getter access, despite the class comment claiming it was cached.
+	# It now follows BodyDef.orbit's lazy-cache + setter-invalidation pattern.
+	var obj := RendezvousObjective.new()
+	obj.station_mu = MU_EARTH
+	obj.station_orbit_radius = R_LEO
+	var first := obj.station_orbit
+	assert_same(obj.station_orbit, first, "repeated access returns the same cached instance")
+
+	obj.station_orbit_radius = R_LEO * 1.2  # a param change must invalidate the cache
+	assert_not_same(obj.station_orbit, first, "changing a station param rebuilds the orbit")
+	assert_almost_eq(obj.station_orbit.a, R_LEO * 1.2, 1.0, "the rebuilt orbit reflects the new radius")
+
+
 func test_closest_approach_cache_survives_warp_sized_time_jumps() -> void:
 	# PF-3: at high warp a render frame advances far more than the old 2 s cache
 	# window, but the conic is unchanged, so the cached solve must be reused.

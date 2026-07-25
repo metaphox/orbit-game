@@ -36,6 +36,7 @@ var _soi_rings: Array[MeshInstance3D] = []
 # [{ "marker": MeshInstance3D, "orbit": OrbitElements, "label": String, "color": Color }]
 var _tracked: Array[Dictionary] = []
 var _refresh_left := 0.0
+var _orbit_line_rev := -1  # ship.revision the minimap conic was last built for (PF-3)
 var _last_heading := 0.0  # prograde-up camera azimuth, held across zero-velocity
 
 
@@ -172,6 +173,15 @@ func sync(ship: ShipSim, t: float, delta: float) -> void:
 	if _refresh_left > 0.0:
 		return
 	_refresh_left = REFRESH_INTERVAL
+	# While coasting the conic is fixed - it only changes when a burn/refit (or an
+	# SOI hand-off, which also refits) bumps ship.revision - so skip the 256-point
+	# ImmediateMesh rebuild the timer would otherwise repeat every REFRESH_INTERVAL,
+	# even at high warp where nothing about the orbit moved. During powered flight
+	# the osculating orbit changes continuously, so rebuild on the timer (PF-3).
+	var coasting := ship.flight_state == ShipSim.FlightState.COASTING
+	if coasting and ship.revision == _orbit_line_rev:
+		return
+	_orbit_line_rev = ship.revision if coasting else -1
 	var r_max := minf(_level.draw_limit, ship.body.soi_radius * 1.15)
 	_rebuild_orbit_line(ship.current_elements(), r_max)
 

@@ -161,3 +161,33 @@ func test_auto_extent_frames_a_transfer_target_at_each_leg() -> void:
 	ship.body = b.sun
 	var reach_root := mv.auto_extent(ship, 0.0) / (3.0 * MapView.MAP_SCALE)
 	assert_gt(reach_root, D_EARTH, "from the root, AUTO frames the planet (the next hop)")
+
+
+# --- PF-3: the minimap conic is rebuilt only when the coasting orbit changes ---
+
+func test_minimap_conic_rebuilds_only_on_revision_while_coasting() -> void:
+	var b := _bodies()
+	var mv := MapView.new()
+	add_child_autofree(mv)
+	mv.build(_level(b, TransferCaptureObjective.new()))
+	var ship := ShipSim.new()
+	ship.setup(_level(b, TransferCaptureObjective.new()))
+	mv.minimap_ortho_size = 1.0e9
+
+	# delta > REFRESH_INTERVAL, so the throttle fires on every sync. First sync
+	# builds the 256-point conic.
+	mv.sync(ship, 0.0, 1.0)
+	assert_gt(mv.orbit_mesh.get_surface_count(), 0, "the coasting conic is built")
+
+	# Poison: clear the mesh. A stationary coasting revision must NOT rebuild it,
+	# even though the refresh timer keeps firing (PF-3: the old code rebuilt every
+	# REFRESH_INTERVAL regardless).
+	mv.orbit_mesh.clear_surfaces()
+	mv.sync(ship, 1.0, 1.0)
+	assert_eq(mv.orbit_mesh.get_surface_count(), 0,
+		"a stationary coasting orbit skips the minimap conic rebuild")
+
+	# A refit (revision bump) rebuilds it.
+	ship.revision += 1
+	mv.sync(ship, 2.0, 1.0)
+	assert_gt(mv.orbit_mesh.get_surface_count(), 0, "a refit rebuilds the minimap conic")

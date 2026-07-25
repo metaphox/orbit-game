@@ -716,31 +716,19 @@ func _recompute_events() -> void:
 	var impact := OrbitEvents.impact_time(el, ship.body.radius, sim_time)
 	if not is_nan(impact):
 		events.append(impact)
-	var horizon := sim_time + _scan_span(el)
+	_event_horizon = sim_time + ship.event_scan_span(level.draw_limit)
 	if ship.body.parent != null:
 		var exit_t := OrbitEvents.soi_exit_time(el, ship.body.soi_radius, sim_time)
 		if not is_nan(exit_t):
 			events.append(exit_t)
 	# not an elif: a ship inside a non-root body's SOI can still enter one
 	# of that body's own children (e.g. a moon of Earth while Earth is
-	# itself a child of the Sun) - see ShipSim.apply_soi_transitions.
-	for moon in level.moons:
-		if moon.decorative or moon.parent != ship.body:
-			continue
-		var entry := OrbitEvents.child_soi_entry_time(
-			el, moon.orbit, moon.soi_radius, sim_time, horizon,
-			maxf((horizon - sim_time) / 400.0, 1.0))
-		if not is_nan(entry):
-			events.append(entry)
-	_event_horizon = horizon
+	# itself a child of the Sun) - see ShipSim.apply_soi_transitions. The scan
+	# itself lives on ShipSim so the visual encounter marker shares one result.
+	var child_entry := ship.next_child_soi_entry(level.moons, sim_time, level.draw_limit)
+	if not is_nan(child_entry):
+		events.append(child_entry)
 	_next_event = events.min() if not events.is_empty() else INF
-
-
-func _scan_span(el: OrbitElements) -> float:
-	if el.is_elliptic():
-		return el.period()
-	var exit_t := OrbitEvents.radius_crossing_time(el, level.draw_limit, sim_time, true)
-	return (exit_t - sim_time) if not is_nan(exit_t) else 2.0e4
 
 
 func _node_create() -> void:

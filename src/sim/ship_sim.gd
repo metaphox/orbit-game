@@ -50,6 +50,16 @@ var node_completed := false  # one-shot flag for the UI to poll and clear
 
 var _level: LevelDef
 
+## Shared child-SOI encounter scan cache (PF-1). child_soi_entry_time is a
+## ~150 ms numerical root-find; the physics event clamp and the visual encounter
+## marker both need the same answer on the same coasting orbit, so it is computed
+## once here and keyed on (revision, body, window) instead of each caller paying
+## the scan. See next_child_soi_entry.
+var _soi_scan_rev := -1
+var _soi_scan_body: BodyDef = null
+var _soi_scan_horizon := -INF
+var _soi_scan_entry := NAN
+
 
 func setup(level: LevelDef) -> void:
 	_level = level
@@ -256,6 +266,42 @@ func current_elements() -> OrbitElements:
 	if flight_state == FlightState.COASTING:
 		return elements
 	return OrbitElements.from_state(r, v, body.mu, last_time)
+
+
+## Suggested horizon for scanning coasting events: one period when bound, else
+## the time to reach draw_limit (or a fallback for a slow escape). Shared by the
+## physics event clamp and the visual encounter marker so both scan the same
+## window off the same current orbit.
+func event_scan_span(draw_limit: float) -> float:
+	if elements.is_elliptic():
+		return elements.period()
+	var exit_t := OrbitEvents.radius_crossing_time(elements, draw_limit, last_time, true)
+	return (exit_t - last_time) if not is_nan(exit_t) else 2.0e4
+
+
+## Earliest time in [t, t + event_scan_span] that the current coasting orbit
+## enters one of `moons`' SOIs, or NAN. The expensive numerical scan runs once
+## per (revision, body, window): while coasting the orbit is fixed, so the
+## physics event clamp (game_root) and the visual encounter marker
+## (ManeuverVisuals) share this single result instead of each re-scanning. Picks
+## the minimum across all active children, so both consumers agree on which moon.
+func next_child_soi_entry(moons: Array, t: float, draw_limit: float) -> float:
+	if revision == _soi_scan_rev and body == _soi_scan_body and t <= _soi_scan_horizon:
+		return _soi_scan_entry
+	var span := event_scan_span(draw_limit)
+	_soi_scan_rev = revision
+	_soi_scan_body = body
+	_soi_scan_horizon = t + span
+	var earliest := INF
+	for moon: BodyDef in moons:
+		if moon.decorative or moon.parent != body:
+			continue
+		var entry := OrbitEvents.child_soi_entry_time(
+			elements, moon.orbit, moon.soi_radius, t, t + span, maxf(span / 400.0, 1.0))
+		if not is_nan(entry):
+			earliest = minf(earliest, entry)
+	_soi_scan_entry = earliest if earliest < INF else NAN
+	return _soi_scan_entry
 
 
 func forward_dir() -> DVec3:

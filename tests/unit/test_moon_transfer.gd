@@ -157,17 +157,18 @@ func test_encounter_marker_scan_is_cached_across_unchanged_frames() -> void:
 	assert_true(game.flight_view._maneuver._encounter_marker.visible,
 		"the transfer's Moon encounter is marked from Earth's SOI")
 
-	# Poison the cached entry time: an unchanged orbit must reuse it verbatim
-	# rather than paying the ~165 ms scan again on the next rebuild.
-	game.flight_view._maneuver._encounter_entry_t = -12345.0
+	# Poison the cached entry time on the SHARED ShipSim scan (PF-1): an unchanged
+	# orbit must reuse it verbatim rather than paying the ~165 ms scan again on the
+	# next rebuild — and the physics event clamp reads the same cache.
+	game.ship._soi_scan_entry = -12345.0
 	simulate(game, 20, 1.0 / 60.0)
-	assert_eq(game.flight_view._maneuver._encounter_entry_t, -12345.0,
+	assert_eq(game.ship._soi_scan_entry, -12345.0,
 		"a stationary orbit reuses the cached encounter time instead of rescanning")
 
 	# A refit (revision bump) invalidates the cache and the scan runs again.
 	game.ship.revision += 1
 	simulate(game, 20, 1.0 / 60.0)
-	assert_ne(game.flight_view._maneuver._encounter_entry_t, -12345.0,
+	assert_ne(game.ship._soi_scan_entry, -12345.0,
 		"a refit invalidates the cache and the encounter scan re-runs")
 
 
