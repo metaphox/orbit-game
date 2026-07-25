@@ -182,6 +182,12 @@ func _physics_process(delta: float) -> void:
 	else:
 		_apply_flight_input(delta)
 
+	# Settle a just-cut (or dry) burn into COASTING now, so the rails-warp event
+	# clamp below sees the true coasting state even if throttle was cut and warp
+	# raised in the same input gap (CR-1) - otherwise advance_to would refit at
+	# the old time and coast straight past the next impact/SOI.
+	ship.normalize_coast()
+
 	# Rising edge of a burn: record the pre-ignition coast state as an anchor
 	# (before advancing, so it's the moment just before thrust). Coalescing of
 	# near-back-to-back burns lives in RewindBuffer.note_burn_start.

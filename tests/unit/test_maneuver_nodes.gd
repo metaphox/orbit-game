@@ -78,6 +78,51 @@ func test_warp_stops_at_scheduled_node_time() -> void:
 		% [game.sim_time, t_node])
 
 
+func test_normalize_coast_settles_a_cut_burn_but_not_an_active_one() -> void:
+	# CR-1 unit: a throttle cut leaves flight_state BURNING until an advance;
+	# normalize_coast() settles it to COASTING immediately, but only once the ship
+	# is genuinely not thrusting.
+	var ship := _lunar_ship()
+	ship.throttle = 1.0
+	ship.advance_to(2.0)
+	assert_eq(ship.flight_state, ShipSim.FlightState.BURNING, "burning after a throttle-on advance")
+	ship.normalize_coast()
+	assert_eq(ship.flight_state, ShipSim.FlightState.BURNING, "an actively-thrusting ship stays BURNING")
+	ship.throttle = 0.0
+	ship.normalize_coast()
+	assert_eq(ship.flight_state, ShipSim.FlightState.COASTING, "a cut burn settles to COASTING")
+
+
+func test_throttle_cut_then_warp_still_clamps_to_the_next_event() -> void:
+	# CR-1 integration: cut throttle (state stays BURNING) then warp in the same
+	# input gap — the rails-warp event clamp must still engage, not skip the event.
+	GameRootScript.level_index = 3
+	var game: Node = load("res://src/main.tscn").instantiate()
+	add_child_autofree(game)
+	simulate(game, 2, 1.0 / 60.0)
+
+	# Leave the ship in the exact CR-1 state: burned one tick, throttle cut, but
+	# flight_state still BURNING (no advance has refitted it yet).
+	game.ship.throttle = 1.0
+	simulate(game, 1, 1.0 / 60.0)
+	game.ship.throttle = 0.0
+	assert_eq(game.ship.flight_state, ShipSim.FlightState.BURNING,
+		"precondition: throttle cut but state still BURNING")
+
+	# An event ~10 s ahead — inside a single max-warp tick (1000x -> ~16.7 s).
+	game._node_create()
+	var t_node: float = game.sim_time + 10.0
+	game.ship.node.t_node = t_node
+	game.ship.refresh_node_plan()
+
+	game.warp_index = game.WARP_STEPS.size() - 1
+	simulate(game, 1, 1.0 / 60.0)
+	assert_lt(game.sim_time, t_node + 3.0,
+		"warp clamped near the event (%.1f) instead of skipping past it (sim_time=%.1f)"
+		% [t_node, game.sim_time])
+	assert_eq(game.warp_index, 0, "and dropped out of warp at the event")
+
+
 func test_node_capability_gate_and_game_flow() -> void:
 	var game: Node = load("res://src/main.tscn").instantiate()
 	add_child_autofree(game)

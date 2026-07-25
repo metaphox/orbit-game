@@ -70,6 +70,17 @@ func setup(level: LevelDef) -> void:
 	last_time = 0.0
 
 
+## Settle a ship that has stopped thrusting (throttle cut, or tank dry) into a
+## COASTING conic refit at the current time, WITHOUT advancing. advance_to() does
+## this refit too, but only once it runs — so a throttle cut followed by a warp
+## change in the same input gap would still read flight_state == BURNING and skip
+## the rails-warp event clamp (CR-1). Callers invoke this before choosing a warp
+## target so the state is event-clamp-ready. No-op while actually thrusting.
+func normalize_coast() -> void:
+	if flight_state == FlightState.BURNING and (throttle <= 0.0 or prop_mass <= 0.0):
+		_refit_elements(last_time)
+
+
 func advance_to(t: float) -> void:
 	if t <= last_time:
 		return
