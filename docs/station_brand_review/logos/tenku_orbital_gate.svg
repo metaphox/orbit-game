@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">TENKŪ Orbital Works orbital-gate mark</title>
+  <desc id="desc">An off-centre vermilion disc crossed by two parallel indigo rails.</desc>
+  <circle cx="220" cy="230" r="78" fill="#D8492F"/>
+  <path d="M80 190 L430 266" stroke="#18253B" stroke-width="28" stroke-linecap="square"/>
+  <path d="M98 266 L404 336" stroke="#18253B" stroke-width="28" stroke-linecap="square"/>
+</svg>

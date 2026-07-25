@@ -298,15 +298,109 @@ def test_organization_report_is_deterministic_bounded_and_serialized():
     assert blueprint["resolved_seed"] == first.seed
 
 
-# --- palette: output references ONLY the player-ship materials -----------------
-def test_tscn_uses_only_ship_materials_no_raw_colours():
-    st = sg.generate_one(2 * sg.ISS_METERS, 1, "truss", 1, 1, 1, 0.35)
-    tscn = sg.to_tscn(st, 0.35)
+# --- operator brands -----------------------------------------------------------
+def test_brand_registry_has_complete_distinct_material_families():
+    repo_root = os.path.dirname(_here)
+    palettes = []
+    for key in sg.BRAND_KEYS:
+        brand = sg.BRANDS[key]
+        assert brand["key"] == key
+        assert set(brand["colors"]) == set(sg.MATERIAL_ROLES)
+        assert set(brand["finish"]) == set(sg.MATERIAL_ROLES)
+        assert set(brand["materials"]) == set(sg.MATERIAL_ROLES)
+        assert set(brand["preview_colors"]) == set(sg.MATERIAL_ROLES)
+        for path in brand["materials"].values():
+            assert path.startswith("res://")
+            assert os.path.exists(os.path.join(repo_root, path[len("res://"):]))
+        palettes.append(tuple(brand["colors"][role]
+                              for role in sg.MATERIAL_ROLES))
+    assert len(set(palettes)) == len(sg.BRAND_KEYS)
+
+
+def test_auto_brand_uses_requested_seed_not_candidate_retry_seed():
+    for seed in range(1, 13):
+        station = sg.generate_one(
+            2 * sg.ISS_METERS, seed, "truss", 1, 1, 1, 0.35, brand="auto")
+        assert station.brand_key == sg.resolve_brand("auto", seed)
+    batch_brands = {sg.resolve_brand("auto", 1 + index * 1000)
+                    for index in range(10)}
+    assert batch_brands == set(sg.BRAND_KEYS)
+
+
+def test_explicit_brands_preserve_seeded_station_geometry_and_score():
+    stations = [
+        sg.generate_one(3 * sg.ISS_METERS, 27, "truss", 1, 1, 1, 0.35,
+                        brand=key)
+        for key in sg.BRAND_KEYS]
+
+    def geometry_signature(station):
+        return [
+            (part.kind, part.mesh, part.half, part.pos, part.cols,
+             part.connector, part.assembly, part.extra)
+            for part in station.parts if part.kind != "brand_logo"]
+
+    reference = stations[0]
+    for station in stations[1:]:
+        assert geometry_signature(station) == geometry_signature(reference)
+        assert station.seed == reference.seed
+        assert station.archetype == reference.archetype
+        assert station.forms == reference.forms
+        assert station.sun_vector == reference.sun_vector
+        assert station.solar_family == reference.solar_family
+        assert station.thermal == reference.thermal
+        assert station.organization == reference.organization
+
+
+def test_every_brand_places_one_correct_module_owned_primitive_logo():
+    expected_part_counts = {"tenku": 3, "jiuyuan": 4,
+                            "far_horizon": 3, "weser": 4}
+    for key in sg.BRAND_KEYS:
+        station = sg.generate_one(
+            sg.ISS_METERS, 8, "stack", 1, 1, 1, 0.35, brand=key)
+        branded_details = [
+            assembly for assembly in station.assemblies.values()
+            if "brand_logo" in assembly.metadata]
+        assert len(branded_details) == 1
+        detail = branded_details[0]
+        logo = detail.metadata["brand_logo"]
+        assert logo["brand"] == key
+        assert logo["mark"] == sg.BRANDS[key]["logo"]["id"]
+        assert len(logo["part_indices"]) == expected_part_counts[key]
+        assert all(station.parts[index].kind == "brand_logo"
+                   and station.parts[index].assembly == detail.id
+                   for index in logo["part_indices"])
+        assert station.assemblies[detail.metadata["module"]].crewed
+        assert station.counts["logos"] == 1
+        assert sg.validate(station) is True
+
+
+def test_brand_validator_rejects_a_mismatched_mark():
+    station = sg.generate_one(
+        sg.ISS_METERS, 8, "stack", 1, 1, 1, 0.35, brand="tenku")
+    detail = next(assembly for assembly in station.assemblies.values()
+                  if "brand_logo" in assembly.metadata)
+    detail.metadata["brand_logo"]["mark"] = "horizon_delta"
+    assert "wrong primitive mark" in _validation_message(station)
+
+
+def test_tscn_and_blueprint_use_only_the_selected_brand_materials():
     import re
-    paths = re.findall(r'path="([^"]+)"', tscn)
-    assert set(paths) == set(sg.MAT.values()), paths   # exactly the 5 ship mats
-    assert "Color(" not in tscn                         # no hard-coded colours
-    assert "albedo_color" not in tscn                   # colour comes from the .tres
+    for key in sg.BRAND_KEYS:
+        station = sg.generate_one(
+            2 * sg.ISS_METERS, 1, "truss", 1, 1, 1, 0.35, brand=key)
+        tscn = sg.to_tscn(station, 0.35)
+        paths = re.findall(r'path="([^"]+)"', tscn)
+        assert set(paths) == set(sg.BRANDS[key]["materials"].values()), paths
+        assert "Color(" not in tscn
+        assert "albedo_color" not in tscn
+        assert f'metadata/operator_brand_key = "{key}"' in tscn
+        assert sg.BRANDS[key]["display_name"] in tscn
+        blueprint = sg.to_json(station, 0.35)
+        assert blueprint["brand"]["key"] == key
+        assert blueprint["brand"]["logo"] == sg.BRANDS[key]["logo"]
+        assert blueprint["brand"]["material_paths"] == sg.BRANDS[key]["materials"]
+        assert set(part["material_role"] for part in blueprint["parts"]) \
+            <= set(sg.MATERIAL_ROLES)
 
 
 def _run():

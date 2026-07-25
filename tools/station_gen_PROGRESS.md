@@ -2,6 +2,30 @@
 
 Scratch note for the /loop task (procedural station generator). Delete when done.
 
+## Done (iteration 17) — fictional station operator brands
+- Researched 1970s aerospace/industrial languages and documented four original
+  fictional operators: TENKŪ (Japan), JIǓYUÁN (China), Far Horizon (US), and
+  Weser (Germany), with originality guardrails and linked primary references.
+- Generator parts now request five semantic roles (hull, structure, solar,
+  accent, light). `--brand` resolves those roles through one of 20 brand material
+  resources with distinct enamel/anodised, ceramic/oxide, brushed-alloy, or
+  powder-coat responses; previews use the same role colours.
+- Every station receives one small original primitive logo owned by a lab or
+  habitat surface. Validation pins the selected mark, owning crew module, and
+  primitive indices. Brand choice cannot consume layout RNG or alter structural
+  geometry, thermal sizing, connectivity, or organisation scoring.
+- `auto` uses a fixed seed mixer rather than a simple modulo, so the CLI's
+  1000-seed batch stride still covers all four operators. Scenes and blueprints
+  record the resolved brand; explicit brand filenames cannot overwrite one
+  another.
+- Five review scenes/blueprints/previews live in `assets/station_brand_review/`
+  and `docs/station_brand_review/`, with a vector brand board for logo/palette
+  review. Four are controlled same-seed comparisons; the fifth exercises auto on
+  the dual-keel/ring/dome hybrid.
+- Verification: 28/28 Python tests, the 162-station archetype/size/seed self-test,
+  20/20 Godot station load/basis checks, the guarded project suite, and a
+  warning-free debug import.
+
 ## Done (iteration 16) — thermal-budget radiator pass
 - Replaced the duplicated, nearly square radiator fins with one connected accordion sheet per
   bank: 6–8 cream panels, visible dark hinges, a continuous spar, and a 5:1–7:1 face aspect.

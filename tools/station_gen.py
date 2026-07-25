@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Procedurally generate plausible space stations for the orbit-game.
 
-Emits a Godot `.tscn` (primitive meshes that reference the *ship* materials, so a
-station reads as the same universe as the player craft) plus a `.json` blueprint.
+Emits a Godot `.tscn` whose primitive meshes resolve semantic material roles
+through one fictional operator brand, plus a `.json` blueprint.
 Every solid part is bounds-checked so nothing interpenetrates — see docs/STATIONS.md
 for the design rules this encodes.
 
@@ -26,14 +26,107 @@ import random
 import sys
 from dataclasses import dataclass, field
 
-# --- Palette: reference the player-ship materials so colours always match ------
+# --- Operator brands: one semantic material vocabulary, four visual languages --
 MAT = {
-    "hull": "res://src/ui/world/materials/ship_hull_material.tres",     # cream
-    "dark": "res://src/ui/world/materials/ship_dark_material.tres",     # structure
-    "solar": "res://src/ui/world/materials/ship_solar_material.tres",   # panels
-    "orange": "res://src/ui/world/materials/ship_nose_material.tres",   # accent
-    "green": "res://src/ui/world/materials/ship_light_material.tres",   # nav lights
+    "hull": "hull",
+    "dark": "structure",
+    "solar": "solar",
+    "orange": "accent",
+    "green": "light",
 }
+
+MATERIAL_ROLES = ("hull", "structure", "solar", "accent", "light")
+BRANDS = {
+    "tenku": {
+        "key": "tenku",
+        "display_name": "TENKŪ ORBITAL WORKS",
+        "legal_name": "天穹軌道工業株式会社",
+        "country": "Japan",
+        "logo": {"id": "orbital_gate",
+                 "description": "vermilion disc crossed by twin indigo rails"},
+        "colors": {"hull": "#E7E0CE", "structure": "#18253B",
+                   "solar": "#294C69", "accent": "#D8492F",
+                   "light": "#8FE0CF"},
+        "finish": {"hull": "semi-gloss ceramic enamel",
+                   "structure": "fine indigo anodising",
+                   "solar": "smoked cobalt collector glass",
+                   "accent": "vermilion service lacquer",
+                   "light": "mint status emitter"},
+    },
+    "jiuyuan": {
+        "key": "jiuyuan",
+        "display_name": "JIǓYUÁN ORBITAL INDUSTRIES",
+        "legal_name": "九原轨道工业有限公司",
+        "country": "China",
+        "logo": {"id": "nested_gate",
+                 "description": "cinnabar open gate around an amber core"},
+        "colors": {"hull": "#C8D0BE", "structure": "#252824",
+                   "solar": "#2C615D", "accent": "#B83B2D",
+                   "light": "#F2C66D"},
+        "finish": {"hull": "satin celadon ceramic-coated alloy",
+                   "structure": "rough ink-black oxide",
+                   "solar": "deep-jade collector glass",
+                   "accent": "cinnabar service lacquer",
+                   "light": "amber thermal-status emitter"},
+    },
+    "far_horizon": {
+        "key": "far_horizon",
+        "display_name": "FAR HORIZON ASTRONAUTICS",
+        "legal_name": "Far Horizon Astronautics, Inc.",
+        "country": "United States",
+        "logo": {"id": "horizon_delta",
+                 "description": "split orange delta crossing a graphite horizon"},
+        "colors": {"hull": "#D7DEE0", "structure": "#20262B",
+                   "solar": "#1D3F62", "accent": "#E66A2C",
+                   "light": "#70D8FF"},
+        "finish": {"hull": "cool enamel over brushed alloy",
+                   "structure": "graphite anti-glare metal",
+                   "solar": "midnight-blue collector glass",
+                   "accent": "matte safety-orange coating",
+                   "light": "electric-cyan status emitter"},
+    },
+    "weser": {
+        "key": "weser",
+        "display_name": "WESER RAUMSYSTEME",
+        "legal_name": "Weser Raumsysteme GmbH",
+        "country": "Germany",
+        "logo": {"id": "module_step",
+                 "description": "three ochre modules rising from a graphite grid"},
+        "colors": {"hull": "#C8C2AE", "structure": "#292D30",
+                   "solar": "#27545B", "accent": "#D6A928",
+                   "light": "#B9D36A"},
+        "finish": {"hull": "very matte warm-stone powder coat",
+                   "structure": "phosphated graphite metal",
+                   "solar": "petrol collector glass",
+                   "accent": "matte signal-ochre block",
+                   "light": "lime status emitter"},
+    },
+}
+BRAND_KEYS = tuple(BRANDS)
+for _brand_key, _brand in BRANDS.items():
+    _brand["materials"] = {
+        role: f"res://assets/station_brands/materials/{_brand_key}/{role}.tres"
+        for role in MATERIAL_ROLES
+    }
+    _brand["preview_colors"] = {
+        role: tuple(int(_brand["colors"][role][offset:offset + 2], 16)
+                    for offset in (1, 3, 5))
+        for role in MATERIAL_ROLES
+    }
+
+
+def resolve_brand(brand: str, requested_seed: int) -> str:
+    """Resolve auto from the requested seed without consuming layout RNG."""
+    if brand == "auto":
+        mask = (1 << 64) - 1
+        mixed = (requested_seed + 0x9E3779B97F4A7C15) & mask
+        mixed = ((mixed ^ (mixed >> 30)) * 0xBF58476D1CE4E5B9) & mask
+        mixed = ((mixed ^ (mixed >> 27)) * 0x94D049BB133111EB) & mask
+        mixed ^= mixed >> 31
+        return BRAND_KEYS[mixed % len(BRAND_KEYS)]
+    if brand not in BRANDS:
+        raise ValueError(f"unknown station brand: {brand}")
+    return brand
 
 ISS_METERS = 109.0  # yardstick: ISS longest dimension
 
@@ -241,10 +334,13 @@ def estimate_thermal_budget(st: Station) -> dict:
 # --- station builder -----------------------------------------------------------
 class Station:
     def __init__(self, seed: int, meters: float, archetype: str,
-                 min_panels: int, min_labs: int, min_habs: int):
+                 min_panels: int, min_labs: int, min_habs: int,
+                 brand: str = "auto"):
         self.rng = random.Random(seed)
         self.seed = seed
         self.requested_seed = seed
+        self.brand_key = resolve_brand(brand, seed)
+        self.brand = BRANDS[self.brand_key]
         self.meters = meters
         self.min_panels = min_panels
         self.min_labs = min_labs
@@ -273,7 +369,8 @@ class Station:
         self.counts = {"labs": 0, "habs": 0, "nodes": 0, "panels": 0,
                        "radiators": 0, "antennas": 0, "ports": 0, "rings": 0,
                        "domes": 0, "tanks": 0, "arms": 0, "tugs": 0,
-                       "truss_bays": 0, "windows": 0, "module_lights": 0}
+                       "truss_bays": 0, "windows": 0, "module_lights": 0,
+                       "logos": 0}
 
     # -- helpers
     def new_assembly(self, role: str, crewed: bool = False,
@@ -1489,8 +1586,109 @@ class Station:
         self.build_docked_tug(hub_r, lx)
         return self
 
+    def add_logo_bar(self, assembly: str, mark_center: Vec, surface_axis: Vec,
+                     tangent: Vec, normal: Vec, start: tuple[float, float],
+                     end: tuple[float, float], width: float, thickness: float,
+                     material: str) -> int:
+        start_world = vadd(
+            mark_center,
+            vadd(vscale(surface_axis, start[0]), vscale(tangent, start[1])))
+        end_world = vadd(
+            mark_center,
+            vadd(vscale(surface_axis, end[0]), vscale(tangent, end[1])))
+        direction = vunit(vsub(end_world, start_world))
+        in_plane_perpendicular = vunit(vcross(direction, normal))
+        return self.add(
+            Part("brand_logo", "box",
+                 (vlength(vsub(end_world, start_world)) / 2.0,
+                  thickness, width / 2.0),
+                 vscale(vadd(start_world, end_world), 0.5), material,
+                 (direction, normal, in_plane_perpendicular), connector=True),
+            assembly)
+
+    def add_logo_square(self, assembly: str, mark_center: Vec,
+                        surface_axis: Vec, tangent: Vec, normal: Vec,
+                        offset: tuple[float, float], half_size: float,
+                        thickness: float, material: str) -> int:
+        square_center = vadd(
+            mark_center,
+            vadd(vscale(surface_axis, offset[0]), vscale(tangent, offset[1])))
+        return self.add(
+            Part("brand_logo", "box", (half_size, thickness, half_size),
+                 square_center, material, (surface_axis, normal, tangent),
+                 connector=True), assembly)
+
+    def build_brand_logo(self, assembly: str, center: Vec, radius: float,
+                         length: float, surface_axis: Vec, tangent: Vec,
+                         normal: Vec, thickness: float) -> list[int]:
+        """Build one original primitive mark on a crewed module surface."""
+        scale = max(0.10, min(radius * 0.38, length * 0.055))
+        mark_center = vadd(
+            vadd(center, vscale(surface_axis, -length * 0.39)),
+            vscale(normal, radius + thickness))
+        indices = []
+        if self.brand_key == "tenku":
+            disc_center = vadd(
+                mark_center,
+                vadd(vscale(surface_axis, -scale * 0.22),
+                     vscale(tangent, scale * 0.05)))
+            indices.append(self.add(
+                Part("brand_logo", "cylinder",
+                     (scale * 0.42, thickness, scale * 0.42), disc_center,
+                     MAT["orange"], axis_cols(normal), connector=True), assembly))
+            indices.append(self.add_logo_bar(
+                assembly, mark_center, surface_axis, tangent, normal,
+                (-scale * 0.95, -scale * 0.20),
+                (scale * 0.95, scale * 0.18), scale * 0.14, thickness,
+                MAT["dark"]))
+            indices.append(self.add_logo_bar(
+                assembly, mark_center, surface_axis, tangent, normal,
+                (-scale * 0.86, -scale * 0.55),
+                (scale * 0.80, -scale * 0.18), scale * 0.14, thickness,
+                MAT["dark"]))
+        elif self.brand_key == "jiuyuan":
+            for start, end in (
+                    ((-0.78, -0.62), (-0.78, 0.68)),
+                    ((-0.78, 0.68), (0.78, 0.68)),
+                    ((0.78, 0.68), (0.78, -0.62))):
+                indices.append(self.add_logo_bar(
+                    assembly, mark_center, surface_axis, tangent, normal,
+                    (start[0] * scale, start[1] * scale),
+                    (end[0] * scale, end[1] * scale), scale * 0.16,
+                    thickness, MAT["orange"]))
+            indices.append(self.add_logo_square(
+                assembly, mark_center, surface_axis, tangent, normal,
+                (0.0, -scale * 0.12), scale * 0.24, thickness, MAT["green"]))
+        elif self.brand_key == "far_horizon":
+            indices.append(self.add_logo_bar(
+                assembly, mark_center, surface_axis, tangent, normal,
+                (-scale, -scale * 0.18), (scale, -scale * 0.18),
+                scale * 0.13, thickness, MAT["dark"]))
+            for start, end in (((-0.72, -0.52), (0.0, 0.55)),
+                               ((0.0, 0.55), (0.72, -0.52))):
+                indices.append(self.add_logo_bar(
+                    assembly, mark_center, surface_axis, tangent, normal,
+                    (start[0] * scale, start[1] * scale),
+                    (end[0] * scale, end[1] * scale), scale * 0.17,
+                    thickness, MAT["orange"]))
+        else:
+            indices.append(self.add_logo_bar(
+                assembly, mark_center, surface_axis, tangent, normal,
+                (-scale, -scale * 0.48), (scale, -scale * 0.48),
+                scale * 0.12, thickness, MAT["dark"]))
+            for offset in ((-0.55, -0.16), (0.0, 0.08), (0.55, 0.32)):
+                indices.append(self.add_logo_square(
+                    assembly, mark_center, surface_axis, tangent, normal,
+                    (offset[0] * scale, offset[1] * scale), scale * 0.23,
+                    thickness, MAT["orange"]))
+        return indices
+
     def build_crewed_surface_details(self):
         """Give each lab/hab a restrained, clustered band of readable windows."""
+        logo_host = next(
+            (module_id for module_id in self.module_assemblies
+             if self.assemblies[module_id].metadata["module_role"] in ("lab", "hab")),
+            None)
         for module_id in tuple(self.module_assemblies):
             module = self.assemblies[module_id]
             role = module.metadata["module_role"]
@@ -1537,6 +1735,16 @@ class Station:
                 self.add(Part("module_light", "sphere", (height * 0.34,) * 3,
                               light_pos, MAT["green"], connector=True), detail)
                 self.counts["module_lights"] += 1
+            if module_id == logo_host:
+                logo_indices = self.build_brand_logo(
+                    detail, center, radius, length, axis, tangent, normal,
+                    max(0.012, thickness * 0.55))
+                self.assemblies[detail].metadata["brand_logo"] = {
+                    "brand": self.brand_key,
+                    "mark": self.brand["logo"]["id"],
+                    "part_indices": logo_indices,
+                }
+                self.counts["logos"] += 1
             surface_pos = vadd(center, vscale(normal, radius))
             self.connect(module_id, detail, "surface", surface_pos, surface_pos,
                          max(height, thickness), connector_parts=[first_window],
@@ -1796,6 +2004,29 @@ def validate_connectivity(st: Station) -> None:
             if abs(vlength(radial) - radius) > max(radius * 0.08, tolerance):
                 raise ValidationError(f"{module_id} has a floating {part.kind}")
 
+    branded_details = [
+        assembly for assembly in st.assemblies.values()
+        if "brand_logo" in assembly.metadata]
+    if len(branded_details) != 1 or st.counts["logos"] != 1:
+        raise ValidationError("station needs exactly one owned brand logo")
+    branded_detail = branded_details[0]
+    logo = branded_detail.metadata["brand_logo"]
+    if logo.get("brand") != st.brand_key:
+        raise ValidationError("brand logo does not match the selected operator")
+    if logo.get("mark") != st.brand["logo"]["id"]:
+        raise ValidationError("brand logo uses the wrong primitive mark")
+    logo_indices = logo.get("part_indices", [])
+    if not logo_indices or any(
+            index not in branded_detail.part_indices
+            or st.parts[index].kind != "brand_logo"
+            or st.parts[index].assembly != branded_detail.id
+            for index in logo_indices):
+        raise ValidationError("brand logo contains a foreign or missing primitive")
+    logo_host = branded_detail.metadata.get("module")
+    if (logo_host not in st.assemblies
+            or st.assemblies[logo_host].metadata.get("module_role") not in ("lab", "hab")):
+        raise ValidationError("brand logo is not owned by a crewed module")
+
     solar_pairs = {}
     for assembly_id, assembly in st.assemblies.items():
         if assembly.role != "solar_wing":
@@ -2051,29 +2282,33 @@ def godot_transform_values(part: Part, scale: float) -> tuple[float, ...]:
 
 def to_tscn(st: Station, scale: float) -> str:
     """Serialise to a Godot scene. `scale` converts design-metres -> game units."""
+    materials = st.brand["materials"]
     ext = {}
-    for i, (name, path) in enumerate(MAT.items()):
-        ext[name] = f"{i+1}_{name}"
-    head = ['[gd_scene load_steps=%d format=3]' % (len(MAT) + len(st.parts) + 1), '']
-    for name, path in MAT.items():
+    for i, role in enumerate(MATERIAL_ROLES):
+        ext[role] = f"{i+1}_{role}"
+    head = ['[gd_scene load_steps=%d format=3]'
+            % (len(materials) + len(st.parts) + 1), '']
+    for role in MATERIAL_ROLES:
         head.append('[ext_resource type="Material" path="%s" id="%s"]'
-                     % (path, ext[name]))
+                    % (materials[role], ext[role]))
     head.append('')
     report = st.organization or analyze_organization(st)
     sun = st.sun_vector
     subs, nodes = [], [
         '[node name="Station" type="Node3D"]',
+        f'metadata/operator_brand_key = "{st.brand_key}"',
+        f'metadata/operator_brand_name = "{st.brand["display_name"]}"',
+        f'metadata/operator_logo = "{st.brand["logo"]["id"]}"',
         f'metadata/sun_vector = Vector3({_fmt(sun[0])}, {_fmt(sun[1])}, {_fmt(sun[2])})',
         f'metadata/solar_family = "{st.solar_family}"',
         f'metadata/thermal_profile = "{st.thermal["profile"]}"',
         f'metadata/radiator_area_ratio = {_fmt(st.thermal["area_ratio"])}',
         f'metadata/estimated_heat_load_kw = {_fmt(st.thermal["estimated_heat_load_kw"])}',
         f'metadata/organization_score = {_fmt(report.score)}', '']
-    matname = {v: k for k, v in MAT.items()}
     for idx, p in enumerate(st.parts):
         mid = f"m{idx}"
         h = tuple(x * scale for x in p.half)
-        mat_id = ext[matname[p.mat]]
+        mat_id = ext[p.mat]
         if p.mesh in ("cylinder", "cone", "polygon"):
             top_radius = (p.extra.get("top_radius", p.half[0]) * scale)
             bottom_radius = (p.extra.get("bottom_radius", p.half[2]) * scale)
@@ -2119,6 +2354,16 @@ def to_json(st: Station, scale: float) -> dict:
         "resolved_seed": st.seed, "archetype": st.archetype, "forms": st.forms,
         "meters": round(st.meters, 1), "iss_multiple": round(st.meters / ISS_METERS, 2),
         "game_scale": scale, "counts": st.counts,
+        "brand": {
+            "key": st.brand_key,
+            "display_name": st.brand["display_name"],
+            "legal_name": st.brand["legal_name"],
+            "country": st.brand["country"],
+            "logo": st.brand["logo"],
+            "role_colors": st.brand["colors"],
+            "finish": st.brand["finish"],
+            "material_paths": st.brand["materials"],
+        },
         "sun_vector": [round(value, 6) for value in st.sun_vector],
         "solar_family": st.solar_family,
         "thermal": st.thermal,
@@ -2151,6 +2396,7 @@ def to_json(st: Station, scale: float) -> dict:
         "parts": [{"kind": p.kind, "mesh": p.mesh,
                    "pos": [round(x, 3) for x in p.pos],
                    "half": [round(x, 3) for x in p.half],
+                   "material_role": p.mat,
                    "connector": p.connector, "assembly": p.assembly,
                    "extra": p.extra,
                    "cols": [[round(value, 6) for value in axis]
@@ -2161,13 +2407,14 @@ def to_json(st: Station, scale: float) -> dict:
 
 # --- CLI -----------------------------------------------------------------------
 def generate_one(meters, seed, archetype, min_panels, min_labs, min_habs,
-                 scale, retries=40):
+                 scale, retries=40, brand="auto"):
     """Build + validate, retrying with a nudged seed until it passes."""
     last = None
+    brand_key = resolve_brand(brand, seed)
     for k in range(retries):
         try:
             st = Station(seed + k * 101, meters, archetype,
-                         min_panels, min_labs, min_habs).build()
+                         min_panels, min_labs, min_habs, brand_key).build()
             validate(st)
             st.requested_seed = seed
             st.organization = analyze_organization(st)
@@ -2185,6 +2432,9 @@ def main(argv=None):
                     choices=["auto", "stack", "truss", "ring", "radial", "power",
                              "dualkeel", "cylinder", "hybrid"],
                     help="structural archetype (default: auto = size-appropriate)")
+    ap.add_argument("--brand", default="auto",
+                    choices=["auto", *BRAND_KEYS],
+                    help="operator livery (default: auto = deterministic from seed)")
     ap.add_argument("--min-panels", type=int, default=1, help="min solar wing PAIRS")
     ap.add_argument("--min-labs", type=int, default=1, help="min lab modules")
     ap.add_argument("--min-habs", type=int, default=1, help="min habitat modules")
@@ -2237,10 +2487,13 @@ def main(argv=None):
             meters = meters0
         seed = args.seed + i * 1000
         st = generate_one(meters, seed, arch, args.min_panels,
-                          args.min_labs, args.min_habs, args.game_scale)
+                          args.min_labs, args.min_habs, args.game_scale,
+                          brand=args.brand)
         descriptor = st.archetype
         if st.archetype == "hybrid":
             descriptor += "_" + "_".join(st.forms)
+        if args.brand != "auto":
+            descriptor += "_" + st.brand_key
         stem = f"station_{i:02d}_{descriptor}_{int(round(meters/ISS_METERS*10)):03d}i"
         with open(os.path.join(args.out, stem + ".tscn"), "w") as f:
             f.write(to_tscn(st, args.game_scale))
@@ -2249,7 +2502,8 @@ def main(argv=None):
         if preview is not None:
             preview.render(st, os.path.join(preview_out, stem + ".png"))
         made.append((stem, st))
-        print(f"  {stem}: {st.archetype}, {meters/ISS_METERS:.1f}x ISS, "
+        print(f"  {stem}: {st.archetype}, {st.brand_key}, "
+              f"{meters/ISS_METERS:.1f}x ISS, "
               f"{len(st.parts)} parts, panels={st.counts['panels']//2}pr "
               f"labs={st.counts['labs']} habs={st.counts['habs']} "
               f"organization={st.organization.score:.1f}")

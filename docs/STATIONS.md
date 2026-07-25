@@ -7,6 +7,8 @@ and not like the level-2 placeholder (clipping rings, off-palette colours).
 > The cited, longer-form research this distils from — the NASA Space Station
 > Freedom redesign saga (Power Tower → Dual Keel → Alpha), Mir/Skylab/Tiangong,
 > and the sci-fi wheels/tori/cylinders — lives in **`docs/STATIONS_research.md`**.
+> Research for the fictional operator palettes and logos lives in
+> **`docs/STATIONS_brand_research.md`**.
 
 ## 1. What real stations are made of
 
@@ -107,9 +109,11 @@ truss/ring/dual-keel/power-tower/cylinder/hybrid.
    - Modules vary in length/diameter within a family; at least one accent part
      (cupola, dome, orange trim, green nav lights). Avoid a row of identical cans
      *and* avoid a junkyard of one-off shapes.
-7. **Palette = the player ship.** Reuse the ship materials so a station reads as
-   "same universe": hull cream `#e0dbc9`, structure dark metallic, solar blue,
-   orange accents *sparingly*, green status lights. Never invent new hues.
+7. **One universe, several operators.** Station geometry requests semantic
+   `hull`, `structure`, `solar`, `accent`, and `light` roles. One documented
+   operator brand resolves those roles to a coherent colour-and-finish family.
+   The original player-ship palette remains the shared visual ancestor, not the
+   only allowable livery; ad-hoc hues remain forbidden.
 8. **Connectivity is a hard gate.** Every structural assembly reaches the station
    root; every crewed volume reaches the pressurised core; every solar leaf reaches
    its gimbal through hinges; every surface detail names its owning module. A high
@@ -136,9 +140,11 @@ it is deliberately not a fixed fraction of L².
 ## 5. Generator contract (see `tools/station_gen.py --help`)
 
 - **Inputs:** rough size (`--iss` or `--meters`), minimum part counts, seed,
-  every implemented single archetype plus hybrid or auto, count, game scale, and
-  output directory. Optional PNG previews can go to a separate preview directory.
-- **Pipeline:** seed RNG → choose one archetype or a routed hybrid recipe → build
+  every implemented single archetype plus hybrid or auto, operator brand or
+  deterministic auto-selection, count, game scale, and output directory.
+  Optional PNG previews can go to a separate preview directory.
+- **Pipeline:** resolve brand without consuming layout RNG → seed RNG → choose
+  one archetype or a routed hybrid recipe → build
   semantic assemblies and consume typed mounts → derive render parts → add
   sun-tracking foldable arrays, load-sized radiator banks, signature parts, and
   module-owned surface details → **validate** geometry, structural reachability,
@@ -303,9 +309,9 @@ Every lab and habitat receives a small surface-detail assembly:
   decorative windows.
 
 Placement uses the owning cylinder's local axial coordinate and azimuth, then
-transforms the detail onto its surface. Windows use the existing dark ship
-material and status lights use the existing green material. No new colour seam or
-raw colour literal is introduced.
+transforms the detail onto its surface. Windows use the selected brand's
+`structure` material and status lights use its `light` material. Geometry never
+contains a raw colour literal.
 
 ### 7.6 Radiator thermal budget and deployable geometry
 
@@ -403,7 +409,7 @@ Rollout status:
 5. **Done:** record requested seed, resolved candidate seed, total score, components, and
    penalties in JSON; optionally show the score in previews and CLI diagnostics.
 
-### 7.8 Implementation and acceptance sequence
+### 7.9 Implementation and acceptance sequence
 
 Implemented now: assembly/mount/joint data; builder ownership; structural and
 pressurised hard validation; four foldable solar families; station-level sun
@@ -426,3 +432,111 @@ Required tests include:
   penalties.
 - The existing palette, no-interference, min-count, Godot-load, project-suite, and
   warning-clean checks remain green.
+
+## 8. Operator brands and material language
+
+**Status:** phase 1 implemented on 2026-07-25. The four operators are original
+fiction informed by the period research in `docs/STATIONS_brand_research.md`.
+Their names and marks must not be replaced with real organisations or source
+fiction. This first phase changes livery and small hull marks only; topology stays
+identical for a given seed so human review can compare palettes fairly. Four
+same-seed comparisons plus one auto-selected hybrid live in
+`docs/station_brand_review/` and `assets/station_brand_review/`.
+
+### 8.1 Semantic material roles
+
+Every render part owns a semantic material role rather than a resource path.
+`StationBrand` resolves the role to one `.tres` material at serialisation and to
+one RGB preview colour in `station_preview.py`.
+
+| Role | Meaning | Usage constraint |
+|---|---|---|
+| `hull` | Pressure shells and protected payload casings | Dominant light neutral; never used as a light |
+| `structure` | Trusses, booms, collars, window glass, anti-glare zones | Dark load-path colour; enough contrast to explain construction |
+| `solar` | Active photovoltaic/collector faces | Dark cool glass; frames remain `structure` |
+| `accent` | Operator mark, safety zone, serviceable hardware | Sparse; never the dominant station colour |
+| `light` | Status/nav lamps and emissive details | Small emissive points, not painted panels |
+
+Surface response is part of the brand. In phase 1, "texture" means physically
+distinct material response—roughness, metallic response, enamel, anodising,
+black oxide, brushed alloy, lacquer, glass, or powder coat—rather than a noisy
+bitmap pasted over every module. Brand-specific weathering and panel geometry are
+future phases.
+
+### 8.2 The four operators
+
+| CLI key | Fictional operator | Hull | Structure | Solar | Accent | Light |
+|---|---|---|---|---|---|---|
+| `tenku` | **TENKŪ ORBITAL WORKS** / 天穹軌道工業株式会社 (Japan) | warm pearl `#E7E0CE` | indigo-black `#18253B` | smoked cobalt `#294C69` | vermilion `#D8492F` | mint `#8FE0CF` |
+| `jiuyuan` | **JIǓYUÁN ORBITAL INDUSTRIES** / 九原轨道工业有限公司 (China) | celadon alloy `#C8D0BE` | ink oxide `#252824` | deep jade `#2C615D` | cinnabar `#B83B2D` | amber `#F2C66D` |
+| `far_horizon` | **FAR HORIZON ASTRONAUTICS, INC.** (United States) | cool aerospace white `#D7DEE0` | graphite `#20262B` | midnight blue `#1D3F62` | safety orange `#E66A2C` | electric cyan `#70D8FF` |
+| `weser` | **WESER RAUMSYSTEME GMBH** (Germany) | warm stone `#C8C2AE` | phosphate graphite `#292D30` | petrol teal `#27545B` | signal ochre `#D6A928` | lime `#B9D36A` |
+
+Material response is deliberately as distinct as hue:
+
+- **TENKŪ** uses semi-gloss ceramic enamel, fine anodised structure, smoked
+  collector glass, and clean lacquered identifiers. Its detail rhythm is precise
+  and warm rather than military.
+- **JIǓYUÁN** uses satin ceramic-coated alloy, rough black oxide, deep-jade
+  collector glass, cinnabar lacquer, and small brass/amber thermal cues. Faceted
+  surfaces and sparse apertures are later geometry work, not phase-1 noise.
+- **FAR HORIZON** uses cool enamel over brushed alloy, graphite anti-glare zones,
+  dark-blue collector glass, and process/safety orange. Exposed fasteners and
+  service labels are later detail work.
+- **WESER** uses very matte warm-grey powder coat, brushed or phosphated dark
+  structure, petrol collector glass, and isolated ochre signal blocks. Grids stay
+  strict and decoration sparse.
+
+### 8.3 Original logo primitives
+
+The generator places exactly one small, surface-owned mark on a lab or habitat.
+Marks use existing brand materials, consist of two to four shallow primitives,
+and participate in the same surface-ownership/connectivity checks as windows.
+
+| Brand | Mark ID | Primitive construction | Meaning |
+|---|---|---|---|
+| TENKŪ | `orbital_gate` | off-centre vermilion disc crossed by two parallel indigo rails | a vehicle passing an orbital gate |
+| JIǓYUÁN | `nested_gate` | open three-sided cinnabar frame around one amber square | nested ground, orbit, and destination frames |
+| FAR HORIZON | `horizon_delta` | split orange chevron crossing one graphite horizon bar | ascent continuing beyond the visible horizon |
+| WESER | `module_step` | three ochre squares climbing on a graphite baseline | interoperable modules assembled into a system |
+
+Marks must remain abstract. In particular, do not add flags, stars, a NASA-style
+orbit, the NASA worm, the ESA symbol, source-fiction silhouettes, or real-company
+wordmarks.
+
+### 8.4 Generator and serialisation contract
+
+- `--brand {auto,tenku,jiuyuan,far_horizon,weser}` selects an operator.
+- `auto` maps the **requested seed** to a brand deterministically before candidate
+  retries and without consuming random numbers. Changing only the brand must not
+  change structural geometry, validation, thermal budgets, connectivity, or
+  organisation score; only the documented shallow logo primitives may differ.
+  A fixed seed mixer prevents the generator's 1000-seed batch stride from
+  collapsing an auto-generated showcase to one repeated operator.
+- An explicit brand is included in review filenames so otherwise identical
+  variants do not overwrite one another.
+- The `.json` blueprint records the key, legal/display names, country, finish
+  summary, logo ID, role colours, and material paths.
+- The `.tscn` root records the brand key/display name and references only the five
+  materials owned by that brand. Generated scenes contain no raw colour values.
+- `station_preview.py` accepts the same `--brand` option and labels the preview
+  with the selected operator.
+
+### 8.5 Acceptance criteria and later phases
+
+Phase 1 acceptance is pinned by the following automated and review artifacts:
+
+1. all four explicit brands generate the same valid topology for the same seed;
+2. each scene references only its selected brand material resources;
+3. every generated station owns exactly one correct brand mark on a crewed module;
+4. auto-selection is deterministic across candidate retries and separate runs;
+5. JSON, scene metadata, CLI output, and PNG previews agree on the resolved brand;
+6. unit tests, the Godot load check, the full project suite, and warning scan pass;
+   and
+7. four same-seed brand previews plus one auto-selected station are emitted for
+   human review.
+
+Later phases may give each operator its own window rhythm, insulation/panel
+topology, truss vocabulary, solar-cell subdivision, typography, and weathering.
+Those changes must be documented before implementation and tested separately
+because they will intentionally break phase 1's geometry-equivalence guarantee.

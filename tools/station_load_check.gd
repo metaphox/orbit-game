@@ -7,6 +7,7 @@ extends SceneTree
 const STATION_DIRS: Array[String] = [
 	"assets/stations",
 	"assets/station_review",
+	"assets/station_brand_review",
 ]
 
 
