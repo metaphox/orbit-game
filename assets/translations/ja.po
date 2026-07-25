@@ -731,3 +731,29 @@ msgstr "再突入"
 
 msgid "SURFACE"
 msgstr "地表"
+
+# --- Orbit reference-mark callout labels ---
+
+msgid "APOAPSIS"
+msgstr "遠点"
+
+msgid "PERIAPSIS"
+msgstr "近点"
+
+msgid "ASCENDING NODE"
+msgstr "昇交点"
+
+msgid "DESCENDING NODE"
+msgstr "降交点"
+
+msgid "IMPACT"
+msgstr "衝突"
+
+msgid "ENCOUNTER"
+msgstr "接近"
+
+msgid "INTERCEPT"
+msgstr "会合"
+
+msgid "CIRCULAR"
+msgstr "円軌道"

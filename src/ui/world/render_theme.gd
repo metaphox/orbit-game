@@ -50,6 +50,7 @@ var mark_dn := Color(0.55, 0.3, 0.75)
 var mark_impact := Color(1.0, 0.2, 0.15)
 var mark_encounter := Color(1.0, 1.0, 1.0)
 var mark_closest := Color(1.0, 0.3, 0.6)
+var mark_circular := Color(0.45, 0.9, 0.8)  # single "circular orbit" callout (apsides undefined)
 
 # Sun lens flare (sun_flare.gd) — decorative additive bloom + ghosts. Colors
 # live here so the flare's whole look is themeable in one place (TD-3 seam).

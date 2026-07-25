@@ -722,3 +722,29 @@ msgstr "WIEDEREINTRITT"
 
 msgid "SURFACE"
 msgstr "OBERFLÄCHE"
+
+# --- Orbit reference-mark callout labels ---
+
+msgid "APOAPSIS"
+msgstr "APOAPSIS"
+
+msgid "PERIAPSIS"
+msgstr "PERIAPSIS"
+
+msgid "ASCENDING NODE"
+msgstr "AUFSTEIGENDER KNOTEN"
+
+msgid "DESCENDING NODE"
+msgstr "ABSTEIGENDER KNOTEN"
+
+msgid "IMPACT"
+msgstr "EINSCHLAG"
+
+msgid "ENCOUNTER"
+msgstr "BEGEGNUNG"
+
+msgid "INTERCEPT"
+msgstr "ABFANGEN"
+
+msgid "CIRCULAR"
+msgstr "KREISBAHN"

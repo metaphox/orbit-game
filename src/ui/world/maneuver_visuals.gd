@@ -10,6 +10,15 @@ extends Node3D
 ## were as FlightView's own children.
 
 const SIDE_MARKER_LAYER := 8  # markers only the orbit (side) camera can see
+## Below this eccentricity the orbit is treated as a circle: apsides are
+## mathematically undefined there (the periapsis direction is numerical noise,
+## so AP/PE jump around and swap), so both apsis marks are hidden. At e this
+## small the two points are ~2·a·e apart — visually coincident — anyway.
+const CIRCULAR_E := 0.002
+## A circular orbit is instead marked by a single "CIRCULAR" callout sitting on
+## the orbit this far (10 km of arc) ahead of the ship in the prograde direction,
+## so it leads the craft around the ring.
+const CIRCULAR_MARK_LEAD := 10000.0
 
 # The node ghost / SOI-encounter preview and the orbit marks are throttled to
 # this interval (they can be expensive). The orbit LINE itself is rebuilt every
@@ -40,8 +49,13 @@ var _preview_active := false
 var _ghost_key: Array = []
 var _node_marker: MeshInstance3D
 
+## [{node: MeshInstance3D, color: Color, text: String}] for every orbit mark,
+## so OrbitLabels can annotate the visible ones (see orbit_label_data).
+var _labeled_marks: Array = []
+var _body_center := Vector3.ZERO  # render-space body centre, for marks' outward radial
 var _ap_marker: MeshInstance3D
 var _pe_marker: MeshInstance3D
+var _circular_marker: MeshInstance3D
 var _an_marker: MeshInstance3D
 var _dn_marker: MeshInstance3D
 var _impact_marker: MeshInstance3D
@@ -73,6 +87,9 @@ func mark_dirty() -> void:
 ## tick, rebuild the ghost and re-place the orbit marks. `guidance_enabled` false
 ## (hardcore) hides the node ghost, preview and node marker.
 func sync(ship: ShipSim, delta: float, side_distance: float, guidance_enabled: bool) -> void:
+	# Body centre in render space (ship at the origin): the marks' local radial
+	# "outward" is measured from here, so callout leaders point away from the body.
+	_body_center = ship.r.neg().to_vector3()
 	_node_instance.position = _node_anchor.sub(ship.r).to_vector3()
 	if _preview_active:
 		_preview_instance.position = _preview_anchor.sub(ship.r).to_vector3()
@@ -140,16 +157,35 @@ func _build_node_visuals() -> void:
 ## _update_orbit_marks. Built once here and toggled visible/hidden rather than
 ## recreated, since most of them don't apply to every level.
 func _build_orbit_marks() -> void:
-	_ap_marker = _make_orbit_mark(_theme.mark_ap)
-	_pe_marker = _make_orbit_mark(_theme.mark_pe)
-	_an_marker = _make_orbit_mark(_theme.mark_an)
-	_dn_marker = _make_orbit_mark(_theme.mark_dn)
-	_impact_marker = _make_orbit_mark(_theme.mark_impact)
-	_encounter_marker = _make_orbit_mark(_theme.mark_encounter)
-	_closest_approach_marker = _make_orbit_mark(_theme.mark_closest)
+	_ap_marker = _make_orbit_mark(_theme.mark_ap, tr("APOAPSIS"))
+	_pe_marker = _make_orbit_mark(_theme.mark_pe, tr("PERIAPSIS"))
+	_circular_marker = _make_orbit_mark(_theme.mark_circular, tr("CIRCULAR"))
+	_an_marker = _make_orbit_mark(_theme.mark_an, tr("ASCENDING NODE"))
+	_dn_marker = _make_orbit_mark(_theme.mark_dn, tr("DESCENDING NODE"))
+	_impact_marker = _make_orbit_mark(_theme.mark_impact, tr("IMPACT"))
+	_encounter_marker = _make_orbit_mark(_theme.mark_encounter, tr("ENCOUNTER"))
+	_closest_approach_marker = _make_orbit_mark(_theme.mark_closest, tr("INTERCEPT"))
 
 
-func _make_orbit_mark(color: Color) -> MeshInstance3D:
+## Currently-visible orbit marks as blueprint-label data for OrbitLabels:
+## [{pos: render-space Vector3, color, text}]. The marks are ship-relative and
+## this node sits at the render origin, so position IS the render-space point.
+func orbit_label_data() -> Array:
+	var out: Array = []
+	for m: Dictionary in _labeled_marks:
+		var node: MeshInstance3D = m["node"]
+		if node.visible:
+			# Outward = the mark's local radial (from the body centre through the
+			# mark), so the callout leader runs perpendicular to the orbit tangent
+			# and away from the body rather than radially from the screen centre.
+			var outward := node.position - _body_center
+			outward = outward.normalized() if outward.length() > 0.001 else Vector3.UP
+			out.append({"pos": node.position, "color": m["color"], "text": m["text"],
+				"outward": outward})
+	return out
+
+
+func _make_orbit_mark(color: Color, label: String) -> MeshInstance3D:
 	var mark := MeshInstance3D.new()
 	var dot := SphereMesh.new()
 	dot.radius = 1.0
@@ -165,6 +201,7 @@ func _make_orbit_mark(color: Color) -> MeshInstance3D:
 	mark.layers = SIDE_MARKER_LAYER
 	mark.visible = false
 	add_child(mark)
+	_labeled_marks.append({"node": mark, "color": color, "text": label})
 	return mark
 
 
@@ -179,14 +216,30 @@ func _nu_reachable(el: OrbitElements, nu: float) -> bool:
 func _update_orbit_marks(ship: ShipSim, el: OrbitElements, side_distance: float) -> void:
 	var mark_scale := Vector3.ONE * maxf(side_distance * 0.006, 1.0)
 
-	_pe_marker.visible = true
-	_pe_marker.position = el.state_at_true_anomaly(0.0).r.sub(ship.r).to_vector3()
-	_pe_marker.scale = mark_scale
+	# Apsides are undefined for a circle (see CIRCULAR_E): below it the periapsis
+	# direction is noise and AP/PE swap confusingly, so hide both. Their absence -
+	# with the target ring and orbit-line colour - reads as "circular".
+	var circular := el.e < CIRCULAR_E
+	_pe_marker.visible = not circular
+	if _pe_marker.visible:
+		_pe_marker.position = el.state_at_true_anomaly(0.0).r.sub(ship.r).to_vector3()
+		_pe_marker.scale = mark_scale
 
-	_ap_marker.visible = el.is_elliptic()
+	_ap_marker.visible = el.is_elliptic() and not circular
 	if _ap_marker.visible:
 		_ap_marker.position = el.state_at_true_anomaly(PI).r.sub(ship.r).to_vector3()
 		_ap_marker.scale = mark_scale
+
+	# One "CIRCULAR" callout stands in for the (undefined) apsides. It rides the
+	# orbit a fixed arc ahead of the ship (prograde = increasing true anomaly), so
+	# it leads the craft around the ring instead of jittering. Arc -> angle by the
+	# current radius; on a circle that arc length is constant everywhere.
+	_circular_marker.visible = circular
+	if _circular_marker.visible:
+		var nu := el.true_anomaly_at_time(ship.last_time)
+		var d_nu := CIRCULAR_MARK_LEAD / ship.r.length()
+		_circular_marker.position = el.state_at_true_anomaly(nu + d_nu).r.sub(ship.r).to_vector3()
+		_circular_marker.scale = mark_scale
 
 	var crossings: Array[float] = el.xz_plane_crossings()
 	var nodes_valid := (crossings.size() == 2

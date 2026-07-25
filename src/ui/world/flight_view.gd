@@ -16,6 +16,7 @@ var _theme: RenderTheme
 var _body_renderer: BodyRenderer
 var _traj_renderer: TrajectoryRenderer
 var _maneuver: ManeuverVisuals
+var _orbit_labels: OrbitLabels
 var _ship_visuals: ShipVisuals
 var star_dust: StarDust  # exposed so game_root can freeze it when the sim pauses
 ## Hardcore (DESIGN.md §14.4) strips the predictive aids: the forward
@@ -79,6 +80,15 @@ func build(level: LevelDef, theme: RenderTheme = null) -> void:
 	add_child(_maneuver)
 	_maneuver.build(level, _theme)
 
+	# Blueprint callouts for the orbit marks, on their own layer over the 3D
+	# view but under the HUD chrome; shown only in the orbit (side) camera.
+	var label_layer := CanvasLayer.new()
+	label_layer.layer = 0
+	add_child(label_layer)
+	# From a scene so the callout styling is editable in the Godot inspector.
+	_orbit_labels = preload("res://src/ui/world/orbit_labels.tscn").instantiate()
+	label_layer.add_child(_orbit_labels)
+
 	_ship_visuals = ShipVisuals.new()
 	add_child(_ship_visuals)
 	_ship_visuals.build(level, rig.get_node("Ship"), rig.get_node("Ship/Hull"),
@@ -94,6 +104,10 @@ func sync(ship: ShipSim, delta: float) -> void:
 	_body_renderer.sync(t, ship_abs, _camera_rig.side_active)
 	_traj_renderer.sync(ship, ship_abs, t, guidance_enabled)
 	_maneuver.sync(ship, delta, _camera_rig.side_distance, guidance_enabled)
+	# Callouts ride the orbit camera only; hand over an empty list otherwise so
+	# nothing draws over the chase view.
+	var marks := _maneuver.orbit_label_data() if _camera_rig.side_active else []
+	_orbit_labels.show_marks(_camera_rig.side_camera, marks)
 	_ship_visuals.sync(ship, ship_abs, t, _camera_rig.side_distance)
 	# Far-plane sizing needs the farthest body, so the camera updates last -
 	# after BodyRenderer.sync has refreshed max_body_dist for this frame.

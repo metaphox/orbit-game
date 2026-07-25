@@ -729,3 +729,29 @@ msgstr ""
 
 msgid "SURFACE"
 msgstr ""
+
+# --- Orbit reference-mark callout labels (blueprint labels in the orbit view) ---
+
+msgid "APOAPSIS"
+msgstr ""
+
+msgid "PERIAPSIS"
+msgstr ""
+
+msgid "ASCENDING NODE"
+msgstr ""
+
+msgid "DESCENDING NODE"
+msgstr ""
+
+msgid "IMPACT"
+msgstr ""
+
+msgid "ENCOUNTER"
+msgstr ""
+
+msgid "INTERCEPT"
+msgstr ""
+
+msgid "CIRCULAR"
+msgstr ""
