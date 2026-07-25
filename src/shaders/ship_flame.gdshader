@@ -11,6 +11,9 @@ void fragment() {
 	float radius = length(local_position.xz);
 	float core = 1.0 - smoothstep(0.02, 0.42, radius);
 	float pulse = 0.78 + 0.22 * sin(local_position.y * 19.0 - TIME * 34.0);
+	// Inline by design (DA-2 documented exception, TD-3): the engine flame is a
+	// single additive VFX, not a themeable body surface, so its amber->white-hot
+	// ramp stays here rather than in RenderTheme.
 	vec3 amber = vec3(1.0, 0.25, 0.015);
 	vec3 white_hot = vec3(1.0, 0.88, 0.48);
 	vec3 color = mix(amber, white_hot, core * core);

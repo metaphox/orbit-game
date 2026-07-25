@@ -29,6 +29,24 @@ var body_colors := {
 	BodyRenderer.BODY_SUN: Color(0.95, 0.75, 0.3),
 	BodyRenderer.BODY_MARS: Color(0.72, 0.36, 0.22),
 }
+# Per-kind procedural-ramp palette for celestial_body.gdshader (DA-2): the shader
+# blends these stops for the named bodies, so a theme can restyle a body's whole
+# surface, not just its generic base tint. Defaults reproduce the NASA-punk look.
+# Passed raw (the shader uniforms are plain vec3, no sRGB conversion).
+var body_ramps := {
+	"earth_cloud_color": Color(0.76, 0.81, 0.75),
+	"earth_grid_color": Color(0.08, 0.55, 0.52),
+	"earth_grid_ref_color": Color(0.95, 0.56, 0.12),
+	"moon_dust_low": Color(0.34, 0.33, 0.30),
+	"moon_dust_high": Color(0.67, 0.64, 0.57),
+	"moon_maria_color": Color(0.24, 0.25, 0.25),
+	"sun_core_color": Color(0.95, 0.28, 0.035),
+	"sun_hot_color": Color(1.0, 0.78, 0.24),
+	"mars_low_color": Color(0.48, 0.17, 0.085),
+	"mars_high_color": Color(0.78, 0.39, 0.18),
+	"mars_dark_color": Color(0.22, 0.11, 0.085),
+	"mars_ice_color": Color(0.72, 0.68, 0.57),
+}
 var atmosphere_shader: Shader = preload("res://src/shaders/atmosphere.gdshader")
 var atmosphere_glow_color := Color(0.10, 0.66, 0.88)
 var atmosphere_glow_strength := 0.76

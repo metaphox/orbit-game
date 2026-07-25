@@ -1,0 +1,80 @@
+{
+  "title": "DEBUG: PATHOLOGICAL 12-MOON BELT",
+  "_note": "12 active (non-decorative) Moon-like children of one planet in a radial belt, with the ship on an ellipse (peri 1500 / apo 5500 km) whose band SPANS the belt - the case broad-phase can't reject, so a refit pays the full ~3.6s 12-child SOI scan. The living companion to tests/unit/test_perf_heavy_level.gd. See .claude/plans/debug-perf-test-levels.md.",
+  "system": "EARTH",
+  "bodies": [
+    {
+      "name": "DBG_MOON_00",
+      "phase_deg": 0
+    },
+    {
+      "name": "DBG_MOON_01",
+      "phase_deg": 29
+    },
+    {
+      "name": "DBG_MOON_02",
+      "phase_deg": 58
+    },
+    {
+      "name": "DBG_MOON_03",
+      "phase_deg": 87
+    },
+    {
+      "name": "DBG_MOON_04",
+      "phase_deg": 116
+    },
+    {
+      "name": "DBG_MOON_05",
+      "phase_deg": 145
+    },
+    {
+      "name": "DBG_MOON_06",
+      "phase_deg": 174
+    },
+    {
+      "name": "DBG_MOON_07",
+      "phase_deg": 203
+    },
+    {
+      "name": "DBG_MOON_08",
+      "phase_deg": 232
+    },
+    {
+      "name": "DBG_MOON_09",
+      "phase_deg": 261
+    },
+    {
+      "name": "DBG_MOON_10",
+      "phase_deg": 290
+    },
+    {
+      "name": "DBG_MOON_11",
+      "phase_deg": 319
+    }
+  ],
+  "start": {
+    "body": "EARTH",
+    "periapsis_km": 1500,
+    "apoapsis_km": 5500
+  },
+  "ship": {
+    "dry_mass": 1200,
+    "prop_mass": 3000,
+    "thrust": 15000,
+    "isp": 90
+  },
+  "objective": {
+    "type": "transfer_capture",
+    "target": "DBG_MOON_05",
+    "approach_falloff_km": 3000
+  },
+  "dv_par": 500,
+  "difficulty": 5,
+  "map_extent_km": 8000,
+  "draw_limit_km": 8000,
+  "fail_radius_km": 12000,
+  "avionics": {
+    "sas": true,
+    "nodes": true
+  }
+}

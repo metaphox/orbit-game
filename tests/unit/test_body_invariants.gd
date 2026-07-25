@@ -25,6 +25,35 @@ func _renderer_for(index: int) -> BodyRenderer:
 	return br
 
 
+## DA-2: a body's whole surface appearance flows through RenderTheme, not just its
+## generic base tint. The per-kind procedural ramps are shader uniforms owned by
+## RenderTheme, so swapping one restyles the body - verified at the actual
+## material-uniform level, the seam the API claims to own.
+func _moon_material(br: BodyRenderer) -> ShaderMaterial:
+	for i in br._bodies.size():
+		if BodyRenderer._body_kind(br._bodies[i].name) == BodyRenderer.BODY_MOON:
+			return br._meshes[i].material_override
+	return null
+
+
+func test_body_surface_ramps_flow_through_render_theme() -> void:
+	# Default theme: the Moon material carries the canonical maria colour.
+	var default_mat := _moon_material(_renderer_for(3))
+	assert_not_null(default_mat, "the translunar level has a Moon to check")
+	assert_eq(Color(default_mat.get_shader_parameter("moon_maria_color")),
+		Color(0.24, 0.25, 0.25), "default theme reproduces the canonical maria colour")
+
+	# Swap the ramp in a theme: the built material must reflect it.
+	var theme := RenderTheme.default()
+	var magenta := Color(1.0, 0.0, 1.0)
+	theme.body_ramps["moon_maria_color"] = magenta
+	var br := BodyRenderer.new()
+	add_child_autofree(br)
+	br.build(Campaign.level_at(3), theme)
+	assert_eq(Color(_moon_material(br).get_shader_parameter("moon_maria_color")), magenta,
+		"swapping the RenderTheme ramp restyles the Moon's surface")
+
+
 ## Kinds of the real (gravity-bearing) bodies the level defines.
 func _real_kinds(br: BodyRenderer) -> Array:
 	var kinds: Array = []

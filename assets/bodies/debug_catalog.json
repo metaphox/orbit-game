@@ -1,0 +1,99 @@
+{
+  "_comment": "Synthetic bodies for DEBUG-ONLY perf test levels (BodyCatalog merges this only in a debug build). 12 Moon-like satellites of one planet, which the real catalog can't provide (its moons have different parents). See .claude/plans/debug-perf-test-levels.md.",
+  "DBG_MOON_00": {
+    "mu": 944000000.0,
+    "radius": 17374.0,
+    "soi_radius": 660000.0,
+    "parent": "EARTH",
+    "orbit_radius": 2400000.0,
+    "color": "#8a8a8a"
+  },
+  "DBG_MOON_01": {
+    "mu": 944000000.0,
+    "radius": 17374.0,
+    "soi_radius": 660000.0,
+    "parent": "EARTH",
+    "orbit_radius": 2660000.0,
+    "color": "#8a8a8a"
+  },
+  "DBG_MOON_02": {
+    "mu": 944000000.0,
+    "radius": 17374.0,
+    "soi_radius": 660000.0,
+    "parent": "EARTH",
+    "orbit_radius": 2920000.0,
+    "color": "#8a8a8a"
+  },
+  "DBG_MOON_03": {
+    "mu": 944000000.0,
+    "radius": 17374.0,
+    "soi_radius": 660000.0,
+    "parent": "EARTH",
+    "orbit_radius": 3180000.0,
+    "color": "#8a8a8a"
+  },
+  "DBG_MOON_04": {
+    "mu": 944000000.0,
+    "radius": 17374.0,
+    "soi_radius": 660000.0,
+    "parent": "EARTH",
+    "orbit_radius": 3440000.0,
+    "color": "#8a8a8a"
+  },
+  "DBG_MOON_05": {
+    "mu": 944000000.0,
+    "radius": 17374.0,
+    "soi_radius": 660000.0,
+    "parent": "EARTH",
+    "orbit_radius": 3700000.0,
+    "color": "#8a8a8a"
+  },
+  "DBG_MOON_06": {
+    "mu": 944000000.0,
+    "radius": 17374.0,
+    "soi_radius": 660000.0,
+    "parent": "EARTH",
+    "orbit_radius": 3960000.0,
+    "color": "#8a8a8a"
+  },
+  "DBG_MOON_07": {
+    "mu": 944000000.0,
+    "radius": 17374.0,
+    "soi_radius": 660000.0,
+    "parent": "EARTH",
+    "orbit_radius": 4220000.0,
+    "color": "#8a8a8a"
+  },
+  "DBG_MOON_08": {
+    "mu": 944000000.0,
+    "radius": 17374.0,
+    "soi_radius": 660000.0,
+    "parent": "EARTH",
+    "orbit_radius": 4480000.0,
+    "color": "#8a8a8a"
+  },
+  "DBG_MOON_09": {
+    "mu": 944000000.0,
+    "radius": 17374.0,
+    "soi_radius": 660000.0,
+    "parent": "EARTH",
+    "orbit_radius": 4740000.0,
+    "color": "#8a8a8a"
+  },
+  "DBG_MOON_10": {
+    "mu": 944000000.0,
+    "radius": 17374.0,
+    "soi_radius": 660000.0,
+    "parent": "EARTH",
+    "orbit_radius": 5000000.0,
+    "color": "#8a8a8a"
+  },
+  "DBG_MOON_11": {
+    "mu": 944000000.0,
+    "radius": 17374.0,
+    "soi_radius": 660000.0,
+    "parent": "EARTH",
+    "orbit_radius": 5260000.0,
+    "color": "#8a8a8a"
+  }
+}

@@ -22,7 +22,7 @@ extends Control
 ## Anchor dot drawn on the mark itself, pixels.
 @export var dot_radius := 3.0
 ## Text colour on the mark-coloured chip. Black by default for the inverted look.
-@export var ink_color := Color.BLACK
+@export var ink_color := Palette.VOID  # dark ink on the bright phosphor chip (DA-6)
 ## Label typeface; falls back to the UI mono font when unset.
 @export var label_font: Font
 

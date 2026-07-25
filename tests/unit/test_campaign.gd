@@ -11,10 +11,11 @@ func before_each() -> void:
 	_clear_save()
 	Settings.reset_to_defaults()
 	Settings.debug_mode = false
-	# Isolate from the dev machine's real mods folder: these tests exercise the
-	# campaign's index-keyed unlock navigation, which drop-in community levels
-	# (always unlocked) would otherwise perturb.
+	# Isolate from the dev machine's real mods folder AND the bundled debug levels
+	# (which load in this debug test context): these tests exercise the campaign's
+	# index-keyed unlock navigation, which the always-unlocked custom levels perturb.
 	CommunityLevels.override_for_test([])
+	DebugLevels.override_for_test([])
 
 
 func after_each() -> void:
@@ -24,6 +25,7 @@ func after_each() -> void:
 	Settings.reset_to_defaults()
 	Settings.debug_mode = false
 	CommunityLevels.reload()
+	DebugLevels.reload()
 
 
 func _clear_save() -> void:
@@ -297,6 +299,32 @@ func test_campaign_resume_clears_stale_community_launch() -> void:
 		"resume cleared the community id, so a win routes to the profile not the sandbox")
 	assert_eq(root.game.level.title, Campaign.title(0),
 		"resumed the campaign mission, not the stale community level")
+
+
+func test_community_win_does_not_offer_next_mission() -> void:
+	# CR-13: a community/custom level has no campaign successor, so the win banner
+	# must not advertise NEXT MISSION - even though the underlying built-in it
+	# stands in for does have one.
+	var root: Node = CampaignRootScene.instantiate()
+	root.store = ProfileStore.load_or_new(SAVE_TEST_PATH)
+	add_child_autofree(root)
+	root._on_profile_created("Ada", false)
+
+	root._launch_custom("mod_demo", Campaign.level_at(0))  # orbit-match, as a drop-in
+	simulate(root, 2, 1.0 / 60.0)
+	assert_ne(Campaign.next_after(0), -1, "the underlying level does have a campaign successor")
+
+	var ship: ShipSim = root.game.ship
+	var target: float = root.game.level.objective.target_radius
+	ship.elements = OrbitElements.from_state(
+		DVec3.new(target, 0.0, 0.0),
+		DVec3.new(0.0, 0.0, -sqrt(root.game.level.body.mu / target)),
+		root.game.level.body.mu, root.game.sim_time)
+	simulate(root, 5, 1.0 / 60.0)
+
+	assert_eq(root.game.phase, root.game.Phase.WON, "the community mission is won")
+	assert_false(root.game.hud._banner_prompt.text.contains("NEXT MISSION"),
+		"a community win offers no Next Mission")
 
 
 func test_win_persists_to_active_profile_and_advances_campaign() -> void:

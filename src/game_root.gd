@@ -165,6 +165,12 @@ func _physics_process(delta: float) -> void:
 	if phase == Phase.WON:
 		ship.rcs_command = Vector3.ZERO  # no attitude control post-win; keep the puffs off
 		sim_time += delta * WARP_STEPS[warp_index]
+		# A landed win is terminal: the craft stays pinned to the surface (fixed
+		# body-relative position, zero velocity) while the body rides its rails
+		# (CR-5). An orbital win keeps coasting its new conic, as before.
+		if ship.landed:
+			ship.last_time = sim_time
+			return
 		ship.advance_to(sim_time)
 		ship.apply_soi_transitions(sim_time)
 		return
@@ -370,11 +376,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif key.is_action_pressed("node_create"):
 		_node_create()
 	elif key.is_action_pressed("node_delete"):
-		if ship.node != null:
-			ship.node = null
-			if ship.sas_mode == ShipSim.SasMode.NODE:
-				ship.sas_mode = ShipSim.SasMode.OFF
-			flight_view.mark_traj_dirty()
+		_node_delete()
 	elif key.is_action_pressed("node_time_earlier"):
 		_node_adjust(NodeField.T_NODE, -60.0 if key.shift_pressed else -5.0)
 	elif key.is_action_pressed("node_time_later"):
@@ -520,7 +522,7 @@ func _check_end_conditions() -> void:
 	elif ship.r.length() <= ship.body.radius:
 		match level.objective.contact_result(ship):
 			Objective.ContactResult.WIN:
-				_win()
+				_win(true)
 			Objective.ContactResult.CRASH:
 				_fail("TOUCHDOWN TOO HARD")
 			_:
@@ -685,13 +687,18 @@ func _rewind_pips() -> String:
 	return tr("REWIND %s%s   [%s]") % [filled, empty, InputBindings.primary_key_label("rewind_open")]
 
 
-func _win() -> void:
+func _win(landed := false) -> void:
 	phase = Phase.WON
+	if landed:  # CR-5: a surface-contact win settles to a terminal landed state
+		ship.settle_landed()
 	hud.set_rewind_line("")
 	var dv_used := ship.dv_used()
 	var medal := level.medal(dv_used)
 	var clean := hardcore or rewind.rewinds_used == 0
-	hud.show_win(level, dv_used, Campaign.next_after(level_index) != -1, clean)
+	# A community/custom level has no campaign successor, so the win banner must
+	# not offer "Next Mission" (CR-13) - routing returns those players to select.
+	var has_next := custom_level == null and Campaign.next_after(level_index) != -1
+	hud.show_win(level, dv_used, has_next, clean)
 	mission_won.emit(level_index, dv_used, medal, rewind.rewinds_used)
 
 
@@ -740,6 +747,18 @@ func _node_create() -> void:
 	if ship.node == null:
 		ship.create_node(sim_time + 120.0)
 		flight_view.mark_traj_dirty()
+
+
+## Removing a node is a mission mutation like create/adjust, so it takes the same
+## phase guard (CR-12): quick pause has no modal menu to intercept the key, so
+## without this the node could be deleted while the sim is frozen.
+func _node_delete() -> void:
+	if phase != Phase.FLYING or ship.node == null:
+		return
+	ship.node = null
+	if ship.sas_mode == ShipSim.SasMode.NODE:
+		ship.sas_mode = ShipSim.SasMode.OFF
+	flight_view.mark_traj_dirty()
 
 
 func _node_adjust(field: NodeField, amount: float) -> void:

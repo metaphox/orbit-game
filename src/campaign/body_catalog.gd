@@ -8,18 +8,29 @@ extends RefCounted
 ## value passed in moon_specs, not stored in the catalog.
 
 const PATH := "res://assets/bodies/catalog.json"
+## Synthetic bodies for the debug-only perf test levels, merged only in a debug
+## build so the shared community catalog stays clean in release.
+const DEBUG_PATH := "res://assets/bodies/debug_catalog.json"
 
 static var _cat: Dictionary = {}
 
 
 static func _catalog() -> Dictionary:
-	if _cat.is_empty() and FileAccess.file_exists(PATH):
-		var data: Variant = JSON.parse_string(FileAccess.open(PATH, FileAccess.READ).get_as_text())
-		if data is Dictionary:
-			for k: String in data:
-				if not k.begins_with("_"):  # "_comment" etc.
-					_cat[k] = data[k]
+	if _cat.is_empty():
+		_merge_file(PATH)
+		if OS.has_feature("debug"):
+			_merge_file(DEBUG_PATH)
 	return _cat
+
+
+static func _merge_file(path: String) -> void:
+	if not FileAccess.file_exists(path):
+		return
+	var data: Variant = JSON.parse_string(FileAccess.open(path, FileAccess.READ).get_as_text())
+	if data is Dictionary:
+		for k: String in data:
+			if not k.begins_with("_"):  # "_comment" etc.
+				_cat[k] = data[k]
 
 
 static func names() -> Array:

@@ -256,6 +256,13 @@ func _make_marker(color: Color) -> Node3D:
 
 
 func _place_marker(marker: Node3D, dir: Vector3) -> void:
+	# A near-stationary ship (e.g. a landed win, CR-5) has no prograde direction:
+	# dir collapses to ~zero, so hide the marker rather than feed look_at a
+	# degenerate eye==target.
+	if dir.length_squared() < 1e-12:
+		marker.visible = false
+		return
+	marker.visible = true
 	marker.position = dir * 14.0
 	var up := Vector3.UP if absf(dir.y) < 0.99 else Vector3.RIGHT
 	marker.look_at(marker.position + dir, up)

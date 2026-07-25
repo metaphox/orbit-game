@@ -37,11 +37,24 @@ func best_dv(id: String) -> float:
 	return _records.get(id, {}).get("dv", 0.0)
 
 
-## Keep the run with the lowest Δv (best medal). `clean` is sticky-best alongside.
+## True once this level has been cleared without spending any rewinds - the sticky
+## ◇ CLEAN ribbon (DESIGN.md §14.4), mirroring Profile.is_clean for the campaign.
+func is_clean(id: String) -> bool:
+	return bool(_records.get(id, {}).get("clean", false))
+
+
+## Keep the run with the lowest Δv (best medal), but track CLEAN as sticky-best
+## INDEPENDENTLY of the dv (CR-10): a slower clean run after a faster
+## rewind-assisted one must still flip CLEAN on, and a later dirty run never
+## revokes it. Mirrors Profile.record_win.
 func record(id: String, medal: String, dv_used: float, clean: bool) -> void:
 	var prev: Dictionary = _records.get(id, {})
+	var sticky_clean: bool = clean or bool(prev.get("clean", false))
 	if prev.is_empty() or dv_used < float(prev.get("dv", INF)):
-		_records[id] = {"medal": medal, "dv": dv_used, "clean": clean or prev.get("clean", false)}
+		_records[id] = {"medal": medal, "dv": dv_used, "clean": sticky_clean}
+	else:  # slower run: keep best medal/dv, but CLEAN still sticks
+		prev["clean"] = sticky_clean
+		_records[id] = prev
 
 
 func save(path := PATH) -> bool:

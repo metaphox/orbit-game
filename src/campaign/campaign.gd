@@ -1,14 +1,11 @@
 class_name Campaign
 extends RefCounted
-## The level registry and act grouping (DESIGN.md section 7). LEVELS is
-## ordered by act (level_<act>_<level>.tres), so its index equals play
-## order; ACTS carves those indices into contiguous per-act ranges. The
-## index is still the stable ID that tests and save files reference, so
-## append new levels at the end of their act's range rather than reordering.
-
-## The built-in levels are authored as JSON (assets/levels/) and built through
-## LevelLoader, the same pipeline community levels use. Order = play order = the
-## stable save index, so never reorder — append within an act's range.
+## The level registry and act grouping (DESIGN.md section 7). The built-in levels
+## are authored as JSON (assets/levels/) and built through LevelLoader, the same
+## pipeline community levels use. LEVEL_IDS is ordered by act, so its index equals
+## play order; ACTS carves those indices into contiguous per-act ranges. Progress
+## is persisted by the stable string id (LevelDef.id), not the index, so levels
+## can be appended within an act's range without shifting saved progress (CR-11).
 const LEVEL_IDS := [
 	"level_01_01", "level_01_02", "level_01_03",
 	"level_02_01", "level_02_02", "level_02_03",

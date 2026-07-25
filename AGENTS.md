@@ -57,17 +57,18 @@ exactly one of these, by meaning:
 | Seam | Owns | Where |
 |---|---|---|
 | **`RenderTheme`** | The 3D flight view's look — env/sky, body surface colours, trajectory, target ring, corridor, node ghost, orbit marks, ship markers. | `src/ui/render_theme.gd` |
-| **`Palette`** | Semantic UI colours — *one meaning per colour* (green = live/own, amber = planned intent, cyan = target, red = danger), plus ORBITAL-OS chrome tokens. | `src/ui/palette.gd` |
-| **`UiTheme`** | Builds **one Godot `Theme`** for all menu/HUD chrome — fonts (Chakra Petch / IBM Plex Mono) and ~40 `theme_type_variation` tokens (titles, HUD values, panels, chips, separators, buttons). Every colour is sourced *from* `Palette`. | `src/ui/ui_theme.gd` |
+| **`Palette`** | Semantic UI colours — *one meaning per colour* (green = live/own, amber = planned intent, cyan = target, red = danger), plus ORBITAL-OS chrome tokens. | `src/ui/theme/palette.gd` |
+| **`UiTheme`** | Builds **one Godot `Theme`** for all menu/HUD chrome — fonts (Chakra Petch / IBM Plex Mono) and ~40 `theme_type_variation` tokens (titles, HUD values, panels, chips, separators, buttons). Every colour is sourced *from* `Palette`. | `src/ui/theme/ui_theme.gd` |
 
-The generated Theme is `src/ui/generated_ui_theme.tres` — a script-only `Theme` whose `_init()` runs `UiTheme.populate(self)`, so it's **rebuilt from `Palette` on every load** (nothing is baked into the `.tres`, so it can't drift). `UiTheme.shared()` returns that same cached instance for code/tests.
+The generated Theme is `src/ui/theme/generated_ui_theme.tres` — a script-only `Theme` whose `_init()` runs `UiTheme.populate(self)`, so it's **rebuilt from `Palette` on every load** (nothing is baked into the `.tres`, so it can't drift; `test_theme_shell` fails if anything gets baked back in). `UiTheme.shared()` returns that same cached instance for code/tests.
 
 Consequences to respect:
 
-- **Levels (`src/levels/data/*.tres`) carry no colour.** A body's surface colour is
-  resolved by *kind* from `RenderTheme.body_colors` (Earth/Moon/Sun/Mars). A level
-  `.tres` should not set `color =` on a known-kind body; only a genuinely *generic*
-  body falls back to its own `BodyDef.color`. Adding a level = data only, no palette.
+- **Levels (`assets/levels/*.json`, built by `LevelLoader`) carry no chrome colour.**
+  A body's surface colour is resolved by *kind* from `RenderTheme.body_colors`
+  (Earth/Moon/Sun/Mars); a genuinely *generic* body falls back to its own catalog
+  `BodyDef.color`. Adding a level = data only, no palette. (See docs/LEVELS.md for
+  the authoring format; the old `src/levels/data/*.tres` pipeline is gone.)
 - **Menu/HUD screens must not define local colour consts.** No `const GREEN := ...`
   per screen — pull from `Palette` (use `Palette.hex()` for BBCode). The 3D
   renderers read from the `RenderTheme` threaded into their `build(...)` (optional
@@ -85,16 +86,18 @@ Consequences to respect:
   set in the layout script from `Palette`, not baked into the `.tscn`. Several of
   these scripts are `@tool` so they preview in the editor — keep editor-only code
   (save hooks, placeholder builds) guarded by `Engine.is_editor_hint()`.
-- **Menu redesign is code-built (deliberate exception).** The two-pane ORBITAL-OS
-  menu system (`menu_shell`, `mission_card`, `option_card`, `mission_detail_pane`,
-  `difficulty_pips`, `backdrop`, `orbit_preview`, and the `*_screen.gd` controllers)
-  is built in **GDScript**, not `.tscn`: each component's node tree is assembled in
-  `_ready`/`build`, and it inherits the shared Theme by **propagation** from
-  `MenuShell` (which sets `theme = UiTheme.shared()`). This was chosen for
-  editor-less reliability. Same rules still hold: style via `theme_type_variation`,
-  runtime colours from `Palette` (never a raw `Color(...)` literal). Cards are
-  `Button`s using the `CARD` / `CARD_SELECTED` variations; layout uses an 8px grid
-  (`const GRID := 8`, all margins/gaps/heights are multiples).
+- **ORBITAL-OS menu: hybrid scene-first + code-built components.** The two-pane
+  menu's *shells and detail panes* are `.tscn` layouts (`menu_shell.tscn`,
+  `mission_detail_pane.tscn`, and `pause_menu_layout`, `settings_detail`,
+  `credits_panel`, `new_profile_layout`, `load_detail`, `title_hero`). The small
+  *repeated components* (`mission_card`, `option_card`, `difficulty_pips`,
+  `backdrop`, `orbit_preview`) and the `*_screen.gd` controllers remain **code-built**
+  — each assembles its node tree in `_ready`/`build` — chosen for editor-less
+  reliability. Everything inherits the shared Theme by propagation from `MenuShell`
+  (`theme = UiTheme.shared()`). Same rules hold everywhere: style via
+  `theme_type_variation`, runtime colours from `Palette` (never a raw `Color(...)`
+  literal). Cards are `Button`s using the `CARD` / `CARD_SELECTED` variations; layout
+  is on an 8px grid (`const GRID := 8`, all margins/gaps/heights are multiples).
 - **Lint scope.** `tools/lint_ui_colors.sh` (in `tools/test.sh`) enforces the
   no-raw-`Color()` rule on `src/ui/*.gd` only; it does **not** scan `.tscn`. Keep
   scene *chrome* colour-clean by construction (type variations). The remaining raw

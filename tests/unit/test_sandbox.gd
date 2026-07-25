@@ -25,9 +25,29 @@ func test_records_and_keeps_best_dv() -> void:
 	assert_almost_eq(s.best_dv("my-level"), 118.0, 0.001)
 
 
+func test_clean_is_sticky_regardless_of_result_order() -> void:
+	# CR-10: CLEAN is sticky-best (DESIGN §14.4), independent of best-medal/dv.
+	# Fast-dirty then slow-clean: CLEAN must stick even though the dv didn't improve.
+	var a := SandboxStore.new()
+	a.record("lvl", "GOLD ★★★", 100.0, false)  # fast, rewind-assisted
+	assert_false(a.is_clean("lvl"), "a dirty first run isn't clean")
+	a.record("lvl", "SILVER ★★", 250.0, true)  # slower, but clean
+	assert_true(a.is_clean("lvl"), "a later clean run makes it CLEAN even if slower")
+	assert_almost_eq(a.best_dv("lvl"), 100.0, 0.001, "best dv/medal is still the fast run")
+	assert_eq(a.medal_for("lvl"), "GOLD ★★★", "best medal unchanged by the slower clean run")
+
+	# Reverse order: clean first, then a faster dirty run — CLEAN is never revoked.
+	var b := SandboxStore.new()
+	b.record("lvl", "SILVER ★★", 250.0, true)
+	b.record("lvl", "GOLD ★★★", 100.0, false)
+	assert_true(b.is_clean("lvl"), "a later dirty run never revokes CLEAN")
+	assert_almost_eq(b.best_dv("lvl"), 100.0, 0.001, "and the faster run is still the best")
+
+
 func test_unknown_id_is_blank() -> void:
 	var s := SandboxStore.new()
 	assert_eq(s.medal_for("never-played"), "", "no record => no medal")
+	assert_false(s.is_clean("never-played"), "no record => not clean")
 	assert_true(s.is_unlocked("anything"), "community levels are always unlocked")
 
 

@@ -1,0 +1,31 @@
+{
+  "title": "DEBUG: FULL SOLAR SYSTEM",
+  "_epoch": "Planet phase_deg = heliocentric mean ecliptic longitude at 2026-07-25 00:00 UTC (JPL approximate elements). Moons default to phase 0 (decorative, sub-pixel at this zoom). A rendering/ephemeris stress showcase; the ship parks at Earth so you can zoom out and tour.",
+  "system": "SOL",
+  "bodies": [
+    { "name": "MERCURY", "phase_deg": 354.075 },
+    { "name": "VENUS", "phase_deg": 245.048 },
+    { "name": "EARTH", "phase_deg": 302.351 },
+    { "name": "MARS", "phase_deg": 39.352 },
+    { "name": "JUPITER", "phase_deg": 120.463 },
+    { "name": "SATURN", "phase_deg": 14.664 },
+    { "name": "URANUS", "phase_deg": 67.048 },
+    { "name": "NEPTUNE", "phase_deg": 2.906 },
+    { "name": "PLUTO", "phase_deg": 277.498 },
+    { "name": "MOON", "decorative": true },
+    { "name": "PHOBOS", "decorative": true },
+    { "name": "DEIMOS", "decorative": true },
+    { "name": "IO", "decorative": true },
+    { "name": "EUROPA", "decorative": true },
+    { "name": "GANYMEDE", "decorative": true },
+    { "name": "CALLISTO", "decorative": true },
+    { "name": "TITAN", "decorative": true },
+    { "name": "TRITON", "decorative": true }
+  ],
+  "start": { "body": "EARTH", "radius_km": 70 },
+  "ship": { "dry_mass": 1200, "prop_mass": 2000, "thrust": 15000, "isp": 90 },
+  "objective": { "type": "orbit_match", "radius_km": 80, "tolerance_km": 3 },
+  "dv_par": 100, "difficulty": 1,
+  "map_extent_km": 1800000, "draw_limit_km": 1800000, "fail_radius_km": 3000000,
+  "avionics": { "sas": true, "nodes": true }
+}

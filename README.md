@@ -172,7 +172,7 @@ src/
   sim/           # ShipSim, BodyDef, ManeuverNode, SOI logic
   objectives/    # the five win/fail predicate classes
   ui/            # HUD, flight/orbit/minimap views, screens
-  levels/data/   # level_01..07 as .tres resources (edit in the Inspector)
+  levels/        # LevelDef + LevelLoader (built-in JSON lives in assets/levels/)
   autopilot/     # the live flight director (debug feature)
   campaign/      # profiles, save/resume, settings
   shaders/       # CRT, film grade, starfield
@@ -182,19 +182,21 @@ DESIGN.md        # the design record — read this first
 PLAN.md          # milestone-by-milestone build history
 ```
 
-Levels are plain Godot `Resource` files (`src/levels/data/*.tres`): body
-hierarchy, ship stats, objective, and Δv par are all Inspector‑editable data —
-no code needed to author a new mission.
+Levels are human-authored JSON (`assets/levels/*.json`), built into a `LevelDef`
+by `LevelLoader` from friendly units and catalog body names: body hierarchy, ship
+stats, objective, and Δv par are all plain data — no code needed to author a new
+mission. The same loader backs drop-in community levels. See `docs/LEVELS.md`.
 
 ## Contributing
 
 The open work is exactly the "not built yet" list above. High‑value places to
 start:
 
-- **New levels.** Author a `LevelDef` `.tres` (copy an existing one), set the
-  bodies/ship/objective/par, and add it to the `Campaign` registry. The autopilot
-  and tests give you fast feedback on whether it's winnable and roughly how much
-  Δv it costs.
+- **New levels.** Author an `assets/levels/*.json` file (copy an existing one),
+  set the bodies/ship/objective/par, and add its id to the `Campaign` registry —
+  or just drop it in the community mods folder to skip the registry entirely
+  (`docs/LEVELS.md`). The autopilot and tests give you fast feedback on whether
+  it's winnable and roughly how much Δv it costs.
 - **Δv‑par tuning** through real play — the current pars are author estimates.
 - **RCS / rotation‑cost** (`DESIGN.md` §4.4) — the designed‑but‑unbuilt second
   difficulty axis.

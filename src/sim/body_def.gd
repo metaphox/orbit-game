@@ -1,9 +1,9 @@
 class_name BodyDef
 extends Resource
 ## A gravitating body. Root bodies sit at the origin; children ride Kepler
-## rails around their parent. Single-level hierarchy for now (moons of the
-## root body); position_at recurses, so deeper nesting only needs SOI logic
-## updates in ShipSim.
+## rails around their parent. The hierarchy nests arbitrarily deep (e.g.
+## Sol -> Jupiter -> Io): position_at recurses up the parent chain, and
+## ShipSim.apply_soi_transitions hands off through nested SOIs.
 
 @export var name := ""
 @export var mu := 0.0

@@ -47,6 +47,7 @@ var revision := 0  # bumps whenever elements are refit (event caches key on it)
 var sas_mode := SasMode.OFF
 var node: ManeuverNode
 var node_completed := false  # one-shot flag for the UI to poll and clear
+var landed := false  # terminal surface-contact state (CR-5); see settle_landed
 
 var _level: LevelDef
 
@@ -89,6 +90,19 @@ func setup(level: LevelDef) -> void:
 func normalize_coast() -> void:
 	if flight_state == FlightState.BURNING and (throttle <= 0.0 or prop_mass <= 0.0):
 		_refit_elements(last_time)
+
+
+## Settle the ship onto the surface as a terminal state after a successful
+## airless landing (CR-5). Throttle and body-relative velocity are zeroed and the
+## craft is marked landed; the caller then freezes its body-relative position
+## while the parent body keeps riding its own rails. Unlike an orbital win (which
+## keeps coasting its new conic), a landed craft must not burn, lift off, or
+## coast a refitted trajectory through the body.
+func settle_landed() -> void:
+	landed = true
+	throttle = 0.0
+	v = DVec3.new()
+	flight_state = FlightState.COASTING
 
 
 func advance_to(t: float) -> void:

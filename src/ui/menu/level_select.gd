@@ -58,17 +58,29 @@ func _build_cards() -> void:
 		for index: int in act["indices"]:
 			_add_card({"community": false, "index": index})
 	# Drop-in community levels that loaded cleanly, as their own section.
-	var community: Array = []
-	for e: Dictionary in CommunityLevels.all():
-		if e["level"] != null:
-			community.append(e)
-	if not community.is_empty():
-		_add_section("COMMUNITY")
-		var n := 1
-		for e: Dictionary in community:
-			_add_card({"community": true, "id": e["id"], "level": e["level"], "dir": e["dir"], "num": n})
-			n += 1
+	_add_custom_section("COMMUNITY", "MOD", CommunityLevels.all())  # i18n-ok: MOD is a mission code (like ORB/LUN)
+	# Debug-only perf test levels — present only in a debug build (DebugLevels.all()
+	# is empty otherwise), so they never show for players.
+	_add_custom_section("DEBUG", "DBG", DebugLevels.all())  # i18n-ok: dev-only section, never shown in release
 	_add_open_mods_button()  # always, so modding is discoverable even with no levels yet
+
+
+## A section of custom (community/debug) levels — string-ID entries flown via the
+## custom-launch path (community_chosen). `code_prefix` names their card codes
+## (MOD-01 / DBG-01). Skipped entirely when nothing loaded, so no empty header.
+func _add_custom_section(title: String, code_prefix: String, source: Array) -> void:
+	var loaded: Array = []
+	for e: Dictionary in source:
+		if e["level"] != null:
+			loaded.append(e)
+	if loaded.is_empty():
+		return
+	_add_section(title)
+	var n := 1
+	for e: Dictionary in loaded:
+		_add_card({"community": true, "id": e["id"], "level": e["level"], "dir": e["dir"],
+			"code": "%s-%02d" % [code_prefix, n]})
+		n += 1
 
 
 ## A mouse-only affordance at the foot of the list that opens the writable mods
@@ -109,7 +121,7 @@ func _add_card(entry: Dictionary) -> void:
 	_shell.left_column.add_child(card)
 	if entry["community"]:
 		var lvl: LevelDef = entry["level"]
-		card.set_data(pos, "MOD-%02d" % entry["num"], _short_title(lvl.title),  # i18n-ok: mission code (like ORB/LUN)
+		card.set_data(pos, entry["code"], _short_title(lvl.title),  # i18n-ok: mission code (like ORB/LUN)
 			_community_status(entry["id"]), lvl.difficulty, false)
 	else:
 		var index: int = entry["index"]

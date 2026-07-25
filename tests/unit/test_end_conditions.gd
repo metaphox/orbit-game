@@ -72,6 +72,48 @@ func test_envelope_fails_from_inside_a_child_soi() -> void:
 	assert_eq(game._fail_reason, "MISSION ENVELOPE EXCEEDED")
 
 
+func test_landed_win_settles_and_stays_put() -> void:
+	# CR-5: a successful airless landing must reach a terminal landed state -
+	# throttle + body-relative velocity zeroed, position frozen - not keep
+	# advancing on rails where a stuck throttle could lift the craft back off.
+	GameRootScript.level_index = 4  # airless landing on the Moon
+	var game: Node = load("res://src/main.tscn").instantiate()
+	add_child_autofree(game)
+	simulate(game, 2, 1.0 / 60.0)
+	var moon: BodyDef = game.ship.body
+
+	# Soft touchdown at full throttle, then drive the win through the real check.
+	game.ship.r = DVec3.new(moon.radius, 0.0, 0.0)
+	game.ship.v = DVec3.new(-4.0, 0.0, 2.0)  # |vs|=4, hs=2 -> WIN
+	game.ship.throttle = 1.0
+	game._check_end_conditions()
+
+	assert_eq(game.phase, game.Phase.WON, "soft touchdown wins")
+	assert_true(game.ship.landed, "the craft is marked landed")
+	assert_eq(game.ship.throttle, 0.0, "throttle is cut on landing")
+	assert_eq(game.ship.v.length(), 0.0, "body-relative velocity is zeroed")
+
+	var pinned: DVec3 = game.ship.r.copy()
+	simulate(game, 180, 1.0 / 60.0)  # three seconds in the post-win scene
+	assert_almost_eq(game.ship.r.distance_to(pinned), 0.0, 1e-6,
+		"a landed craft stays pinned to the surface instead of lifting off or sinking")
+	assert_eq(game.ship.v.length(), 0.0, "and never regains velocity")
+
+
+func test_orbital_win_keeps_coasting() -> void:
+	# The CR-5 landed state must NOT apply to an orbital win: that keeps coasting
+	# its new conic (DESIGN §14.3), so the ship's position advances over time.
+	GameRootScript.level_index = 0
+	var game: Node = load("res://src/main.tscn").instantiate()
+	add_child_autofree(game)
+	simulate(game, 2, 1.0 / 60.0)
+	game._win()  # orbital-style win (no landing)
+	assert_false(game.ship.landed, "an orbital win is not landed")
+	var before: DVec3 = game.ship.r.copy()
+	simulate(game, 60, 1.0 / 60.0)
+	assert_gt(game.ship.r.distance_to(before), 0.0, "an orbital win keeps coasting")
+
+
 func test_envelope_does_not_fire_within_the_boundary() -> void:
 	var game := _boot()
 	var moon := _nested_moon()

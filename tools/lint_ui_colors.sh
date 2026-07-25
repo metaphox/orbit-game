@@ -14,7 +14,10 @@
 # scene needs at runtime is applied in code from Palette (e.g. map_view.gd).
 cd "$(dirname "$0")/.." || exit 1
 
-HITS=$(grep -rnE 'Color8?\(\s*[-0-9.]' src/ui --include='*.gd' --include='*.tscn' \
+# Two forms are flagged: a raw `Color(<number>...` literal, and a named colour
+# constant `Color.<NAME>` (Color.BLACK, Color.WHITE, ...) - both are standalone
+# colours that belong in Palette (DA-6).
+HITS=$(grep -rnE 'Color8?\(\s*[-0-9.]|Color\.[A-Z]' src/ui --include='*.gd' --include='*.tscn' \
 	| grep -vE 'src/ui/(theme/palette|world/render_theme)\.gd' \
 	| grep -vE 'src/ui/world/station_model\.tscn' \
 	| grep -v '# lint-ok')

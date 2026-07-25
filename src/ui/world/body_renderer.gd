@@ -234,6 +234,10 @@ func _make_body_material(body: BodyDef, kind: int, emission_strength := 1.0) -> 
 	material.set_shader_parameter("base_color", _theme.body_colors.get(kind, body.color))
 	material.set_shader_parameter("seed", float(absi(body.name.hash() % 2048)) / 173.0)
 	material.set_shader_parameter("emission_strength", emission_strength)
+	# Per-kind ramp palette from the theme (DA-2), so body surface appearance flows
+	# through RenderTheme rather than being hardcoded in the shader.
+	for param: String in _theme.body_ramps:
+		material.set_shader_parameter(param, _theme.body_ramps[param])
 	if kind == BODY_EARTH:
 		material.set_shader_parameter("earth_map", _theme.earth_map)
 	return material

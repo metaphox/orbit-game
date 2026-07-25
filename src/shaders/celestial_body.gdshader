@@ -6,6 +6,21 @@ render_mode diffuse_burley, specular_schlick_ggx;
 // hand-painted mission-simulator models instead of photographic globes.
 uniform int body_kind = 0; // 0 generic, 1 Earth, 2 Moon, 3 Sun, 4 Mars
 uniform vec4 base_color : source_color = vec4(0.5, 0.5, 0.5, 1.0);
+// Per-kind procedural-ramp palette, owned by RenderTheme (DA-2). Plain vec3 (NOT
+// source_color) so the values arrive raw, exactly as the old inline literals did.
+// Defaults reproduce the current look when a theme doesn't override them.
+uniform vec3 earth_cloud_color = vec3(0.76, 0.81, 0.75);
+uniform vec3 earth_grid_color = vec3(0.08, 0.55, 0.52);
+uniform vec3 earth_grid_ref_color = vec3(0.95, 0.56, 0.12);
+uniform vec3 moon_dust_low = vec3(0.34, 0.33, 0.30);
+uniform vec3 moon_dust_high = vec3(0.67, 0.64, 0.57);
+uniform vec3 moon_maria_color = vec3(0.24, 0.25, 0.25);
+uniform vec3 sun_core_color = vec3(0.95, 0.28, 0.035);
+uniform vec3 sun_hot_color = vec3(1.0, 0.78, 0.24);
+uniform vec3 mars_low_color = vec3(0.48, 0.17, 0.085);
+uniform vec3 mars_high_color = vec3(0.78, 0.39, 0.18);
+uniform vec3 mars_dark_color = vec3(0.22, 0.11, 0.085);
+uniform vec3 mars_ice_color = vec3(0.72, 0.68, 0.57);
 uniform float seed = 0.0;
 // Multiplies the body's emission. 1.0 for gameplay bodies; the decorative
 // immersion Sun cranks this so it reads as a blinding, heavily-blooming star.
@@ -96,7 +111,7 @@ void fragment() {
 		float cloud_noise = fbm(p * vec3(7.5, 12.0, 7.5) + vec3(seed, 11.0, 3.0));
 		float cloud_bands = cloud_noise + sin(p.y * 26.0 + coast_detail * 7.0) * 0.065;
 		float cloud = smoothstep(0.72 + dither * 0.03, 0.82, cloud_bands) * 0.58;
-		color = mix(color, vec3(0.76, 0.81, 0.75), max(polar, cloud));
+		color = mix(color, earth_cloud_color, max(polar, cloud));
 
 		// Navigation-grid paint shares the exact UV frame used by earth_map.
 		// Twelve longitude cells and six latitude cells make 30-degree blocks;
@@ -111,8 +126,7 @@ void fragment() {
 		float prime_meridian = 1.0 - smoothstep(prime_width, prime_width * 2.0,
 			abs(UV.x - 0.5));
 		float reference_line = max(equator, prime_meridian);
-		vec3 grid_color = mix(vec3(0.08, 0.55, 0.52), vec3(0.95, 0.56, 0.12),
-			reference_line);
+		vec3 grid_color = mix(earth_grid_color, earth_grid_ref_color, reference_line);
 		color = mix(color, grid_color, grid * 0.28 + reference_line * 0.34);
 		roughness = mix(0.48, 0.9, land);
 		emission = mapped * 0.025 + grid_color * (grid * 0.035 + reference_line * 0.07);
@@ -126,24 +140,24 @@ void fragment() {
 		crater_field += crater(p, vec3(0.18, -0.79, 0.58), 0.10);
 		crater_field += crater(p, vec3(-0.78, -0.12, -0.61), 0.15);
 		crater_field += crater(p, vec3(0.50, 0.73, -0.47), 0.075);
-		vec3 dust = mix(vec3(0.34, 0.33, 0.30), vec3(0.67, 0.64, 0.57), grain);
-		color = mix(dust, vec3(0.24, 0.25, 0.25), maria * 0.72);
+		vec3 dust = mix(moon_dust_low, moon_dust_high, grain);
+		color = mix(dust, moon_maria_color, maria * 0.72);
 		color *= 1.0 + crater_field * 0.32;
 		color = floor((color + dither * 0.025) * 7.0) / 7.0;
 		roughness = 1.0;
 		emission = color * 0.34;
 	} else if (body_kind == 3) {
 		float cells = fbm(p * 6.0 + vec3(seed, TIME * 0.015, 4.0));
-		color = mix(vec3(0.95, 0.28, 0.035), vec3(1.0, 0.78, 0.24), cells);
+		color = mix(sun_core_color, sun_hot_color, cells);
 		emission = color * 2.2;
 		roughness = 0.7;
 	} else if (body_kind == 4) {
 		float terrain = fbm(p * 5.0 + vec3(seed, 2.0, 7.0));
 		float dark = smoothstep(0.52 + dither * 0.04, 0.68, fbm(p * 2.0 + vec3(4.0)));
-		color = mix(vec3(0.48, 0.17, 0.085), vec3(0.78, 0.39, 0.18), terrain);
-		color = mix(color, vec3(0.22, 0.11, 0.085), dark * 0.55);
+		color = mix(mars_low_color, mars_high_color, terrain);
+		color = mix(color, mars_dark_color, dark * 0.55);
 		float ice = smoothstep(0.82, 0.93, abs(p.y));
-		color = mix(color, vec3(0.72, 0.68, 0.57), ice);
+		color = mix(color, mars_ice_color, ice);
 	} else {
 		float facets = floor((fbm(p * 4.0 + vec3(seed)) + dither * 0.04) * 6.0) / 6.0;
 		color = base_color.rgb * mix(0.58, 1.18, facets);

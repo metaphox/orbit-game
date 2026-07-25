@@ -180,6 +180,25 @@ func test_throttle_cut_then_warp_still_clamps_to_the_next_event() -> void:
 	assert_eq(game.warp_index, 0, "and dropped out of warp at the event")
 
 
+func test_node_delete_is_frozen_by_quick_pause() -> void:
+	# CR-12: node deletion is a mission mutation and must take the same phase guard
+	# as create/adjust - quick pause has no modal menu to intercept the key.
+	GameRootScript.level_index = 3
+	var game: Node = load("res://src/main.tscn").instantiate()
+	add_child_autofree(game)
+	simulate(game, 2, 1.0 / 60.0)
+	game._node_create()
+	assert_not_null(game.ship.node, "node created while flying")
+
+	game.phase = game.Phase.PAUSED  # quick pause freezes the sim
+	game._node_delete()
+	assert_not_null(game.ship.node, "a frozen sim does not delete the node")
+
+	game.phase = game.Phase.FLYING
+	game._node_delete()
+	assert_null(game.ship.node, "deletion works again once flying")
+
+
 func test_node_capability_gate_and_game_flow() -> void:
 	var game: Node = load("res://src/main.tscn").instantiate()
 	add_child_autofree(game)

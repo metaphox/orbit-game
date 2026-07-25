@@ -1,9 +1,11 @@
 class_name LevelDef
 extends Resource
-## Everything that defines a level, as an Inspector-editable Resource
-## authored to a .tres file per level (see src/levels/data/).
+## Everything that defines a level. The runtime object is built by LevelLoader
+## from a human-authored JSON file (assets/levels/ for the built-ins, the mods
+## folders for community levels — the single authoring pipeline; see docs/LEVELS.md);
+## it is no longer hand-authored as a .tres.
 
-@export var id := ""       # stable slug (JSON/brief filename stem); "" for legacy .tres
+@export var id := ""       # stable slug (JSON/brief filename stem)
 @export var title := ""
 @export var body: BodyDef  # root body of the system
 @export var moons: Array[BodyDef] = []
