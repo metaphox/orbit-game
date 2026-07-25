@@ -2,19 +2,78 @@
 
 Scratch note for the /loop task (procedural station generator). Delete when done.
 
-## NEXT ITERATION — Taowu playtest feedback (2026-07-25), NOT yet implemented
-Tool works & reads plausibly; three changes wanted next (full detail in docs/STATIONS.md §6):
-1. **Thinner solar panels** — currently way too thick even for the toy solar system. Cut blanket
-   Y-thickness hard in `build_solar` (today `self.meters * 0.006` → try ~`* 0.0015` / small floor);
-   thin the radiator fins too. Foil, not plywood.
-2. **More part variety / more part TYPES** — stations should feel more complex & varied; parts need
-   NOT be realistic (quasi-sci-fi). Add new kinds beyond cylinder/box/torus/sphere roles: domes/
-   blisters, truss-lattice bays, tank clusters, varied dishes, robotic arm, docked tugs, comms
-   masts, tapered hull sections, fins. Two stations should differ in KIND, not just size/count.
-3. **Allow HYBRID archetypes** — retire "pick ONE per station". Compose forms on a shared frame,
-   e.g. dual-keel + giant dome + rotating ring. The per-archetype builders are the building blocks;
-   graft them together and keep passing the non-interference validator. Biggest structural change.
-(Positive: the research doc `docs/STATIONS_research.md` landed well.)
+## Done (iteration 17) — fictional station operator brands
+- Researched 1970s aerospace/industrial languages and documented four original
+  fictional operators: TENKŪ (Japan), JIǓYUÁN (China), Far Horizon (US), and
+  Weser (Germany), with originality guardrails and linked primary references.
+- Generator parts now request five semantic roles (hull, structure, solar,
+  accent, light). `--brand` resolves those roles through one of 20 brand material
+  resources with distinct enamel/anodised, ceramic/oxide, brushed-alloy, or
+  powder-coat responses; previews use the same role colours.
+- Every station receives one small original primitive logo owned by a lab or
+  habitat surface. Validation pins the selected mark, owning crew module, and
+  primitive indices. Brand choice cannot consume layout RNG or alter structural
+  geometry, thermal sizing, connectivity, or organisation scoring.
+- `auto` uses a fixed seed mixer rather than a simple modulo, so the CLI's
+  1000-seed batch stride still covers all four operators. Scenes and blueprints
+  record the resolved brand; explicit brand filenames cannot overwrite one
+  another.
+- Five review scenes/blueprints/previews live in `assets/station_brand_review/`
+  and `docs/station_brand_review/`, with a vector brand board for logo/palette
+  review. Four are controlled same-seed comparisons; the fifth exercises auto on
+  the dual-keel/ring/dome hybrid.
+- Verification: 28/28 Python tests, the 162-station archetype/size/seed self-test,
+  20/20 Godot station load/basis checks, the guarded project suite, and a
+  warning-free debug import.
+
+## Done (iteration 16) — thermal-budget radiator pass
+- Replaced the duplicated, nearly square radiator fins with one connected accordion sheet per
+  bank: 6–8 cream panels, visible dark hinges, a continuous spar, and a 5:1–7:1 face aspect.
+- Radiator area now follows an explicit ISS-calibrated thermal proxy based on generated solar
+  collecting area plus crewed-volume load. Ordinary forms validate at 25–35% radiator/solar
+  area; power-tower forms use a bounded 1.24× high-power profile with a 42% ceiling.
+- The JSON blueprint and Godot root metadata expose the thermal profile, estimated heat load,
+  emitted/target radiator area, bank count, and area ratio. Validation rejects inconsistent
+  budgets, duplicate panel layers, missing hinges, bad aspect ratios, and sun-facing radiators.
+- Regenerated the five review scenes/blueprints/previews. Their area ratios are 27.2–33.6%, and
+  the review set still covers all four solar families plus all three hybrid recipes.
+- Verification: 23/23 Python tests, 162-station self-test, 15/15 Godot scene/basis
+  checks, 289/289 project tests with the coverage guard intact, and a warning-free debug import.
+
+## Done (iteration 15) — connected station graph + foldable arrays
+- The generator now builds semantic **assemblies**, compatible **mounts**, and typed
+  **joints**, then hard-validates structural/pressurised reachability and physical connector
+  endpoints. A connector may cross only its two declared endpoint assemblies.
+- The dual-keel observatory is a crewed chain from a real module through a visible pressure
+  trunk and broad vestibule into the dome; its ring remains a separately connected assembly.
+- Solar wings use station-coherent accordion, petal, round-umbrella, or ordered-honeycomb
+  families with leaf/hinge metadata, narrow rails, mirrored topology/area, a declared local sun
+  vector, and a gimbal solution within 15° of the sun.
+- Every lab/habitat owns a restrained cylindrical-surface window cluster and at most one green
+  status light. Surface ownership and placement are validated.
+- JSON blueprints now expose assemblies, mounts, joints, requested/resolved seeds, sun vector,
+  solar family, and a deterministic 0–100 organisation report with components and penalties.
+  It remains report-only pending human calibration; valid-candidate ranking is not enabled.
+- Godot text transforms now transpose the generator's axis columns into the row-ordered
+  `Transform3D(...)` scene syntax. The load check compares emitted node bases/origins with JSON,
+  preventing tilted booms, spines, or ribs from rotating away from their analytic attachments.
+- Five review scenes/blueprints/previews were regenerated to cover all four array families.
+  Verification: 21/21 Python tests, 162-station self-test, and 15/15 Godot scenes load.
+
+## Done (iteration 14) — hybrid + variety playtest pass
+- **Thin deployed surfaces:** solar blanket half-thickness is capped at 0.18 design metres and
+  radiator fins at 0.28, with small absolute floors. Unit coverage pins both the absolute cap and
+  the blanket aspect ratio at 0.5×, 1×, and 20× ISS.
+- **New part families:** seeded domes, three-tank racks, two-joint robotic arms, docked capsule
+  tugs with tapered engines/fins/lights, varied tapered dishes, and repeated truss-lattice bays.
+  Every station gets at least two signature families.
+- **Hybrid archetype:** three recipes now compose existing forms with shared clearance routing:
+  dual-keel + ring + giant observatory dome; truss + ring + radial cluster; and power tower +
+  ring + tank farm. Auto-selection can use hybrids for large stations.
+- **Human review:** five generated scenes/blueprints live in `assets/station_review/`; matching
+  SIDE/TOP/END PNGs and review notes live in `docs/station_review/`. The new END view makes
+  ring and radial silhouettes visible instead of showing them only edge-on.
+- Verification expanded from 8 to 11 unit tests; selftest now covers 162 generated stations.
 
 ## Done (iteration 1)
 - **docs/STATIONS.md** — design guideline (parts, archetypes, hard rules, scale, generator contract).
@@ -154,8 +213,8 @@ Tool works & reads plausibly; three changes wanted next (full detail in docs/STA
 - Kept `assets/stations/` clean (tscn+json only); previews live under `docs/`.
 
 ## How to run the checks
-- `python3 tools/station_gen.py --selftest`  → 108-station validation sweep
-- `python3 tools/test_station_gen.py`         → 8 unit tests
+- `python3 tools/station_gen.py --selftest`  → 162-station validation sweep
+- `python3 tools/test_station_gen.py`         → 23 unit tests
 - `python3 tools/station_gen.py --count 10 --spread --preview --out /tmp/s`  → images to eyeball
 - `godot --headless --script tools/station_load_check.gd`  → all scenes load
 

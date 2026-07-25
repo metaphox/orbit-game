@@ -1,0 +1,8209 @@
+{
+  "requested_seed": 4,
+  "seed": 4,
+  "resolved_seed": 4,
+  "archetype": "stack",
+  "forms": [
+    "stack"
+  ],
+  "meters": 109.0,
+  "iss_multiple": 1.0,
+  "game_scale": 0.35,
+  "counts": {
+    "labs": 2,
+    "habs": 1,
+    "nodes": 0,
+    "panels": 4,
+    "radiators": 2,
+    "antennas": 1,
+    "ports": 2,
+    "rings": 0,
+    "domes": 1,
+    "tanks": 0,
+    "arms": 1,
+    "tugs": 0,
+    "truss_bays": 0,
+    "windows": 7,
+    "module_lights": 3
+  },
+  "sun_vector": [
+    0.0,
+    0.956849,
+    -0.290584
+  ],
+  "solar_family": "accordion_rect",
+  "thermal": {
+    "profile": "ordinary",
+    "solar_area_m2": 502.99325622438755,
+    "solar_supported_heat_kw": 13.077824661834075,
+    "crewed_heat_kw": 1.7499999999999998,
+    "load_multiplier": 1.0,
+    "estimated_heat_load_kw": 14.827824661834075,
+    "rejection_kw_per_m2": 0.096,
+    "minimum_area_ratio": 0.25,
+    "maximum_area_ratio": 0.35,
+    "target_radiator_area_m2": 154.45650689410493,
+    "bank_count": 2,
+    "emitted_radiator_area_m2": 154.45650689410493,
+    "area_ratio": 0.3070747072306695
+  },
+  "station_root": "lab_000",
+  "pressurized_root": "lab_000",
+  "organization_score": 96.9,
+  "organization": {
+    "score": 96.9,
+    "components": {
+      "connection_quality": 0.966,
+      "functional_orientation": 0.997,
+      "spatial_clearance": 0.8812,
+      "mass_balance": 0.9879,
+      "routing_hierarchy": 1.0,
+      "pattern_coherence": 0.9786
+    },
+    "penalties": [],
+    "mode": "report_only"
+  },
+  "assemblies": [
+    {
+      "id": "lab_000",
+      "role": "lab",
+      "crewed": true,
+      "decorative": false,
+      "part_indices": [
+        0,
+        1,
+        5
+      ],
+      "metadata": {
+        "center": [
+          -22.887457945439312,
+          0,
+          0
+        ],
+        "radius": 2.1018089150974513,
+        "length": 15.066980507304713,
+        "axis": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "module_role": "lab"
+      }
+    },
+    {
+      "id": "hab_001",
+      "role": "hab",
+      "crewed": true,
+      "decorative": false,
+      "part_indices": [
+        2
+      ],
+      "metadata": {
+        "center": [
+          -2.6379209947101465,
+          0,
+          0
+        ],
+        "radius": 1.8777884019654774,
+        "length": 25.43209339415362,
+        "axis": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "module_role": "hab"
+      }
+    },
+    {
+      "id": "lab_002",
+      "role": "lab",
+      "crewed": true,
+      "decorative": false,
+      "part_indices": [
+        3,
+        4,
+        6,
+        7
+      ],
+      "metadata": {
+        "center": [
+          20.249536950729166,
+          0,
+          0
+        ],
+        "radius": 2.0015144296521554,
+        "length": 20.342822496725006,
+        "axis": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "module_role": "lab"
+      }
+    },
+    {
+      "id": "robot_arm_003",
+      "role": "robot_arm",
+      "crewed": false,
+      "decorative": false,
+      "part_indices": [
+        8,
+        9,
+        10,
+        11
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "dome_004",
+      "role": "dome",
+      "crewed": true,
+      "decorative": false,
+      "part_indices": [
+        12,
+        13
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "solar_wing_005",
+      "role": "solar_wing",
+      "crewed": false,
+      "decorative": false,
+      "part_indices": [
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48
+      ],
+      "metadata": {
+        "family": "accordion_rect",
+        "pair": 0,
+        "side": -1,
+        "normal": [
+          0.0,
+          0.9341363071579517,
+          -0.3569164603227273
+        ],
+        "tracking_angle_deg": -20.910945607306424,
+        "hinge_connected": true,
+        "leaf_count": 22,
+        "leaf_part_indices": [
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31,
+          32,
+          33,
+          34,
+          35,
+          36,
+          37,
+          38
+        ],
+        "hinge_edges": [
+          [
+            "gimbal",
+            17
+          ],
+          [
+            17,
+            18
+          ],
+          [
+            18,
+            19
+          ],
+          [
+            19,
+            20
+          ],
+          [
+            20,
+            21
+          ],
+          [
+            21,
+            22
+          ],
+          [
+            22,
+            23
+          ],
+          [
+            23,
+            24
+          ],
+          [
+            24,
+            25
+          ],
+          [
+            25,
+            26
+          ],
+          [
+            26,
+            27
+          ],
+          [
+            27,
+            28
+          ],
+          [
+            28,
+            29
+          ],
+          [
+            29,
+            30
+          ],
+          [
+            30,
+            31
+          ],
+          [
+            31,
+            32
+          ],
+          [
+            32,
+            33
+          ],
+          [
+            33,
+            34
+          ],
+          [
+            34,
+            35
+          ],
+          [
+            35,
+            36
+          ],
+          [
+            36,
+            37
+          ],
+          [
+            37,
+            38
+          ]
+        ],
+        "hinge_count": 20,
+        "collecting_area": 133.59110451913614,
+        "stowed_volume": 2.795794635376481
+      }
+    },
+    {
+      "id": "solar_wing_006",
+      "role": "solar_wing",
+      "crewed": false,
+      "decorative": false,
+      "part_indices": [
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83
+      ],
+      "metadata": {
+        "family": "accordion_rect",
+        "pair": 0,
+        "side": 1,
+        "normal": [
+          0.0,
+          0.9341363071579517,
+          -0.3569164603227273
+        ],
+        "tracking_angle_deg": -20.910945607306424,
+        "hinge_connected": true,
+        "leaf_count": 22,
+        "leaf_part_indices": [
+          52,
+          53,
+          54,
+          55,
+          56,
+          57,
+          58,
+          59,
+          60,
+          61,
+          62,
+          63,
+          64,
+          65,
+          66,
+          67,
+          68,
+          69,
+          70,
+          71,
+          72,
+          73
+        ],
+        "hinge_edges": [
+          [
+            "gimbal",
+            52
+          ],
+          [
+            52,
+            53
+          ],
+          [
+            53,
+            54
+          ],
+          [
+            54,
+            55
+          ],
+          [
+            55,
+            56
+          ],
+          [
+            56,
+            57
+          ],
+          [
+            57,
+            58
+          ],
+          [
+            58,
+            59
+          ],
+          [
+            59,
+            60
+          ],
+          [
+            60,
+            61
+          ],
+          [
+            61,
+            62
+          ],
+          [
+            62,
+            63
+          ],
+          [
+            63,
+            64
+          ],
+          [
+            64,
+            65
+          ],
+          [
+            65,
+            66
+          ],
+          [
+            66,
+            67
+          ],
+          [
+            67,
+            68
+          ],
+          [
+            68,
+            69
+          ],
+          [
+            69,
+            70
+          ],
+          [
+            70,
+            71
+          ],
+          [
+            71,
+            72
+          ],
+          [
+            72,
+            73
+          ]
+        ],
+        "hinge_count": 20,
+        "collecting_area": 133.59110451913614,
+        "stowed_volume": 2.795794635376481
+      }
+    },
+    {
+      "id": "solar_wing_007",
+      "role": "solar_wing",
+      "crewed": false,
+      "decorative": false,
+      "part_indices": [
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        99,
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115
+      ],
+      "metadata": {
+        "family": "accordion_rect",
+        "pair": 1,
+        "side": -1,
+        "normal": [
+          0.0,
+          0.9173147229331358,
+          -0.398162905216074
+        ],
+        "tracking_angle_deg": -23.463382940557945,
+        "hinge_connected": true,
+        "leaf_count": 20,
+        "leaf_part_indices": [
+          87,
+          88,
+          89,
+          90,
+          91,
+          92,
+          93,
+          94,
+          95,
+          96,
+          97,
+          98,
+          99,
+          100,
+          101,
+          102,
+          103,
+          104,
+          105,
+          106
+        ],
+        "hinge_edges": [
+          [
+            "gimbal",
+            87
+          ],
+          [
+            87,
+            88
+          ],
+          [
+            88,
+            89
+          ],
+          [
+            89,
+            90
+          ],
+          [
+            90,
+            91
+          ],
+          [
+            91,
+            92
+          ],
+          [
+            92,
+            93
+          ],
+          [
+            93,
+            94
+          ],
+          [
+            94,
+            95
+          ],
+          [
+            95,
+            96
+          ],
+          [
+            96,
+            97
+          ],
+          [
+            97,
+            98
+          ],
+          [
+            98,
+            99
+          ],
+          [
+            99,
+            100
+          ],
+          [
+            100,
+            101
+          ],
+          [
+            101,
+            102
+          ],
+          [
+            102,
+            103
+          ],
+          [
+            103,
+            104
+          ],
+          [
+            104,
+            105
+          ],
+          [
+            105,
+            106
+          ]
+        ],
+        "hinge_count": 18,
+        "collecting_area": 117.90552359305765,
+        "stowed_volume": 2.4675267977555104
+      }
+    },
+    {
+      "id": "solar_wing_008",
+      "role": "solar_wing",
+      "crewed": false,
+      "decorative": false,
+      "part_indices": [
+        116,
+        117,
+        118,
+        119,
+        120,
+        121,
+        122,
+        123,
+        124,
+        125,
+        126,
+        127,
+        128,
+        129,
+        130,
+        131,
+        132,
+        133,
+        134,
+        135,
+        136,
+        137,
+        138,
+        139,
+        140,
+        141,
+        142,
+        143,
+        144,
+        145,
+        146,
+        147
+      ],
+      "metadata": {
+        "family": "accordion_rect",
+        "pair": 1,
+        "side": 1,
+        "normal": [
+          0.0,
+          0.9173147229331358,
+          -0.398162905216074
+        ],
+        "tracking_angle_deg": -23.463382940557945,
+        "hinge_connected": true,
+        "leaf_count": 20,
+        "leaf_part_indices": [
+          119,
+          120,
+          121,
+          122,
+          123,
+          124,
+          125,
+          126,
+          127,
+          128,
+          129,
+          130,
+          131,
+          132,
+          133,
+          134,
+          135,
+          136,
+          137,
+          138
+        ],
+        "hinge_edges": [
+          [
+            "gimbal",
+            119
+          ],
+          [
+            119,
+            120
+          ],
+          [
+            120,
+            121
+          ],
+          [
+            121,
+            122
+          ],
+          [
+            122,
+            123
+          ],
+          [
+            123,
+            124
+          ],
+          [
+            124,
+            125
+          ],
+          [
+            125,
+            126
+          ],
+          [
+            126,
+            127
+          ],
+          [
+            127,
+            128
+          ],
+          [
+            128,
+            129
+          ],
+          [
+            129,
+            130
+          ],
+          [
+            130,
+            131
+          ],
+          [
+            131,
+            132
+          ],
+          [
+            132,
+            133
+          ],
+          [
+            133,
+            134
+          ],
+          [
+            134,
+            135
+          ],
+          [
+            135,
+            136
+          ],
+          [
+            136,
+            137
+          ],
+          [
+            137,
+            138
+          ]
+        ],
+        "hinge_count": 18,
+        "collecting_area": 117.90552359305765,
+        "stowed_volume": 2.4675267977555104
+      }
+    },
+    {
+      "id": "radiator_bank_009",
+      "role": "radiator_bank",
+      "crewed": false,
+      "decorative": false,
+      "part_indices": [
+        148,
+        149,
+        150,
+        151,
+        152,
+        153,
+        154,
+        155,
+        156,
+        157,
+        158,
+        159,
+        160,
+        161,
+        162
+      ],
+      "metadata": {
+        "normal": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "sun_dot": 0.0,
+        "thermal_profile": "ordinary",
+        "panel_count": 7,
+        "hinge_count": 6,
+        "panel_aspect_ratio": 6.076222191339286,
+        "deployed_aspect_ratio": 6.226222191339287,
+        "deployed_length_m": 22.197082611520432,
+        "panel_width_m": 3.565096446830425,
+        "radiating_area_m2": 77.22825344705247,
+        "panel_layer_count": 1,
+        "panel_part_indices": [
+          149,
+          151,
+          153,
+          155,
+          157,
+          159,
+          161
+        ]
+      }
+    },
+    {
+      "id": "radiator_bank_010",
+      "role": "radiator_bank",
+      "crewed": false,
+      "decorative": false,
+      "part_indices": [
+        163,
+        164,
+        165,
+        166,
+        167,
+        168,
+        169,
+        170,
+        171,
+        172,
+        173,
+        174,
+        175,
+        176,
+        177
+      ],
+      "metadata": {
+        "normal": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "sun_dot": 0.0,
+        "thermal_profile": "ordinary",
+        "panel_count": 7,
+        "hinge_count": 6,
+        "panel_aspect_ratio": 6.32785110333344,
+        "deployed_aspect_ratio": 6.477851103333441,
+        "deployed_length_m": 22.630332875337054,
+        "panel_width_m": 3.4934938321894586,
+        "radiating_area_m2": 77.22825344705247,
+        "panel_layer_count": 1,
+        "panel_part_indices": [
+          164,
+          166,
+          168,
+          170,
+          172,
+          174,
+          176
+        ]
+      }
+    },
+    {
+      "id": "antenna_011",
+      "role": "antenna",
+      "crewed": false,
+      "decorative": false,
+      "part_indices": [
+        178,
+        179
+      ],
+      "metadata": {}
+    },
+    {
+      "id": "module_details_012",
+      "role": "module_details",
+      "crewed": false,
+      "decorative": true,
+      "part_indices": [
+        180,
+        181,
+        182
+      ],
+      "metadata": {
+        "module": "lab_000",
+        "clustered": true
+      }
+    },
+    {
+      "id": "module_details_013",
+      "role": "module_details",
+      "crewed": false,
+      "decorative": true,
+      "part_indices": [
+        183,
+        184,
+        185
+      ],
+      "metadata": {
+        "module": "hab_001",
+        "clustered": true
+      }
+    },
+    {
+      "id": "module_details_014",
+      "role": "module_details",
+      "crewed": false,
+      "decorative": true,
+      "part_indices": [
+        186,
+        187,
+        188,
+        189
+      ],
+      "metadata": {
+        "module": "lab_002",
+        "clustered": true
+      }
+    }
+  ],
+  "mounts": [
+    {
+      "id": "mount_000",
+      "owner": "lab_000",
+      "name": "axial_out",
+      "pos": [
+        -15.354,
+        0,
+        0
+      ],
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "radius": 1.314,
+      "joint_types": [
+        "pressurized"
+      ],
+      "occupied": true
+    },
+    {
+      "id": "mount_001",
+      "owner": "hab_001",
+      "name": "axial_in",
+      "pos": [
+        -15.354,
+        0,
+        0
+      ],
+      "normal": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "radius": 1.314,
+      "joint_types": [
+        "pressurized"
+      ],
+      "occupied": true
+    },
+    {
+      "id": "mount_002",
+      "owner": "hab_001",
+      "name": "axial_out",
+      "pos": [
+        10.078,
+        0,
+        0
+      ],
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "radius": 1.391,
+      "joint_types": [
+        "pressurized"
+      ],
+      "occupied": true
+    },
+    {
+      "id": "mount_003",
+      "owner": "lab_002",
+      "name": "axial_in",
+      "pos": [
+        10.078,
+        0,
+        0
+      ],
+      "normal": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "radius": 1.391,
+      "joint_types": [
+        "pressurized"
+      ],
+      "occupied": true
+    },
+    {
+      "id": "mount_004",
+      "owner": "hab_001",
+      "name": "arm_socket",
+      "pos": [
+        -13.989,
+        -1.878,
+        0.0
+      ],
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "radius": 0.147,
+      "joint_types": [
+        "articulated"
+      ],
+      "occupied": true
+    },
+    {
+      "id": "mount_005",
+      "owner": "robot_arm_003",
+      "name": "shoulder",
+      "pos": [
+        -13.989,
+        -1.878,
+        0.0
+      ],
+      "normal": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "radius": 0.147,
+      "joint_types": [
+        "articulated"
+      ],
+      "occupied": true
+    },
+    {
+      "id": "mount_006",
+      "owner": "hab_001",
+      "name": "dome_tunnel",
+      "pos": [
+        9.594,
+        -1.878,
+        0.0
+      ],
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "radius": 0.294,
+      "joint_types": [
+        "pressurized"
+      ],
+      "occupied": true
+    },
+    {
+      "id": "mount_007",
+      "owner": "dome_004",
+      "name": "vestibule",
+      "pos": [
+        9.594,
+        -1.878,
+        0.0
+      ],
+      "normal": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "radius": 0.294,
+      "joint_types": [
+        "pressurized"
+      ],
+      "occupied": true
+    },
+    {
+      "id": "mount_008",
+      "owner": "lab_000",
+      "name": "solar_pair_0",
+      "pos": [
+        -24.337,
+        0.0,
+        0.0
+      ],
+      "normal": [
+        0.0,
+        -0.356916,
+        -0.934136
+      ],
+      "radius": 0.126,
+      "joint_types": [
+        "articulated"
+      ],
+      "occupied": true
+    },
+    {
+      "id": "mount_009",
+      "owner": "solar_wing_005",
+      "name": "gimbal",
+      "pos": [
+        -24.337,
+        -1.978,
+        -5.178
+      ],
+      "normal": [
+        0.0,
+        0.356916,
+        0.934136
+      ],
+      "radius": 0.126,
+      "joint_types": [
+        "articulated"
+      ],
+      "occupied": true
+    },
+    {
+      "id": "mount_010",
+      "owner": "lab_000",
+      "name": "solar_pair_0",
+      "pos": [
+        -24.337,
+        0.0,
+        0.0
+      ],
+      "normal": [
+        0.0,
+        0.356916,
+        0.934136
+      ],
+      "radius": 0.126,
+      "joint_types": [
+        "articulated"
+      ],
+      "occupied": true
+    },
+    {
+      "id": "mount_011",
+      "owner": "solar_wing_006",
+      "name": "gimbal",
+      "pos": [
+        -24.337,
+        1.978,
+        5.178
+      ],
+      "normal": [
+        0.0,
+        -0.356916,
+        -0.934136
+      ],
+      "radius": 0.126,
+      "joint_types": [
+        "articulated"
+      ],
+      "occupied": true
+    },
+    {
+      "id": "mount_012",
+      "owner": "lab_002",
+      "name": "solar_pair_1",
+      "pos": [
+        24.337,
+        0.0,
+        0.0
+      ],
+      "normal": [
+        0.0,
+        -0.398163,
+        -0.917315
+      ],
+      "radius": 0.126,
+      "joint_types": [
+        "articulated"
+      ],
+      "occupied": true
+    },
+    {
+      "id": "mount_013",
+      "owner": "solar_wing_007",
+      "name": "gimbal",
+      "pos": [
+        24.337,
+        -2.207,
+        -5.085
+      ],
+      "normal": [
+        0.0,
+        0.398163,
+        0.917315
+      ],
+      "radius": 0.126,
+      "joint_types": [
+        "articulated"
+      ],
+      "occupied": true
+    },
+    {
+      "id": "mount_014",
+      "owner": "lab_002",
+      "name": "solar_pair_1",
+      "pos": [
+        24.337,
+        0.0,
+        0.0
+      ],
+      "normal": [
+        0.0,
+        0.398163,
+        0.917315
+      ],
+      "radius": 0.126,
+      "joint_types": [
+        "articulated"
+      ],
+      "occupied": true
+    },
+    {
+      "id": "mount_015",
+      "owner": "solar_wing_008",
+      "name": "gimbal",
+      "pos": [
+        24.337,
+        2.207,
+        5.085
+      ],
+      "normal": [
+        0.0,
+        -0.398163,
+        -0.917315
+      ],
+      "radius": 0.126,
+      "joint_types": [
+        "articulated"
+      ],
+      "occupied": true
+    },
+    {
+      "id": "mount_016",
+      "owner": "lab_002",
+      "name": "radiator_mount",
+      "pos": [
+        18.679,
+        0.0,
+        0.0
+      ],
+      "normal": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "radius": 0.168,
+      "joint_types": [
+        "structural"
+      ],
+      "occupied": true
+    },
+    {
+      "id": "mount_017",
+      "owner": "radiator_bank_009",
+      "name": "bank_spar",
+      "pos": [
+        18.679,
+        -3.153,
+        0.0
+      ],
+      "normal": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "radius": 0.168,
+      "joint_types": [
+        "structural"
+      ],
+      "occupied": true
+    },
+    {
+      "id": "mount_018",
+      "owner": "hab_001",
+      "name": "radiator_mount",
+      "pos": [
+        -10.633,
+        0.0,
+        0.0
+      ],
+      "normal": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "radius": 0.168,
+      "joint_types": [
+        "structural"
+      ],
+      "occupied": true
+    },
+    {
+      "id": "mount_019",
+      "owner": "radiator_bank_010",
+      "name": "bank_spar",
+      "pos": [
+        -10.633,
+        3.153,
+        0.0
+      ],
+      "normal": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "radius": 0.168,
+      "joint_types": [
+        "structural"
+      ],
+      "occupied": true
+    },
+    {
+      "id": "mount_020",
+      "owner": "lab_002",
+      "name": "antenna_socket",
+      "pos": [
+        14.823,
+        0.0,
+        -2.002
+      ],
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "radius": 0.105,
+      "joint_types": [
+        "structural"
+      ],
+      "occupied": true
+    },
+    {
+      "id": "mount_021",
+      "owner": "antenna_011",
+      "name": "mast_base",
+      "pos": [
+        14.823,
+        0.0,
+        -2.002
+      ],
+      "normal": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "radius": 0.105,
+      "joint_types": [
+        "structural"
+      ],
+      "occupied": true
+    },
+    {
+      "id": "mount_022",
+      "owner": "lab_000",
+      "name": "window_band",
+      "pos": [
+        -22.887,
+        2.093,
+        -0.192
+      ],
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "radius": 0.231,
+      "joint_types": [
+        "surface"
+      ],
+      "occupied": true
+    },
+    {
+      "id": "mount_023",
+      "owner": "module_details_012",
+      "name": "surface_patch",
+      "pos": [
+        -22.887,
+        2.093,
+        -0.192
+      ],
+      "normal": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "radius": 0.231,
+      "joint_types": [
+        "surface"
+      ],
+      "occupied": true
+    },
+    {
+      "id": "mount_024",
+      "owner": "hab_001",
+      "name": "window_band",
+      "pos": [
+        -2.638,
+        1.783,
+        -0.589
+      ],
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "radius": 0.207,
+      "joint_types": [
+        "surface"
+      ],
+      "occupied": true
+    },
+    {
+      "id": "mount_025",
+      "owner": "module_details_013",
+      "name": "surface_patch",
+      "pos": [
+        -2.638,
+        1.783,
+        -0.589
+      ],
+      "normal": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "radius": 0.207,
+      "joint_types": [
+        "surface"
+      ],
+      "occupied": true
+    },
+    {
+      "id": "mount_026",
+      "owner": "lab_002",
+      "name": "window_band",
+      "pos": [
+        20.25,
+        1.999,
+        -0.099
+      ],
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "radius": 0.22,
+      "joint_types": [
+        "surface"
+      ],
+      "occupied": true
+    },
+    {
+      "id": "mount_027",
+      "owner": "module_details_014",
+      "name": "surface_patch",
+      "pos": [
+        20.25,
+        1.999,
+        -0.099
+      ],
+      "normal": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "radius": 0.22,
+      "joint_types": [
+        "surface"
+      ],
+      "occupied": true
+    }
+  ],
+  "joints": [
+    {
+      "id": "joint_000",
+      "parent_mount": "mount_000",
+      "child_mount": "mount_001",
+      "kind": "pressurized",
+      "connector_parts": [],
+      "metadata": {
+        "capacity_radius": 1.3144518813758341,
+        "span": 0.0
+      }
+    },
+    {
+      "id": "joint_001",
+      "parent_mount": "mount_002",
+      "child_mount": "mount_003",
+      "kind": "pressurized",
+      "connector_parts": [],
+      "metadata": {
+        "capacity_radius": 1.3911289258680368,
+        "span": 0.0
+      }
+    },
+    {
+      "id": "joint_002",
+      "parent_mount": "mount_004",
+      "child_mount": "mount_005",
+      "kind": "articulated",
+      "connector_parts": [
+        8
+      ],
+      "metadata": {
+        "capacity_radius": 0.14712662405682161,
+        "span": 0.0
+      }
+    },
+    {
+      "id": "joint_003",
+      "parent_mount": "mount_006",
+      "child_mount": "mount_007",
+      "kind": "pressurized",
+      "connector_parts": [
+        13
+      ],
+      "metadata": {
+        "capacity_radius": 0.29425324811364323,
+        "span": 0.0
+      }
+    },
+    {
+      "id": "joint_004",
+      "parent_mount": "mount_008",
+      "child_mount": "mount_009",
+      "kind": "articulated",
+      "connector_parts": [
+        14
+      ],
+      "metadata": {
+        "capacity_radius": 0.12610853490584706,
+        "span": 5.5428942641559225
+      }
+    },
+    {
+      "id": "joint_005",
+      "parent_mount": "mount_010",
+      "child_mount": "mount_011",
+      "kind": "articulated",
+      "connector_parts": [
+        49
+      ],
+      "metadata": {
+        "capacity_radius": 0.12610853490584706,
+        "span": 5.5428942641559225
+      }
+    },
+    {
+      "id": "joint_006",
+      "parent_mount": "mount_012",
+      "child_mount": "mount_013",
+      "kind": "articulated",
+      "connector_parts": [
+        84
+      ],
+      "metadata": {
+        "capacity_radius": 0.12610853490584706,
+        "span": 5.5428942641559225
+      }
+    },
+    {
+      "id": "joint_007",
+      "parent_mount": "mount_014",
+      "child_mount": "mount_015",
+      "kind": "articulated",
+      "connector_parts": [
+        116
+      ],
+      "metadata": {
+        "capacity_radius": 0.12610853490584706,
+        "span": 5.5428942641559225
+      }
+    },
+    {
+      "id": "joint_008",
+      "parent_mount": "mount_016",
+      "child_mount": "mount_017",
+      "kind": "structural",
+      "connector_parts": [
+        162
+      ],
+      "metadata": {
+        "capacity_radius": 0.16814471320779611,
+        "span": 3.152713372646177
+      }
+    },
+    {
+      "id": "joint_009",
+      "parent_mount": "mount_018",
+      "child_mount": "mount_019",
+      "kind": "structural",
+      "connector_parts": [
+        177
+      ],
+      "metadata": {
+        "capacity_radius": 0.16814471320779611,
+        "span": 3.152713372646177
+      }
+    },
+    {
+      "id": "joint_010",
+      "parent_mount": "mount_020",
+      "child_mount": "mount_021",
+      "kind": "structural",
+      "connector_parts": [
+        178
+      ],
+      "metadata": {
+        "capacity_radius": 0.10509044575487257,
+        "span": 0.0
+      }
+    },
+    {
+      "id": "joint_011",
+      "parent_mount": "mount_022",
+      "child_mount": "mount_023",
+      "kind": "surface",
+      "connector_parts": [
+        180
+      ],
+      "metadata": {
+        "capacity_radius": 0.23119898066071964,
+        "span": 0.0
+      }
+    },
+    {
+      "id": "joint_012",
+      "parent_mount": "mount_024",
+      "child_mount": "mount_025",
+      "kind": "surface",
+      "connector_parts": [
+        183
+      ],
+      "metadata": {
+        "capacity_radius": 0.2065567242162025,
+        "span": 0.0
+      }
+    },
+    {
+      "id": "joint_013",
+      "parent_mount": "mount_026",
+      "child_mount": "mount_027",
+      "kind": "surface",
+      "connector_parts": [
+        186
+      ],
+      "metadata": {
+        "capacity_radius": 0.2201665872617371,
+        "span": 0.0
+      }
+    }
+  ],
+  "parts": [
+    {
+      "kind": "lab",
+      "mesh": "cylinder",
+      "pos": [
+        -22.887,
+        0,
+        0
+      ],
+      "half": [
+        2.102,
+        7.533,
+        2.102
+      ],
+      "connector": false,
+      "assembly": "lab_000",
+      "extra": {},
+      "cols": [
+        [
+          0.0,
+          1.0,
+          0
+        ],
+        [
+          -1.0,
+          0.0,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ]
+    },
+    {
+      "kind": "trim",
+      "mesh": "cylinder",
+      "pos": [
+        -22.887,
+        0,
+        0
+      ],
+      "half": [
+        2.186,
+        0.904,
+        2.186
+      ],
+      "connector": true,
+      "assembly": "lab_000",
+      "extra": {},
+      "cols": [
+        [
+          0.0,
+          1.0,
+          0
+        ],
+        [
+          -1.0,
+          0.0,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ]
+    },
+    {
+      "kind": "hab",
+      "mesh": "cylinder",
+      "pos": [
+        -2.638,
+        0,
+        0
+      ],
+      "half": [
+        1.878,
+        12.716,
+        1.878
+      ],
+      "connector": false,
+      "assembly": "hab_001",
+      "extra": {},
+      "cols": [
+        [
+          0.0,
+          1.0,
+          0
+        ],
+        [
+          -1.0,
+          0.0,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ]
+    },
+    {
+      "kind": "lab",
+      "mesh": "cylinder",
+      "pos": [
+        20.25,
+        0,
+        0
+      ],
+      "half": [
+        2.002,
+        10.171,
+        2.002
+      ],
+      "connector": false,
+      "assembly": "lab_002",
+      "extra": {},
+      "cols": [
+        [
+          0.0,
+          1.0,
+          0
+        ],
+        [
+          -1.0,
+          0.0,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ]
+    },
+    {
+      "kind": "trim",
+      "mesh": "cylinder",
+      "pos": [
+        20.25,
+        0,
+        0
+      ],
+      "half": [
+        2.082,
+        1.221,
+        2.082
+      ],
+      "connector": true,
+      "assembly": "lab_002",
+      "extra": {},
+      "cols": [
+        [
+          0.0,
+          1.0,
+          0
+        ],
+        [
+          -1.0,
+          0.0,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ]
+    },
+    {
+      "kind": "port",
+      "mesh": "cylinder",
+      "pos": [
+        -30.858,
+        0,
+        0
+      ],
+      "half": [
+        0.795,
+        0.437,
+        0.795
+      ],
+      "connector": true,
+      "assembly": "lab_000",
+      "extra": {
+        "approach_direction": [
+          -1.0,
+          0.0,
+          0.0
+        ]
+      },
+      "cols": [
+        [
+          0.0,
+          1.0,
+          0
+        ],
+        [
+          -1.0,
+          0.0,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ]
+    },
+    {
+      "kind": "port",
+      "mesh": "cylinder",
+      "pos": [
+        30.858,
+        0,
+        0
+      ],
+      "half": [
+        0.795,
+        0.437,
+        0.795
+      ],
+      "connector": true,
+      "assembly": "lab_002",
+      "extra": {
+        "approach_direction": [
+          1.0,
+          0.0,
+          0.0
+        ]
+      },
+      "cols": [
+        [
+          0.0,
+          1.0,
+          0
+        ],
+        [
+          -1.0,
+          0.0,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ]
+    },
+    {
+      "kind": "light",
+      "mesh": "sphere",
+      "pos": [
+        31.136,
+        0.397,
+        0
+      ],
+      "half": [
+        0.238,
+        0.238,
+        0.238
+      ],
+      "connector": true,
+      "assembly": "lab_002",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "kind": "arm_segment",
+      "mesh": "box",
+      "pos": [
+        -13.989,
+        -3.262,
+        0
+      ],
+      "half": [
+        0.147,
+        1.384,
+        0.147
+      ],
+      "connector": true,
+      "assembly": "robot_arm_003",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "kind": "arm_joint",
+      "mesh": "sphere",
+      "pos": [
+        -13.989,
+        -4.646,
+        0
+      ],
+      "half": [
+        0.294,
+        0.294,
+        0.294
+      ],
+      "connector": true,
+      "assembly": "robot_arm_003",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "kind": "arm_segment",
+      "mesh": "box",
+      "pos": [
+        -12.813,
+        -4.646,
+        0
+      ],
+      "half": [
+        1.176,
+        0.147,
+        0.147
+      ],
+      "connector": true,
+      "assembly": "robot_arm_003",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "kind": "arm_joint",
+      "mesh": "sphere",
+      "pos": [
+        -11.636,
+        -4.646,
+        0
+      ],
+      "half": [
+        0.235,
+        0.235,
+        0.235
+      ],
+      "connector": true,
+      "assembly": "robot_arm_003",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "kind": "dome",
+      "mesh": "sphere",
+      "pos": [
+        9.594,
+        -3.942,
+        0
+      ],
+      "half": [
+        2.064,
+        2.064,
+        2.064
+      ],
+      "connector": false,
+      "assembly": "dome_004",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "kind": "dome_neck",
+      "mesh": "cylinder",
+      "pos": [
+        9.594,
+        -2.126,
+        0
+      ],
+      "half": [
+        0.294,
+        0.454,
+        0.294
+      ],
+      "connector": true,
+      "assembly": "dome_004",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "kind": "solar_boom",
+      "mesh": "box",
+      "pos": [
+        -24.337,
+        -0.989,
+        -2.589
+      ],
+      "half": [
+        0.126,
+        0.126,
+        2.771
+      ],
+      "connector": true,
+      "assembly": "solar_wing_005",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "solar_spine",
+      "mesh": "box",
+      "pos": [
+        -24.43,
+        -7.051,
+        -18.454
+      ],
+      "half": [
+        0.035,
+        0.033,
+        14.213
+      ],
+      "connector": true,
+      "assembly": "solar_wing_005",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "solar_spine",
+      "mesh": "box",
+      "pos": [
+        -24.244,
+        -7.051,
+        -18.454
+      ],
+      "half": [
+        0.035,
+        0.033,
+        14.213
+      ],
+      "connector": true,
+      "assembly": "solar_wing_005",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -25.823,
+        -2.421,
+        -6.336
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.24
+      ],
+      "connector": false,
+      "assembly": "solar_wing_005",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -25.823,
+        -3.347,
+        -8.76
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.24
+      ],
+      "connector": false,
+      "assembly": "solar_wing_005",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -25.823,
+        -4.273,
+        -11.184
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.24
+      ],
+      "connector": false,
+      "assembly": "solar_wing_005",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -25.823,
+        -5.199,
+        -13.607
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.24
+      ],
+      "connector": false,
+      "assembly": "solar_wing_005",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -25.823,
+        -6.125,
+        -16.031
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.24
+      ],
+      "connector": false,
+      "assembly": "solar_wing_005",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -25.823,
+        -7.051,
+        -18.454
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.24
+      ],
+      "connector": false,
+      "assembly": "solar_wing_005",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -25.823,
+        -7.977,
+        -20.878
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.24
+      ],
+      "connector": false,
+      "assembly": "solar_wing_005",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -25.823,
+        -8.903,
+        -23.301
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.24
+      ],
+      "connector": false,
+      "assembly": "solar_wing_005",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -25.823,
+        -9.829,
+        -25.725
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.24
+      ],
+      "connector": false,
+      "assembly": "solar_wing_005",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -25.823,
+        -10.755,
+        -28.148
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.24
+      ],
+      "connector": false,
+      "assembly": "solar_wing_005",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -25.823,
+        -11.681,
+        -30.572
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.24
+      ],
+      "connector": false,
+      "assembly": "solar_wing_005",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -22.851,
+        -2.421,
+        -6.336
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.24
+      ],
+      "connector": false,
+      "assembly": "solar_wing_005",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -22.851,
+        -3.347,
+        -8.76
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.24
+      ],
+      "connector": false,
+      "assembly": "solar_wing_005",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -22.851,
+        -4.273,
+        -11.184
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.24
+      ],
+      "connector": false,
+      "assembly": "solar_wing_005",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -22.851,
+        -5.199,
+        -13.607
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.24
+      ],
+      "connector": false,
+      "assembly": "solar_wing_005",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -22.851,
+        -6.125,
+        -16.031
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.24
+      ],
+      "connector": false,
+      "assembly": "solar_wing_005",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -22.851,
+        -7.051,
+        -18.454
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.24
+      ],
+      "connector": false,
+      "assembly": "solar_wing_005",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -22.851,
+        -7.977,
+        -20.878
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.24
+      ],
+      "connector": false,
+      "assembly": "solar_wing_005",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -22.851,
+        -8.903,
+        -23.301
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.24
+      ],
+      "connector": false,
+      "assembly": "solar_wing_005",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -22.851,
+        -9.829,
+        -25.725
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.24
+      ],
+      "connector": false,
+      "assembly": "solar_wing_005",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -22.851,
+        -10.755,
+        -28.148
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.24
+      ],
+      "connector": false,
+      "assembly": "solar_wing_005",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -22.851,
+        -11.681,
+        -30.572
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.24
+      ],
+      "connector": false,
+      "assembly": "solar_wing_005",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "solar_hinge",
+      "mesh": "box",
+      "pos": [
+        -24.337,
+        -2.884,
+        -7.548
+      ],
+      "half": [
+        2.797,
+        0.033,
+        0.025
+      ],
+      "connector": true,
+      "assembly": "solar_wing_005",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "solar_hinge",
+      "mesh": "box",
+      "pos": [
+        -24.337,
+        -3.81,
+        -9.972
+      ],
+      "half": [
+        2.797,
+        0.033,
+        0.025
+      ],
+      "connector": true,
+      "assembly": "solar_wing_005",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "solar_hinge",
+      "mesh": "box",
+      "pos": [
+        -24.337,
+        -4.736,
+        -12.395
+      ],
+      "half": [
+        2.797,
+        0.033,
+        0.025
+      ],
+      "connector": true,
+      "assembly": "solar_wing_005",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "solar_hinge",
+      "mesh": "box",
+      "pos": [
+        -24.337,
+        -5.662,
+        -14.819
+      ],
+      "half": [
+        2.797,
+        0.033,
+        0.025
+      ],
+      "connector": true,
+      "assembly": "solar_wing_005",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "solar_hinge",
+      "mesh": "box",
+      "pos": [
+        -24.337,
+        -6.588,
+        -17.242
+      ],
+      "half": [
+        2.797,
+        0.033,
+        0.025
+      ],
+      "connector": true,
+      "assembly": "solar_wing_005",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "solar_hinge",
+      "mesh": "box",
+      "pos": [
+        -24.337,
+        -7.514,
+        -19.666
+      ],
+      "half": [
+        2.797,
+        0.033,
+        0.025
+      ],
+      "connector": true,
+      "assembly": "solar_wing_005",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "solar_hinge",
+      "mesh": "box",
+      "pos": [
+        -24.337,
+        -8.44,
+        -22.09
+      ],
+      "half": [
+        2.797,
+        0.033,
+        0.025
+      ],
+      "connector": true,
+      "assembly": "solar_wing_005",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "solar_hinge",
+      "mesh": "box",
+      "pos": [
+        -24.337,
+        -9.366,
+        -24.513
+      ],
+      "half": [
+        2.797,
+        0.033,
+        0.025
+      ],
+      "connector": true,
+      "assembly": "solar_wing_005",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "solar_hinge",
+      "mesh": "box",
+      "pos": [
+        -24.337,
+        -10.292,
+        -26.937
+      ],
+      "half": [
+        2.797,
+        0.033,
+        0.025
+      ],
+      "connector": true,
+      "assembly": "solar_wing_005",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "solar_hinge",
+      "mesh": "box",
+      "pos": [
+        -24.337,
+        -11.218,
+        -29.36
+      ],
+      "half": [
+        2.797,
+        0.033,
+        0.025
+      ],
+      "connector": true,
+      "assembly": "solar_wing_005",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "solar_boom",
+      "mesh": "box",
+      "pos": [
+        -24.337,
+        0.989,
+        2.589
+      ],
+      "half": [
+        0.126,
+        0.126,
+        2.771
+      ],
+      "connector": true,
+      "assembly": "solar_wing_006",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "solar_spine",
+      "mesh": "box",
+      "pos": [
+        -24.43,
+        7.051,
+        18.454
+      ],
+      "half": [
+        0.035,
+        0.033,
+        14.213
+      ],
+      "connector": true,
+      "assembly": "solar_wing_006",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "solar_spine",
+      "mesh": "box",
+      "pos": [
+        -24.244,
+        7.051,
+        18.454
+      ],
+      "half": [
+        0.035,
+        0.033,
+        14.213
+      ],
+      "connector": true,
+      "assembly": "solar_wing_006",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -25.823,
+        2.421,
+        6.336
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.24
+      ],
+      "connector": false,
+      "assembly": "solar_wing_006",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -25.823,
+        3.347,
+        8.76
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.24
+      ],
+      "connector": false,
+      "assembly": "solar_wing_006",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -25.823,
+        4.273,
+        11.184
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.24
+      ],
+      "connector": false,
+      "assembly": "solar_wing_006",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -25.823,
+        5.199,
+        13.607
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.24
+      ],
+      "connector": false,
+      "assembly": "solar_wing_006",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -25.823,
+        6.125,
+        16.031
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.24
+      ],
+      "connector": false,
+      "assembly": "solar_wing_006",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -25.823,
+        7.051,
+        18.454
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.24
+      ],
+      "connector": false,
+      "assembly": "solar_wing_006",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -25.823,
+        7.977,
+        20.878
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.24
+      ],
+      "connector": false,
+      "assembly": "solar_wing_006",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -25.823,
+        8.903,
+        23.301
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.24
+      ],
+      "connector": false,
+      "assembly": "solar_wing_006",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -25.823,
+        9.829,
+        25.725
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.24
+      ],
+      "connector": false,
+      "assembly": "solar_wing_006",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -25.823,
+        10.755,
+        28.148
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.24
+      ],
+      "connector": false,
+      "assembly": "solar_wing_006",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -25.823,
+        11.681,
+        30.572
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.24
+      ],
+      "connector": false,
+      "assembly": "solar_wing_006",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -22.851,
+        2.421,
+        6.336
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.24
+      ],
+      "connector": false,
+      "assembly": "solar_wing_006",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -22.851,
+        3.347,
+        8.76
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.24
+      ],
+      "connector": false,
+      "assembly": "solar_wing_006",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -22.851,
+        4.273,
+        11.184
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.24
+      ],
+      "connector": false,
+      "assembly": "solar_wing_006",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -22.851,
+        5.199,
+        13.607
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.24
+      ],
+      "connector": false,
+      "assembly": "solar_wing_006",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -22.851,
+        6.125,
+        16.031
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.24
+      ],
+      "connector": false,
+      "assembly": "solar_wing_006",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -22.851,
+        7.051,
+        18.454
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.24
+      ],
+      "connector": false,
+      "assembly": "solar_wing_006",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -22.851,
+        7.977,
+        20.878
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.24
+      ],
+      "connector": false,
+      "assembly": "solar_wing_006",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -22.851,
+        8.903,
+        23.301
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.24
+      ],
+      "connector": false,
+      "assembly": "solar_wing_006",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -22.851,
+        9.829,
+        25.725
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.24
+      ],
+      "connector": false,
+      "assembly": "solar_wing_006",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -22.851,
+        10.755,
+        28.148
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.24
+      ],
+      "connector": false,
+      "assembly": "solar_wing_006",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -22.851,
+        11.681,
+        30.572
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.24
+      ],
+      "connector": false,
+      "assembly": "solar_wing_006",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "solar_hinge",
+      "mesh": "box",
+      "pos": [
+        -24.337,
+        2.884,
+        7.548
+      ],
+      "half": [
+        2.797,
+        0.033,
+        0.025
+      ],
+      "connector": true,
+      "assembly": "solar_wing_006",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "solar_hinge",
+      "mesh": "box",
+      "pos": [
+        -24.337,
+        3.81,
+        9.972
+      ],
+      "half": [
+        2.797,
+        0.033,
+        0.025
+      ],
+      "connector": true,
+      "assembly": "solar_wing_006",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "solar_hinge",
+      "mesh": "box",
+      "pos": [
+        -24.337,
+        4.736,
+        12.395
+      ],
+      "half": [
+        2.797,
+        0.033,
+        0.025
+      ],
+      "connector": true,
+      "assembly": "solar_wing_006",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "solar_hinge",
+      "mesh": "box",
+      "pos": [
+        -24.337,
+        5.662,
+        14.819
+      ],
+      "half": [
+        2.797,
+        0.033,
+        0.025
+      ],
+      "connector": true,
+      "assembly": "solar_wing_006",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "solar_hinge",
+      "mesh": "box",
+      "pos": [
+        -24.337,
+        6.588,
+        17.242
+      ],
+      "half": [
+        2.797,
+        0.033,
+        0.025
+      ],
+      "connector": true,
+      "assembly": "solar_wing_006",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "solar_hinge",
+      "mesh": "box",
+      "pos": [
+        -24.337,
+        7.514,
+        19.666
+      ],
+      "half": [
+        2.797,
+        0.033,
+        0.025
+      ],
+      "connector": true,
+      "assembly": "solar_wing_006",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "solar_hinge",
+      "mesh": "box",
+      "pos": [
+        -24.337,
+        8.44,
+        22.09
+      ],
+      "half": [
+        2.797,
+        0.033,
+        0.025
+      ],
+      "connector": true,
+      "assembly": "solar_wing_006",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "solar_hinge",
+      "mesh": "box",
+      "pos": [
+        -24.337,
+        9.366,
+        24.513
+      ],
+      "half": [
+        2.797,
+        0.033,
+        0.025
+      ],
+      "connector": true,
+      "assembly": "solar_wing_006",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "solar_hinge",
+      "mesh": "box",
+      "pos": [
+        -24.337,
+        10.292,
+        26.937
+      ],
+      "half": [
+        2.797,
+        0.033,
+        0.025
+      ],
+      "connector": true,
+      "assembly": "solar_wing_006",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "solar_hinge",
+      "mesh": "box",
+      "pos": [
+        -24.337,
+        11.218,
+        29.36
+      ],
+      "half": [
+        2.797,
+        0.033,
+        0.025
+      ],
+      "connector": true,
+      "assembly": "solar_wing_006",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.934136,
+          -0.356916
+        ],
+        [
+          0.0,
+          0.356916,
+          0.934136
+        ]
+      ]
+    },
+    {
+      "kind": "solar_boom",
+      "mesh": "box",
+      "pos": [
+        24.337,
+        -1.103,
+        -2.542
+      ],
+      "half": [
+        0.126,
+        0.126,
+        2.771
+      ],
+      "connector": true,
+      "assembly": "solar_wing_007",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "solar_spine",
+      "mesh": "box",
+      "pos": [
+        24.244,
+        -7.181,
+        -16.543
+      ],
+      "half": [
+        0.035,
+        0.033,
+        12.492
+      ],
+      "connector": true,
+      "assembly": "solar_wing_007",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "solar_spine",
+      "mesh": "box",
+      "pos": [
+        24.43,
+        -7.181,
+        -16.543
+      ],
+      "half": [
+        0.035,
+        0.033,
+        12.492
+      ],
+      "connector": true,
+      "assembly": "solar_wing_007",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        22.851,
+        -2.686,
+        -6.189
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.204
+      ],
+      "connector": false,
+      "assembly": "solar_wing_007",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        22.851,
+        -3.685,
+        -8.49
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.204
+      ],
+      "connector": false,
+      "assembly": "solar_wing_007",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        22.851,
+        -4.684,
+        -10.791
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.204
+      ],
+      "connector": false,
+      "assembly": "solar_wing_007",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        22.851,
+        -5.683,
+        -13.092
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.204
+      ],
+      "connector": false,
+      "assembly": "solar_wing_007",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        22.851,
+        -6.681,
+        -15.393
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.204
+      ],
+      "connector": false,
+      "assembly": "solar_wing_007",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        22.851,
+        -7.68,
+        -17.694
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.204
+      ],
+      "connector": false,
+      "assembly": "solar_wing_007",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        22.851,
+        -8.679,
+        -19.995
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.204
+      ],
+      "connector": false,
+      "assembly": "solar_wing_007",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        22.851,
+        -9.678,
+        -22.296
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.204
+      ],
+      "connector": false,
+      "assembly": "solar_wing_007",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        22.851,
+        -10.676,
+        -24.597
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.204
+      ],
+      "connector": false,
+      "assembly": "solar_wing_007",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        22.851,
+        -11.675,
+        -26.898
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.204
+      ],
+      "connector": false,
+      "assembly": "solar_wing_007",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        25.823,
+        -2.686,
+        -6.189
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.204
+      ],
+      "connector": false,
+      "assembly": "solar_wing_007",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        25.823,
+        -3.685,
+        -8.49
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.204
+      ],
+      "connector": false,
+      "assembly": "solar_wing_007",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        25.823,
+        -4.684,
+        -10.791
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.204
+      ],
+      "connector": false,
+      "assembly": "solar_wing_007",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        25.823,
+        -5.683,
+        -13.092
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.204
+      ],
+      "connector": false,
+      "assembly": "solar_wing_007",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        25.823,
+        -6.681,
+        -15.393
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.204
+      ],
+      "connector": false,
+      "assembly": "solar_wing_007",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        25.823,
+        -7.68,
+        -17.694
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.204
+      ],
+      "connector": false,
+      "assembly": "solar_wing_007",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        25.823,
+        -8.679,
+        -19.995
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.204
+      ],
+      "connector": false,
+      "assembly": "solar_wing_007",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        25.823,
+        -9.678,
+        -22.296
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.204
+      ],
+      "connector": false,
+      "assembly": "solar_wing_007",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        25.823,
+        -10.676,
+        -24.597
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.204
+      ],
+      "connector": false,
+      "assembly": "solar_wing_007",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        25.823,
+        -11.675,
+        -26.898
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.204
+      ],
+      "connector": false,
+      "assembly": "solar_wing_007",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "solar_hinge",
+      "mesh": "box",
+      "pos": [
+        24.337,
+        -3.186,
+        -7.34
+      ],
+      "half": [
+        2.797,
+        0.033,
+        0.022
+      ],
+      "connector": true,
+      "assembly": "solar_wing_007",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "solar_hinge",
+      "mesh": "box",
+      "pos": [
+        24.337,
+        -4.185,
+        -9.641
+      ],
+      "half": [
+        2.797,
+        0.033,
+        0.022
+      ],
+      "connector": true,
+      "assembly": "solar_wing_007",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "solar_hinge",
+      "mesh": "box",
+      "pos": [
+        24.337,
+        -5.183,
+        -11.942
+      ],
+      "half": [
+        2.797,
+        0.033,
+        0.022
+      ],
+      "connector": true,
+      "assembly": "solar_wing_007",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "solar_hinge",
+      "mesh": "box",
+      "pos": [
+        24.337,
+        -6.182,
+        -14.242
+      ],
+      "half": [
+        2.797,
+        0.033,
+        0.022
+      ],
+      "connector": true,
+      "assembly": "solar_wing_007",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "solar_hinge",
+      "mesh": "box",
+      "pos": [
+        24.337,
+        -7.181,
+        -16.543
+      ],
+      "half": [
+        2.797,
+        0.033,
+        0.022
+      ],
+      "connector": true,
+      "assembly": "solar_wing_007",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "solar_hinge",
+      "mesh": "box",
+      "pos": [
+        24.337,
+        -8.179,
+        -18.844
+      ],
+      "half": [
+        2.797,
+        0.033,
+        0.022
+      ],
+      "connector": true,
+      "assembly": "solar_wing_007",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "solar_hinge",
+      "mesh": "box",
+      "pos": [
+        24.337,
+        -9.178,
+        -21.145
+      ],
+      "half": [
+        2.797,
+        0.033,
+        0.022
+      ],
+      "connector": true,
+      "assembly": "solar_wing_007",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "solar_hinge",
+      "mesh": "box",
+      "pos": [
+        24.337,
+        -10.177,
+        -23.446
+      ],
+      "half": [
+        2.797,
+        0.033,
+        0.022
+      ],
+      "connector": true,
+      "assembly": "solar_wing_007",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "solar_hinge",
+      "mesh": "box",
+      "pos": [
+        24.337,
+        -11.176,
+        -25.747
+      ],
+      "half": [
+        2.797,
+        0.033,
+        0.022
+      ],
+      "connector": true,
+      "assembly": "solar_wing_007",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "solar_boom",
+      "mesh": "box",
+      "pos": [
+        24.337,
+        1.103,
+        2.542
+      ],
+      "half": [
+        0.126,
+        0.126,
+        2.771
+      ],
+      "connector": true,
+      "assembly": "solar_wing_008",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "solar_spine",
+      "mesh": "box",
+      "pos": [
+        24.244,
+        7.181,
+        16.543
+      ],
+      "half": [
+        0.035,
+        0.033,
+        12.492
+      ],
+      "connector": true,
+      "assembly": "solar_wing_008",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "solar_spine",
+      "mesh": "box",
+      "pos": [
+        24.43,
+        7.181,
+        16.543
+      ],
+      "half": [
+        0.035,
+        0.033,
+        12.492
+      ],
+      "connector": true,
+      "assembly": "solar_wing_008",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        22.851,
+        2.686,
+        6.189
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.204
+      ],
+      "connector": false,
+      "assembly": "solar_wing_008",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        22.851,
+        3.685,
+        8.49
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.204
+      ],
+      "connector": false,
+      "assembly": "solar_wing_008",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        22.851,
+        4.684,
+        10.791
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.204
+      ],
+      "connector": false,
+      "assembly": "solar_wing_008",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        22.851,
+        5.683,
+        13.092
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.204
+      ],
+      "connector": false,
+      "assembly": "solar_wing_008",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        22.851,
+        6.681,
+        15.393
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.204
+      ],
+      "connector": false,
+      "assembly": "solar_wing_008",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        22.851,
+        7.68,
+        17.694
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.204
+      ],
+      "connector": false,
+      "assembly": "solar_wing_008",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        22.851,
+        8.679,
+        19.995
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.204
+      ],
+      "connector": false,
+      "assembly": "solar_wing_008",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        22.851,
+        9.678,
+        22.296
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.204
+      ],
+      "connector": false,
+      "assembly": "solar_wing_008",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        22.851,
+        10.676,
+        24.597
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.204
+      ],
+      "connector": false,
+      "assembly": "solar_wing_008",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        22.851,
+        11.675,
+        26.898
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.204
+      ],
+      "connector": false,
+      "assembly": "solar_wing_008",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        25.823,
+        2.686,
+        6.189
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.204
+      ],
+      "connector": false,
+      "assembly": "solar_wing_008",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        25.823,
+        3.685,
+        8.49
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.204
+      ],
+      "connector": false,
+      "assembly": "solar_wing_008",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        25.823,
+        4.684,
+        10.791
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.204
+      ],
+      "connector": false,
+      "assembly": "solar_wing_008",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        25.823,
+        5.683,
+        13.092
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.204
+      ],
+      "connector": false,
+      "assembly": "solar_wing_008",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        25.823,
+        6.681,
+        15.393
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.204
+      ],
+      "connector": false,
+      "assembly": "solar_wing_008",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        25.823,
+        7.68,
+        17.694
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.204
+      ],
+      "connector": false,
+      "assembly": "solar_wing_008",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        25.823,
+        8.679,
+        19.995
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.204
+      ],
+      "connector": false,
+      "assembly": "solar_wing_008",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        25.823,
+        9.678,
+        22.296
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.204
+      ],
+      "connector": false,
+      "assembly": "solar_wing_008",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        25.823,
+        10.676,
+        24.597
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.204
+      ],
+      "connector": false,
+      "assembly": "solar_wing_008",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        25.823,
+        11.675,
+        26.898
+      ],
+      "half": [
+        1.224,
+        0.009,
+        1.204
+      ],
+      "connector": false,
+      "assembly": "solar_wing_008",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "solar_hinge",
+      "mesh": "box",
+      "pos": [
+        24.337,
+        3.186,
+        7.34
+      ],
+      "half": [
+        2.797,
+        0.033,
+        0.022
+      ],
+      "connector": true,
+      "assembly": "solar_wing_008",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "solar_hinge",
+      "mesh": "box",
+      "pos": [
+        24.337,
+        4.185,
+        9.641
+      ],
+      "half": [
+        2.797,
+        0.033,
+        0.022
+      ],
+      "connector": true,
+      "assembly": "solar_wing_008",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "solar_hinge",
+      "mesh": "box",
+      "pos": [
+        24.337,
+        5.183,
+        11.942
+      ],
+      "half": [
+        2.797,
+        0.033,
+        0.022
+      ],
+      "connector": true,
+      "assembly": "solar_wing_008",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "solar_hinge",
+      "mesh": "box",
+      "pos": [
+        24.337,
+        6.182,
+        14.242
+      ],
+      "half": [
+        2.797,
+        0.033,
+        0.022
+      ],
+      "connector": true,
+      "assembly": "solar_wing_008",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "solar_hinge",
+      "mesh": "box",
+      "pos": [
+        24.337,
+        7.181,
+        16.543
+      ],
+      "half": [
+        2.797,
+        0.033,
+        0.022
+      ],
+      "connector": true,
+      "assembly": "solar_wing_008",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "solar_hinge",
+      "mesh": "box",
+      "pos": [
+        24.337,
+        8.179,
+        18.844
+      ],
+      "half": [
+        2.797,
+        0.033,
+        0.022
+      ],
+      "connector": true,
+      "assembly": "solar_wing_008",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "solar_hinge",
+      "mesh": "box",
+      "pos": [
+        24.337,
+        9.178,
+        21.145
+      ],
+      "half": [
+        2.797,
+        0.033,
+        0.022
+      ],
+      "connector": true,
+      "assembly": "solar_wing_008",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "solar_hinge",
+      "mesh": "box",
+      "pos": [
+        24.337,
+        10.177,
+        23.446
+      ],
+      "half": [
+        2.797,
+        0.033,
+        0.022
+      ],
+      "connector": true,
+      "assembly": "solar_wing_008",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "solar_hinge",
+      "mesh": "box",
+      "pos": [
+        24.337,
+        11.176,
+        25.747
+      ],
+      "half": [
+        2.797,
+        0.033,
+        0.022
+      ],
+      "connector": true,
+      "assembly": "solar_wing_008",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.917315,
+          -0.398163
+        ],
+        [
+          0.0,
+          0.398163,
+          0.917315
+        ]
+      ]
+    },
+    {
+      "kind": "spar",
+      "mesh": "box",
+      "pos": [
+        18.679,
+        -14.251,
+        0.0
+      ],
+      "half": [
+        0.043,
+        11.099,
+        0.043
+      ],
+      "connector": true,
+      "assembly": "radiator_bank_009",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "kind": "radiator",
+      "mesh": "box",
+      "pos": [
+        18.679,
+        -4.7,
+        0.0
+      ],
+      "half": [
+        0.02,
+        1.547,
+        1.783
+      ],
+      "connector": false,
+      "assembly": "radiator_bank_009",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "kind": "radiator_hinge",
+      "mesh": "box",
+      "pos": [
+        18.679,
+        -6.292,
+        0.0
+      ],
+      "half": [
+        0.051,
+        0.016,
+        1.818
+      ],
+      "connector": true,
+      "assembly": "radiator_bank_009",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "kind": "radiator",
+      "mesh": "box",
+      "pos": [
+        18.679,
+        -7.884,
+        0.0
+      ],
+      "half": [
+        0.02,
+        1.547,
+        1.783
+      ],
+      "connector": false,
+      "assembly": "radiator_bank_009",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "kind": "radiator_hinge",
+      "mesh": "box",
+      "pos": [
+        18.679,
+        -9.476,
+        0.0
+      ],
+      "half": [
+        0.051,
+        0.016,
+        1.818
+      ],
+      "connector": true,
+      "assembly": "radiator_bank_009",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "kind": "radiator",
+      "mesh": "box",
+      "pos": [
+        18.679,
+        -11.068,
+        0.0
+      ],
+      "half": [
+        0.02,
+        1.547,
+        1.783
+      ],
+      "connector": false,
+      "assembly": "radiator_bank_009",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "kind": "radiator_hinge",
+      "mesh": "box",
+      "pos": [
+        18.679,
+        -12.659,
+        0.0
+      ],
+      "half": [
+        0.051,
+        0.016,
+        1.818
+      ],
+      "connector": true,
+      "assembly": "radiator_bank_009",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "kind": "radiator",
+      "mesh": "box",
+      "pos": [
+        18.679,
+        -14.251,
+        0.0
+      ],
+      "half": [
+        0.02,
+        1.547,
+        1.783
+      ],
+      "connector": false,
+      "assembly": "radiator_bank_009",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "kind": "radiator_hinge",
+      "mesh": "box",
+      "pos": [
+        18.679,
+        -15.843,
+        0.0
+      ],
+      "half": [
+        0.051,
+        0.016,
+        1.818
+      ],
+      "connector": true,
+      "assembly": "radiator_bank_009",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "kind": "radiator",
+      "mesh": "box",
+      "pos": [
+        18.679,
+        -17.435,
+        0.0
+      ],
+      "half": [
+        0.02,
+        1.547,
+        1.783
+      ],
+      "connector": false,
+      "assembly": "radiator_bank_009",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "kind": "radiator_hinge",
+      "mesh": "box",
+      "pos": [
+        18.679,
+        -19.027,
+        0.0
+      ],
+      "half": [
+        0.051,
+        0.016,
+        1.818
+      ],
+      "connector": true,
+      "assembly": "radiator_bank_009",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "kind": "radiator",
+      "mesh": "box",
+      "pos": [
+        18.679,
+        -20.619,
+        0.0
+      ],
+      "half": [
+        0.02,
+        1.547,
+        1.783
+      ],
+      "connector": false,
+      "assembly": "radiator_bank_009",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "kind": "radiator_hinge",
+      "mesh": "box",
+      "pos": [
+        18.679,
+        -22.211,
+        0.0
+      ],
+      "half": [
+        0.051,
+        0.016,
+        1.818
+      ],
+      "connector": true,
+      "assembly": "radiator_bank_009",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "kind": "radiator",
+      "mesh": "box",
+      "pos": [
+        18.679,
+        -23.802,
+        0.0
+      ],
+      "half": [
+        0.02,
+        1.547,
+        1.783
+      ],
+      "connector": false,
+      "assembly": "radiator_bank_009",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "kind": "radiator_boom",
+      "mesh": "cylinder",
+      "pos": [
+        18.679,
+        -1.576,
+        0
+      ],
+      "half": [
+        0.168,
+        1.576,
+        0.168
+      ],
+      "connector": true,
+      "assembly": "radiator_bank_009",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "kind": "spar",
+      "mesh": "box",
+      "pos": [
+        -10.633,
+        14.468,
+        0.0
+      ],
+      "half": [
+        0.042,
+        11.315,
+        0.042
+      ],
+      "connector": true,
+      "assembly": "radiator_bank_010",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "kind": "radiator",
+      "mesh": "box",
+      "pos": [
+        -10.633,
+        4.732,
+        0.0
+      ],
+      "half": [
+        0.02,
+        1.579,
+        1.747
+      ],
+      "connector": false,
+      "assembly": "radiator_bank_010",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "kind": "radiator_hinge",
+      "mesh": "box",
+      "pos": [
+        -10.633,
+        6.354,
+        0.0
+      ],
+      "half": [
+        0.05,
+        0.016,
+        1.782
+      ],
+      "connector": true,
+      "assembly": "radiator_bank_010",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "kind": "radiator",
+      "mesh": "box",
+      "pos": [
+        -10.633,
+        7.977,
+        0.0
+      ],
+      "half": [
+        0.02,
+        1.579,
+        1.747
+      ],
+      "connector": false,
+      "assembly": "radiator_bank_010",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "kind": "radiator_hinge",
+      "mesh": "box",
+      "pos": [
+        -10.633,
+        9.6,
+        0.0
+      ],
+      "half": [
+        0.05,
+        0.016,
+        1.782
+      ],
+      "connector": true,
+      "assembly": "radiator_bank_010",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "kind": "radiator",
+      "mesh": "box",
+      "pos": [
+        -10.633,
+        11.222,
+        0.0
+      ],
+      "half": [
+        0.02,
+        1.579,
+        1.747
+      ],
+      "connector": false,
+      "assembly": "radiator_bank_010",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "kind": "radiator_hinge",
+      "mesh": "box",
+      "pos": [
+        -10.633,
+        12.845,
+        0.0
+      ],
+      "half": [
+        0.05,
+        0.016,
+        1.782
+      ],
+      "connector": true,
+      "assembly": "radiator_bank_010",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "kind": "radiator",
+      "mesh": "box",
+      "pos": [
+        -10.633,
+        14.468,
+        0.0
+      ],
+      "half": [
+        0.02,
+        1.579,
+        1.747
+      ],
+      "connector": false,
+      "assembly": "radiator_bank_010",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "kind": "radiator_hinge",
+      "mesh": "box",
+      "pos": [
+        -10.633,
+        16.091,
+        0.0
+      ],
+      "half": [
+        0.05,
+        0.016,
+        1.782
+      ],
+      "connector": true,
+      "assembly": "radiator_bank_010",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "kind": "radiator",
+      "mesh": "box",
+      "pos": [
+        -10.633,
+        17.713,
+        0.0
+      ],
+      "half": [
+        0.02,
+        1.579,
+        1.747
+      ],
+      "connector": false,
+      "assembly": "radiator_bank_010",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "kind": "radiator_hinge",
+      "mesh": "box",
+      "pos": [
+        -10.633,
+        19.336,
+        0.0
+      ],
+      "half": [
+        0.05,
+        0.016,
+        1.782
+      ],
+      "connector": true,
+      "assembly": "radiator_bank_010",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "kind": "radiator",
+      "mesh": "box",
+      "pos": [
+        -10.633,
+        20.959,
+        0.0
+      ],
+      "half": [
+        0.02,
+        1.579,
+        1.747
+      ],
+      "connector": false,
+      "assembly": "radiator_bank_010",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "kind": "radiator_hinge",
+      "mesh": "box",
+      "pos": [
+        -10.633,
+        22.581,
+        0.0
+      ],
+      "half": [
+        0.05,
+        0.016,
+        1.782
+      ],
+      "connector": true,
+      "assembly": "radiator_bank_010",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "kind": "radiator",
+      "mesh": "box",
+      "pos": [
+        -10.633,
+        24.204,
+        0.0
+      ],
+      "half": [
+        0.02,
+        1.579,
+        1.747
+      ],
+      "connector": false,
+      "assembly": "radiator_bank_010",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "kind": "radiator_boom",
+      "mesh": "cylinder",
+      "pos": [
+        -10.633,
+        1.576,
+        0
+      ],
+      "half": [
+        0.168,
+        1.576,
+        0.168
+      ],
+      "connector": true,
+      "assembly": "radiator_bank_010",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "kind": "mast",
+      "mesh": "cylinder",
+      "pos": [
+        14.823,
+        0.0,
+        -3.252
+      ],
+      "half": [
+        0.105,
+        1.25,
+        0.105
+      ],
+      "connector": true,
+      "assembly": "antenna_011",
+      "extra": {},
+      "cols": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.0,
+          1.0
+        ],
+        [
+          0,
+          -1.0,
+          0.0
+        ]
+      ]
+    },
+    {
+      "kind": "antenna",
+      "mesh": "cone",
+      "pos": [
+        14.823,
+        0.0,
+        -4.607
+      ],
+      "half": [
+        1.05,
+        0.168,
+        1.05
+      ],
+      "connector": false,
+      "assembly": "antenna_011",
+      "extra": {
+        "top_radius": 0.18905994245467825,
+        "bottom_radius": 1.0503330136371014
+      },
+      "cols": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.0,
+          1.0
+        ],
+        [
+          0,
+          -1.0,
+          0.0
+        ]
+      ]
+    },
+    {
+      "kind": "window",
+      "mesh": "box",
+      "pos": [
+        -24.444,
+        2.131,
+        -0.195
+      ],
+      "half": [
+        0.336,
+        0.038,
+        0.231
+      ],
+      "connector": true,
+      "assembly": "module_details_012",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.99582,
+          -0.091341
+        ],
+        [
+          -0.0,
+          0.091341,
+          0.99582
+        ]
+      ]
+    },
+    {
+      "kind": "window",
+      "mesh": "box",
+      "pos": [
+        -21.331,
+        2.131,
+        -0.195
+      ],
+      "half": [
+        0.336,
+        0.038,
+        0.231
+      ],
+      "connector": true,
+      "assembly": "module_details_012",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.99582,
+          -0.091341
+        ],
+        [
+          -0.0,
+          0.091341,
+          0.99582
+        ]
+      ]
+    },
+    {
+      "kind": "module_light",
+      "mesh": "sphere",
+      "pos": [
+        -17.765,
+        2.206,
+        0.216
+      ],
+      "half": [
+        0.079,
+        0.079,
+        0.079
+      ],
+      "connector": true,
+      "assembly": "module_details_012",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "kind": "window",
+      "mesh": "box",
+      "pos": [
+        -5.266,
+        1.815,
+        -0.599
+      ],
+      "half": [
+        0.3,
+        0.034,
+        0.207
+      ],
+      "connector": true,
+      "assembly": "module_details_013",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.94961,
+          -0.313432
+        ],
+        [
+          -0.0,
+          0.313432,
+          0.94961
+        ]
+      ]
+    },
+    {
+      "kind": "window",
+      "mesh": "box",
+      "pos": [
+        -0.01,
+        1.815,
+        -0.599
+      ],
+      "half": [
+        0.3,
+        0.034,
+        0.207
+      ],
+      "connector": true,
+      "assembly": "module_details_013",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.94961,
+          -0.313432
+        ],
+        [
+          -0.0,
+          0.313432,
+          0.94961
+        ]
+      ]
+    },
+    {
+      "kind": "module_light",
+      "mesh": "sphere",
+      "pos": [
+        6.009,
+        1.964,
+        -0.257
+      ],
+      "half": [
+        0.07,
+        0.07,
+        0.07
+      ],
+      "connector": true,
+      "assembly": "module_details_013",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "kind": "window",
+      "mesh": "box",
+      "pos": [
+        17.096,
+        2.035,
+        -0.101
+      ],
+      "half": [
+        0.32,
+        0.036,
+        0.22
+      ],
+      "connector": true,
+      "assembly": "module_details_014",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.998774,
+          -0.049496
+        ],
+        [
+          -0.0,
+          0.049496,
+          0.998774
+        ]
+      ]
+    },
+    {
+      "kind": "window",
+      "mesh": "box",
+      "pos": [
+        20.25,
+        2.035,
+        -0.101
+      ],
+      "half": [
+        0.32,
+        0.036,
+        0.22
+      ],
+      "connector": true,
+      "assembly": "module_details_014",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.998774,
+          -0.049496
+        ],
+        [
+          -0.0,
+          0.049496,
+          0.998774
+        ]
+      ]
+    },
+    {
+      "kind": "window",
+      "mesh": "box",
+      "pos": [
+        23.403,
+        2.035,
+        -0.101
+      ],
+      "half": [
+        0.32,
+        0.036,
+        0.22
+      ],
+      "connector": true,
+      "assembly": "module_details_014",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.998774,
+          -0.049496
+        ],
+        [
+          -0.0,
+          0.049496,
+          0.998774
+        ]
+      ]
+    },
+    {
+      "kind": "module_light",
+      "mesh": "sphere",
+      "pos": [
+        27.166,
+        2.091,
+        0.293
+      ],
+      "half": [
+        0.075,
+        0.075,
+        0.075
+      ],
+      "connector": true,
+      "assembly": "module_details_014",
+      "extra": {},
+      "cols": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  ]
+}

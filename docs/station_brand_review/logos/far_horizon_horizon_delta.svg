@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Far Horizon Astronautics horizon-delta mark</title>
+  <desc id="desc">A split safety-orange delta rising through a graphite horizon.</desc>
+  <path d="M76 328 H436" stroke="#20262B" stroke-width="26" stroke-linecap="square"/>
+  <path d="M118 380 L256 116 L394 380" fill="none" stroke="#E66A2C" stroke-width="36" stroke-linejoin="miter" stroke-linecap="square"/>
+</svg>

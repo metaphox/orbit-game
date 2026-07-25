@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Weser Raumsysteme module-step mark</title>
+  <desc id="desc">Three signal-ochre modules rise in sequence from a graphite baseline.</desc>
+  <path d="M72 390 H440" stroke="#292D30" stroke-width="28" stroke-linecap="square"/>
+  <rect x="104" y="276" width="88" height="88" fill="#D6A928"/>
+  <rect x="212" y="222" width="88" height="88" fill="#D6A928"/>
+  <rect x="320" y="168" width="88" height="88" fill="#D6A928"/>
+</svg>
