@@ -233,6 +233,47 @@ func test_full_catalog_supports_a_moon_of_a_planet() -> void:
 	assert_true((by["EUROPA"] as BodyDef).decorative and not (by["IO"] as BodyDef).decorative)
 
 
+func test_loader_rejects_malformed_json_without_crashing() -> void:
+	# CR-3: a drop-in mod is untrusted. Wrong container/value types must return a
+	# readable error, never crash a typed coercion or leak NaN/INF into physics.
+	var obj := {"type": "orbit_match", "radius_km": 80, "tolerance_km": 1}
+	var cases := [
+		{"system": "EARTH", "bodies": "not-an-array", "objective": obj},
+		{"system": "EARTH", "bodies": [42], "objective": obj},
+		{"system": "EARTH", "bodies": ["EARTH"], "objective": obj},
+		{"system": "EARTH", "start": [], "objective": obj},
+		{"system": "EARTH", "ship": "heavy", "objective": obj},
+		{"system": "EARTH", "objective": "orbit_match"},
+		{"system": "EARTH", "avionics": true, "objective": obj},
+		# nonsensical numbers that would otherwise reach divisions / the rocket eqn
+		{"system": "EARTH", "ship": {"dry_mass": 0}, "objective": obj},
+		{"system": "EARTH", "ship": {"isp": -5}, "objective": obj},
+		{"system": "EARTH", "ship": {"thrust": [1, 2]}, "objective": obj},
+		{"system": "EARTH", "start": {"radius_km": 0}, "objective": obj},
+		{"system": "EARTH", "start": {"radius_km": "low"}, "objective": obj},
+		{"system": "EARTH", "objective": {"type": "orbit_match", "radius_km": -80}},
+		{"system": "EARTH", "objective": {"type": "orbit_match", "radius_km": [80]}},
+		{"system": "EARTH", "objective": {"type": "orbit_match", "radius_km": 80, "tolerance_km": -1}},
+		{"system": "EARTH", "objective": obj, "map_extent_km": 0},
+		{"system": "EARTH", "objective": obj, "draw_limit_km": -10},
+	]
+	for spec: Dictionary in cases:
+		var r := LevelLoader.from_dict(spec, "x")
+		assert_ne(r.error, "", "malformed spec is rejected: %s" % JSON.stringify(spec))
+		assert_null(r.level, "a rejected spec returns no level")
+
+
+func test_loader_defaults_absent_ship_and_start_to_a_playable_craft() -> void:
+	# Omitting ship/start yields a valid (default) craft in a low orbit, not a
+	# NaN/INF ship — parsing tests rely on this and authors get a sane fallback.
+	var r := LevelLoader.from_dict({"system": "EARTH",
+		"objective": {"type": "orbit_match", "radius_km": 80, "tolerance_km": 1}}, "x")
+	assert_eq(r.error, "", "a spec without ship/start still loads")
+	assert_gt(r.level.dry_mass, 0.0, "default dry mass is positive")
+	assert_gt(r.level.isp, 0.0, "default isp is positive")
+	assert_gt(r.level.start_radius, r.level.body.radius, "default start is above the surface")
+
+
 func test_loader_rejects_bad_specs_with_readable_errors() -> void:
 	var unknown_body := LevelLoader.from_dict({"system": "PLANET_X",
 		"objective": {"type": "orbit_match", "radius_km": 80, "tolerance_km": 1}}, "x")

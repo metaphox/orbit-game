@@ -93,12 +93,12 @@ func _add_section(title: String) -> void:
 	var header := Label.new()
 	header.theme_type_variation = UiTheme.ACT_HEADER
 	header.text = title
-	var wrap := MarginContainer.new()
-	wrap.add_theme_constant_override("margin_top", 16)
-	wrap.add_theme_constant_override("margin_left", 16)
-	wrap.add_theme_constant_override("margin_bottom", 4)
-	wrap.add_child(header)
-	_shell.left_column.add_child(wrap)
+	var header_margin := MarginContainer.new()
+	header_margin.add_theme_constant_override("margin_top", 16)
+	header_margin.add_theme_constant_override("margin_left", 16)
+	header_margin.add_theme_constant_override("margin_bottom", 4)
+	header_margin.add_child(header)
+	_shell.left_column.add_child(header_margin)
 
 
 func _add_card(entry: Dictionary) -> void:
@@ -130,7 +130,7 @@ func _short_title(title: String) -> String:
 
 func _community_status(id: String) -> String:
 	var medal := _sandbox.medal_for(id) if _sandbox != null else ""
-	return medal if medal != "" else TranslationServer.translate("ACTIVE", &"status")
+	return medal if medal != "" else String(TranslationServer.translate("ACTIVE", &"status"))
 
 
 func _first_selectable_pos() -> int:

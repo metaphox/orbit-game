@@ -5,6 +5,11 @@ extends RefCounted
 ## stem); a file that fails to parse/validate is skipped with a logged reason,
 ## not fatal. Results are cached until reload().
 
+## A level file is tiny (a few KB); cap reads so a stray huge/binary file dropped
+## in the mods folder can't be slurped whole into memory.
+const MAX_FILE_KB := 256
+const MAX_FILE_BYTES := MAX_FILE_KB * 1024
+
 static var _cache: Array = []
 static var _loaded := false
 
@@ -51,7 +56,14 @@ static func load_from_dirs(dirs: Array) -> Array:
 
 
 static func _load_one(id: String, path: String, dir: String) -> Dictionary:
-	var text := FileAccess.open(path, FileAccess.READ).get_as_text()
+	var f := FileAccess.open(path, FileAccess.READ)
+	if f == null:  # permission / race / vanished between scan and read
+		return {"id": id, "level": null, "dir": dir,
+			"error": "could not open (error %d)" % FileAccess.get_open_error()}
+	if f.get_length() > MAX_FILE_BYTES:
+		return {"id": id, "level": null, "dir": dir,
+			"error": "file too large (> %d KB) to be a level" % MAX_FILE_KB}
+	var text := f.get_as_text()
 	var json := JSON.new()  # instance parse: no engine-error spam on a bad mod file
 	if json.parse(text) != OK or not (json.data is Dictionary):
 		return {"id": id, "level": null, "dir": dir, "error": "not valid JSON (line %d)" % json.get_error_line()}

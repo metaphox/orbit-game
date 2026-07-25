@@ -20,6 +20,7 @@ func before_each() -> void:
 func after_each() -> void:
 	_clear_save()
 	GameRootScript.level_index = 0
+	GameRootScript.custom_level = null  # static; don't leak a community launch across tests
 	Settings.reset_to_defaults()
 	Settings.debug_mode = false
 	CommunityLevels.reload()
@@ -226,6 +227,31 @@ func test_new_profile_flow_reaches_mission_select_and_flies() -> void:
 	root._current_ui.back_pressed.emit()
 	simulate(root, 2, 1.0 / 60.0)
 	assert_true(root._current_ui is TitleScreen, "mission select can return to the title")
+
+
+func test_campaign_resume_clears_stale_community_launch() -> void:
+	# CR-2: GameRoot.custom_level is static and WINS over level_index, so a
+	# community level flown earlier must not bleed into a resumed campaign save
+	# (nor mis-route its win to the sandbox via a stale _active_community_id).
+	var root: Node = CampaignRootScene.instantiate()
+	root.store = ProfileStore.load_or_new(SAVE_TEST_PATH)
+	add_child_autofree(root)
+	root._on_profile_created("Ada", false)
+
+	var drop_in: LevelDef = Campaign.level_at(2)  # stands in as a drop-in level
+	root._launch_custom("mod_demo", drop_in)
+	simulate(root, 2, 1.0 / 60.0)
+	assert_eq(GameRootScript.custom_level, drop_in, "community launch set the static custom level")
+	assert_eq(root._active_community_id, "mod_demo")
+
+	# Continue a CAMPAIGN save (mission 0): the stale community state must clear.
+	root._resume_mission({"level_index": 0})
+	simulate(root, 2, 1.0 / 60.0)
+	assert_null(GameRootScript.custom_level, "resume cleared the stale community level")
+	assert_eq(root._active_community_id, "",
+		"resume cleared the community id, so a win routes to the profile not the sandbox")
+	assert_eq(root.game.level.title, Campaign.title(0),
+		"resumed the campaign mission, not the stale community level")
 
 
 func test_win_persists_to_active_profile_and_advances_campaign() -> void:

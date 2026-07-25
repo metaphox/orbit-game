@@ -89,9 +89,9 @@ func _on_continue() -> void:
 func _resume_mission(save_data: Dictionary) -> void:
 	_clear_ui()
 	_clear_game()
-	var index: int = save_data.get("level_index", 0)
-	GameRootScript.level_index = index
-	GameRootScript.hardcore = active_profile.hardcore
+	# Clears any stale community launch (custom_level/_active_community_id) so a
+	# resumed campaign save can't inherit a drop-in level flown earlier (CR-2).
+	_set_launch_context("", null, int(save_data.get("level_index", 0)))
 	game = GameRootScene.instantiate()
 	add_child(game)
 	game.load_saved_state(save_data)
@@ -159,13 +159,23 @@ func _show_mission_select() -> void:
 	_current_ui = menu
 
 
+## The single place that assigns ALL of GameRoot's static launch context, so no
+## entry path can leave one field stale. In particular `custom_level` is static
+## and WINS over `level_index` in GameRoot, so a community level flown earlier
+## must be cleared before a campaign launch/resume or it silently replaces the
+## intended mission (and its win mis-routes to the sandbox). Campaign paths pass
+## community_id="" / custom=null; the community path passes the level + its ID.
+func _set_launch_context(community_id: String, custom: LevelDef, index: int) -> void:
+	_active_community_id = community_id
+	GameRootScript.custom_level = custom
+	GameRootScript.level_index = index
+	GameRootScript.hardcore = active_profile.hardcore
+
+
 func _launch(index: int) -> void:
 	_clear_ui()
 	_clear_game()
-	_active_community_id = ""
-	GameRootScript.custom_level = null
-	GameRootScript.level_index = index
-	GameRootScript.hardcore = active_profile.hardcore
+	_set_launch_context("", null, index)
 	game = GameRootScene.instantiate()
 	add_child(game)
 	_connect_game_signals()
@@ -176,9 +186,7 @@ func _launch(index: int) -> void:
 func _launch_custom(id: String, level: LevelDef) -> void:
 	_clear_ui()
 	_clear_game()
-	_active_community_id = id
-	GameRootScript.custom_level = level
-	GameRootScript.hardcore = active_profile.hardcore
+	_set_launch_context(id, level, GameRootScript.level_index)
 	game = GameRootScene.instantiate()
 	add_child(game)
 	_connect_game_signals()

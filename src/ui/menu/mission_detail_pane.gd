@@ -72,7 +72,7 @@ func show_community(level: LevelDef, medal: String, plan_bbcode: String) -> void
 	_index = -1
 	_sortie.text = tr("COMMUNITY")
 	_fill(level, _short_title(level.title), "%s · %s" % [
-		tr("COMMUNITY"), medal if medal != "" else TranslationServer.translate("ACTIVE", &"status")],
+		tr("COMMUNITY"), medal if medal != "" else String(TranslationServer.translate("ACTIVE", &"status"))],
 		medal, false)
 	_set_plan(plan_bbcode)
 
