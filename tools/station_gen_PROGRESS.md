@@ -2,19 +2,37 @@
 
 Scratch note for the /loop task (procedural station generator). Delete when done.
 
-## NEXT ITERATION — Taowu playtest feedback (2026-07-25), NOT yet implemented
-Tool works & reads plausibly; three changes wanted next (full detail in docs/STATIONS.md §6):
-1. **Thinner solar panels** — currently way too thick even for the toy solar system. Cut blanket
-   Y-thickness hard in `build_solar` (today `self.meters * 0.006` → try ~`* 0.0015` / small floor);
-   thin the radiator fins too. Foil, not plywood.
-2. **More part variety / more part TYPES** — stations should feel more complex & varied; parts need
-   NOT be realistic (quasi-sci-fi). Add new kinds beyond cylinder/box/torus/sphere roles: domes/
-   blisters, truss-lattice bays, tank clusters, varied dishes, robotic arm, docked tugs, comms
-   masts, tapered hull sections, fins. Two stations should differ in KIND, not just size/count.
-3. **Allow HYBRID archetypes** — retire "pick ONE per station". Compose forms on a shared frame,
-   e.g. dual-keel + giant dome + rotating ring. The per-archetype builders are the building blocks;
-   graft them together and keep passing the non-interference validator. Biggest structural change.
-(Positive: the research doc `docs/STATIONS_research.md` landed well.)
+## Done (iteration 15) — connected station graph + foldable arrays
+- The generator now builds semantic **assemblies**, compatible **mounts**, and typed
+  **joints**, then hard-validates structural/pressurised reachability and physical connector
+  endpoints. A connector may cross only its two declared endpoint assemblies.
+- The dual-keel observatory is a crewed chain from a real module through a visible pressure
+  trunk and broad vestibule into the dome; its ring remains a separately connected assembly.
+- Solar wings use station-coherent accordion, petal, round-umbrella, or ordered-honeycomb
+  families with leaf/hinge metadata, narrow rails, mirrored topology/area, a declared local sun
+  vector, and a gimbal solution within 15° of the sun.
+- Every lab/habitat owns a restrained cylindrical-surface window cluster and at most one green
+  status light. Surface ownership and placement are validated.
+- JSON blueprints now expose assemblies, mounts, joints, requested/resolved seeds, sun vector,
+  solar family, and a deterministic 0–100 organisation report with components and penalties.
+  It remains report-only pending human calibration; valid-candidate ranking is not enabled.
+- Five review scenes/blueprints/previews were regenerated to cover all four array families.
+  Verification: 20/20 Python tests, 162-station self-test, and 15/15 Godot scenes load.
+
+## Done (iteration 14) — hybrid + variety playtest pass
+- **Thin deployed surfaces:** solar blanket half-thickness is capped at 0.18 design metres and
+  radiator fins at 0.28, with small absolute floors. Unit coverage pins both the absolute cap and
+  the blanket aspect ratio at 0.5×, 1×, and 20× ISS.
+- **New part families:** seeded domes, three-tank racks, two-joint robotic arms, docked capsule
+  tugs with tapered engines/fins/lights, varied tapered dishes, and repeated truss-lattice bays.
+  Every station gets at least two signature families.
+- **Hybrid archetype:** three recipes now compose existing forms with shared clearance routing:
+  dual-keel + ring + giant observatory dome; truss + ring + radial cluster; and power tower +
+  ring + tank farm. Auto-selection can use hybrids for large stations.
+- **Human review:** five generated scenes/blueprints live in `assets/station_review/`; matching
+  SIDE/TOP/END PNGs and review notes live in `docs/station_review/`. The new END view makes
+  ring and radial silhouettes visible instead of showing them only edge-on.
+- Verification expanded from 8 to 11 unit tests; selftest now covers 162 generated stations.
 
 ## Done (iteration 1)
 - **docs/STATIONS.md** — design guideline (parts, archetypes, hard rules, scale, generator contract).
@@ -154,8 +172,8 @@ Tool works & reads plausibly; three changes wanted next (full detail in docs/STA
 - Kept `assets/stations/` clean (tscn+json only); previews live under `docs/`.
 
 ## How to run the checks
-- `python3 tools/station_gen.py --selftest`  → 108-station validation sweep
-- `python3 tools/test_station_gen.py`         → 8 unit tests
+- `python3 tools/station_gen.py --selftest`  → 162-station validation sweep
+- `python3 tools/test_station_gen.py`         → 20 unit tests
 - `python3 tools/station_gen.py --count 10 --spread --preview --out /tmp/s`  → images to eyeball
 - `godot --headless --script tools/station_load_check.gd`  → all scenes load
 

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Orthographic PNG previews of a generated Station — pure Python + Pillow, so it
-needs no Godot and opens no window (headless Godot renders black). Two panels:
-a SIDE view (X-Y, shows the spine / radiators / rings edge-on) and a TOP view
-(X-Z, shows the solar-array faces). Painter's algorithm, coloured by material.
+needs no Godot and opens no window (headless Godot renders black). Three panels:
+SIDE (X-Y), TOP (X-Z), and END (Y-Z, which exposes rings/radial clusters).
+Painter's algorithm, coloured by material.
 
 Used via `station_gen.py --preview`; also runnable to preview a fresh build:
     python3 tools/station_preview.py --iss 5 --seed 2 --out /tmp/s.png
@@ -33,6 +33,17 @@ COLORS = {
 
 def _corners(p):
     out = []
+    if p.mesh == "polygon":
+        sides = p.extra.get("sides", 6)
+        for sy in (-1, 1):
+            for index in range(sides):
+                angle = 2.0 * sg.math.pi * index / sides + sg.math.pi / 2.0
+                loc = (sg.math.cos(angle) * p.half[0], sy * p.half[1],
+                       sg.math.sin(angle) * p.half[2])
+                out.append(tuple(
+                    p.pos[i] + sum(loc[j] * p.cols[j][i] for j in range(3))
+                    for i in range(3)))
+        return out
     for sx in (-1, 1):
         for sy in (-1, 1):
             for sz in (-1, 1):
@@ -76,6 +87,16 @@ def _draw_view(draw, parts, hori, vert, depth, flip_v, ox, oy, sc, hmin, vmax):
     for p in sorted(parts, key=lambda q: q.pos[depth]):
         col = COLORS.get(p.mat, (150, 150, 150))
         cs = _corners(p)
+        if p.mesh == "torus" and depth == 0:
+            cx = ox + (p.pos[hori] - hmin) * sc
+            cy = oy + (vmax - p.pos[vert]) * sc
+            wh = p.world_half()
+            rx = wh[hori] * sc
+            ry = wh[vert] * sc
+            stroke = max(2, int((p.extra["outer"] - p.extra["inner"]) * sc))
+            draw.ellipse([cx - rx, cy - ry, cx + rx, cy + ry], outline=col,
+                         width=stroke)
+            continue
         if p.mesh == "sphere":
             cx = ox + (p.pos[hori] - hmin) * sc
             cy = oy + (vmax - p.pos[vert]) * sc
@@ -101,18 +122,30 @@ def render(st, path, px=1100):
     sc = (px - 2 * pad) / max(maxx - minx, 1e-6)
     h_side = int((maxy - miny) * sc) + 2 * pad
     h_top = int((maxz - minz) * sc) + 2 * pad
+    end_span = max(maxy - miny, maxz - minz, 1e-6)
+    sc_end = (px - 2 * pad) / end_span
+    h_end = int((maxz - minz) * sc_end) + 2 * pad
     lab = 26
-    H = lab + h_side + lab + h_top + pad
+    H = lab + h_side + lab + h_top + lab + h_end + pad
     img = Image.new("RGB", (px, H), BG)
     d = ImageDraw.Draw(img)
     ox = pad + (px - 2 * pad - (maxx - minx) * sc) / 2
-    d.text((pad, 6), "SIDE  (X-Y)  %s  %.1fx ISS  %d parts"
-           % (st.archetype.upper(), st.meters / sg.ISS_METERS, len(parts)),
+    form_label = "+".join(st.forms).upper()
+    organization = st.organization or sg.analyze_organization(st)
+    d.text((pad, 6), "SIDE  (X-Y)  %s  %.1fx ISS  %d parts  %s  ORG %.1f"
+           % (form_label, st.meters / sg.ISS_METERS, len(parts),
+              st.solar_family.upper(), organization.score),
            fill=(150, 160, 170))
     _draw_view(d, parts, 0, 1, 2, True, ox, lab + pad, sc, minx, maxy)
     y2 = lab + h_side
     d.text((pad, y2 + 4), "TOP  (X-Z)  — solar-array faces", fill=(150, 160, 170))
     _draw_view(d, parts, 0, 2, 1, True, ox, y2 + lab + pad, sc, minx, maxz)
+    y3 = y2 + lab + h_top
+    d.text((pad, y3 + 4), "END  (Y-Z)  — ring / radial cross-section",
+           fill=(150, 160, 170))
+    ox_end = pad + (px - 2 * pad - (maxy - miny) * sc_end) / 2
+    _draw_view(d, parts, 1, 2, 0, True, ox_end, y3 + lab + pad,
+               sc_end, miny, maxz)
     img.save(path)
     return path
 
