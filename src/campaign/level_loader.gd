@@ -9,10 +9,19 @@ extends RefCounted
 
 const KM := 1000.0
 
-## Anti-nightmare caps (tunable). Total bodies bound render/iteration cost;
-## active (non-decorative) moons bound the expensive per-frame/refit SOI scan
-## (child_soi_entry_time ~165ms/call). Scenery bodies are cheap — mark distant
-## ones "decorative": true to stay under MAX_ACTIVE_MOONS.
+## Anti-nightmare caps (tunable). Total bodies bound render/iteration cost
+## (measured cheap: a 48-body render sync is <1 ms/frame — see
+## test_perf_heavy_level). Active (non-decorative) moons bound the expensive
+## per-refit SOI scan: a no-encounter child_soi_entry_time is ~0.45 s, and the
+## physics event clamp scans every reachable active child. A broad-phase radial
+## rejection (OrbitEvents.child_soi_entry_time) drops the common case — a
+## confined/parking orbit among distant moons — to microseconds (unreachable
+## moons rejected O(1)), and PF-1 shares the one scan between the clamp and the
+## visual marker. The residual worst case is one orbit whose [peri, apo] band
+## radially spans many reachable active moons: ~0.45 s each, only at a
+## burn/SOI-refit (cached while coasting). If that ceiling matters on target
+## hardware, lower MAX_ACTIVE_MOONS. Scenery is cheap — mark distant bodies
+## "decorative": true to stay under the active cap.
 const MAX_BODIES := 48
 const MAX_ACTIVE_MOONS := 12
 

@@ -72,6 +72,36 @@ func test_scan_is_cached_on_revision_and_window() -> void:
 	assert_lt(rescanned, first, "a revision bump rescans and picks up the enlarged SOI (earlier entry)")
 
 
+func test_broad_phase_rejects_an_out_of_reach_moon() -> void:
+	# PF-1 broad-phase: a moon whose orbit sits far outside the ship's radial band
+	# can never be entered, so the scan rejects it in O(1) (returns NAN) instead of
+	# paying the hundreds-of-ms fine scan. It must never reject a reachable moon.
+	var earth := BodyDef.new()
+	earth.name = "EARTH"
+	earth.mu = MU_EARTH
+	earth.radius = 63710.0
+	var r := 7.0e6  # tight low circular orbit
+	var el := OrbitElements.from_state(
+		DVec3.new(r, 0.0, 0.0), DVec3.new(0.0, 0.0, -sqrt(MU_EARTH / r)), MU_EARTH, 0.0)
+
+	var far_moon := BodyDef.new()
+	far_moon.parent = earth
+	far_moon.orbit_radius = 4.0e8  # far beyond the ship's apoapsis
+	far_moon.soi_radius = 6.6e5
+	assert_true(OrbitEvents._radial_bands_gap(el, far_moon.orbit) > far_moon.soi_radius,
+		"the far moon's band is separated by more than its SOI")
+	assert_true(is_nan(OrbitEvents.child_soi_entry_time(
+		el, far_moon.orbit, far_moon.soi_radius, 0.0, el.period(), el.period() / 400.0)),
+		"an out-of-reach moon is rejected without a fine scan")
+
+	var near := BodyDef.new()
+	near.parent = earth
+	near.orbit_radius = r  # co-radial: genuinely reachable
+	near.soi_radius = 6.6e5
+	assert_false(OrbitEvents._radial_bands_gap(el, near.orbit) > near.soi_radius,
+		"a co-radial moon is inside the band and proceeds to the fine scan")
+
+
 func test_decorative_and_foreign_children_are_ignored() -> void:
 	var s := _scenario()
 	var ship: ShipSim = s.ship

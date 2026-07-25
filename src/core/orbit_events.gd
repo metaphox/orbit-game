@@ -56,6 +56,16 @@ static func child_soi_entry_time(
 		t_start: float, t_end: float, coarse_dt: float) -> float:
 	if t_end <= t_start:
 		return NAN
+	# Broad-phase: two conics about the same parent can only come within
+	# soi_radius if their radial bands [periapsis, apoapsis] approach within it -
+	# |r_ship - r_child| >= | |r_ship| - |r_child| |, so a radial gap wider than
+	# the SOI rules an encounter out. This O(1) apo/peri test rejects children the
+	# current orbit can't reach (a parking orbit vs distant moons, or the far
+	# moons while transferring to a near one) before the ~hundreds-of-ms interval
+	# scan below - the dominant cost on many-moon systems (PF-1 broad-phase). It
+	# only ever rejects a provably impossible encounter, never a real one.
+	if _radial_bands_gap(ship_el, child_el) > soi_radius:
+		return NAN
 	if _distance(ship_el, child_el, t_start) <= soi_radius:
 		return t_start
 	var dt := _bounded_step(ship_el, child_el, t_start, t_end, soi_radius, coarse_dt)
@@ -156,6 +166,16 @@ static func _bisect_entry(
 		else:
 			t_in = mid
 	return t_in
+
+
+## Radial separation between two orbits' [periapsis, apoapsis] bands: 0 when the
+## bands overlap, else the gap between them. A lower bound on the bodies' closest
+## possible 3D distance (out-of-plane separation only adds to it), so it's a
+## sound conservative rejection test. apoapsis is INF for unbound orbits, so the
+## outer side never falsely rejects an escaping ship.
+static func _radial_bands_gap(a: OrbitElements, b: OrbitElements) -> float:
+	return maxf(maxf(a.radius_periapsis() - b.radius_apoapsis(),
+		b.radius_periapsis() - a.radius_apoapsis()), 0.0)
 
 
 static func _distance(ship_el: OrbitElements, child_el: OrbitElements, t: float) -> float:
