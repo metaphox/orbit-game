@@ -37,6 +37,14 @@ MAT = {
 
 ISS_METERS = 109.0  # yardstick: ISS longest dimension
 
+SOLAR_SUPPORTED_HEAT_KW_PER_M2 = 0.026
+RADIATOR_REJECTION_KW_PER_M2 = 0.096
+CREWED_HEAT_KW = {"lab": 0.60, "hab": 0.35}
+OTHER_CREWED_HEAT_KW = 0.20
+HIGH_POWER_LOAD_MULTIPLIER = 1.24
+ORDINARY_RADIATOR_AREA_RATIO = (0.25, 0.35)
+HIGH_POWER_RADIATOR_AREA_RATIO = (0.25, 0.42)
+
 
 # --- tiny 3-vector / matrix helpers (columns = local axes in world space) ------
 Vec = tuple  # (x, y, z)
@@ -188,6 +196,48 @@ def radial_band(p: Part):
     return math.hypot(ny, nz), math.hypot(ymax, zmax)
 
 
+def solar_collecting_area(st: Station) -> float:
+    return sum(
+        assembly.metadata.get("collecting_area", 0.0)
+        for assembly in st.assemblies.values()
+        if assembly.role == "solar_wing")
+
+
+def radiator_face_area(st: Station) -> float:
+    return sum(
+        part.half[1] * 2.0 * part.half[2] * 2.0
+        for part in st.parts if part.kind == "radiator")
+
+
+def estimate_thermal_budget(st: Station) -> dict:
+    solar_area = solar_collecting_area(st)
+    crewed_heat = sum(
+        CREWED_HEAT_KW.get(assembly.role, OTHER_CREWED_HEAT_KW)
+        for assembly in st.assemblies.values() if assembly.crewed)
+    high_power = st.archetype == "power" or "power" in st.forms
+    profile = "high_power" if high_power else "ordinary"
+    multiplier = HIGH_POWER_LOAD_MULTIPLIER if high_power else 1.0
+    solar_heat = solar_area * SOLAR_SUPPORTED_HEAT_KW_PER_M2
+    estimated_heat = (solar_heat + crewed_heat) * multiplier
+    raw_area = estimated_heat / RADIATOR_REJECTION_KW_PER_M2
+    ratio_range = (HIGH_POWER_RADIATOR_AREA_RATIO if high_power
+                   else ORDINARY_RADIATOR_AREA_RATIO)
+    target_area = max(solar_area * ratio_range[0],
+                      min(raw_area, solar_area * ratio_range[1]))
+    return {
+        "profile": profile,
+        "solar_area_m2": solar_area,
+        "solar_supported_heat_kw": solar_heat,
+        "crewed_heat_kw": crewed_heat,
+        "load_multiplier": multiplier,
+        "estimated_heat_load_kw": estimated_heat,
+        "rejection_kw_per_m2": RADIATOR_REJECTION_KW_PER_M2,
+        "minimum_area_ratio": ratio_range[0],
+        "maximum_area_ratio": ratio_range[1],
+        "target_radiator_area_m2": target_area,
+    }
+
+
 # --- station builder -----------------------------------------------------------
 class Station:
     def __init__(self, seed: int, meters: float, archetype: str,
@@ -208,6 +258,7 @@ class Station:
         self.module_assemblies: list[str] = []
         self.frame_assembly: str | None = None
         self.organization: OrganizationReport | None = None
+        self.thermal: dict = {}
         self.appendage_x_avoid: list[tuple[float, float]] = []
         self.archetype = self._pick_archetype(archetype)
         self.forms = [self.archetype]
@@ -657,32 +708,73 @@ class Station:
 
     # -- radiators (perpendicular to the arrays) -------------------------------
     def build_radiators(self, rmax, span, avoid=None):
-        n = max(1, self.counts["panels"] // 4)
-        rad_len = self.meters * self.jitter(0.08, 0.14)
-        clear = rmax * 1.4
-        for i in range(n):
+        budget = estimate_thermal_budget(self)
+        target_area = budget["target_radiator_area_m2"]
+        nominal_bank_area = max(1.0, self.meters ** 2 * 0.0075)
+        required_banks = max(1, math.ceil(target_area / nominal_bank_area))
+        solar_pairs = max(1, self.counts["panels"] // 2)
+        bank_count = min(6, solar_pairs, required_banks)
+        clear = rmax * 1.5
+        emitted_area = 0.0
+        for i in range(bank_count):
             routed_avoid = list(avoid or []) + self.appendage_x_avoid
             mx = self._free_x(-span * 0.42, span * 0.42, routed_avoid, rmax * 0.3)
             if mx is None:
                 raise ValidationError("no room for radiators clear of the rings")
-            sgn = -1 if i % 2 == 0 else 1              # alternate up/down
-            yc = sgn * (clear + rad_len / 2)
-            # a radiator BANK: two fins flanking a dark backing spar, broad faces
-            # ±X (perpendicular to the ±Y-facing arrays), tall in Y. Same envelope
-            # as the old single slab but reads as a real deployed panel bank.
-            depth = self.meters * 0.05
-            fin_x = max(0.03, min(0.28, self.meters * 0.0006))
+            sgn = -1 if i % 2 == 0 else 1
+            area_share = target_area / bank_count
+            panel_aspect = self.jitter(5.2, 6.8)
+            radiating_length = math.sqrt(area_share * panel_aspect)
+            panel_width = math.sqrt(area_share / panel_aspect)
+            panel_count = self.rng.randint(6, 8)
+            panel_length = radiating_length / panel_count
+            fin_half = max(0.02, min(0.12, self.meters * 0.00005))
+            gap = max(fin_half * 3.0,
+                      min(panel_width * 0.025, panel_length * 0.08))
+            deployed_length = radiating_length + gap * (panel_count - 1)
+            root_y = sgn * clear
+            centre_y = root_y + sgn * deployed_length / 2.0
+            spar_half = max(fin_half * 1.6,
+                            min(0.18, panel_width * 0.012))
             radiator = self.new_assembly(
                 "radiator_bank",
                 metadata={"normal": (1.0, 0.0, 0.0),
-                          "sun_dot": abs(self.sun_vector[0])})
-            self.add(Part("spar", "box", (fin_x * 1.4, rad_len / 2, depth),
-                          (mx, yc, 0), MAT["dark"], connector=True), radiator)
-            for fx in (-1, 1):
-                self.add(Part("radiator", "box",
-                              (fin_x, rad_len / 2, depth * 0.92),
-                              (mx + fx * fin_x * 3.0, yc, 0), MAT["hull"]),
-                         radiator)
+                          "sun_dot": abs(self.sun_vector[0]),
+                          "thermal_profile": budget["profile"],
+                          "panel_count": panel_count,
+                          "hinge_count": panel_count - 1,
+                          "panel_aspect_ratio": panel_aspect,
+                          "deployed_aspect_ratio": deployed_length / panel_width,
+                          "deployed_length_m": deployed_length,
+                          "panel_width_m": panel_width,
+                          "radiating_area_m2": area_share,
+                          "panel_layer_count": 1,
+                          "panel_part_indices": []})
+            self.add(
+                Part("spar", "box",
+                     (spar_half, deployed_length / 2.0, spar_half),
+                     (mx, centre_y, 0.0), MAT["dark"], connector=True),
+                radiator)
+            panel_indices = []
+            for panel_index in range(panel_count):
+                distance = (panel_length / 2.0
+                            + panel_index * (panel_length + gap))
+                panel_indices.append(self.add(
+                    Part("radiator", "box",
+                         (fin_half, panel_length / 2.0, panel_width / 2.0),
+                         (mx, root_y + sgn * distance, 0.0), MAT["hull"]),
+                    radiator))
+                if panel_index < panel_count - 1:
+                    hinge_distance = ((panel_index + 1) * panel_length
+                                      + panel_index * gap + gap / 2.0)
+                    self.add(
+                        Part("radiator_hinge", "box",
+                             (spar_half * 1.2, gap * 0.18,
+                              panel_width * 0.51),
+                             (mx, root_y + sgn * hinge_distance, 0.0),
+                             MAT["dark"], connector=True),
+                        radiator)
+            self.assemblies[radiator].metadata["panel_part_indices"] = panel_indices
             boom_index = self.add(
                 Part("radiator_boom", "cylinder",
                      (rmax * 0.08, clear / 2, rmax * 0.08),
@@ -696,8 +788,15 @@ class Station:
             self.connect(host, radiator, "structural", host_pos, bank_pos,
                          rmax * 0.08, connector_parts=[boom_index],
                          parent_name="radiator_mount", child_name="bank_spar")
-            self.appendage_x_avoid.append((mx, fin_x * 4.5))
+            self.appendage_x_avoid.append((mx, spar_half * 4.5))
             self.counts["radiators"] += 1
+            emitted_area += area_share
+        budget.update({
+            "bank_count": bank_count,
+            "emitted_radiator_area_m2": emitted_area,
+            "area_ratio": emitted_area / max(budget["solar_area_m2"], 1e-9),
+        })
+        self.thermal = budget
 
     # -- structural texture + quasi-sci-fi signature parts -------------------
     def build_truss_lattice(self, x0, x1, rmax):
@@ -1520,6 +1619,75 @@ def graph_distances(graph: dict[str, set[str]], root: str) -> dict[str, int]:
     return distances
 
 
+def validate_radiators(st: Station) -> None:
+    if not st.thermal:
+        raise ValidationError("station has no thermal budget")
+    expected_budget = estimate_thermal_budget(st)
+    for key, expected in expected_budget.items():
+        actual = st.thermal.get(key)
+        if isinstance(expected, str):
+            if actual != expected:
+                raise ValidationError(f"thermal budget has wrong {key}")
+        elif actual is None or not math.isclose(actual, expected, rel_tol=1e-8):
+            raise ValidationError(f"thermal budget has inconsistent {key}")
+
+    banks = [assembly for assembly in st.assemblies.values()
+             if assembly.role == "radiator_bank"]
+    if len(banks) != st.counts["radiators"] or not banks:
+        raise ValidationError("radiator bank count does not match the blueprint")
+    if st.thermal.get("bank_count") != len(banks):
+        raise ValidationError("thermal budget has inconsistent bank count")
+
+    solar_area = expected_budget["solar_area_m2"]
+    emitted_area = radiator_face_area(st)
+    target_area = expected_budget["target_radiator_area_m2"]
+    if not math.isclose(emitted_area, target_area, rel_tol=1e-8):
+        raise ValidationError("radiator area does not satisfy the thermal budget")
+    if not math.isclose(st.thermal.get("emitted_radiator_area_m2", -1.0),
+                        emitted_area, rel_tol=1e-8):
+        raise ValidationError("thermal budget has inconsistent emitted area")
+    area_ratio = emitted_area / solar_area
+    if not math.isclose(st.thermal.get("area_ratio", -1.0), area_ratio,
+                        rel_tol=1e-8):
+        raise ValidationError("thermal budget has inconsistent area ratio")
+    if not (expected_budget["minimum_area_ratio"] - 1e-8 <= area_ratio
+            <= expected_budget["maximum_area_ratio"] + 1e-8):
+        raise ValidationError("radiator area ratio is outside its thermal profile")
+
+    normal_tolerance = math.sin(math.radians(15.0))
+    for bank in banks:
+        data = bank.metadata
+        panel_indices = data.get("panel_part_indices", [])
+        panel_count = data.get("panel_count", 0)
+        if panel_count not in range(6, 9) or len(panel_indices) != panel_count:
+            raise ValidationError(f"{bank.id} needs 6-8 accordion panels")
+        if data.get("hinge_count") != panel_count - 1:
+            raise ValidationError(f"{bank.id} has an incomplete hinge sequence")
+        if data.get("panel_layer_count") != 1:
+            raise ValidationError(f"{bank.id} has duplicate radiator layers")
+        if not 5.0 <= data.get("panel_aspect_ratio", 0.0) <= 7.0:
+            raise ValidationError(f"{bank.id} has an implausible aspect ratio")
+        normal = vunit(data["normal"])
+        if abs(vdot(normal, vunit(st.sun_vector))) > normal_tolerance:
+            raise ValidationError(f"{bank.id} is not edge-on to the sun")
+        panels = [st.parts[index] for index in panel_indices]
+        if any(panel.kind != "radiator" or panel.assembly != bank.id
+               for panel in panels):
+            raise ValidationError(f"{bank.id} references a foreign panel")
+        normal_offsets = [vdot(panel.pos, normal) for panel in panels]
+        if max(normal_offsets) - min(normal_offsets) > max(0.02, st.meters * 0.0001):
+            raise ValidationError(f"{bank.id} has duplicate radiator layers")
+        bank_area = sum(panel.half[1] * 2.0 * panel.half[2] * 2.0
+                        for panel in panels)
+        if not math.isclose(bank_area, data.get("radiating_area_m2", -1.0),
+                            rel_tol=1e-8):
+            raise ValidationError(f"{bank.id} has inconsistent panel area")
+        hinges = [st.parts[index] for index in bank.part_indices
+                  if st.parts[index].kind == "radiator_hinge"]
+        if len(hinges) != panel_count - 1:
+            raise ValidationError(f"{bank.id} has missing visible hinges")
+
+
 def validate_connectivity(st: Station) -> None:
     if st.root_assembly is None or st.pressure_root is None:
         raise ValidationError("station needs structural and pressurized roots")
@@ -1666,6 +1834,8 @@ def validate_connectivity(st: Station) -> None:
         if not math.isclose(left["collecting_area"], right["collecting_area"],
                             rel_tol=1e-8):
             raise ValidationError(f"solar pair {pair} has mismatched area")
+
+    validate_radiators(st)
 
     occupied_port_owners = {joint_owners(st, joint)[0] for joint in st.joints
                             if joint.kind == "docked"}
@@ -1868,6 +2038,17 @@ def _fmt(v: float) -> str:
     return f"{v:.4f}".rstrip("0").rstrip(".") if v == v else "0"
 
 
+def godot_transform_values(part: Part, scale: float) -> tuple[float, ...]:
+    """Godot's text Transform3D constructor takes matrix rows, while Part.cols
+    stores world-space local axes (matrix columns). Transpose at this boundary."""
+    cols = part.cols
+    origin = tuple(value * scale for value in part.pos)
+    return (cols[0][0], cols[1][0], cols[2][0],
+            cols[0][1], cols[1][1], cols[2][1],
+            cols[0][2], cols[1][2], cols[2][2],
+            origin[0], origin[1], origin[2])
+
+
 def to_tscn(st: Station, scale: float) -> str:
     """Serialise to a Godot scene. `scale` converts design-metres -> game units."""
     ext = {}
@@ -1884,6 +2065,9 @@ def to_tscn(st: Station, scale: float) -> str:
         '[node name="Station" type="Node3D"]',
         f'metadata/sun_vector = Vector3({_fmt(sun[0])}, {_fmt(sun[1])}, {_fmt(sun[2])})',
         f'metadata/solar_family = "{st.solar_family}"',
+        f'metadata/thermal_profile = "{st.thermal["profile"]}"',
+        f'metadata/radiator_area_ratio = {_fmt(st.thermal["area_ratio"])}',
+        f'metadata/estimated_heat_load_kw = {_fmt(st.thermal["estimated_heat_load_kw"])}',
         f'metadata/organization_score = {_fmt(report.score)}', '']
     matname = {v: k for k, v in MAT.items()}
     for idx, p in enumerate(st.parts):
@@ -1919,11 +2103,8 @@ def to_tscn(st: Station, scale: float) -> str:
                      f'material = ExtResource("{mat_id}")',
                      f'radius = {_fmt(h[0])}', f'height = {_fmt(h[0]*2)}',
                      'radial_segments = 12', 'rings = 6', '']
-        c = p.cols
-        o = tuple(x * scale for x in p.pos)
-        tf = ", ".join(_fmt(v) for v in (
-            c[0][0], c[0][1], c[0][2], c[1][0], c[1][1], c[1][2],
-            c[2][0], c[2][1], c[2][2], o[0], o[1], o[2]))
+        tf = ", ".join(_fmt(value)
+                       for value in godot_transform_values(p, scale))
         nm = f"{p.kind.capitalize()}{idx}"
         nodes += [f'[node name="{nm}" type="MeshInstance3D" parent="."]',
                   f'transform = Transform3D({tf})',
@@ -1940,6 +2121,7 @@ def to_json(st: Station, scale: float) -> dict:
         "game_scale": scale, "counts": st.counts,
         "sun_vector": [round(value, 6) for value in st.sun_vector],
         "solar_family": st.solar_family,
+        "thermal": st.thermal,
         "station_root": st.root_assembly,
         "pressurized_root": st.pressure_root,
         "organization_score": report.score,
@@ -1970,7 +2152,9 @@ def to_json(st: Station, scale: float) -> dict:
                    "pos": [round(x, 3) for x in p.pos],
                    "half": [round(x, 3) for x in p.half],
                    "connector": p.connector, "assembly": p.assembly,
-                   "extra": p.extra}
+                   "extra": p.extra,
+                   "cols": [[round(value, 6) for value in axis]
+                            for axis in p.cols]}
                   for p in st.parts],
     }
 

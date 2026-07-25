@@ -62,8 +62,10 @@ truss/ring/dual-keel/power-tower/cylinder/hybrid.
   toward one local sun vector. Their narrow deployable spine, repeated hinge bays,
   and stowed-envelope logic must explain how the array could fold for launch.
   Rectangular blankets are the common family, not the only family.
-- **Radiators edge-on to the sun** — flat panels *perpendicular to the arrays*, on
-  the truss, never on the modules; banks of 2–3.
+- **Radiators edge-on to the sun** — long, narrow accordion wings
+  *perpendicular to the arrays*, mounted through a truss or structural boom rather
+  than pasted onto a crew module. Their area follows the station's thermal budget,
+  not its overall bounding length.
 - **High-gain dish antennas** on masts (1–4) + small whips.
 - **Docking nodes with multiple ports** — fat short cylinders, collars/cones, radial
   ports @90°; a berthed ship reads as "active."
@@ -90,14 +92,18 @@ truss/ring/dual-keel/power-tower/cylinder/hybrid.
 3. **Arrays come in symmetric pairs.** A pair shares one family, effective area,
    dimensions, and fold topology. The two deployment directions mirror each
    other while their active faces track the same local sun vector.
-4. **Radiators are perpendicular to the arrays** (edge-on to the sun) and ride the
-   truss, not the modules.
+4. **Radiators are perpendicular to the arrays** (edge-on to the sun), have a
+   connected structural boom, and use one deployable panel layer per bank. An
+   ordinary solar-powered station keeps total radiator face area near 25–35% of
+   total solar collecting area; a declared high-power profile may exceed that
+   band within its own validated limit.
 5. **Symmetry / balance.** Mass is roughly balanced about the centre; paired parts
    are mirrored.
 6. **Sensible counts (never none, never a swarm, never all-identical):**
    - Solar wing pairs scale with size: ~1 pair when small → several when huge.
      Minimum 1 pair (a station needs power). Cap so it doesn't become a pin-cushion.
-   - Antennas: 1–4. Docking ports: ≥1. Radiators scale with array count.
+   - Antennas: 1–4. Docking ports: ≥1. Radiator bank count follows required
+     thermal area and the maximum plausible area of one deployable wing.
    - Modules vary in length/diameter within a family; at least one accent part
      (cupola, dome, orange trim, green nav lights). Avoid a row of identical cans
      *and* avoid a junkyard of one-off shapes.
@@ -123,8 +129,9 @@ multiples; `--game-scale` converts metres → Godot units for the emitted `.tscn
 - Largest showcase ≈ **20× ISS** (~2.2 km) — long trussed spine or a ring hub,
   many wing pairs, radiator banks, multiple rings/domes.
 
-Power, radiator area, and part counts all grow with L (roughly with mass ∝ L³,
-softened so huge stations stay readable rather than exploding in part count).
+Power collection and part counts grow softly with L. Radiator area is derived
+from the generated solar collecting area, crewed-module load, and thermal profile;
+it is deliberately not a fixed fraction of L².
 
 ## 5. Generator contract (see `tools/station_gen.py --help`)
 
@@ -133,18 +140,19 @@ softened so huge stations stay readable rather than exploding in part count).
   output directory. Optional PNG previews can go to a separate preview directory.
 - **Pipeline:** seed RNG → choose one archetype or a routed hybrid recipe → build
   semantic assemblies and consume typed mounts → derive render parts → add
-  sun-tracking foldable arrays, radiator banks, signature parts, and module-owned
-  surface details → **validate** geometry, structural reachability, pressurised
-  reachability, joint attachment, solar topology/orientation, and content minimums
-  → calculate the report-only organisation index → serialise a Godot `.tscn` plus
-  a `.json` blueprint containing the assembly graph and diagnostic report.
+  sun-tracking foldable arrays, load-sized radiator banks, signature parts, and
+  module-owned surface details → **validate** geometry, structural reachability,
+  pressurised reachability, joint attachment, solar/radiator
+  topology/orientation/area, and content minimums → calculate the report-only
+  organisation index → serialise a Godot `.tscn` plus a `.json` blueprint
+  containing the assembly graph, thermal budget, and diagnostic report.
 - **Failure is explicit:** if constraints can't be met (e.g. min-panels won't fit
   the chosen size) the tool reports why and exits non-zero rather than emitting a
   clipping mess.
 
 ## 6. Current iteration (Taowu playtest feedback, 2026-07-25)
 
-The three requested changes are implemented in the generator and represented by
+The requested changes are implemented in the generator and represented by
 the five assets in `assets/station_review/`, with three-view PNGs in
 `docs/station_review/`.
 
@@ -160,6 +168,9 @@ the five assets in `assets/station_review/`, with three-view PNGs in
    builders around shared routed clearance slabs, including the canonical
    **dual-keel frame carrying a giant dome and a rotating ring**. Hybrids pass the
    same AABB + torus-annulus validation as single-form stations.
+4. **Reference-sized radiators.** The old near-square duplicate fins are replaced
+   by narrow 6–8-panel accordion banks. Their count and area come from the thermal
+   budget in §7.6, and both the budget and deployed topology are hard-validated.
 
 ## 7. Connected assemblies, foldable arrays, and organisation reporting
 
@@ -271,6 +282,12 @@ Tilt is functional, not arbitrary noise:
   variation without making arrays point toward unrelated light sources.
 - Clearance and collision checks use the final rotated geometry.
 
+`Part.cols` stores local axes as matrix columns. Godot's text
+`Transform3D(...)` syntax lists matrix rows, so scene serialisation transposes at
+that boundary. Blueprints retain the column axes and the Godot load check compares
+each instantiated basis/origin against them; this prevents a valid analytic boom
+from being rotated away from its panel in the emitted scene.
+
 When a generated asset is placed in a level, the station root can be rotated so
 its local sun vector points toward the real parent star. Runtime solar tracking
 may be added later without changing the generated assembly contract.
@@ -290,7 +307,47 @@ transforms the detail onto its surface. Windows use the existing dark ship
 material and status lights use the existing green material. No new colour seam or
 raw colour literal is introduced.
 
-### 7.6 Connected dual-keel observatory
+### 7.6 Radiator thermal budget and deployable geometry
+
+The ISS is the calibration reference, not a shape to copy literally. NASA reports
+approximately 1,300 m² of ISS radiator surface rejecting about 125 kW, and an ISS
+Heat Rejection System wing uses eight 2.7 × 3.4 m panels over a roughly 23 m
+deployed length. The resulting visual lesson is more important than the exact
+hardware: practical radiator wings are long, narrow, segmented, and sized from
+waste heat. Sources: [NASA ISS radiator-area comparison](https://ntrs.nasa.gov/api/citations/20250010635/downloads/MARVL%20ECI%20Continuation%20Review_STARK-V3.pdf)
+and [NASA HRS geometry](https://ntrs.nasa.gov/api/citations/20100033102/downloads/20100033102.pdf).
+
+The generator uses a deterministic, ISS-calibrated proxy budget:
+
+- Solar-supported equipment contributes **0.026 kW of rejected heat per m²** of
+  generated collecting area.
+- Each lab adds **0.60 kW**, each habitat **0.35 kW**, and other crewed volumes
+  **0.20 kW**.
+- A radiator face rejects **0.096 kW/m²**. This is a system-level visual-sizing
+  coefficient, not an ideal Stefan–Boltzmann material limit.
+- Power-tower forms use a **1.24× high-power load multiplier**. Ordinary target
+  area is clamped to **25–35%** of solar collecting area; high-power forms are
+  allowed up to **42%**.
+
+The blueprint records the profile, estimated heat load, target and emitted
+radiator area, solar area, and their ratio. Validation rejects missing or
+inconsistent budgets rather than silently emitting an oversized decorative slab.
+
+Each radiator bank is one two-sided deployable sheet rather than two
+near-coincident fins. It has:
+
+- a deployed aspect ratio of roughly **5:1–7:1**;
+- **6–8** rectangular panels separated by visible fold gaps;
+- hinge bars and one continuous backing spar connected to the station boom;
+- enough banks to carry the target area without making any one bank broader than
+  the reference silhouette; and
+- a panel normal perpendicular to the local sun vector.
+
+Full coolant routing and loop redundancy remain outside the visual generator's
+scope. A future redundant loop must be declared in metadata and represented as a
+separate connected bank, not as coincident geometry.
+
+### 7.7 Connected dual-keel observatory
 
 The large dome on the current dual-keel hybrid looks isolated because its narrow
 neck terminates at a structural frame edge. The replacement is a crewed
@@ -307,7 +364,7 @@ rather than an unsupported full sphere. Validation requires both a pressurised
 path to the core and an adequate structural path. The rotating ring is routed
 around this trunk instead of visually replacing it.
 
-### 7.7 Organisation score
+### 7.8 Organisation score
 
 The blueprint exposes a deterministic **organization_score** from 0–100. Do not
 call it SOI: that abbreviation already means sphere of influence in the game.

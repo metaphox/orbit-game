@@ -2,6 +2,20 @@
 
 Scratch note for the /loop task (procedural station generator). Delete when done.
 
+## Done (iteration 16) — thermal-budget radiator pass
+- Replaced the duplicated, nearly square radiator fins with one connected accordion sheet per
+  bank: 6–8 cream panels, visible dark hinges, a continuous spar, and a 5:1–7:1 face aspect.
+- Radiator area now follows an explicit ISS-calibrated thermal proxy based on generated solar
+  collecting area plus crewed-volume load. Ordinary forms validate at 25–35% radiator/solar
+  area; power-tower forms use a bounded 1.24× high-power profile with a 42% ceiling.
+- The JSON blueprint and Godot root metadata expose the thermal profile, estimated heat load,
+  emitted/target radiator area, bank count, and area ratio. Validation rejects inconsistent
+  budgets, duplicate panel layers, missing hinges, bad aspect ratios, and sun-facing radiators.
+- Regenerated the five review scenes/blueprints/previews. Their area ratios are 27.2–33.6%, and
+  the review set still covers all four solar families plus all three hybrid recipes.
+- Verification: 23/23 Python tests, 162-station self-test, 15/15 Godot scene/basis
+  checks, 289/289 project tests with the coverage guard intact, and a warning-free debug import.
+
 ## Done (iteration 15) — connected station graph + foldable arrays
 - The generator now builds semantic **assemblies**, compatible **mounts**, and typed
   **joints**, then hard-validates structural/pressurised reachability and physical connector
@@ -16,8 +30,11 @@ Scratch note for the /loop task (procedural station generator). Delete when done
 - JSON blueprints now expose assemblies, mounts, joints, requested/resolved seeds, sun vector,
   solar family, and a deterministic 0–100 organisation report with components and penalties.
   It remains report-only pending human calibration; valid-candidate ranking is not enabled.
+- Godot text transforms now transpose the generator's axis columns into the row-ordered
+  `Transform3D(...)` scene syntax. The load check compares emitted node bases/origins with JSON,
+  preventing tilted booms, spines, or ribs from rotating away from their analytic attachments.
 - Five review scenes/blueprints/previews were regenerated to cover all four array families.
-  Verification: 20/20 Python tests, 162-station self-test, and 15/15 Godot scenes load.
+  Verification: 21/21 Python tests, 162-station self-test, and 15/15 Godot scenes load.
 
 ## Done (iteration 14) — hybrid + variety playtest pass
 - **Thin deployed surfaces:** solar blanket half-thickness is capped at 0.18 design metres and
@@ -173,7 +190,7 @@ Scratch note for the /loop task (procedural station generator). Delete when done
 
 ## How to run the checks
 - `python3 tools/station_gen.py --selftest`  → 162-station validation sweep
-- `python3 tools/test_station_gen.py`         → 20 unit tests
+- `python3 tools/test_station_gen.py`         → 23 unit tests
 - `python3 tools/station_gen.py --count 10 --spread --preview --out /tmp/s`  → images to eyeball
 - `godot --headless --script tools/station_load_check.gd`  → all scenes load
 

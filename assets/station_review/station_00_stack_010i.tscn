@@ -1,4 +1,4 @@
-[gd_scene load_steps=174 format=3]
+[gd_scene load_steps=196 format=3]
 
 [ext_resource type="Material" path="res://src/ui/world/materials/ship_hull_material.tres" id="1_hull"]
 [ext_resource type="Material" path="res://src/ui/world/materials/ship_dark_material.tres" id="2_dark"]
@@ -644,96 +644,191 @@ size = Vector3(1.9582, 0.0229, 0.0154)
 
 [sub_resource type="BoxMesh" id="m148"]
 material = ExtResource("2_dark")
-size = Vector3(0.0641, 5.1913, 3.815)
+size = Vector3(0.0299, 7.769, 0.0299)
 
 [sub_resource type="BoxMesh" id="m149"]
 material = ExtResource("1_hull")
-size = Vector3(0.0458, 5.1913, 3.5098)
+size = Vector3(0.014, 1.0831, 1.2478)
 
 [sub_resource type="BoxMesh" id="m150"]
-material = ExtResource("1_hull")
-size = Vector3(0.0458, 5.1913, 3.5098)
+material = ExtResource("2_dark")
+size = Vector3(0.0359, 0.0112, 1.2727)
 
-[sub_resource type="CylinderMesh" id="m151"]
+[sub_resource type="BoxMesh" id="m151"]
+material = ExtResource("1_hull")
+size = Vector3(0.014, 1.0831, 1.2478)
+
+[sub_resource type="BoxMesh" id="m152"]
+material = ExtResource("2_dark")
+size = Vector3(0.0359, 0.0112, 1.2727)
+
+[sub_resource type="BoxMesh" id="m153"]
+material = ExtResource("1_hull")
+size = Vector3(0.014, 1.0831, 1.2478)
+
+[sub_resource type="BoxMesh" id="m154"]
+material = ExtResource("2_dark")
+size = Vector3(0.0359, 0.0112, 1.2727)
+
+[sub_resource type="BoxMesh" id="m155"]
+material = ExtResource("1_hull")
+size = Vector3(0.014, 1.0831, 1.2478)
+
+[sub_resource type="BoxMesh" id="m156"]
+material = ExtResource("2_dark")
+size = Vector3(0.0359, 0.0112, 1.2727)
+
+[sub_resource type="BoxMesh" id="m157"]
+material = ExtResource("1_hull")
+size = Vector3(0.014, 1.0831, 1.2478)
+
+[sub_resource type="BoxMesh" id="m158"]
+material = ExtResource("2_dark")
+size = Vector3(0.0359, 0.0112, 1.2727)
+
+[sub_resource type="BoxMesh" id="m159"]
+material = ExtResource("1_hull")
+size = Vector3(0.014, 1.0831, 1.2478)
+
+[sub_resource type="BoxMesh" id="m160"]
+material = ExtResource("2_dark")
+size = Vector3(0.0359, 0.0112, 1.2727)
+
+[sub_resource type="BoxMesh" id="m161"]
+material = ExtResource("1_hull")
+size = Vector3(0.014, 1.0831, 1.2478)
+
+[sub_resource type="CylinderMesh" id="m162"]
 material = ExtResource("2_dark")
 top_radius = 0.0589
 bottom_radius = 0.0589
-height = 1.0299
+height = 1.1034
 radial_segments = 12
 rings = 1
 
-[sub_resource type="CylinderMesh" id="m152"]
+[sub_resource type="BoxMesh" id="m163"]
+material = ExtResource("2_dark")
+size = Vector3(0.0293, 7.9206, 0.0293)
+
+[sub_resource type="BoxMesh" id="m164"]
+material = ExtResource("1_hull")
+size = Vector3(0.014, 1.1053, 1.2227)
+
+[sub_resource type="BoxMesh" id="m165"]
+material = ExtResource("2_dark")
+size = Vector3(0.0352, 0.011, 1.2472)
+
+[sub_resource type="BoxMesh" id="m166"]
+material = ExtResource("1_hull")
+size = Vector3(0.014, 1.1053, 1.2227)
+
+[sub_resource type="BoxMesh" id="m167"]
+material = ExtResource("2_dark")
+size = Vector3(0.0352, 0.011, 1.2472)
+
+[sub_resource type="BoxMesh" id="m168"]
+material = ExtResource("1_hull")
+size = Vector3(0.014, 1.1053, 1.2227)
+
+[sub_resource type="BoxMesh" id="m169"]
+material = ExtResource("2_dark")
+size = Vector3(0.0352, 0.011, 1.2472)
+
+[sub_resource type="BoxMesh" id="m170"]
+material = ExtResource("1_hull")
+size = Vector3(0.014, 1.1053, 1.2227)
+
+[sub_resource type="BoxMesh" id="m171"]
+material = ExtResource("2_dark")
+size = Vector3(0.0352, 0.011, 1.2472)
+
+[sub_resource type="BoxMesh" id="m172"]
+material = ExtResource("1_hull")
+size = Vector3(0.014, 1.1053, 1.2227)
+
+[sub_resource type="BoxMesh" id="m173"]
+material = ExtResource("2_dark")
+size = Vector3(0.0352, 0.011, 1.2472)
+
+[sub_resource type="BoxMesh" id="m174"]
+material = ExtResource("1_hull")
+size = Vector3(0.014, 1.1053, 1.2227)
+
+[sub_resource type="BoxMesh" id="m175"]
+material = ExtResource("2_dark")
+size = Vector3(0.0352, 0.011, 1.2472)
+
+[sub_resource type="BoxMesh" id="m176"]
+material = ExtResource("1_hull")
+size = Vector3(0.014, 1.1053, 1.2227)
+
+[sub_resource type="CylinderMesh" id="m177"]
+material = ExtResource("2_dark")
+top_radius = 0.0589
+bottom_radius = 0.0589
+height = 1.1034
+radial_segments = 12
+rings = 1
+
+[sub_resource type="CylinderMesh" id="m178"]
 material = ExtResource("2_dark")
 top_radius = 0.0368
 bottom_radius = 0.0368
-height = 0.6658
+height = 0.8752
 radial_segments = 12
 rings = 1
 
-[sub_resource type="CylinderMesh" id="m153"]
+[sub_resource type="CylinderMesh" id="m179"]
 material = ExtResource("1_hull")
-top_radius = 0.056
-bottom_radius = 0.3112
+top_radius = 0.0662
+bottom_radius = 0.3676
 height = 0.1177
 radial_segments = 12
 rings = 1
 
-[sub_resource type="BoxMesh" id="m154"]
+[sub_resource type="BoxMesh" id="m180"]
 material = ExtResource("2_dark")
 size = Vector3(0.2354, 0.0265, 0.1618)
 
-[sub_resource type="BoxMesh" id="m155"]
+[sub_resource type="BoxMesh" id="m181"]
 material = ExtResource("2_dark")
 size = Vector3(0.2354, 0.0265, 0.1618)
 
-[sub_resource type="BoxMesh" id="m156"]
-material = ExtResource("2_dark")
-size = Vector3(0.2354, 0.0265, 0.1618)
+[sub_resource type="SphereMesh" id="m182"]
+material = ExtResource("5_green")
+radius = 0.0275
+height = 0.055
+radial_segments = 12
+rings = 6
 
-[sub_resource type="BoxMesh" id="m157"]
-material = ExtResource("2_dark")
-size = Vector3(0.2103, 0.0237, 0.1446)
-
-[sub_resource type="BoxMesh" id="m158"]
-material = ExtResource("2_dark")
-size = Vector3(0.2103, 0.0237, 0.1446)
-
-[sub_resource type="BoxMesh" id="m159"]
+[sub_resource type="BoxMesh" id="m183"]
 material = ExtResource("2_dark")
 size = Vector3(0.2103, 0.0237, 0.1446)
 
-[sub_resource type="BoxMesh" id="m160"]
+[sub_resource type="BoxMesh" id="m184"]
 material = ExtResource("2_dark")
 size = Vector3(0.2103, 0.0237, 0.1446)
 
-[sub_resource type="BoxMesh" id="m161"]
-material = ExtResource("2_dark")
-size = Vector3(0.2103, 0.0237, 0.1446)
-
-[sub_resource type="SphereMesh" id="m162"]
+[sub_resource type="SphereMesh" id="m185"]
 material = ExtResource("5_green")
 radius = 0.0246
 height = 0.0492
 radial_segments = 12
 rings = 6
 
-[sub_resource type="BoxMesh" id="m163"]
+[sub_resource type="BoxMesh" id="m186"]
 material = ExtResource("2_dark")
 size = Vector3(0.2242, 0.0252, 0.1541)
 
-[sub_resource type="BoxMesh" id="m164"]
+[sub_resource type="BoxMesh" id="m187"]
 material = ExtResource("2_dark")
 size = Vector3(0.2242, 0.0252, 0.1541)
 
-[sub_resource type="BoxMesh" id="m165"]
+[sub_resource type="BoxMesh" id="m188"]
 material = ExtResource("2_dark")
 size = Vector3(0.2242, 0.0252, 0.1541)
 
-[sub_resource type="BoxMesh" id="m166"]
-material = ExtResource("2_dark")
-size = Vector3(0.2242, 0.0252, 0.1541)
-
-[sub_resource type="SphereMesh" id="m167"]
+[sub_resource type="SphereMesh" id="m189"]
 material = ExtResource("5_green")
 radius = 0.0262
 height = 0.0524
@@ -743,34 +838,37 @@ rings = 6
 [node name="Station" type="Node3D"]
 metadata/sun_vector = Vector3(0, 0.9568, -0.2906)
 metadata/solar_family = "accordion_rect"
-metadata/organization_score = 95.9
+metadata/thermal_profile = "ordinary"
+metadata/radiator_area_ratio = 0.3071
+metadata/estimated_heat_load_kw = 14.8278
+metadata/organization_score = 96.9
 
 [node name="Lab0" type="MeshInstance3D" parent="."]
-transform = Transform3D(0, 1, 0, -1, 0, 0, 0, 0, 1, -8.0106, 0, 0)
+transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, -8.0106, 0, 0)
 mesh = SubResource("m0")
 
 [node name="Trim1" type="MeshInstance3D" parent="."]
-transform = Transform3D(0, 1, 0, -1, 0, 0, 0, 0, 1, -8.0106, 0, 0)
+transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, -8.0106, 0, 0)
 mesh = SubResource("m1")
 
 [node name="Hab2" type="MeshInstance3D" parent="."]
-transform = Transform3D(0, 1, 0, -1, 0, 0, 0, 0, 1, -0.9233, 0, 0)
+transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, -0.9233, 0, 0)
 mesh = SubResource("m2")
 
 [node name="Lab3" type="MeshInstance3D" parent="."]
-transform = Transform3D(0, 1, 0, -1, 0, 0, 0, 0, 1, 7.0873, 0, 0)
+transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 7.0873, 0, 0)
 mesh = SubResource("m3")
 
 [node name="Trim4" type="MeshInstance3D" parent="."]
-transform = Transform3D(0, 1, 0, -1, 0, 0, 0, 0, 1, 7.0873, 0, 0)
+transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 7.0873, 0, 0)
 mesh = SubResource("m4")
 
 [node name="Port5" type="MeshInstance3D" parent="."]
-transform = Transform3D(0, 1, 0, -1, 0, 0, 0, 0, 1, -10.8004, 0, 0)
+transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, -10.8004, 0, 0)
 mesh = SubResource("m5")
 
 [node name="Port6" type="MeshInstance3D" parent="."]
-transform = Transform3D(0, 1, 0, -1, 0, 0, 0, 0, 1, 10.8004, 0, 0)
+transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 10.8004, 0, 0)
 mesh = SubResource("m6")
 
 [node name="Light7" type="MeshInstance3D" parent="."]
@@ -802,617 +900,705 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.3579, -0.7439, 0)
 mesh = SubResource("m13")
 
 [node name="Solar_boom14" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -8.5179, -0.3462, -0.9061)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -8.5179, -0.3462, -0.9061)
 mesh = SubResource("m14")
 
 [node name="Solar_spine15" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -8.5505, -2.4679, -6.459)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -8.5505, -2.4679, -6.459)
 mesh = SubResource("m15")
 
 [node name="Solar_spine16" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -8.4852, -2.4679, -6.459)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -8.4852, -2.4679, -6.459)
 mesh = SubResource("m16")
 
 [node name="Panel17" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -9.038, -0.8474, -2.2178)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -9.038, -0.8474, -2.2178)
 mesh = SubResource("m17")
 
 [node name="Panel18" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -9.038, -1.1715, -3.066)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -9.038, -1.1715, -3.066)
 mesh = SubResource("m18")
 
 [node name="Panel19" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -9.038, -1.4956, -3.9143)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -9.038, -1.4956, -3.9143)
 mesh = SubResource("m19")
 
 [node name="Panel20" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -9.038, -1.8197, -4.7625)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -9.038, -1.8197, -4.7625)
 mesh = SubResource("m20")
 
 [node name="Panel21" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -9.038, -2.1438, -5.6107)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -9.038, -2.1438, -5.6107)
 mesh = SubResource("m21")
 
 [node name="Panel22" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -9.038, -2.4679, -6.459)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -9.038, -2.4679, -6.459)
 mesh = SubResource("m22")
 
 [node name="Panel23" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -9.038, -2.792, -7.3072)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -9.038, -2.792, -7.3072)
 mesh = SubResource("m23")
 
 [node name="Panel24" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -9.038, -3.1161, -8.1555)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -9.038, -3.1161, -8.1555)
 mesh = SubResource("m24")
 
 [node name="Panel25" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -9.038, -3.4402, -9.0037)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -9.038, -3.4402, -9.0037)
 mesh = SubResource("m25")
 
 [node name="Panel26" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -9.038, -3.7643, -9.852)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -9.038, -3.7643, -9.852)
 mesh = SubResource("m26")
 
 [node name="Panel27" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -9.038, -4.0883, -10.7002)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -9.038, -4.0883, -10.7002)
 mesh = SubResource("m27")
 
 [node name="Panel28" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -7.9977, -0.8474, -2.2178)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -7.9977, -0.8474, -2.2178)
 mesh = SubResource("m28")
 
 [node name="Panel29" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -7.9977, -1.1715, -3.066)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -7.9977, -1.1715, -3.066)
 mesh = SubResource("m29")
 
 [node name="Panel30" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -7.9977, -1.4956, -3.9143)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -7.9977, -1.4956, -3.9143)
 mesh = SubResource("m30")
 
 [node name="Panel31" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -7.9977, -1.8197, -4.7625)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -7.9977, -1.8197, -4.7625)
 mesh = SubResource("m31")
 
 [node name="Panel32" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -7.9977, -2.1438, -5.6107)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -7.9977, -2.1438, -5.6107)
 mesh = SubResource("m32")
 
 [node name="Panel33" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -7.9977, -2.4679, -6.459)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -7.9977, -2.4679, -6.459)
 mesh = SubResource("m33")
 
 [node name="Panel34" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -7.9977, -2.792, -7.3072)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -7.9977, -2.792, -7.3072)
 mesh = SubResource("m34")
 
 [node name="Panel35" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -7.9977, -3.1161, -8.1555)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -7.9977, -3.1161, -8.1555)
 mesh = SubResource("m35")
 
 [node name="Panel36" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -7.9977, -3.4402, -9.0037)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -7.9977, -3.4402, -9.0037)
 mesh = SubResource("m36")
 
 [node name="Panel37" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -7.9977, -3.7643, -9.852)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -7.9977, -3.7643, -9.852)
 mesh = SubResource("m37")
 
 [node name="Panel38" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -7.9977, -4.0883, -10.7002)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -7.9977, -4.0883, -10.7002)
 mesh = SubResource("m38")
 
 [node name="Solar_hinge39" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -8.5179, -1.0094, -2.6419)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -8.5179, -1.0094, -2.6419)
 mesh = SubResource("m39")
 
 [node name="Solar_hinge40" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -8.5179, -1.3335, -3.4901)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -8.5179, -1.3335, -3.4901)
 mesh = SubResource("m40")
 
 [node name="Solar_hinge41" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -8.5179, -1.6576, -4.3384)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -8.5179, -1.6576, -4.3384)
 mesh = SubResource("m41")
 
 [node name="Solar_hinge42" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -8.5179, -1.9817, -5.1866)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -8.5179, -1.9817, -5.1866)
 mesh = SubResource("m42")
 
 [node name="Solar_hinge43" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -8.5179, -2.3058, -6.0349)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -8.5179, -2.3058, -6.0349)
 mesh = SubResource("m43")
 
 [node name="Solar_hinge44" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -8.5179, -2.6299, -6.8831)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -8.5179, -2.6299, -6.8831)
 mesh = SubResource("m44")
 
 [node name="Solar_hinge45" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -8.5179, -2.954, -7.7313)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -8.5179, -2.954, -7.7313)
 mesh = SubResource("m45")
 
 [node name="Solar_hinge46" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -8.5179, -3.2781, -8.5796)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -8.5179, -3.2781, -8.5796)
 mesh = SubResource("m46")
 
 [node name="Solar_hinge47" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -8.5179, -3.6022, -9.4278)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -8.5179, -3.6022, -9.4278)
 mesh = SubResource("m47")
 
 [node name="Solar_hinge48" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -8.5179, -3.9263, -10.2761)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -8.5179, -3.9263, -10.2761)
 mesh = SubResource("m48")
 
 [node name="Solar_boom49" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -8.5179, 0.3462, 0.9061)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -8.5179, 0.3462, 0.9061)
 mesh = SubResource("m49")
 
 [node name="Solar_spine50" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -8.5505, 2.4679, 6.459)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -8.5505, 2.4679, 6.459)
 mesh = SubResource("m50")
 
 [node name="Solar_spine51" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -8.4852, 2.4679, 6.459)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -8.4852, 2.4679, 6.459)
 mesh = SubResource("m51")
 
 [node name="Panel52" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -9.038, 0.8474, 2.2178)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -9.038, 0.8474, 2.2178)
 mesh = SubResource("m52")
 
 [node name="Panel53" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -9.038, 1.1715, 3.066)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -9.038, 1.1715, 3.066)
 mesh = SubResource("m53")
 
 [node name="Panel54" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -9.038, 1.4956, 3.9143)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -9.038, 1.4956, 3.9143)
 mesh = SubResource("m54")
 
 [node name="Panel55" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -9.038, 1.8197, 4.7625)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -9.038, 1.8197, 4.7625)
 mesh = SubResource("m55")
 
 [node name="Panel56" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -9.038, 2.1438, 5.6107)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -9.038, 2.1438, 5.6107)
 mesh = SubResource("m56")
 
 [node name="Panel57" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -9.038, 2.4679, 6.459)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -9.038, 2.4679, 6.459)
 mesh = SubResource("m57")
 
 [node name="Panel58" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -9.038, 2.792, 7.3072)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -9.038, 2.792, 7.3072)
 mesh = SubResource("m58")
 
 [node name="Panel59" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -9.038, 3.1161, 8.1555)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -9.038, 3.1161, 8.1555)
 mesh = SubResource("m59")
 
 [node name="Panel60" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -9.038, 3.4402, 9.0037)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -9.038, 3.4402, 9.0037)
 mesh = SubResource("m60")
 
 [node name="Panel61" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -9.038, 3.7643, 9.852)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -9.038, 3.7643, 9.852)
 mesh = SubResource("m61")
 
 [node name="Panel62" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -9.038, 4.0883, 10.7002)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -9.038, 4.0883, 10.7002)
 mesh = SubResource("m62")
 
 [node name="Panel63" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -7.9977, 0.8474, 2.2178)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -7.9977, 0.8474, 2.2178)
 mesh = SubResource("m63")
 
 [node name="Panel64" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -7.9977, 1.1715, 3.066)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -7.9977, 1.1715, 3.066)
 mesh = SubResource("m64")
 
 [node name="Panel65" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -7.9977, 1.4956, 3.9143)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -7.9977, 1.4956, 3.9143)
 mesh = SubResource("m65")
 
 [node name="Panel66" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -7.9977, 1.8197, 4.7625)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -7.9977, 1.8197, 4.7625)
 mesh = SubResource("m66")
 
 [node name="Panel67" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -7.9977, 2.1438, 5.6107)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -7.9977, 2.1438, 5.6107)
 mesh = SubResource("m67")
 
 [node name="Panel68" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -7.9977, 2.4679, 6.459)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -7.9977, 2.4679, 6.459)
 mesh = SubResource("m68")
 
 [node name="Panel69" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -7.9977, 2.792, 7.3072)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -7.9977, 2.792, 7.3072)
 mesh = SubResource("m69")
 
 [node name="Panel70" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -7.9977, 3.1161, 8.1555)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -7.9977, 3.1161, 8.1555)
 mesh = SubResource("m70")
 
 [node name="Panel71" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -7.9977, 3.4402, 9.0037)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -7.9977, 3.4402, 9.0037)
 mesh = SubResource("m71")
 
 [node name="Panel72" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -7.9977, 3.7643, 9.852)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -7.9977, 3.7643, 9.852)
 mesh = SubResource("m72")
 
 [node name="Panel73" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -7.9977, 4.0883, 10.7002)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -7.9977, 4.0883, 10.7002)
 mesh = SubResource("m73")
 
 [node name="Solar_hinge74" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -8.5179, 1.0094, 2.6419)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -8.5179, 1.0094, 2.6419)
 mesh = SubResource("m74")
 
 [node name="Solar_hinge75" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -8.5179, 1.3335, 3.4901)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -8.5179, 1.3335, 3.4901)
 mesh = SubResource("m75")
 
 [node name="Solar_hinge76" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -8.5179, 1.6576, 4.3384)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -8.5179, 1.6576, 4.3384)
 mesh = SubResource("m76")
 
 [node name="Solar_hinge77" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -8.5179, 1.9817, 5.1866)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -8.5179, 1.9817, 5.1866)
 mesh = SubResource("m77")
 
 [node name="Solar_hinge78" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -8.5179, 2.3058, 6.0349)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -8.5179, 2.3058, 6.0349)
 mesh = SubResource("m78")
 
 [node name="Solar_hinge79" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -8.5179, 2.6299, 6.8831)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -8.5179, 2.6299, 6.8831)
 mesh = SubResource("m79")
 
 [node name="Solar_hinge80" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -8.5179, 2.954, 7.7313)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -8.5179, 2.954, 7.7313)
 mesh = SubResource("m80")
 
 [node name="Solar_hinge81" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -8.5179, 3.2781, 8.5796)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -8.5179, 3.2781, 8.5796)
 mesh = SubResource("m81")
 
 [node name="Solar_hinge82" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -8.5179, 3.6022, 9.4278)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -8.5179, 3.6022, 9.4278)
 mesh = SubResource("m82")
 
 [node name="Solar_hinge83" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9341, -0.3569, 0, 0.3569, 0.9341, -8.5179, 3.9263, 10.2761)
+transform = Transform3D(1, 0, 0, 0, 0.9341, 0.3569, 0, -0.3569, 0.9341, -8.5179, 3.9263, 10.2761)
 mesh = SubResource("m83")
 
 [node name="Solar_boom84" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 8.5179, -0.3862, -0.8898)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 8.5179, -0.3862, -0.8898)
 mesh = SubResource("m84")
 
 [node name="Solar_spine85" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 8.4852, -2.5132, -5.7902)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 8.4852, -2.5132, -5.7902)
 mesh = SubResource("m85")
 
 [node name="Solar_spine86" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 8.5505, -2.5132, -5.7902)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 8.5505, -2.5132, -5.7902)
 mesh = SubResource("m86")
 
 [node name="Panel87" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 7.9977, -0.9403, -2.1662)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 7.9977, -0.9403, -2.1662)
 mesh = SubResource("m87")
 
 [node name="Panel88" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 7.9977, -1.2898, -2.9715)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 7.9977, -1.2898, -2.9715)
 mesh = SubResource("m88")
 
 [node name="Panel89" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 7.9977, -1.6394, -3.7769)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 7.9977, -1.6394, -3.7769)
 mesh = SubResource("m89")
 
 [node name="Panel90" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 7.9977, -1.9889, -4.5822)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 7.9977, -1.9889, -4.5822)
 mesh = SubResource("m90")
 
 [node name="Panel91" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 7.9977, -2.3385, -5.3875)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 7.9977, -2.3385, -5.3875)
 mesh = SubResource("m91")
 
 [node name="Panel92" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 7.9977, -2.688, -6.1929)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 7.9977, -2.688, -6.1929)
 mesh = SubResource("m92")
 
 [node name="Panel93" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 7.9977, -3.0376, -6.9982)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 7.9977, -3.0376, -6.9982)
 mesh = SubResource("m93")
 
 [node name="Panel94" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 7.9977, -3.3871, -7.8035)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 7.9977, -3.3871, -7.8035)
 mesh = SubResource("m94")
 
 [node name="Panel95" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 7.9977, -3.7367, -8.6088)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 7.9977, -3.7367, -8.6088)
 mesh = SubResource("m95")
 
 [node name="Panel96" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 7.9977, -4.0862, -9.4142)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 7.9977, -4.0862, -9.4142)
 mesh = SubResource("m96")
 
 [node name="Panel97" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 9.038, -0.9403, -2.1662)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 9.038, -0.9403, -2.1662)
 mesh = SubResource("m97")
 
 [node name="Panel98" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 9.038, -1.2898, -2.9715)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 9.038, -1.2898, -2.9715)
 mesh = SubResource("m98")
 
 [node name="Panel99" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 9.038, -1.6394, -3.7769)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 9.038, -1.6394, -3.7769)
 mesh = SubResource("m99")
 
 [node name="Panel100" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 9.038, -1.9889, -4.5822)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 9.038, -1.9889, -4.5822)
 mesh = SubResource("m100")
 
 [node name="Panel101" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 9.038, -2.3385, -5.3875)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 9.038, -2.3385, -5.3875)
 mesh = SubResource("m101")
 
 [node name="Panel102" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 9.038, -2.688, -6.1929)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 9.038, -2.688, -6.1929)
 mesh = SubResource("m102")
 
 [node name="Panel103" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 9.038, -3.0376, -6.9982)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 9.038, -3.0376, -6.9982)
 mesh = SubResource("m103")
 
 [node name="Panel104" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 9.038, -3.3871, -7.8035)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 9.038, -3.3871, -7.8035)
 mesh = SubResource("m104")
 
 [node name="Panel105" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 9.038, -3.7367, -8.6088)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 9.038, -3.7367, -8.6088)
 mesh = SubResource("m105")
 
 [node name="Panel106" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 9.038, -4.0862, -9.4142)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 9.038, -4.0862, -9.4142)
 mesh = SubResource("m106")
 
 [node name="Solar_hinge107" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 8.5179, -1.115, -2.5689)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 8.5179, -1.115, -2.5689)
 mesh = SubResource("m107")
 
 [node name="Solar_hinge108" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 8.5179, -1.4646, -3.3742)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 8.5179, -1.4646, -3.3742)
 mesh = SubResource("m108")
 
 [node name="Solar_hinge109" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 8.5179, -1.8141, -4.1795)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 8.5179, -1.8141, -4.1795)
 mesh = SubResource("m109")
 
 [node name="Solar_hinge110" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 8.5179, -2.1637, -4.9849)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 8.5179, -2.1637, -4.9849)
 mesh = SubResource("m110")
 
 [node name="Solar_hinge111" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 8.5179, -2.5132, -5.7902)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 8.5179, -2.5132, -5.7902)
 mesh = SubResource("m111")
 
 [node name="Solar_hinge112" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 8.5179, -2.8628, -6.5955)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 8.5179, -2.8628, -6.5955)
 mesh = SubResource("m112")
 
 [node name="Solar_hinge113" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 8.5179, -3.2124, -7.4008)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 8.5179, -3.2124, -7.4008)
 mesh = SubResource("m113")
 
 [node name="Solar_hinge114" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 8.5179, -3.5619, -8.2062)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 8.5179, -3.5619, -8.2062)
 mesh = SubResource("m114")
 
 [node name="Solar_hinge115" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 8.5179, -3.9115, -9.0115)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 8.5179, -3.9115, -9.0115)
 mesh = SubResource("m115")
 
 [node name="Solar_boom116" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 8.5179, 0.3862, 0.8898)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 8.5179, 0.3862, 0.8898)
 mesh = SubResource("m116")
 
 [node name="Solar_spine117" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 8.4852, 2.5132, 5.7902)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 8.4852, 2.5132, 5.7902)
 mesh = SubResource("m117")
 
 [node name="Solar_spine118" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 8.5505, 2.5132, 5.7902)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 8.5505, 2.5132, 5.7902)
 mesh = SubResource("m118")
 
 [node name="Panel119" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 7.9977, 0.9403, 2.1662)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 7.9977, 0.9403, 2.1662)
 mesh = SubResource("m119")
 
 [node name="Panel120" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 7.9977, 1.2898, 2.9715)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 7.9977, 1.2898, 2.9715)
 mesh = SubResource("m120")
 
 [node name="Panel121" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 7.9977, 1.6394, 3.7769)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 7.9977, 1.6394, 3.7769)
 mesh = SubResource("m121")
 
 [node name="Panel122" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 7.9977, 1.9889, 4.5822)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 7.9977, 1.9889, 4.5822)
 mesh = SubResource("m122")
 
 [node name="Panel123" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 7.9977, 2.3385, 5.3875)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 7.9977, 2.3385, 5.3875)
 mesh = SubResource("m123")
 
 [node name="Panel124" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 7.9977, 2.688, 6.1929)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 7.9977, 2.688, 6.1929)
 mesh = SubResource("m124")
 
 [node name="Panel125" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 7.9977, 3.0376, 6.9982)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 7.9977, 3.0376, 6.9982)
 mesh = SubResource("m125")
 
 [node name="Panel126" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 7.9977, 3.3871, 7.8035)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 7.9977, 3.3871, 7.8035)
 mesh = SubResource("m126")
 
 [node name="Panel127" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 7.9977, 3.7367, 8.6088)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 7.9977, 3.7367, 8.6088)
 mesh = SubResource("m127")
 
 [node name="Panel128" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 7.9977, 4.0862, 9.4142)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 7.9977, 4.0862, 9.4142)
 mesh = SubResource("m128")
 
 [node name="Panel129" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 9.038, 0.9403, 2.1662)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 9.038, 0.9403, 2.1662)
 mesh = SubResource("m129")
 
 [node name="Panel130" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 9.038, 1.2898, 2.9715)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 9.038, 1.2898, 2.9715)
 mesh = SubResource("m130")
 
 [node name="Panel131" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 9.038, 1.6394, 3.7769)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 9.038, 1.6394, 3.7769)
 mesh = SubResource("m131")
 
 [node name="Panel132" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 9.038, 1.9889, 4.5822)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 9.038, 1.9889, 4.5822)
 mesh = SubResource("m132")
 
 [node name="Panel133" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 9.038, 2.3385, 5.3875)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 9.038, 2.3385, 5.3875)
 mesh = SubResource("m133")
 
 [node name="Panel134" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 9.038, 2.688, 6.1929)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 9.038, 2.688, 6.1929)
 mesh = SubResource("m134")
 
 [node name="Panel135" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 9.038, 3.0376, 6.9982)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 9.038, 3.0376, 6.9982)
 mesh = SubResource("m135")
 
 [node name="Panel136" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 9.038, 3.3871, 7.8035)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 9.038, 3.3871, 7.8035)
 mesh = SubResource("m136")
 
 [node name="Panel137" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 9.038, 3.7367, 8.6088)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 9.038, 3.7367, 8.6088)
 mesh = SubResource("m137")
 
 [node name="Panel138" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 9.038, 4.0862, 9.4142)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 9.038, 4.0862, 9.4142)
 mesh = SubResource("m138")
 
 [node name="Solar_hinge139" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 8.5179, 1.115, 2.5689)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 8.5179, 1.115, 2.5689)
 mesh = SubResource("m139")
 
 [node name="Solar_hinge140" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 8.5179, 1.4646, 3.3742)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 8.5179, 1.4646, 3.3742)
 mesh = SubResource("m140")
 
 [node name="Solar_hinge141" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 8.5179, 1.8141, 4.1795)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 8.5179, 1.8141, 4.1795)
 mesh = SubResource("m141")
 
 [node name="Solar_hinge142" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 8.5179, 2.1637, 4.9849)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 8.5179, 2.1637, 4.9849)
 mesh = SubResource("m142")
 
 [node name="Solar_hinge143" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 8.5179, 2.5132, 5.7902)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 8.5179, 2.5132, 5.7902)
 mesh = SubResource("m143")
 
 [node name="Solar_hinge144" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 8.5179, 2.8628, 6.5955)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 8.5179, 2.8628, 6.5955)
 mesh = SubResource("m144")
 
 [node name="Solar_hinge145" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 8.5179, 3.2124, 7.4008)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 8.5179, 3.2124, 7.4008)
 mesh = SubResource("m145")
 
 [node name="Solar_hinge146" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 8.5179, 3.5619, 8.2062)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 8.5179, 3.5619, 8.2062)
 mesh = SubResource("m146")
 
 [node name="Solar_hinge147" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9173, -0.3982, 0, 0.3982, 0.9173, 8.5179, 3.9115, 9.0115)
+transform = Transform3D(1, 0, 0, 0, 0.9173, 0.3982, 0, -0.3982, 0.9173, 8.5179, 3.9115, 9.0115)
 mesh = SubResource("m147")
 
 [node name="Spar148" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.5376, -3.6255, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.5376, -4.9879, 0)
 mesh = SubResource("m148")
 
 [node name="Radiator149" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.4689, -3.6255, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.5376, -1.645, 0)
 mesh = SubResource("m149")
 
-[node name="Radiator150" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.6063, -3.6255, 0)
+[node name="Radiator_hinge150" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.5376, -2.2022, 0)
 mesh = SubResource("m150")
 
-[node name="Radiator_boom151" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.5376, -0.5149, 0)
+[node name="Radiator151" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.5376, -2.7593, 0)
 mesh = SubResource("m151")
 
-[node name="Mast152" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0.7101, 0, 0.9901)
+[node name="Radiator_hinge152" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.5376, -3.3165, 0)
 mesh = SubResource("m152")
 
-[node name="Antenna153" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0.7101, 0, 1.3541)
+[node name="Radiator153" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.5376, -3.8736, 0)
 mesh = SubResource("m153")
 
-[node name="Window154" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9633, 0.2685, 0, -0.2685, 0.9633, -8.828, 0.7214, 0.201)
+[node name="Radiator_hinge154" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.5376, -4.4308, 0)
 mesh = SubResource("m154")
 
-[node name="Window155" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9633, 0.2685, 0, -0.2685, 0.9633, -8.0106, 0.7214, 0.201)
+[node name="Radiator155" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.5376, -4.9879, 0)
 mesh = SubResource("m155")
 
-[node name="Window156" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9633, 0.2685, 0, -0.2685, 0.9633, -7.1932, 0.7214, 0.201)
+[node name="Radiator_hinge156" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.5376, -5.5451, 0)
 mesh = SubResource("m156")
 
-[node name="Window157" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9999, 0.0111, 0, -0.0111, 0.9999, -2.7629, 0.669, 0.0074)
+[node name="Radiator157" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.5376, -6.1022, 0)
 mesh = SubResource("m157")
 
-[node name="Window158" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9999, 0.0111, 0, -0.0111, 0.9999, -1.8431, 0.669, 0.0074)
+[node name="Radiator_hinge158" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.5376, -6.6594, 0)
 mesh = SubResource("m158")
 
-[node name="Window159" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9999, 0.0111, 0, -0.0111, 0.9999, -0.9233, 0.669, 0.0074)
+[node name="Radiator159" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.5376, -7.2166, 0)
 mesh = SubResource("m159")
 
-[node name="Window160" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9999, 0.0111, 0, -0.0111, 0.9999, -0.0035, 0.669, 0.0074)
+[node name="Radiator_hinge160" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.5376, -7.7737, 0)
 mesh = SubResource("m160")
 
-[node name="Window161" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9999, 0.0111, 0, -0.0111, 0.9999, 0.9163, 0.669, 0.0074)
+[node name="Radiator161" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.5376, -8.3309, 0)
 mesh = SubResource("m161")
 
-[node name="Module_light162" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.1031, 0.6794, 0.1377)
+[node name="Radiator_boom162" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.5376, -0.5517, 0)
 mesh = SubResource("m162")
 
-[node name="Window163" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9608, -0.2773, -0, 0.2773, 0.9608, 5.763, 0.6852, -0.1977)
+[node name="Spar163" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.7216, 5.0638, 0)
 mesh = SubResource("m163")
 
-[node name="Window164" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9608, -0.2773, -0, 0.2773, 0.9608, 6.6459, 0.6852, -0.1977)
+[node name="Radiator164" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.7216, 1.6561, 0)
 mesh = SubResource("m164")
 
-[node name="Window165" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9608, -0.2773, -0, 0.2773, 0.9608, 7.5288, 0.6852, -0.1977)
+[node name="Radiator_hinge165" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.7216, 2.224, 0)
 mesh = SubResource("m165")
 
-[node name="Window166" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9608, -0.2773, -0, 0.2773, 0.9608, 8.4117, 0.6852, -0.1977)
+[node name="Radiator166" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.7216, 2.792, 0)
 mesh = SubResource("m166")
 
-[node name="Module_light167" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.5081, 0.7358, -0.068)
+[node name="Radiator_hinge167" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.7216, 3.3599, 0)
 mesh = SubResource("m167")
+
+[node name="Radiator168" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.7216, 3.9279, 0)
+mesh = SubResource("m168")
+
+[node name="Radiator_hinge169" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.7216, 4.4958, 0)
+mesh = SubResource("m169")
+
+[node name="Radiator170" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.7216, 5.0638, 0)
+mesh = SubResource("m170")
+
+[node name="Radiator_hinge171" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.7216, 5.6317, 0)
+mesh = SubResource("m171")
+
+[node name="Radiator172" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.7216, 6.1996, 0)
+mesh = SubResource("m172")
+
+[node name="Radiator_hinge173" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.7216, 6.7676, 0)
+mesh = SubResource("m173")
+
+[node name="Radiator174" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.7216, 7.3355, 0)
+mesh = SubResource("m174")
+
+[node name="Radiator_hinge175" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.7216, 7.9035, 0)
+mesh = SubResource("m175")
+
+[node name="Radiator176" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.7216, 8.4714, 0)
+mesh = SubResource("m176")
+
+[node name="Radiator_boom177" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.7216, 0.5517, 0)
+mesh = SubResource("m177")
+
+[node name="Mast178" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 5.188, 0, -1.1381)
+mesh = SubResource("m178")
+
+[node name="Antenna179" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 5.188, 0, -1.6125)
+mesh = SubResource("m179")
+
+[node name="Window180" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, -0, 0, 0.9958, 0.0913, 0, -0.0913, 0.9958, -8.5555, 0.7457, -0.0684)
+mesh = SubResource("m180")
+
+[node name="Window181" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, -0, 0, 0.9958, 0.0913, 0, -0.0913, 0.9958, -7.4657, 0.7457, -0.0684)
+mesh = SubResource("m181")
+
+[node name="Module_light182" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.2176, 0.7722, 0.0754)
+mesh = SubResource("m182")
+
+[node name="Window183" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, -0, 0, 0.9496, 0.3134, 0, -0.3134, 0.9496, -1.8431, 0.6353, -0.2097)
+mesh = SubResource("m183")
+
+[node name="Window184" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, -0, 0, 0.9496, 0.3134, 0, -0.3134, 0.9496, -0.0035, 0.6353, -0.2097)
+mesh = SubResource("m184")
+
+[node name="Module_light185" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.1031, 0.6874, -0.0898)
+mesh = SubResource("m185")
+
+[node name="Window186" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, -0, 0, 0.9988, 0.0495, 0, -0.0495, 0.9988, 5.9837, 0.7123, -0.0353)
+mesh = SubResource("m186")
+
+[node name="Window187" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, -0, 0, 0.9988, 0.0495, 0, -0.0495, 0.9988, 7.0873, 0.7123, -0.0353)
+mesh = SubResource("m187")
+
+[node name="Window188" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, -0, 0, 0.9988, 0.0495, 0, -0.0495, 0.9988, 8.1909, 0.7123, -0.0353)
+mesh = SubResource("m188")
+
+[node name="Module_light189" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.5081, 0.7317, 0.1026)
+mesh = SubResource("m189")

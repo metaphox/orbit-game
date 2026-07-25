@@ -37,6 +37,13 @@ def test_cylinder_along_x_has_expected_aabb():
     assert _close(wh[0], h / 2) and _close(wh[1], r) and _close(wh[2], r), wh
 
 
+def test_tscn_transform_transposes_part_axes_into_godot_rows():
+    part = sg.Part("m", "box", (1, 1, 1), (10, 20, 30), "hull",
+                   ((1, 2, 3), (4, 5, 6), (7, 8, 9)))
+    assert sg.godot_transform_values(part, 0.5) == (
+        1, 4, 7, 2, 5, 8, 3, 6, 9, 5.0, 10.0, 15.0)
+
+
 def test_radial_band_centered_vs_offset():
     centered = sg.Part("m", "box", (1, 1, 1), (0, 0, 0), "hull")
     rmn, rmx = sg.radial_band(centered)
@@ -126,8 +133,48 @@ def test_deployed_surfaces_stay_foil_thin_at_showcase_scale():
         radiator_fins = [p for p in st.parts if p.kind == "radiator"]
         assert panels and radiator_fins
         assert max(p.half[1] for p in panels) <= 0.35
-        assert max(p.half[0] for p in radiator_fins) <= 0.28
+        assert max(p.half[0] for p in radiator_fins) <= 0.12
         assert all(p.half[1] / max(p.half[0], p.half[2]) < 0.012 for p in panels)
+
+
+def test_radiators_follow_thermal_budget_and_reference_proportions():
+    for arch, expected_profile in (("stack", "ordinary"),
+                                   ("truss", "ordinary"),
+                                   ("power", "high_power")):
+        st = sg.generate_one(3 * sg.ISS_METERS, 9, arch, 1, 1, 1, 0.35)
+        thermal = st.thermal
+        assert thermal["profile"] == expected_profile
+        assert _close(thermal["solar_area_m2"], sg.solar_collecting_area(st))
+        assert _close(thermal["target_radiator_area_m2"],
+                      sg.radiator_face_area(st))
+        assert (thermal["minimum_area_ratio"] <= thermal["area_ratio"]
+                <= thermal["maximum_area_ratio"])
+        banks = [assembly for assembly in st.assemblies.values()
+                 if assembly.role == "radiator_bank"]
+        assert len(banks) == thermal["bank_count"]
+        for bank in banks:
+            data = bank.metadata
+            assert 6 <= data["panel_count"] <= 8
+            assert data["hinge_count"] == data["panel_count"] - 1
+            assert 5.0 <= data["panel_aspect_ratio"] <= 7.0
+            assert data["panel_layer_count"] == 1
+            assert len(data["panel_part_indices"]) == data["panel_count"]
+        blueprint = sg.to_json(st, 0.35)
+        assert blueprint["thermal"] == thermal
+        assert 'metadata/thermal_profile = ' in sg.to_tscn(st, 0.35)
+
+
+def test_radiator_validator_rejects_duplicate_panel_layers():
+    st = sg.generate_one(sg.ISS_METERS, 10, "stack", 1, 1, 1, 0.35)
+    bank = next(assembly for assembly in st.assemblies.values()
+                if assembly.role == "radiator_bank")
+    bank.metadata["panel_layer_count"] = 2
+    try:
+        sg.validate_radiators(st)
+    except sg.ValidationError as error:
+        assert "duplicate radiator layers" in str(error)
+    else:
+        raise AssertionError("duplicate radiator layers unexpectedly validated")
 
 
 def test_hybrid_recipes_compose_multiple_proven_forms():
