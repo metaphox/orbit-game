@@ -402,35 +402,59 @@ func serialize() -> Dictionary:
 ## mid-burn substep across a save boundary isn't meaningful. A live in-session
 ## snapshot (live == true) restores throttle and flight state verbatim, so
 ## cancelling rewind returns to "now" unchanged and burns stay atomic.
+## Reads every field defensively (short/missing/wrong-type arrays fall back to
+## the current or a zero value, not a crash) so a hand-edited or truncated save
+## can never abort restoration (CR-6). The store boundary discards obviously bad
+## saves too; this makes the read itself total.
 func apply_serialized(data: Dictionary, at_time: float, live := false) -> void:
-	body = _find_body(data.get("body_name", body.name))
-	var rv: Array = data.get("r", [r.x, r.y, r.z])
+	body = _find_body(String(data.get("body_name", body.name)))
+	var rv := _floats(data.get("r"), 3, [r.x, r.y, r.z])
 	r = DVec3.new(rv[0], rv[1], rv[2])
-	var vv: Array = data.get("v", [v.x, v.y, v.z])
+	var vv := _floats(data.get("v"), 3, [v.x, v.y, v.z])
 	v = DVec3.new(vv[0], vv[1], vv[2])
 	attitude = _array_to_basis(data.get("attitude", []))
-	var av: Array = data.get("angular_velocity", [0.0, 0.0, 0.0])
+	var av := _floats(data.get("angular_velocity"), 3, [0.0, 0.0, 0.0])
 	angular_velocity = Vector3(av[0], av[1], av[2])
 	rcs_command = Vector3.ZERO
-	prop_mass = data.get("prop_mass", prop_mass)
-	sas_mode = data.get("sas_mode", SasMode.OFF) as SasMode
-	throttle = float(data.get("throttle", 0.0)) if live else 0.0
+	prop_mass = _f(data.get("prop_mass"), prop_mass)
+	sas_mode = clampi(int(_f(data.get("sas_mode"), SasMode.OFF)), 0, SAS_NAMES.size() - 1) as SasMode
+	throttle = clampf(_f(data.get("throttle"), 0.0), 0.0, 1.0) if live else 0.0
 	last_time = at_time
 	_refit_elements(at_time)
 	if live:
-		flight_state = data.get("flight_state", FlightState.COASTING) as FlightState
+		flight_state = clampi(int(_f(data.get("flight_state"), FlightState.COASTING)),
+			0, 1) as FlightState
 
 	var node_data: Variant = data.get("node")
-	if node_data != null:
+	if node_data is Dictionary:
 		node = ManeuverNode.new()
-		node.t_node = node_data["t_node"]
-		node.prograde = node_data["prograde"]
-		node.normal = node_data["normal"]
-		node.radial = node_data["radial"]
-		var rem: Array = node_data["remaining"]
+		node.t_node = _f(node_data.get("t_node"), at_time)
+		node.prograde = _f(node_data.get("prograde"), 0.0)
+		node.normal = _f(node_data.get("normal"), 0.0)
+		node.radial = _f(node_data.get("radial"), 0.0)
+		var rem := _floats(node_data.get("remaining"), 3, [0.0, 0.0, 0.0])
 		node.remaining = DVec3.new(rem[0], rem[1], rem[2])
 	else:
 		node = null
+
+
+## A finite float from an untrusted value, else `default` (never float()s a
+## non-number, which would crash on an array/dict).
+static func _f(value: Variant, default: float) -> float:
+	return float(value) if ((value is int or value is float) and is_finite(float(value))) else default
+
+
+## `n` finite floats from `a`, or `fallback` if it isn't a long-enough numeric array.
+static func _floats(a: Variant, n: int, fallback: Array) -> Array:
+	if not (a is Array) or (a as Array).size() < n:
+		return fallback
+	var out: Array = []
+	for i in n:
+		var c: Variant = a[i]
+		if not ((c is int or c is float) and is_finite(float(c))):
+			return fallback
+		out.append(float(c))
+	return out
 
 
 func _find_body(body_name: String) -> BodyDef:

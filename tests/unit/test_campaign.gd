@@ -136,7 +136,52 @@ func test_save_includes_schema_version() -> void:
 	var parsed = JSON.parse_string(f.get_as_text())
 	f.close()
 	# JSON has no int type - everything numeric round-trips as float.
-	assert_eq(parsed.get("version"), 2.0)
+	assert_eq(parsed.get("version"), 3.0)
+
+
+func test_v2_int_progress_migrates_to_stable_ids_preserving_progress() -> void:
+	# CR-11: a v2 save keyed by int index migrates to id keys WITHOUT resetting.
+	_write_raw(SAVE_TEST_PATH, JSON.stringify({
+		"version": 2,
+		"last_active": "Ada",
+		"profiles": [{
+			"name": "Ada", "hardcore": false,
+			"unlocked": [0, 1, 3],
+			"medals": {"1": {"medal": "GOLD ★★★", "dv": 60.0, "clean": true}},
+			"mission_save": {"level_index": 3, "sim_time": 500.0,
+				"r": [70000.0, 0.0, 0.0], "v": [0.0, 0.0, -1000.0]},
+		}],
+	}))
+	var store := ProfileStore.load_or_new(SAVE_TEST_PATH)
+	assert_eq(store.load_warning, "", "a v2 save migrates cleanly, no reset warning")
+	var ada := store.find_profile("Ada")
+	assert_true(ada.is_unlocked(0) and ada.is_unlocked(1) and ada.is_unlocked(3),
+		"unlocked indices survive as stable ids")
+	assert_false(ada.is_unlocked(2), "an index that wasn't unlocked stays locked")
+	assert_eq(ada.medal_for(1), "GOLD ★★★", "the medal migrates to its id")
+	assert_eq(ada.unlocked.keys().has(Campaign.id_at(3)), true, "stored by id, not int")
+	assert_eq(ada.mission_save["level_id"], Campaign.id_at(3), "mission save migrates to level_id")
+	assert_false(ada.mission_save.has("level_index"), "the old int index key is dropped")
+
+
+func test_damaged_mission_save_is_discarded_but_profile_kept() -> void:
+	# CR-6: a parseable-but-corrupt in-progress save must not crash or wipe the
+	# profile; only the bad slot is dropped, with a warning.
+	_write_raw(SAVE_TEST_PATH, JSON.stringify({
+		"version": 3,
+		"profiles": [{
+			"name": "Ada", "hardcore": false,
+			"unlocked": [Campaign.id_at(0), Campaign.id_at(1)],
+			"medals": {},
+			"mission_save": {"level_id": Campaign.id_at(1), "sim_time": "boom", "r": [1.0]},
+		}],
+	}))
+	var store := ProfileStore.load_or_new(SAVE_TEST_PATH)
+	var ada := store.find_profile("Ada")
+	assert_not_null(ada, "the profile itself is retained")
+	assert_true(ada.is_unlocked(1), "its progress is intact")
+	assert_null(ada.mission_save, "only the damaged mission slot is discarded")
+	assert_eq(store.load_warning, "A DAMAGED MISSION SAVE WAS DISCARDED", "and it's surfaced")
 
 
 func test_save_reports_success_and_failure() -> void:
@@ -245,7 +290,7 @@ func test_campaign_resume_clears_stale_community_launch() -> void:
 	assert_eq(root._active_community_id, "mod_demo")
 
 	# Continue a CAMPAIGN save (mission 0): the stale community state must clear.
-	root._resume_mission({"level_index": 0})
+	root._resume_mission({"level_id": Campaign.id_at(0)})
 	simulate(root, 2, 1.0 / 60.0)
 	assert_null(GameRootScript.custom_level, "resume cleared the stale community level")
 	assert_eq(root._active_community_id, "",
@@ -601,15 +646,15 @@ func test_save_progress_persists_to_active_profile() -> void:
 	root.game._save_progress()
 
 	assert_not_null(root.active_profile.mission_save, "save landed on the active profile")
-	assert_eq(root.active_profile.mission_save["level_index"], 3)
+	assert_eq(root.active_profile.mission_save["level_id"], Campaign.id_at(3),
+		"save is keyed by stable id, not the display index (CR-11)")
 	assert_eq(root.active_profile.mission_save["sim_time"], 12345.0)
 	assert_eq(root.active_profile.mission_save["warp_index"], 2)
 
 	var reloaded := ProfileStore.load_or_new(SAVE_TEST_PATH)
 	var reloaded_save = reloaded.find_profile("Ada").mission_save
 	assert_not_null(reloaded_save, "save persisted to disk")
-	# JSON has no int type - everything numeric round-trips as float.
-	assert_eq(reloaded_save["level_index"], 3.0)
+	assert_eq(reloaded_save["level_id"], Campaign.id_at(3), "stable id round-trips through disk")
 
 
 func test_continue_resumes_saved_mission_exactly() -> void:

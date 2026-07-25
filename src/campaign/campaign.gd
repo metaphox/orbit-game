@@ -88,6 +88,18 @@ static func brief_id(index: int) -> String:
 	return LEVEL_IDS[index]
 
 
+## Stable string identity for a display index, "" if out of range. This is the
+## PERSISTENT key for progress (unlocks/medals/saves) — the integer index is a
+## display/runtime handle only, so inserting levels can't shift saved progress.
+static func id_at(index: int) -> String:
+	return LEVEL_IDS[index] if index >= 0 and index < LEVEL_IDS.size() else ""
+
+
+## Display index for a stable id, or -1 if the id isn't a current built-in.
+static func index_of(id: String) -> int:
+	return LEVEL_IDS.find(id)
+
+
 ## Index of the act that contains this level.
 static func act_of(index: int) -> int:
 	for a: int in ACTS.size():

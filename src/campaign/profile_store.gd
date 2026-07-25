@@ -10,10 +10,11 @@ extends RefCounted
 const DEFAULT_PATH := "user://save.json"
 const MAX_PROFILES := 5
 const NAME_MAX_LENGTH := 20
-## v2: LEVELS was renumbered into act order (level_<act>_<level>.tres), so
-## index-keyed progress from a v1 save points at the wrong levels and is
-## discarded on load (see _apply).
-const SCHEMA_VERSION := 2
+## v2: LEVELS was renumbered into act order, so v1 int-index progress pointed at
+## the wrong levels and is discarded on load. v3 (CR-11): progress is keyed by
+## stable LevelDef.id, so display index no longer is identity — a v2 save is
+## migrated in place (int index -> id at that position), preserving progress.
+const SCHEMA_VERSION := 3
 const BACKUP_SUFFIX := ".bak"
 const TMP_SUFFIX := ".tmp"
 
@@ -83,34 +84,101 @@ func _apply(parsed: Dictionary) -> void:
 	if settings_data.is_empty() and parsed.has("effects_enabled"):
 		settings_data = {"effects_enabled": parsed["effects_enabled"]}
 	Settings.from_dict(settings_data)
-	# Progress is keyed by LEVELS index; a pre-v2 save predates the act-order
-	# renumbering, so its indices point at the wrong levels. Keep the named
-	# profiles but reset their progress to a fresh campaign.
-	var stale := int(parsed.get("version", 0)) < SCHEMA_VERSION
-	if stale:
+	# v1 predates the act-order renumbering, so its int indices point at the wrong
+	# levels and can't be migrated: keep the named profiles, reset progress. v2 is
+	# migrated in place (int index -> stable id). v3+ is already id-keyed.
+	var version := int(parsed.get("version", 0))
+	var reset := version < 2
+	var migrate := version == 2
+	if reset:
 		load_warning = "SAVE PREDATES LEVEL RENUMBERING - PROGRESS RESET"
 	for p_data: Variant in parsed.get("profiles", []):
 		if not (p_data is Dictionary):
 			push_warning("ProfileStore: skipping a malformed profile entry")
 			continue
-		var profile := Profile.new()
-		profile.profile_name = p_data.get("name", "")
-		profile.hardcore = p_data.get("hardcore", false)
-		if not stale:
+		var profile := Profile.new()  # _init unlocks the first mission
+		profile.profile_name = String(p_data.get("name", ""))
+		profile.hardcore = bool(p_data.get("hardcore", false))
+		if not reset:
 			profile.unlocked.clear()
-			for k: Variant in p_data.get("unlocked", []):
-				var index: Variant = _as_level_index(k)
-				if index != null:
-					profile.unlocked[index] = true
-			var medals: Variant = p_data.get("medals", {})
-			if medals is Dictionary:
-				for k: Variant in medals:
-					var index: Variant = _as_level_index(k)
-					if index != null and medals[k] is Dictionary:
-						profile.medals[index] = medals[k]
-			var mission_save: Variant = p_data.get("mission_save")
-			profile.mission_save = mission_save if mission_save is Dictionary else null
+			_load_unlocked(profile, p_data.get("unlocked", []), migrate)
+			_load_medals(profile, p_data.get("medals", {}), migrate)
+			profile.mission_save = _load_mission_save(p_data.get("mission_save"), migrate)
+			profile.unlocked[Campaign.id_at(0)] = true  # first mission always open
 		profiles.append(profile)
+
+
+## Read the unlocked set as stable ids. `migrate` converts a v2 array of int
+## indices to ids via the current ordering; otherwise entries are ids already.
+func _load_unlocked(profile: Profile, arr: Variant, migrate: bool) -> void:
+	if not (arr is Array):
+		return
+	for k: Variant in arr:
+		var id := _key_to_id(k, migrate)
+		if id != "":
+			profile.unlocked[id] = true
+
+
+func _load_medals(profile: Profile, data: Variant, migrate: bool) -> void:
+	if not (data is Dictionary):
+		return
+	for k: Variant in data:
+		var id := _key_to_id(k, migrate)
+		if id != "" and data[k] is Dictionary:
+			profile.medals[id] = _sanitize_medal(data[k])
+
+
+## A key -> stable id: for a v2 migrate, treat it as an int index; otherwise it's
+## already an id string. "" if it doesn't resolve to a current level.
+func _key_to_id(k: Variant, migrate: bool) -> String:
+	if migrate:
+		var idx: Variant = _as_level_index(k)
+		return Campaign.id_at(idx) if idx != null else ""
+	return String(k) if k is String else ""
+
+
+## CR-6: keep only well-formed medal fields (a hand-edited save can hold garbage).
+func _sanitize_medal(e: Dictionary) -> Dictionary:
+	var dv: Variant = e.get("dv", 0.0)
+	var dv_ok: bool = (dv is int or dv is float) and is_finite(float(dv))
+	return {
+		"medal": String(e.get("medal", "")),
+		"dv": float(dv) if dv_ok else 0.0,
+		"clean": bool(e.get("clean", false)),
+	}
+
+
+## CR-6: validate/migrate the in-progress save. Returns null (discarding only
+## this slot, not the whole profile) when the payload is damaged or references a
+## level that no longer exists, surfacing a load_warning.
+func _load_mission_save(ms: Variant, migrate: bool) -> Variant:
+	if not (ms is Dictionary):
+		return null
+	var slot: Dictionary = (ms as Dictionary).duplicate()
+	if migrate and slot.has("level_index"):
+		var idx: Variant = _as_level_index(slot["level_index"])
+		slot["level_id"] = Campaign.id_at(idx) if idx != null else ""
+		slot.erase("level_index")
+	if not _valid_mission_save(slot):
+		load_warning = "A DAMAGED MISSION SAVE WAS DISCARDED"
+		return null
+	return slot
+
+
+func _valid_mission_save(slot: Dictionary) -> bool:
+	if Campaign.index_of(String(slot.get("level_id", ""))) == -1:
+		return false  # unknown / removed level
+	var t: Variant = slot.get("sim_time", 0.0)
+	if not ((t is int or t is float) and is_finite(float(t))):
+		return false
+	for key: String in ["r", "v"]:  # ship position/velocity must be finite 3-vectors
+		var a: Variant = slot.get(key, [])
+		if not (a is Array) or (a as Array).size() < 3:
+			return false
+		for c: Variant in a:
+			if not ((c is int or c is float) and is_finite(float(c))):
+				return false
+	return true
 
 
 ## Writes to a temp file, backs up the previous save, then atomically

@@ -91,7 +91,10 @@ func _resume_mission(save_data: Dictionary) -> void:
 	_clear_game()
 	# Clears any stale community launch (custom_level/_active_community_id) so a
 	# resumed campaign save can't inherit a drop-in level flown earlier (CR-2).
-	_set_launch_context("", null, int(save_data.get("level_index", 0)))
+	# Progress is keyed by stable id (CR-11); resolve it back to a display index,
+	# clamped to a valid mission if the id is unknown (e.g. a removed level).
+	var index := Campaign.index_of(String(save_data.get("level_id", "")))
+	_set_launch_context("", null, maxi(index, 0))
 	game = GameRootScene.instantiate()
 	add_child(game)
 	game.load_saved_state(save_data)

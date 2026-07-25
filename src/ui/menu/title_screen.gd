@@ -97,7 +97,7 @@ func _blurb_for(i: int) -> String:
 		0:
 			var lp := _store.last_active_profile()
 			if lp != null and lp.mission_save != null:
-				var idx: int = lp.mission_save.get("level_index", 0)
+				var idx := maxi(Campaign.index_of(String(lp.mission_save.get("level_id", ""))), 0)
 				return tr("RESUME  %s · %s  %s") % [lp.profile_name, Campaign.code(idx), tr(Campaign.short_title(idx))]
 			return "NO MISSION IN PROGRESS"
 		1:

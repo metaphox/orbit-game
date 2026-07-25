@@ -431,7 +431,7 @@ func _close_pause_menu() -> void:
 
 func _save_progress() -> void:
 	var payload := ship.serialize()
-	payload["level_index"] = level_index
+	payload["level_id"] = level.id  # stable identity (CR-11), not the display index
 	payload["sim_time"] = sim_time
 	payload["warp_index"] = warp_index
 	payload["rewind_charges"] = rewind.charges

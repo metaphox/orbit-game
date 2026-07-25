@@ -85,7 +85,7 @@ func test_record_win_tracks_clean_and_is_sticky() -> void:
 	sticky.record_win(0, "SILVER ★★", 80.0, 0)   # clean run
 	sticky.record_win(0, "GOLD ★★★", 60.0, 3)    # better dv, but rewound
 	assert_true(sticky.is_clean(0), "CLEAN survives a later rewind-assisted best run")
-	assert_eq(sticky.medals[0]["medal"], "GOLD ★★★", "still keeps the best-dv medal")
+	assert_eq(sticky.medals[Campaign.id_at(0)]["medal"], "GOLD ★★★", "still keeps the best-dv medal")
 
 
 # --- game_root integration -------------------------------------------------
