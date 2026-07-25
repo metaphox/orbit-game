@@ -1,0 +1,133 @@
+#!/usr/bin/env python3
+"""Orthographic PNG previews of a generated Station — pure Python + Pillow, so it
+needs no Godot and opens no window (headless Godot renders black). Two panels:
+a SIDE view (X-Y, shows the spine / radiators / rings edge-on) and a TOP view
+(X-Z, shows the solar-array faces). Painter's algorithm, coloured by material.
+
+Used via `station_gen.py --preview`; also runnable to preview a fresh build:
+    python3 tools/station_preview.py --iss 5 --seed 2 --out /tmp/s.png
+"""
+
+from PIL import Image, ImageDraw
+
+import importlib.util
+import os
+import sys
+
+_here = os.path.dirname(os.path.abspath(__file__))
+_spec = importlib.util.spec_from_file_location(
+    "station_gen", os.path.join(_here, "station_gen.py"))
+sg = importlib.util.module_from_spec(_spec)
+sys.modules["station_gen"] = sg
+_spec.loader.exec_module(sg)
+
+BG = (11, 14, 20)
+COLORS = {
+    sg.MAT["hull"]: (224, 219, 201),
+    sg.MAT["dark"]: (46, 49, 52),
+    sg.MAT["solar"]: (46, 74, 118),
+    sg.MAT["orange"]: (224, 82, 31),
+    sg.MAT["green"]: (120, 235, 175),
+}
+
+
+def _corners(p):
+    out = []
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            for sz in (-1, 1):
+                loc = (sx * p.half[0], sy * p.half[1], sz * p.half[2])
+                out.append(tuple(
+                    p.pos[i] + sum(loc[j] * p.cols[j][i] for j in range(3))
+                    for i in range(3)))
+    return out
+
+
+def _hull(pts):
+    """Andrew's monotone-chain convex hull of 2D points."""
+    pts = sorted(set(pts))
+    if len(pts) < 3:
+        return pts
+
+    def cross(o, a, b):
+        return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
+
+    lower = []
+    for p in pts:
+        while len(lower) >= 2 and cross(lower[-2], lower[-1], p) <= 0:
+            lower.pop()
+        lower.append(p)
+    upper = []
+    for p in reversed(pts):
+        while len(upper) >= 2 and cross(upper[-2], upper[-1], p) <= 0:
+            upper.pop()
+        upper.append(p)
+    return lower[:-1] + upper[:-1]
+
+
+def _shade(color, f):
+    return tuple(max(0, min(255, int(c * f))) for c in color)
+
+
+def _draw_view(draw, parts, hori, vert, depth, flip_v, ox, oy, sc, hmin, vmax):
+    def to_px(c):
+        return (ox + (c[hori] - hmin) * sc,
+                oy + ((vmax - c[vert]) if flip_v else (c[vert] - vmax + 0)) * sc)
+    for p in sorted(parts, key=lambda q: q.pos[depth]):
+        col = COLORS.get(p.mat, (150, 150, 150))
+        cs = _corners(p)
+        if p.mesh == "sphere":
+            cx = ox + (p.pos[hori] - hmin) * sc
+            cy = oy + (vmax - p.pos[vert]) * sc
+            r = max(1.5, p.half[0] * sc)
+            draw.ellipse([cx - r, cy - r, cx + r, cy + r], fill=col,
+                         outline=_shade(col, 0.6))
+            continue
+        poly = _hull([to_px(c) for c in cs])
+        if len(poly) >= 3:
+            draw.polygon(poly, fill=col, outline=_shade(col, 0.55))
+
+
+def render(st, path, px=1100):
+    parts = st.parts
+    allc = [c for p in parts for c in _corners(p)]
+    xs = [c[0] for c in allc]
+    ys = [c[1] for c in allc]
+    zs = [c[2] for c in allc]
+    minx, maxx = min(xs), max(xs)
+    miny, maxy = min(ys), max(ys)
+    minz, maxz = min(zs), max(zs)
+    pad = int(px * 0.05)
+    sc = (px - 2 * pad) / max(maxx - minx, 1e-6)
+    h_side = int((maxy - miny) * sc) + 2 * pad
+    h_top = int((maxz - minz) * sc) + 2 * pad
+    lab = 26
+    H = lab + h_side + lab + h_top + pad
+    img = Image.new("RGB", (px, H), BG)
+    d = ImageDraw.Draw(img)
+    ox = pad + (px - 2 * pad - (maxx - minx) * sc) / 2
+    d.text((pad, 6), "SIDE  (X-Y)  %s  %.1fx ISS  %d parts"
+           % (st.archetype.upper(), st.meters / sg.ISS_METERS, len(parts)),
+           fill=(150, 160, 170))
+    _draw_view(d, parts, 0, 1, 2, True, ox, lab + pad, sc, minx, maxy)
+    y2 = lab + h_side
+    d.text((pad, y2 + 4), "TOP  (X-Z)  — solar-array faces", fill=(150, 160, 170))
+    _draw_view(d, parts, 0, 2, 1, True, ox, y2 + lab + pad, sc, minx, maxz)
+    img.save(path)
+    return path
+
+
+def _main():
+    ap = sg.argparse.ArgumentParser()
+    ap.add_argument("--iss", type=float, default=1.0)
+    ap.add_argument("--archetype", default="auto")
+    ap.add_argument("--seed", type=int, default=1)
+    ap.add_argument("--out", default="/tmp/station.png")
+    a = ap.parse_args()
+    st = sg.generate_one(a.iss * sg.ISS_METERS, a.seed, a.archetype, 1, 1, 1, 0.35)
+    print(render(st, a.out))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(_main())

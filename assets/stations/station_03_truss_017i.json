@@ -1,0 +1,619 @@
+{
+  "seed": 3008,
+  "archetype": "truss",
+  "meters": 186.4,
+  "iss_multiple": 1.71,
+  "game_scale": 0.35,
+  "counts": {
+    "labs": 2,
+    "habs": 2,
+    "nodes": 0,
+    "panels": 4,
+    "radiators": 1,
+    "antennas": 2,
+    "ports": 2,
+    "rings": 0
+  },
+  "parts": [
+    {
+      "kind": "lab",
+      "mesh": "cylinder",
+      "pos": [
+        -37.862,
+        0,
+        0
+      ],
+      "half": [
+        2.334,
+        7.736,
+        2.334
+      ],
+      "connector": false
+    },
+    {
+      "kind": "hab",
+      "mesh": "cylinder",
+      "pos": [
+        -16.092,
+        0,
+        0
+      ],
+      "half": [
+        2.164,
+        14.034,
+        2.164
+      ],
+      "connector": false
+    },
+    {
+      "kind": "hab",
+      "mesh": "cylinder",
+      "pos": [
+        5.789,
+        0,
+        0
+      ],
+      "half": [
+        2.12,
+        7.848,
+        2.12
+      ],
+      "connector": false
+    },
+    {
+      "kind": "trim",
+      "mesh": "cylinder",
+      "pos": [
+        5.789,
+        0,
+        0
+      ],
+      "half": [
+        2.205,
+        0.942,
+        2.205
+      ],
+      "connector": true
+    },
+    {
+      "kind": "lab",
+      "mesh": "cylinder",
+      "pos": [
+        29.618,
+        0,
+        0
+      ],
+      "half": [
+        2.1,
+        15.981,
+        2.1
+      ],
+      "connector": false
+    },
+    {
+      "kind": "port",
+      "mesh": "cylinder",
+      "pos": [
+        -46.092,
+        0,
+        0
+      ],
+      "half": [
+        0.897,
+        0.493,
+        0.897
+      ],
+      "connector": true
+    },
+    {
+      "kind": "port",
+      "mesh": "cylinder",
+      "pos": [
+        46.092,
+        0,
+        0
+      ],
+      "half": [
+        0.897,
+        0.493,
+        0.897
+      ],
+      "connector": true
+    },
+    {
+      "kind": "boom",
+      "mesh": "cylinder",
+      "pos": [
+        36.479,
+        0,
+        -3.731
+      ],
+      "half": [
+        0.28,
+        3.731,
+        0.28
+      ],
+      "connector": true
+    },
+    {
+      "kind": "mast",
+      "mesh": "box",
+      "pos": [
+        36.479,
+        0,
+        -30.237
+      ],
+      "half": [
+        0.822,
+        1.677,
+        22.776
+      ],
+      "connector": true
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        32.037,
+        0,
+        -30.237
+      ],
+      "half": [
+        3.454,
+        1.118,
+        22.776
+      ],
+      "connector": false
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        40.92,
+        0,
+        -30.237
+      ],
+      "half": [
+        3.454,
+        1.118,
+        22.776
+      ],
+      "connector": false
+    },
+    {
+      "kind": "batten",
+      "mesh": "box",
+      "pos": [
+        36.479,
+        0,
+        -43.903
+      ],
+      "half": [
+        8.225,
+        1.491,
+        0.911
+      ],
+      "connector": true
+    },
+    {
+      "kind": "batten",
+      "mesh": "box",
+      "pos": [
+        36.479,
+        0,
+        -16.572
+      ],
+      "half": [
+        8.225,
+        1.491,
+        0.911
+      ],
+      "connector": true
+    },
+    {
+      "kind": "boom",
+      "mesh": "cylinder",
+      "pos": [
+        36.479,
+        0,
+        3.731
+      ],
+      "half": [
+        0.28,
+        3.731,
+        0.28
+      ],
+      "connector": true
+    },
+    {
+      "kind": "mast",
+      "mesh": "box",
+      "pos": [
+        36.479,
+        0,
+        30.237
+      ],
+      "half": [
+        0.822,
+        1.677,
+        22.776
+      ],
+      "connector": true
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        32.037,
+        0,
+        30.237
+      ],
+      "half": [
+        3.454,
+        1.118,
+        22.776
+      ],
+      "connector": false
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        40.92,
+        0,
+        30.237
+      ],
+      "half": [
+        3.454,
+        1.118,
+        22.776
+      ],
+      "connector": false
+    },
+    {
+      "kind": "batten",
+      "mesh": "box",
+      "pos": [
+        36.479,
+        0,
+        16.572
+      ],
+      "half": [
+        8.225,
+        1.491,
+        0.911
+      ],
+      "connector": true
+    },
+    {
+      "kind": "batten",
+      "mesh": "box",
+      "pos": [
+        36.479,
+        0,
+        43.903
+      ],
+      "half": [
+        8.225,
+        1.491,
+        0.911
+      ],
+      "connector": true
+    },
+    {
+      "kind": "boom",
+      "mesh": "cylinder",
+      "pos": [
+        -36.479,
+        0,
+        -3.731
+      ],
+      "half": [
+        0.28,
+        3.731,
+        0.28
+      ],
+      "connector": true
+    },
+    {
+      "kind": "mast",
+      "mesh": "box",
+      "pos": [
+        -36.479,
+        0,
+        -33.384
+      ],
+      "half": [
+        0.822,
+        1.677,
+        25.923
+      ],
+      "connector": true
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -40.92,
+        0,
+        -33.384
+      ],
+      "half": [
+        3.454,
+        1.118,
+        25.923
+      ],
+      "connector": false
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -32.037,
+        0,
+        -33.384
+      ],
+      "half": [
+        3.454,
+        1.118,
+        25.923
+      ],
+      "connector": false
+    },
+    {
+      "kind": "batten",
+      "mesh": "box",
+      "pos": [
+        -36.479,
+        0,
+        -48.938
+      ],
+      "half": [
+        8.225,
+        1.491,
+        1.037
+      ],
+      "connector": true
+    },
+    {
+      "kind": "batten",
+      "mesh": "box",
+      "pos": [
+        -36.479,
+        0,
+        -17.831
+      ],
+      "half": [
+        8.225,
+        1.491,
+        1.037
+      ],
+      "connector": true
+    },
+    {
+      "kind": "boom",
+      "mesh": "cylinder",
+      "pos": [
+        -36.479,
+        0,
+        3.731
+      ],
+      "half": [
+        0.28,
+        3.731,
+        0.28
+      ],
+      "connector": true
+    },
+    {
+      "kind": "mast",
+      "mesh": "box",
+      "pos": [
+        -36.479,
+        0,
+        33.384
+      ],
+      "half": [
+        0.822,
+        1.677,
+        25.923
+      ],
+      "connector": true
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -40.92,
+        0,
+        33.384
+      ],
+      "half": [
+        3.454,
+        1.118,
+        25.923
+      ],
+      "connector": false
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -32.037,
+        0,
+        33.384
+      ],
+      "half": [
+        3.454,
+        1.118,
+        25.923
+      ],
+      "connector": false
+    },
+    {
+      "kind": "batten",
+      "mesh": "box",
+      "pos": [
+        -36.479,
+        0,
+        17.831
+      ],
+      "half": [
+        8.225,
+        1.491,
+        1.037
+      ],
+      "connector": true
+    },
+    {
+      "kind": "batten",
+      "mesh": "box",
+      "pos": [
+        -36.479,
+        0,
+        48.938
+      ],
+      "half": [
+        8.225,
+        1.491,
+        1.037
+      ],
+      "connector": true
+    },
+    {
+      "kind": "spar",
+      "mesh": "box",
+      "pos": [
+        22.695,
+        -13.631,
+        0
+      ],
+      "half": [
+        1.044,
+        10.364,
+        9.319
+      ],
+      "connector": true
+    },
+    {
+      "kind": "radiator",
+      "mesh": "box",
+      "pos": [
+        20.459,
+        -13.631,
+        0
+      ],
+      "half": [
+        0.746,
+        10.364,
+        8.574
+      ],
+      "connector": false
+    },
+    {
+      "kind": "radiator",
+      "mesh": "box",
+      "pos": [
+        24.932,
+        -13.631,
+        0
+      ],
+      "half": [
+        0.746,
+        10.364,
+        8.574
+      ],
+      "connector": false
+    },
+    {
+      "kind": "boom",
+      "mesh": "cylinder",
+      "pos": [
+        22.695,
+        -1.634,
+        0
+      ],
+      "half": [
+        0.187,
+        1.634,
+        0.187
+      ],
+      "connector": true
+    },
+    {
+      "kind": "mast",
+      "mesh": "cylinder",
+      "pos": [
+        -10.645,
+        0,
+        -3.879
+      ],
+      "half": [
+        0.117,
+        1.545,
+        0.117
+      ],
+      "connector": true
+    },
+    {
+      "kind": "antenna",
+      "mesh": "cylinder",
+      "pos": [
+        -10.645,
+        0,
+        -5.513
+      ],
+      "half": [
+        0.884,
+        0.14,
+        0.884
+      ],
+      "connector": false
+    },
+    {
+      "kind": "mast",
+      "mesh": "cylinder",
+      "pos": [
+        27.886,
+        0,
+        -3.644
+      ],
+      "half": [
+        0.117,
+        1.31,
+        0.117
+      ],
+      "connector": true
+    },
+    {
+      "kind": "antenna",
+      "mesh": "cylinder",
+      "pos": [
+        27.886,
+        0,
+        -5.084
+      ],
+      "half": [
+        1.292,
+        0.14,
+        1.292
+      ],
+      "connector": false
+    },
+    {
+      "kind": "cupola",
+      "mesh": "sphere",
+      "pos": [
+        -1.661,
+        -2.1,
+        0
+      ],
+      "half": [
+        1.167,
+        1.167,
+        1.167
+      ],
+      "connector": true
+    }
+  ]
+}

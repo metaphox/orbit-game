@@ -1,0 +1,409 @@
+{
+  "seed": 8,
+  "archetype": "stack",
+  "meters": 54.5,
+  "iss_multiple": 0.5,
+  "game_scale": 0.35,
+  "counts": {
+    "labs": 1,
+    "habs": 2,
+    "nodes": 0,
+    "panels": 2,
+    "radiators": 1,
+    "antennas": 1,
+    "ports": 2,
+    "rings": 0
+  },
+  "parts": [
+    {
+      "kind": "lab",
+      "mesh": "cylinder",
+      "pos": [
+        -7.352,
+        0,
+        0
+      ],
+      "half": [
+        1.707,
+        5.837,
+        1.707
+      ],
+      "connector": false
+    },
+    {
+      "kind": "trim",
+      "mesh": "cylinder",
+      "pos": [
+        -7.352,
+        0,
+        0
+      ],
+      "half": [
+        1.775,
+        0.7,
+        1.775
+      ],
+      "connector": true
+    },
+    {
+      "kind": "hab",
+      "mesh": "cylinder",
+      "pos": [
+        1.835,
+        0,
+        0
+      ],
+      "half": [
+        1.569,
+        3.351,
+        1.569
+      ],
+      "connector": false
+    },
+    {
+      "kind": "hab",
+      "mesh": "cylinder",
+      "pos": [
+        9.187,
+        0,
+        0
+      ],
+      "half": [
+        1.496,
+        4.002,
+        1.496
+      ],
+      "connector": false
+    },
+    {
+      "kind": "port",
+      "mesh": "cylinder",
+      "pos": [
+        -13.543,
+        0,
+        0
+      ],
+      "half": [
+        0.644,
+        0.354,
+        0.644
+      ],
+      "connector": true
+    },
+    {
+      "kind": "port",
+      "mesh": "cylinder",
+      "pos": [
+        13.543,
+        0,
+        0
+      ],
+      "half": [
+        0.644,
+        0.354,
+        0.644
+      ],
+      "connector": true
+    },
+    {
+      "kind": "light",
+      "mesh": "sphere",
+      "pos": [
+        13.769,
+        0.322,
+        0
+      ],
+      "half": [
+        0.193,
+        0.193,
+        0.193
+      ],
+      "connector": true
+    },
+    {
+      "kind": "boom",
+      "mesh": "cylinder",
+      "pos": [
+        0.0,
+        0,
+        -1.91
+      ],
+      "half": [
+        0.205,
+        1.91,
+        0.205
+      ],
+      "connector": true
+    },
+    {
+      "kind": "mast",
+      "mesh": "box",
+      "pos": [
+        0.0,
+        0,
+        -10.288
+      ],
+      "half": [
+        0.213,
+        0.49,
+        6.467
+      ],
+      "connector": true
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -1.148,
+        0,
+        -10.288
+      ],
+      "half": [
+        0.893,
+        0.327,
+        6.467
+      ],
+      "connector": false
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        1.148,
+        0,
+        -10.288
+      ],
+      "half": [
+        0.893,
+        0.327,
+        6.467
+      ],
+      "connector": false
+    },
+    {
+      "kind": "batten",
+      "mesh": "box",
+      "pos": [
+        0.0,
+        0,
+        -14.168
+      ],
+      "half": [
+        2.127,
+        0.436,
+        0.259
+      ],
+      "connector": true
+    },
+    {
+      "kind": "batten",
+      "mesh": "box",
+      "pos": [
+        0.0,
+        0,
+        -6.408
+      ],
+      "half": [
+        2.127,
+        0.436,
+        0.259
+      ],
+      "connector": true
+    },
+    {
+      "kind": "boom",
+      "mesh": "cylinder",
+      "pos": [
+        0.0,
+        0,
+        1.91
+      ],
+      "half": [
+        0.205,
+        1.91,
+        0.205
+      ],
+      "connector": true
+    },
+    {
+      "kind": "mast",
+      "mesh": "box",
+      "pos": [
+        0.0,
+        0,
+        10.288
+      ],
+      "half": [
+        0.213,
+        0.49,
+        6.467
+      ],
+      "connector": true
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        -1.148,
+        0,
+        10.288
+      ],
+      "half": [
+        0.893,
+        0.327,
+        6.467
+      ],
+      "connector": false
+    },
+    {
+      "kind": "panel",
+      "mesh": "box",
+      "pos": [
+        1.148,
+        0,
+        10.288
+      ],
+      "half": [
+        0.893,
+        0.327,
+        6.467
+      ],
+      "connector": false
+    },
+    {
+      "kind": "batten",
+      "mesh": "box",
+      "pos": [
+        0.0,
+        0,
+        6.408
+      ],
+      "half": [
+        2.127,
+        0.436,
+        0.259
+      ],
+      "connector": true
+    },
+    {
+      "kind": "batten",
+      "mesh": "box",
+      "pos": [
+        0.0,
+        0,
+        14.168
+      ],
+      "half": [
+        2.127,
+        0.436,
+        0.259
+      ],
+      "connector": true
+    },
+    {
+      "kind": "spar",
+      "mesh": "box",
+      "pos": [
+        6.507,
+        -5.345,
+        0
+      ],
+      "half": [
+        0.305,
+        2.956,
+        2.725
+      ],
+      "connector": true
+    },
+    {
+      "kind": "radiator",
+      "mesh": "box",
+      "pos": [
+        5.853,
+        -5.345,
+        0
+      ],
+      "half": [
+        0.218,
+        2.956,
+        2.507
+      ],
+      "connector": false
+    },
+    {
+      "kind": "radiator",
+      "mesh": "box",
+      "pos": [
+        7.161,
+        -5.345,
+        0
+      ],
+      "half": [
+        0.218,
+        2.956,
+        2.507
+      ],
+      "connector": false
+    },
+    {
+      "kind": "boom",
+      "mesh": "cylinder",
+      "pos": [
+        6.507,
+        -1.195,
+        0
+      ],
+      "half": [
+        0.137,
+        1.195,
+        0.137
+      ],
+      "connector": true
+    },
+    {
+      "kind": "mast",
+      "mesh": "cylinder",
+      "pos": [
+        4.173,
+        0,
+        2.533
+      ],
+      "half": [
+        0.085,
+        0.826,
+        0.085
+      ],
+      "connector": true
+    },
+    {
+      "kind": "antenna",
+      "mesh": "cylinder",
+      "pos": [
+        4.173,
+        0,
+        3.453
+      ],
+      "half": [
+        0.945,
+        0.102,
+        0.945
+      ],
+      "connector": false
+    },
+    {
+      "kind": "cupola",
+      "mesh": "sphere",
+      "pos": [
+        4.346,
+        -1.536,
+        0
+      ],
+      "half": [
+        0.853,
+        0.853,
+        0.853
+      ],
+      "connector": true
+    }
+  ]
+}
